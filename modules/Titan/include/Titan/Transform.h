@@ -24,7 +24,7 @@ namespace Titan {
 		//scale
 		void SetScale(glm::vec3 scale);
 		//rotation
-		void SetRot(glm::quat rotation);
+		void SetRot(glm::vec3 rotation);
 
 		//GETTERS
 		//position
@@ -32,7 +32,7 @@ namespace Titan {
 		//scale 
 		glm::vec3 GetScale();
 		//rotation
-		glm::quat GetRotation();
+		glm::vec3 GetRotation();
 		//transform matrix 
 		glm::mat4 GetMatrix();
 

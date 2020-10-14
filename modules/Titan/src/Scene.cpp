@@ -5,7 +5,6 @@
 namespace Titan{
 	
 	TTN_Scene::TTN_Scene() {
-		
 	}
 
 	TTN_Scene::~TTN_Scene() {
