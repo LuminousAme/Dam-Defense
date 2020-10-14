@@ -1,6 +1,5 @@
-#include "Titan/test.h"
+#include "Titan/Entity.h"
 
 int main() { 
-	Titan::Print();
 	return 0; 
 } 
