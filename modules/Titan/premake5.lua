@@ -25,6 +25,7 @@ project "Titan"
         "imagehlp.lib",
         "%{wks.location}\\dependencies\\fmod\\fmod64.lib",
         "%{wks.location}\\dependencies\\gzip\\zlib.lib",
+		"entt",
         "tinyGLTF"
     }
 
@@ -38,11 +39,11 @@ project "Titan"
         "%{wks.location}\\dependencies\\stbs",
         "%{wks.location}\\dependencies\\imgui",
         "%{wks.location}\\modules\\toolkit\\include",
-	"%{wks.location}\\dependencies\\fmod", 
-	"{wks.location}\\dependencies\\cereal",
-	"%{wks.location}\\dependencies\\gzip",
-	"%{wks.location}\\dependencies\\tinyGLTF",
-	"{wks.location}\\dependencies\\json"
+		"%{wks.location}\\dependencies\\fmod", 
+		"{wks.location}\\dependencies\\cereal",
+		"%{wks.location}\\dependencies\\gzip",
+		"%{wks.location}\\dependencies\\tinyGLTF",
+		"{wks.location}\\dependencies\\json"
     }
 
     disablewarnings {

@@ -2,7 +2,12 @@
 // Scene.h - header for the class that handles ECS, render calls, etc. 
 #pragma once
 
+//include the entity component system header
 #include "entt.hpp"
+//include all the component class definitions we need
+#include "Transform.h"
+//include all the graphics features we need
+#include "Shader.h"
 
 namespace Titan {
 

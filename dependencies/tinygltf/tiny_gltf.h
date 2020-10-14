@@ -1,4 +1,3 @@
-#include "..\..\modules\Titan\include\Titan\Scene.h"
 //
 // Header-only tiny glTF 2.0 loader and serializer.
 //
