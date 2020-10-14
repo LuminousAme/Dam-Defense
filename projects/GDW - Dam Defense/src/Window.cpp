@@ -7,7 +7,7 @@
 #include <iostream>
 
 
-GLFWwindow* gwindow = nullptr;
+GLFWwindow* Window::gwindow = nullptr;
 
 void Window::Init(int width, int height, const std::string& name)
 {
@@ -31,11 +31,17 @@ void Window::Init(int width, int height, const std::string& name)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
-	while (!glfwWindowShouldClose(gwindow)) {
-		glfwPollEvents();
-		glClearColor(0.0f, 0.0f, 0.1f, 1.0f); glClear(GL_COLOR_BUFFER_BIT);
-		glfwSwapBuffers(gwindow);
-	}
+	//glfwSwapBuffers(gwindow);
+
+	//while (!glfwWindowShouldClose(gwindow)) {
+	//	glfwPollEvents();
+	//	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//	//glUseProgram(shader_program);
+	//	glDrawArrays(GL_TRIANGLES, 0, 3);
+	//	glDrawArrays(GL_TRIANGLES, 3, 3);
+	//	glfwSwapBuffers(gwindow);
+	//}
 
 }
 
