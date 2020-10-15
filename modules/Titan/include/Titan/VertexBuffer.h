@@ -10,7 +10,7 @@
 namespace Titan {
 
 	//class for the buffer that will store vertices for rendering
-	class TTN_VertexBuffer : TTN_IBuffer {
+	class TTN_VertexBuffer : public TTN_IBuffer {
 	public:
 		//defines a special easier to use name for shared(smart) pointers to the class 
 		typedef std::shared_ptr<TTN_VertexBuffer> svbptr;

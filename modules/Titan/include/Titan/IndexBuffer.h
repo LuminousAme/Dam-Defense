@@ -55,7 +55,7 @@ namespace Titan {
 		GLenum GetElementType() const { return _elementType; }
 
 		//Unbinds the currently bound index buffer
-		static void Unbind() { TTN_IBuffer::UnBind(GL_ELEMENT_ARRAY_BUFFER); }
+		static void UnBind() { TTN_IBuffer::UnBind(GL_ELEMENT_ARRAY_BUFFER); }
 
 	protected:
 		//stores the type of element being saved in the index buffer 
