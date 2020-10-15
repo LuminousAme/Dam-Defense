@@ -46,11 +46,20 @@ namespace Titan {
 		//renders all the entities with meshes and transforms in the scene 
 		void Render(); 
 
+		//sets wheter or not the scene should be rendered 
+		void SetShouldRender(bool _shouldRender);
+
+		//gets wheter or not the scene should be rendered 
+		bool GetShouldRender();
+
 #pragma endregion Graphics_functions_dec
 
 	private:
 		//context that contains all our entities, their ids, and components 
 		entt::registry m_Registry;
+
+		//boolean to store wheter or not this scene should currently be rendered
+		bool shouldRender; 
 	};
 
 #pragma region ECS_functions_def

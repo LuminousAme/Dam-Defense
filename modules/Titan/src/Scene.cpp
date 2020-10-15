@@ -24,4 +24,16 @@ namespace Titan{
 	{
 	}
 
+	//sets wheter or not the scene should be rendered
+	void TTN_Scene::SetShouldRender(bool _shouldRender)
+	{
+		shouldRender = _shouldRender;
+	}
+
+	//returns wheter or not this scene should be rendered
+	bool TTN_Scene::GetShouldRender()
+	{
+		return shouldRender;
+	}
+
 }
