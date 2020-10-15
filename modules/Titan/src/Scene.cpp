@@ -20,6 +20,10 @@ namespace Titan{
 		return (unsigned int)entity;
 	}
 
+	void TTN_Scene::Update(float deltaTime)
+	{
+	}
+
 	void TTN_Scene::Render()
 	{
 	}

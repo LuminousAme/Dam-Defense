@@ -27,9 +27,6 @@ namespace Titan {
 		//function for starting a new frame 
 		static void NewFrameStart();
 
-		//function to update deltatime each frame
-		static void NewDeltaTime();
-
 		//function to get the change in time 
 		static float GetDeltaTime();
 
@@ -41,7 +38,7 @@ namespace Titan {
 
 	public:
 		//vector for all the scenes in the application
-		std::vector<TTN_Scene> scenes;
+		static std::vector<TTN_Scene> scenes;
 
 	protected:
 		//default constructor, just creates an empty aplication project

@@ -40,6 +40,9 @@ namespace Titan {
 		//removes a component from an object 
 		template<typename T>
 		void Remove(unsigned int entity);
+
+		//updates all the entities in the scene
+		void Update(float deltaTime);
 #pragma endregion ECS_functions_dec
 
 #pragma region Graphics_functions_dec
