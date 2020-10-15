@@ -1,11 +1,7 @@
 #include "Titan/Window.h"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include "GLM/glm.hpp"
 #include <string>
 #include <iostream>
-
 
 namespace Titan {
 

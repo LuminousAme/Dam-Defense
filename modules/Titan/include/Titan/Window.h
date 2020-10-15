@@ -1,7 +1,8 @@
 #pragma once
 
+
 #include <glad/glad.h>
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 #include "GLM/glm.hpp"
 #include <string>
 
