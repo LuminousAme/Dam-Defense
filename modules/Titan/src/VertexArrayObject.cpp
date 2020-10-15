@@ -98,7 +98,7 @@ namespace Titan {
 			glDrawElements(GL_TRIANGLES, _ibo->GetElementCount(), _ibo->GetElementType(), nullptr);
 		else
 			//otherwise it must only have vbos, so use those vbos to draw the triangles
-			glDrawArrays(GL_TRIANGLES, 0, _vertexCount / 3);
+			glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
 		//unbind the VAO
 		UnBind();
 	}
