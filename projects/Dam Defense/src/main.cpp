@@ -1,5 +1,16 @@
 #include "Titan/Scene.h"
+#include "Titan/Window.h"
 
-int main() { 
-	return 0; 
-} 
+namespace Titan {
+
+	int main() {
+
+
+		Window GameWindow(800, 800, "Dam Defense");
+
+
+		return 0;
+	}
+
+
+}
