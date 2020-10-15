@@ -6,11 +6,13 @@
 //import other required features
 #include <stdio.h>
 
+
 namespace Titan {
 	//set the base values for the member variables
 	GLFWwindow* TTN_Application::m_window = nullptr;
 	float TTN_Application::m_dt = 0.0f;
 	float TTN_Application::m_previousFrameTime = 0.0f;
+	std::vector<TTN_Scene> TTN_Application::scenes = std::vector<TTN_Scene>();
 
 	//function to initialize a new window 
 	void TTN_Application::Init(const std::string name, int width, int height)
@@ -23,14 +25,6 @@ namespace Titan {
 			throw std::runtime_error("GLFW init failed");
 		}
 
-
-		//initliaze glad and check it initliazed properly 
-		if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) == 0) {
-			//if it did not init properly print that to the console and throw a runtime error
-			printf("glad init failed.");
-			throw std::runtime_error("glad init failed");
-		}
-
 		//prevent the user from resizing the window at will (it could distort our graphics if they could)
 		glfwWindowHint(GLFW_RESIZABLE, false);
 
@@ -39,6 +33,13 @@ namespace Titan {
 
 		//set the window we want to draw on to the window that was just created
 		glfwMakeContextCurrent(m_window);
+
+		//initliaze glad and check it initliazed properly 
+		if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) == 0) {
+			//if it did not init properly print that to the console and throw a runtime error
+			printf("glad init failed.");
+			throw std::runtime_error("glad init failed");
+		}
 
 		//enable depth test so things don't get drawn on top of objects behind them 
 		glEnable(GL_DEPTH_TEST);
@@ -98,6 +99,9 @@ namespace Titan {
 	{
 		//start a new frame 
 		TTN_Application::NewFrameStart();
+
+		//check for events from glfw 
+		glfwPollEvents();
 
 		//go through each scene 
 		for (int i = 0; i < TTN_Application::scenes.size(); i++) {

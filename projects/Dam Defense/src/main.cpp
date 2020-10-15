@@ -1,16 +1,13 @@
 #include "Titan/Scene.h"
-#include "Titan/Window.h"
+#include "Titan/Application.h"
 
-namespace Titan {
+using namespace Titan;
 
-	int main() {
+int main() {
+	TTN_Application::Init("Dam Defense", 800, 800);
 
+	while (!TTN_Application::GetIsClosing())
+		TTN_Application::Update();
 
-		Window GameWindow(800, 800, "Dam Defense");
-
-
-		return 0;
-	}
-
-
+	return 0;
 }
