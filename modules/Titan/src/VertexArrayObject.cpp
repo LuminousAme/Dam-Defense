@@ -1,5 +1,5 @@
 //Titan Engine, by Atlas X Games 
-// VertexArrayObjects.h - source file for the class that uses colections of VBOs and IBOs in order to determine how to draw geometry
+// VertexArrayObjects.cpp - source file for the class that uses colections of VBOs and IBOs in order to determine how to draw geometry
 
 //include the VAO header
 #include "Titan/VertexArrayObject.h"

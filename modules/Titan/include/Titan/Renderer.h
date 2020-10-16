@@ -2,11 +2,9 @@
 // Renderer.h - header for the class that allows meshes, 2D sprites, etc. be rendered 
 #pragma once
 
-//include the opengl wrapper classes
+//include the mesh and shader classes
+#include "Mesh.h"
 #include "Shader.h"
-#include "VertexArrayObject.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
 
 namespace Titan {
 
@@ -19,10 +17,25 @@ namespace Titan {
 			MESH
 		};
 
+		//constructor that sets the mesh
+		TTN_Renderer(TTN_Mesh mesh);
 
+		//destructor
+		~TTN_Renderer();
+
+		//move and assingment constrcutors for ENTT
+		TTN_Renderer(TTN_Renderer&& renderer) = default;
+
+		TTN_Renderer& operator=(TTN_Renderer&& renderer) = default;
+
+		//sets a new mesh
+		void SetMesh(TTN_Mesh& mesh);
+		void Render(glm::mat4 model, glm::mat4 proj, glm::mat4 view);
 
 	protected:
 		//a pointer to the shader that should be used to render this object
-		TTN_Shader* shader;
+		TTN_Shader* m_Shader;
+		//a smart pointer to the vao for the mesh
+		TTN_VertexArrayObject::svaptr m_Vao;
 	};
 }

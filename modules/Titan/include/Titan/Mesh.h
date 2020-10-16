@@ -3,7 +3,6 @@
 #pragma once
 
 //include the opengl wrap around classes
-#include "Shader.h"
 #include "VertexArrayObject.h"
 //include glm features
 #include "GLM/glm.hpp"

@@ -66,7 +66,7 @@ namespace Titan {
 		//Gets the OpenGL handle that it's wrapping around 
 		GLuint GetHandle() const { return _handle; }
 
-	private:
+	public:
 		//Set a uniform for a 3x3 matrix 
 		void SetUniformMatrix(int location, const glm::mat3* value, int count = 1, bool transposed = false);
 		//Set a unform for  a 4x4 matrix 
@@ -95,6 +95,38 @@ namespace Titan {
 		void SetUniform(int location, const glm::bvec3* value, int count = 1);
 		//Set a uniform for 4 booleans
 		void SetUniform(int location, const glm::bvec4* value, int count = 1);
+
+		//template function for setting a uniform based on just name and data
+		template <typename T>
+		void SetUniform(const std::string& name, const T& value) {
+			//finds the location that the uniform of that name is stored at 
+			int location = __GetUniformLocation(name);
+			//check if the location exists
+			if (location != -1) {
+				//if it does, then set the uniform at that location
+				SetUniform(location, &value, 1);
+			}
+			else {
+				//if it doesn't log a warning
+				LOG_WARN("Ignoring uniform \"{}\"", name);
+			}
+		}
+
+		//template function for setting a uniform matrix based on just name and data
+		template <typename T>
+		void SetUniformMatrix(const std::string& name, const T& value, bool transposed = false) {
+			//finds the location that the uniform of that name is stored at 
+			int location = __GetUniformLocation(name);
+			//check if the location exists
+			if (location != -1) {
+				//if it does, then set the uniform matrix at that location
+				SetUniformMatrix(location, &value, 1, transposed);
+			}
+			else {
+				//if it doesn't log a warning
+				LOG_WARN("Ignoring uniform \"{}\"", name);
+			}
+		}
 
 	protected:
 		//vertex shader

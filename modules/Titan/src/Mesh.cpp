@@ -1,6 +1,5 @@
 //Titan Engine, by Atlas X Games 
-// VertexArrayObjects.h - source file for the class that represents 3D meshes
-
+// Mesh.cpp - source file for the class that represents 3D meshes
 
 //include the header
 #include "Titan/Mesh.h"
