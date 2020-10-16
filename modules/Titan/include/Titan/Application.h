@@ -1,7 +1,9 @@
 //Titan Engine, by Atlas X Games 
 // Application.h - header for the class that runs the program, creating the window, etc.
 #pragma once
-
+#ifndef GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_NONE
+#endif
 //include the required features and libraries 
 #include "GLFW/glfw3.h"
 #include "GLM/glm.hpp"
