@@ -3,6 +3,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "GLM/glm.hpp"
+
+#define GLM_ENABLE_EXPERIMENTAL
+
 namespace Titan {
 
 	class TTN_Camera
@@ -12,7 +15,7 @@ namespace Titan {
 		TTN_Camera();
 		virtual ~TTN_Camera() = default;
 
-		void View(const glm::vec3& point); // change view to this point
+		void View(); // update the view
 		void LookAt(const glm::vec3& point); // changes the camera direction to this point
 
 		//GETTERS
@@ -22,6 +25,8 @@ namespace Titan {
 		const glm::vec3& GetForward() { return m_forward; }
 		/// Gets the up direction for this camera (basically a vector pointing out the top of the camera's head)
 		const glm::vec3& GetUp() { return m_up; }
+		/// Gets the direction that the camera is looking at 
+		const glm::vec3& GetTarget() { return m_target; }
 
 		//gets the view and projection coordinates
 		const glm::mat4& GetView() { return m_view; }
@@ -36,6 +41,8 @@ namespace Titan {
 		void SetForward(const glm::vec3& forward);
 		/// Sets the camera's up vector, this can be thought of as a vector sticking out of the top of the camera's head
 		void SetUp(const glm::vec3& up);
+		///Sets what the camera is looking at 
+		void SetTarget(const glm::vec3& target);
 
 
 		// orthographic projection 
@@ -49,6 +56,8 @@ namespace Titan {
 		glm::vec3 m_position;  //postion of camera in world space
 		glm::vec3 m_forward; // the direction the camera will be facing (forward vector)
 		glm::vec3 m_up; // camera's up vector (vector sticking upwards from camera's head
+
+		glm::vec3 m_target; //what the camera should be looking at 
 
 		glm::mat4 m_view;
 		glm::mat4 m_projection;

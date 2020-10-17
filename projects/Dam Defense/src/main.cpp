@@ -1,26 +1,70 @@
 #include "Titan/Scene.h"
+#include "Titan/Application.h"
 
+using namespace Titan;
 
+int main() {
+	TTN_Application::Init("Dam Defense", 800, 800);
 
-	int main() {
+	//create a shader program object
+	TTN_Shader::sshptr shaderProgam = TTN_Shader::Create(); 
+	//load the shaders into the shader program 
+	shaderProgam->LoadShaderStageFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
+	shaderProgam->LoadShaderStageFromFile("shaders/frag_shader.glsl", GL_FRAGMENT_SHADER);
+	shaderProgam->Link(); 
 
+	//create a mesh for the triangle
+	TTN_Mesh triMesh = TTN_Mesh();
+	//create the vertex position
+	std::vector<glm::vec3> triVerts;
+	triVerts.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+	triVerts.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+	triVerts.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
+	triMesh.setVertices(triVerts);
+	//create the vertex normals
+	std::vector<glm::vec3> triNorms;
+	for (int i = 0; i < 3; i++) triNorms.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+	triMesh.setNormals(triNorms);
+	//create the vertex uvs
+	std::vector<glm::vec3> triUVs;
+	for (int i = 0; i < 3; i++) triUVs.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+	triMesh.setUVs(triUVs);
 
-		Titan::Window GameWindow(800, 800, "Dam Defense");
+	//setup a transform for the trinagle
+	TTN_Transform triTrans = TTN_Transform();
+	triTrans.SetPos(glm::vec3(1.0f, 0.5f, 1.0f));
+	triTrans.SetRot(glm::vec3(0.0f, 0.0f, 1.0f));
+	triTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 
+	//setup a mesh renderer for the trinagle
+	TTN_Renderer triRenderer = TTN_Renderer(triMesh, shaderProgam);
 
-		while (!GameWindow.ShouldClose()) {
-			glfwPollEvents();
+	//create a new scene
+	TTN_Scene testScene = TTN_Scene();
 
-			
-			glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//create an entity in the scene for the camera
+	auto CamEntity = testScene.CreateEntity();
+	testScene.SetCamEntity(CamEntity);
+	testScene.Attach<TTN_Transform>(CamEntity);
+	testScene.Attach<TTN_Camera>(CamEntity);
+	auto& camTrans = testScene.Get<TTN_Transform>(CamEntity);
+	camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
+	camTrans.SetRot(glm::vec3(0.0f, 0.0f, 0.0f));
+	camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+	testScene.Get<TTN_Camera>(CamEntity).CalcPerspective(90.0f, 1.0f, 0.01f, 100.f);
+	testScene.Get<TTN_Camera>(CamEntity).View();
 
+	//create an entity in the scene for the triangle
+	auto triEntity = testScene.CreateEntity();
 
-			glfwSwapBuffers(GameWindow.gwindow);
-		}
+	testScene.AttachCopy<TTN_Transform>(triEntity, triTrans);
+	testScene.AttachCopy<TTN_Renderer>(triEntity, triRenderer);
 
+	//add the scene to the application
+	TTN_Application::scenes.push_back(testScene);
 
-		return 0;
-	}
+	while (!TTN_Application::GetIsClosing())
+		TTN_Application::Update();
 
-
+	return 0;
+}

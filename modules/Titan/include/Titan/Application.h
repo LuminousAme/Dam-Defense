@@ -1,22 +1,30 @@
 //Titan Engine, by Atlas X Games 
 // Application.h - header for the class that runs the program, creating the window, etc.
 #pragma once
+
+//tell GLFW to not import OpenGL cause Glad imports it too.
 #ifndef GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_NONE
 #endif
+
+//include the titan scene class 
+#include "Scene.h"
 //include the required features and libraries 
-#include "GLFW/glfw3.h"
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include "GLM/glm.hpp"
 #include <string>
 #include <vector>
-//include the titan scene class 
-#include "Scene.h"
+
 
 namespace Titan {
 	
 	//class to represent the application, window, etc.
 	class TTN_Application {
 	public:
+		//default destructor 
+		~TTN_Application() = default;
+
 		//function to initilize the window
 		static void Init(const std::string name, int width, int height);
 
@@ -29,9 +37,6 @@ namespace Titan {
 		//function for starting a new frame 
 		static void NewFrameStart();
 
-		//function to update deltatime each frame
-		static void NewDeltaTime();
-
 		//function to get the change in time 
 		static float GetDeltaTime();
 
@@ -43,7 +48,7 @@ namespace Titan {
 
 	public:
 		//vector for all the scenes in the application
-		std::vector<TTN_Scene> scenes;
+		static std::vector<TTN_Scene> scenes;
 
 	protected:
 		//default constructor, just creates an empty aplication project
