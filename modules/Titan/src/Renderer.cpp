@@ -54,12 +54,12 @@ namespace Titan {
 	}
 
 	//function that will send the uniforms with how to draw the object arounding to the camera to openGL
-	void TTN_Renderer::Render(glm::mat4 model, glm::mat4 proj, glm::mat4 view)
+	void TTN_Renderer::Render(glm::mat4 model, glm::mat4 VP)
 	{
 		//bind the shader this model uses
 		m_Shader->Bind();
 		//send the uniforms to openGL 
-		m_Shader->SetUniformMatrix("MVP", proj * view * model);
+		m_Shader->SetUniformMatrix("MVP", VP * model);
 		//render the VAO
 		m_Vao->Render();
 		//unbind the shader

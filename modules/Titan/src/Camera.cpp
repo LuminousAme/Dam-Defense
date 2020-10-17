@@ -11,10 +11,11 @@ namespace Titan {
 		m_view = (glm::mat4(1.0f));
 		m_projection = (glm::mat4(1.0f));
 		m_viewProjection = (glm::mat4(1.0f));
+		m_target = m_forward; //camera facing forward
 	}
 
-	void TTN_Camera::View(const glm::vec3& point){
-		m_view = glm::lookAt(m_position, point, m_up); //lookAt function uses position, target and up vector as paramaters
+	void TTN_Camera::View(){
+		m_view = glm::lookAt(m_position, m_target, m_up); //lookAt function uses position, target and up vector as paramaters
 	}
 
 	void TTN_Camera::LookAt(const glm::vec3& point){
@@ -36,6 +37,11 @@ namespace Titan {
 
 	void TTN_Camera::SetUp(const glm::vec3& up){
 		m_up = up;
+	}
+
+	void TTN_Camera::SetTarget(const glm::vec3& target)
+	{
+		m_target = target;
 	}
 
 	void TTN_Camera::CalcOrtho(float left, float right, float bottom, float top, float near, float far){

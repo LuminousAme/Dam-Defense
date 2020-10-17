@@ -42,6 +42,18 @@ int main() {
 	//create a new scene
 	TTN_Scene testScene = TTN_Scene();
 
+	//create an entity in the scene for the camera
+	auto CamEntity = testScene.CreateEntity();
+	testScene.SetCamEntity(CamEntity);
+	testScene.Attach<TTN_Transform>(CamEntity);
+	testScene.Attach<TTN_Camera>(CamEntity);
+	auto& camTrans = testScene.Get<TTN_Transform>(CamEntity);
+	camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
+	camTrans.SetRot(glm::vec3(0.0f, 0.0f, 0.0f));
+	camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+	testScene.Get<TTN_Camera>(CamEntity).CalcPerspective(90.0f, 1.0f, 0.01f, 100.f);
+	testScene.Get<TTN_Camera>(CamEntity).View();
+
 	//create an entity in the scene for the triangle
 	auto triEntity = testScene.CreateEntity();
 

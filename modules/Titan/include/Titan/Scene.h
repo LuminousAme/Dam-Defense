@@ -7,6 +7,7 @@
 //include all the component class definitions we need
 #include "Transform.h"
 #include "Renderer.h"
+#include "Camera.h"
 //include all the graphics features we need
 #include "Shader.h"
 
@@ -63,12 +64,21 @@ namespace Titan {
 
 #pragma endregion Graphics_functions_dec
 
+		//sets the camera entity reference
+		void SetCamEntity(const entt::entity& cam) { m_Cam = cam; }
+		//gets the camera entity
+		const entt::entity& GetCamEntity() { return m_Cam; }
+
+
 	private:
 		//context that contains all our entities, their ids, and components 
 		entt::registry* m_Registry = nullptr;
 
 		//boolean to store wheter or not this scene should currently be rendered
 		bool shouldRender; 
+
+		//variable to store the entity for the camera
+		entt::entity m_Cam;
 	};
 
 #pragma region ECS_functions_def

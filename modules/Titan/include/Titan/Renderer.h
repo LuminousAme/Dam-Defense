@@ -37,7 +37,7 @@ namespace Titan {
 		//sets a shader
 		void SetShader(TTN_Shader::sshptr shader);
 
-		void Render(glm::mat4 model, glm::mat4 proj, glm::mat4 view);
+		void Render(glm::mat4 model, glm::mat4 VP);
 
 	private:
 		//a pointer to the shader that should be used to render this object
