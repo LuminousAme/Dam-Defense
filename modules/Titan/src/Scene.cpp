@@ -7,6 +7,8 @@
 namespace Titan {
 	
 	TTN_Scene::TTN_Scene() {
+		shouldRender = true;
+		m_Registry = new entt::registry();
 	}
 
 	TTN_Scene::~TTN_Scene() {
@@ -16,7 +18,7 @@ namespace Titan {
 	entt::entity TTN_Scene::CreateEntity()
 	{
 		//create the entity
-		auto entity = m_Registry.create();
+		auto entity = m_Registry->create();
 
 		//return the entity id 
 		return entity;
@@ -34,7 +36,7 @@ namespace Titan {
 		glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f) + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		//go through every entity with a transform and a mesh renderer and render the mesh
-		auto meshView = m_Registry.view<TTN_Transform, TTN_Renderer>();
+		auto meshView = m_Registry->view<TTN_Transform, TTN_Renderer>();
 		for (auto entity : meshView) {
 			//render the mesh
 			Get<TTN_Renderer>(entity).Render(Get<TTN_Transform>(entity).GetMatrix(), proj, view);

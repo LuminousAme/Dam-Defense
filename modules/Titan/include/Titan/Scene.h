@@ -19,6 +19,11 @@ namespace Titan {
 		//constructor 
 		TTN_Scene();
 
+		//copy, move, and assingment operators
+		TTN_Scene(const TTN_Scene& oldScene) = default;
+		TTN_Scene(TTN_Scene&&) = default;
+		TTN_Scene& operator=(TTN_Scene&) = default;
+
 		//destrutor 
 		~TTN_Scene();
 
@@ -60,7 +65,7 @@ namespace Titan {
 
 	private:
 		//context that contains all our entities, their ids, and components 
-		entt::registry m_Registry;
+		entt::registry* m_Registry = nullptr;
 
 		//boolean to store wheter or not this scene should currently be rendered
 		bool shouldRender; 
@@ -71,31 +76,31 @@ namespace Titan {
 	inline void TTN_Scene::Attach(entt::entity entity)
 	{
 		//assign the component to the entity
-		m_Registry.assign<T>(entity);
+		m_Registry->emplace<T>(entity);
 	}
 
 	template<typename T>
 	inline void TTN_Scene::AttachCopy(entt::entity entity, T copy)
 	{
 		//assign the component to the entity 
-		m_Registry.assign<T>(entity);
+		m_Registry->emplace<T>(entity);
 
 		//copy the passed in object into the component 
-		m_Registry.get<T>(entity) = copy;
+		m_Registry->get<T>(entity) = copy;
 	}
 
 	template<typename T>
 	inline T& TTN_Scene::Get(entt::entity entity)
 	{
 		//return a reference to the component 
-		return m_Registry.get<T>(entity);
+		return m_Registry->get<T>(entity);
 	}
 
 	template<typename T>
 	inline void TTN_Scene::Remove(entt::entity entity)
 	{
 		//remove the component from the entity
-		m_Registry.remove<T>(entity);
+		m_Registry->remove<T>(entity);
 	}
 #pragma endregion ECS_functions_def
 

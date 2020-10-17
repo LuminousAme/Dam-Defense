@@ -46,7 +46,7 @@ namespace Titan {
 
 		//enable cull faces so only the front faces are rendered, this will improve performance and model back faces shouldn't be
 		//visible anyways
-		glEnable(GL_CULL_FACE);
+		//glEnable(GL_CULL_FACE);
 
 		//Set the background colour for our scene to the base black
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

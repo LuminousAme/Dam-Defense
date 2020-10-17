@@ -9,15 +9,15 @@ namespace Titan {
 	TTN_Mesh::TTN_Mesh()
 	{
 		//initliaze the array of VBO pointers
-		for (int i = 0; i < sizeof(m_vbos); i++)
+		for (int i = 0; i < 3; i++)
 			m_vbos[i]->Create();
 	}
 
 	//Constructor, creates a mesh with the data given
-	TTN_Mesh::TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec2>& uvs)
+	TTN_Mesh::TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec3>& uvs)
 	{
 		//initliaze the array of VBO pointers
-		for (int i = 0; i < sizeof(m_vbos); i++)
+		for (int i = 0; i < 3; i++)
 			m_vbos[i]->Create();
 
 		//set the vertices
@@ -50,12 +50,12 @@ namespace Titan {
 		CreateVBO(1, 3, norms);
 	}
 
-	void TTN_Mesh::setUVs(std::vector<glm::vec2>& uvs)
+	void TTN_Mesh::setUVs(std::vector<glm::vec3>& uvs)
 	{
 		//copy the uvs
 		m_Uvs = uvs;
 		//send them to a vbo
-		CreateVBO(2, 2, uvs);
+		CreateVBO(2, 3, uvs);
 	}
 
 	//gets the pointer to a VBO

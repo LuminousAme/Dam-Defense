@@ -76,7 +76,7 @@ namespace Titan {
 		}
 
 
-		return false;
+		return status != GL_FALSE;
 	}
 
 	//Load a shader stage from an external file into the pipeline 
