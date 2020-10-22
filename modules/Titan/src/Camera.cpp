@@ -1,3 +1,6 @@
+//Titan Engine, by Atlas X Games 
+// Camera.cpp - source file for the class that represents a camera in a 3D scene
+
 #include "Titan/Camera.h"
 #include "GLM/gtx/transform.hpp"
 

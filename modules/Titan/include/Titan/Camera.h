@@ -1,3 +1,5 @@
+//Titan Engine, by Atlas X Games 
+// Camera.h - header for the class that represents a camera in a 3D scene
 #pragma once
 
 #include <glad/glad.h>
