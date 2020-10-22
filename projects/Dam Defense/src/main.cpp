@@ -12,7 +12,6 @@ int main() {
 	shaderProgam->LoadShaderStageFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
 	shaderProgam->LoadShaderStageFromFile("shaders/frag_shader.glsl", GL_FRAGMENT_SHADER);
 	shaderProgam->Link(); 
-
 	//create a mesh for the triangle
 	TTN_Mesh triMesh = TTN_Mesh();
 	//create the vertex position
@@ -63,8 +62,13 @@ int main() {
 	//add the scene to the application
 	TTN_Application::scenes.push_back(testScene);
 
-	while (!TTN_Application::GetIsClosing())
+	while (!TTN_Application::GetIsClosing()) {
+
+		testScene.Get<TTN_Camera>(CamEntity).keyInput(TTN_Application::m_window);
 		TTN_Application::Update();
 
+
+
+	}
 	return 0;
 }

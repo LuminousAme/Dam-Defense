@@ -49,12 +49,13 @@ namespace Titan {
 	public:
 		//vector for all the scenes in the application
 		static std::vector<TTN_Scene> scenes;
+		static GLFWwindow* m_window;
 
 	protected:
 		//default constructor, just creates an empty aplication project
 		TTN_Application() = default;
 
-		static GLFWwindow* m_window;
+		
 		static float m_dt;
 		static float m_previousFrameTime;
 	};

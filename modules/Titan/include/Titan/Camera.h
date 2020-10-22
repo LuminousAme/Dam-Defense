@@ -18,6 +18,8 @@ namespace Titan {
 		void View(); // update the view
 		void LookAt(const glm::vec3& point); // changes the camera direction to this point
 
+		void keyInput(GLFWwindow* window);
+
 		//GETTERS
 		//gets camera's position in the world
 		const glm::vec3& GetPosition() { return m_position; }
@@ -44,7 +46,6 @@ namespace Titan {
 		///Sets what the camera is looking at 
 		void SetTarget(const glm::vec3& target);
 
-
 		// orthographic projection 
 		void CalcOrtho(float left, float right, float bottom, float top, float near, float far);
 
@@ -56,8 +57,10 @@ namespace Titan {
 		glm::vec3 m_position;  //postion of camera in world space
 		glm::vec3 m_forward; // the direction the camera will be facing (forward vector)
 		glm::vec3 m_up; // camera's up vector (vector sticking upwards from camera's head
-
+		
 		glm::vec3 m_target; //what the camera should be looking at 
+
+		glm::vec3 m_above; //x axis for camera to look up and down
 
 		glm::mat4 m_view;
 		glm::mat4 m_projection;
