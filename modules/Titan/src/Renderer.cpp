@@ -6,7 +6,7 @@
 
 namespace Titan {
 	//constructor, creates a renderer object from a mesh
-	TTN_Renderer::TTN_Renderer(TTN_Mesh mesh)
+	TTN_Renderer::TTN_Renderer(TTN_Mesh* mesh)
 	{
 		//set the mesh
 		SetMesh(mesh);
@@ -14,7 +14,7 @@ namespace Titan {
 		m_Shader = nullptr;
 	}
 
-	TTN_Renderer::TTN_Renderer(TTN_Mesh mesh, TTN_Shader::sshptr shader)
+	TTN_Renderer::TTN_Renderer(TTN_Mesh* mesh, TTN_Shader::sshptr shader)
 	{
 		//set the mesh
 		SetMesh(mesh);
@@ -25,8 +25,8 @@ namespace Titan {
 	//default constructor
 	TTN_Renderer::TTN_Renderer()
 	{
+		m_mesh = nullptr;
 		m_Shader = nullptr;
-		m_Vao = nullptr;
 	}
 
 	//destructor, destroys the object
@@ -35,16 +35,9 @@ namespace Titan {
 	}
 
 	//sets the mesh, loading all it's VBOs into a VAO that OpenGL can use to draw
-	void TTN_Renderer::SetMesh(TTN_Mesh& mesh)
+	void TTN_Renderer::SetMesh(TTN_Mesh* mesh)
 	{
-		m_Vao = TTN_VertexArrayObject::Create();
-
-		//positions
-		m_Vao->AddVertexBuffer(mesh.GetVBOPointer(0), {BufferAttribute(0, 3, GL_FLOAT, false, sizeof(float)*3, 0)});
-		//normals
-		m_Vao->AddVertexBuffer(mesh.GetVBOPointer(1), { BufferAttribute(1, 3, GL_FLOAT, false, sizeof(float) * 3, 0) });
-		//uvs
-		m_Vao->AddVertexBuffer(mesh.GetVBOPointer(2), { BufferAttribute(2, 2, GL_FLOAT, false, sizeof(float) * 3, 0) });
+		m_mesh = mesh;
 	}
 
 	//sets a shader
@@ -56,12 +49,18 @@ namespace Titan {
 	//function that will send the uniforms with how to draw the object arounding to the camera to openGL
 	void TTN_Renderer::Render(glm::mat4 model, glm::mat4 VP)
 	{
+		//make sure the vao is acutally set up before continuing
+		if (m_mesh->GetVAOPointer() == nullptr)
+			//if it isn't, then stop then return so the later code doesn't break the entire program
+			return;
+
 		//bind the shader this model uses
 		m_Shader->Bind();
 		//send the uniforms to openGL 
 		m_Shader->SetUniformMatrix("MVP", VP * model);
+		m_Shader->SetUniform("LightPos", glm::vec3(0.0f, 3.0f, 2.0f));
 		//render the VAO
-		m_Vao->Render();
+		m_mesh->GetVAOPointer()->Render();
 		//unbind the shader
 		m_Shader->UnBind();
 	}

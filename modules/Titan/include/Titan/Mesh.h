@@ -16,12 +16,19 @@ namespace Titan {
 	public:
 		//constructor
 		TTN_Mesh();
+		//copy constructors
+		TTN_Mesh(const TTN_Mesh&) = default;
+		TTN_Mesh(TTN_Mesh&&) = default;
+		TTN_Mesh& operator=(TTN_Mesh&) = default;
 
 		//constructor with data built in 
 		TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec3>& uvs);
 
 		//destructor
 		~TTN_Mesh();
+
+		//sets up the VAO for the mesh so it can acutally be rendered, called by the user (as they may change details of the mesh)
+		void SetUpVao();
 
 		//SETTERS 
 		//sets the vertices of the mesh and loads them into a position VBO
@@ -32,8 +39,8 @@ namespace Titan {
 		void setUVs(std::vector<glm::vec3>& uvs);
 
 		//GETTERS
-		//Gets the pointer to a VBO
-		TTN_VertexBuffer::svbptr GetVBOPointer(int location);
+		//Gets the pointer to the meshes vao
+		TTN_VertexArrayObject::svaptr GetVAOPointer();
 
 	protected:
 		//a vector containing all the vertices on the mesh 
@@ -45,6 +52,8 @@ namespace Titan {
 
 		//array of VBO smart pointers, 0 for pos, 1 for normals, 2 for uvs. 
 		TTN_VertexBuffer::svbptr m_vbos[3];
+		//smart pointer with the VAO for the mesh 
+		TTN_VertexArrayObject::svaptr m_vao;
 
 		//creates a VBO for the attribute we want 
 		template<typename T>

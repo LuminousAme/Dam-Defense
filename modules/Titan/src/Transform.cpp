@@ -40,7 +40,7 @@ namespace Titan {
 	void TTN_Transform::SetRot(glm::vec3 rotation)
 	{
 		//convert the euler angles into a quaterion and save it in the rotation variable 
-		m_rotation = glm::quat(rotation);
+		m_rotation = glm::quat(glm::vec3(glm::radians(rotation.x), glm::radians(rotation.y), glm::radians(rotation.z)));
 		//recompute the matrix representing the overall transform
 		Recompute();
 	}
@@ -61,7 +61,7 @@ namespace Titan {
 	glm::vec3 TTN_Transform::GetRotation()
 	{
 		//convert the quaterion into euler angles in a vec3, then return it
-		return glm::eulerAngles(m_rotation);
+		return glm::vec3(glm::degrees(glm::eulerAngles(m_rotation).x), glm::degrees(glm::eulerAngles(m_rotation).y), glm::degrees(glm::eulerAngles(m_rotation).z));
 	}
 
 	//returns the 4x4 matrix representing the combiation of all other elements
