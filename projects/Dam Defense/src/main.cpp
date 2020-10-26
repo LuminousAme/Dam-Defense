@@ -61,7 +61,6 @@ int main() {
 		testScene.Attach<TTN_Camera>(camera);
 		auto& camTrans = testScene.Get<TTN_Transform>(camera);
 		camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
-		camTrans.SetRot(glm::vec3(0.0f, 0.0f, 0.0f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		testScene.Get<TTN_Camera>(camera).CalcPerspective(90.0f, 1.0f, 0.01f, 100.f);
 		testScene.Get<TTN_Camera>(camera).View();
@@ -81,7 +80,6 @@ int main() {
 		//setup a transform for the first tree
 		TTN_Transform treeTrans = TTN_Transform();
 		treeTrans.SetPos(glm::vec3(-2.0f, -3.0f, 5.f));
-		treeTrans.SetRot(glm::vec3(0.0f, 0.0f, 0.0f));
 		treeTrans.SetScale(glm::vec3(1.f, 1.f, 1.f));
 		//attach that transform to the tree entity
 		testScene.AttachCopy<TTN_Transform>(tree1, treeTrans);
@@ -104,7 +102,6 @@ int main() {
 		//grab a reference to that transform and set it up
 		auto& treeTrans = testScene.Get<TTN_Transform>(tree2);
 		treeTrans.SetPos(glm::vec3(2.0f, -3.0f, 3.0f));
-		treeTrans.SetRot(glm::vec3(0.0f, 90.0f, 0.0f));
 		treeTrans.SetScale(glm::vec3(1.f, 1.f, 1.f));
 	}
 
@@ -125,7 +122,7 @@ int main() {
 		//grab a reference to that transform and set it up
 		auto& boatTrans = testScene.Get<TTN_Transform>(boat);
 		boatTrans.SetPos(glm::vec3(0.f, -3.0f, 5.0f));
-		boatTrans.SetRot(glm::vec3(0.0f, 270.0f, 0.0f));
+		boatTrans.RotateFixed(glm::vec3(0.0f, 270.0f, 0.0f));
 		boatTrans.SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
 	}
 
@@ -151,18 +148,9 @@ int main() {
 
 		//rotate the second tree 
 		rotY += rotSpeed * dt;
-		auto& tree2Trans = testScene.Get<TTN_Transform>(tree2);
-		tree2Trans.SetRot(glm::vec3(tree2Trans.GetRotation().x, rotY, tree2Trans.GetRotation().z));
-		if (rotY >= 90.f)
-			rotSpeed = -5.0f;
-		else if (rotY <= -90.f)
-			rotSpeed = 5.0f;
+		while (rotY > 360.0f)
+			rotY -= 360.f;
 
-<<<<<<< HEAD
-	while (!TTN_Application::GetIsClosing()) {
-
-		testScene.Get<TTN_Camera>(CamEntity).keyInput(TTN_Application::m_window);
-=======
 		//render the screen
 >>>>>>> Ame
 		TTN_Application::Update();
