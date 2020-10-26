@@ -23,8 +23,6 @@ namespace Titan {
 		void SetPos(glm::vec3 pos);
 		//scale
 		void SetScale(glm::vec3 scale);
-		//rotation
-		void SetRot(glm::vec3 rotation);
 
 		//GETTERS
 		//position
@@ -35,6 +33,11 @@ namespace Titan {
 		glm::vec3 GetRotation();
 		//transform matrix 
 		glm::mat4 GetMatrix();
+
+		//rotates by inputed value
+		void RotateRelative(glm::vec3 rotation);
+		void RotateFixed(glm::vec3 rotation);
+
 
 	private:
 		//function that will recalculate the transformation matrix, call from the setters (so whenever a change is made to the object) 

@@ -11,7 +11,7 @@ namespace Titan {
 	{
 		m_pos = glm::vec3(0.0f, 0.0f, 0.0f);
 		m_scale = glm::vec3(1.0f, 1.0f, 1.0f);
-		m_rotation = glm::quat(0.0f, 0.0f, 0.0f, 0.0f);
+		m_rotation = glm::quat(glm::radians(glm::vec3(0.0f, 0.0f, 0.0f)));
 		Recompute();
 	}
 
@@ -36,15 +36,6 @@ namespace Titan {
 		Recompute();
 	}
 
-	//sets the rotation to the value passed in 
-	void TTN_Transform::SetRot(glm::vec3 rotation)
-	{
-		//convert the euler angles into a quaterion and save it in the rotation variable 
-		m_rotation = glm::quat(glm::vec3(glm::radians(rotation.x), glm::radians(rotation.y), glm::radians(rotation.z)));
-		//recompute the matrix representing the overall transform
-		Recompute();
-	}
-
 	//returns the position value
 	glm::vec3 TTN_Transform::GetPos()
 	{
@@ -57,11 +48,9 @@ namespace Titan {
 		return m_scale;
 	}
 
-	//returns the rotation value 
 	glm::vec3 TTN_Transform::GetRotation()
 	{
-		//convert the quaterion into euler angles in a vec3, then return it
-		return glm::vec3(glm::degrees(glm::eulerAngles(m_rotation).x), glm::degrees(glm::eulerAngles(m_rotation).y), glm::degrees(glm::eulerAngles(m_rotation).z));
+		return glm::vec3(glm::degrees(glm::eulerAngles(m_rotation)));
 	}
 
 	//returns the 4x4 matrix representing the combiation of all other elements
@@ -69,6 +58,20 @@ namespace Titan {
 	{
 		return m_transform;
 	}
+
+	void TTN_Transform::RotateRelative(glm::vec3 rotation)
+	{
+		m_rotation = m_rotation * glm::quat(glm::radians(rotation));
+		Recompute();
+	}
+
+	void TTN_Transform::RotateFixed(glm::vec3 rotation)
+	{
+		m_rotation = glm::quat(glm::radians(rotation)) * m_rotation;
+		Recompute();
+	}
+
+	
 
 	void TTN_Transform::Recompute()
 	{
