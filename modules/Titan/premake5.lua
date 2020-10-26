@@ -25,7 +25,6 @@ project "Titan"
         "imagehlp.lib",
         "%{wks.location}\\dependencies\\fmod\\fmod64.lib",
         "%{wks.location}\\dependencies\\gzip\\zlib.lib",
-		"entt",
         "tinyGLTF"
     }
 

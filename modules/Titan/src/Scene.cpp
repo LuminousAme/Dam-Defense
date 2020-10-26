@@ -41,7 +41,9 @@ namespace Titan {
 			//recalculate the view
 			Get<TTN_Camera>(entity).View();
 			//save the view and projection matrix
-			vp = Get<TTN_Camera>(entity).GetVP();
+			vp = Get<TTN_Camera>(entity).GetProj();
+			glm::mat4 viewMat = glm::inverse(Get<TTN_Transform>(entity).GetMatrix());
+			vp *= viewMat;
 		}
 		//get the view and projection matrices for the scene
 		glm::mat4 proj = glm::perspective(glm::radians(90.0f), 1.0f, 0.01f, 100.f);

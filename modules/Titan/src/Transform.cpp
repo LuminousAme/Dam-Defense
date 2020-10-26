@@ -71,7 +71,17 @@ namespace Titan {
 		Recompute();
 	}
 
-	
+	void TTN_Transform::LookAt(glm::vec3 target, glm::vec3 up)
+	{
+		m_rotation = glm::quatLookAt(target - m_pos, up);
+		Recompute();
+	}
+
+	void TTN_Transform::LookAlong(glm::vec3 direction, glm::vec3 up)
+	{
+		m_rotation = glm::quatLookAt(direction, up);
+		Recompute();
+	}
 
 	void TTN_Transform::Recompute()
 	{

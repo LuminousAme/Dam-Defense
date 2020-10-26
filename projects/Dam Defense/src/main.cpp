@@ -34,6 +34,7 @@ int main() {
 		auto& camTrans = testScene.Get<TTN_Transform>(camera);
 		camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		testScene.Get<TTN_Camera>(camera).CalcPerspective(90.0f, 1.0f, 0.01f, 100.f);
 		testScene.Get<TTN_Camera>(camera).View();
 	}
@@ -104,8 +105,7 @@ int main() {
 	TTN_Application::SetClearColor(glm::vec4(0.0f, 0.2f, 8.0f, 1.0f));
 	
 	float speed = -1.0f;
-	float rotY = 0;
-	float rotSpeed = 5;
+
 
 	while (!TTN_Application::GetIsClosing()) {
 		//get the change in time for the frame
@@ -118,14 +118,13 @@ int main() {
 		if (boatTrans.GetPos().z < 3.0f || boatTrans.GetPos().z > 7.0f)
 			speed *= -1;
 
-		//rotate the second tree 
-		rotY += rotSpeed * dt;
-		while (rotY > 360.0f)
-			rotY -= 360.f;
-
 		auto& tree2Trans = testScene.Get<TTN_Transform>(tree2);
 		tree2Trans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
+
+		auto& camTrans = testScene.Get<TTN_Transform>(testScene.GetCamEntity());
+		camTrans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
 		
+		printf("fps: %f\n", 1.0f/dt);
 		//render the screen
 		TTN_Application::Update();
 	}
