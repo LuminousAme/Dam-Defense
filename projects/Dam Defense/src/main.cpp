@@ -23,6 +23,8 @@ int main() {
 	//create a new scene
 	TTN_Scene testScene = TTN_Scene();
 
+	printf("a");
+
 	//entity for the camera in testScene
 	entt::entity camera;
 	{
