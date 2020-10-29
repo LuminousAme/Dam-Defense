@@ -10,6 +10,7 @@
 #include "Camera.h"
 //include all the graphics features we need
 #include "Shader.h"
+#include "Physics.h"
 
 namespace Titan {
 
