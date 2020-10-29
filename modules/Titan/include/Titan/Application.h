@@ -15,10 +15,11 @@
 #include "GLM/glm.hpp"
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 
 namespace Titan {
-	
+
 	//class to represent the application, window, etc.
 	class TTN_Application {
 	public:
@@ -57,6 +58,131 @@ namespace Titan {
 		static GLFWwindow* m_window;
 		static float m_dt;
 		static float m_previousFrameTime;
+
+	public:
+		//input enum class, converts titan input type to glfw input types
+		enum class TTN_KeyCode {
+			Unknown = GLFW_KEY_UNKNOWN,
+			Space = GLFW_KEY_SPACE,
+			Apostrophe = GLFW_KEY_APOSTROPHE,
+			Comma = GLFW_KEY_COMMA,
+			Minus = GLFW_KEY_MINUS,
+			Period = GLFW_KEY_PERIOD,
+			ForwardSlash = GLFW_KEY_SLASH,
+			BackSlash = GLFW_KEY_BACKSLASH,
+			Zero = GLFW_KEY_0,
+			One = GLFW_KEY_1,
+			Two = GLFW_KEY_2,
+			Three = GLFW_KEY_3,
+			Four = GLFW_KEY_4,
+			Five = GLFW_KEY_5,
+			Six = GLFW_KEY_6,
+			Seven = GLFW_KEY_7,
+			Eight = GLFW_KEY_8,
+			Nine = GLFW_KEY_9,
+			Semicolon = GLFW_KEY_SEMICOLON,
+			Equals = GLFW_KEY_EQUAL,
+			A = GLFW_KEY_A,
+			B = GLFW_KEY_B,
+			C = GLFW_KEY_C,
+			D = GLFW_KEY_D,
+			E = GLFW_KEY_E,
+			F = GLFW_KEY_F,
+			G = GLFW_KEY_G,
+			H = GLFW_KEY_H,
+			I = GLFW_KEY_I,
+			J = GLFW_KEY_J,
+			K = GLFW_KEY_K,
+			L = GLFW_KEY_L,
+			M = GLFW_KEY_M,
+			N = GLFW_KEY_N,
+			O = GLFW_KEY_O,
+			P = GLFW_KEY_P,
+			Q = GLFW_KEY_Q,
+			R = GLFW_KEY_R,
+			S = GLFW_KEY_S,
+			T = GLFW_KEY_T,
+			U = GLFW_KEY_U,
+			V = GLFW_KEY_V,
+			W = GLFW_KEY_W,
+			X = GLFW_KEY_X,
+			Y = GLFW_KEY_Y,
+			Z = GLFW_KEY_Z,
+			LeftSqaureBracket = GLFW_KEY_LEFT_BRACKET,
+			RightSquareBracket = GLFW_KEY_RIGHT_BRACKET,
+			Esc = GLFW_KEY_ESCAPE,
+			Enter = GLFW_KEY_ENTER,
+			Tab = GLFW_KEY_TAB,
+			Backspace = GLFW_KEY_BACKSPACE,
+			Insert = GLFW_KEY_INSERT,
+			Delete = GLFW_KEY_DELETE,
+			RightArrow = GLFW_KEY_RIGHT,
+			LeftArrow = GLFW_KEY_LEFT,
+			UpArrow = GLFW_KEY_UP,
+			DownArrow = GLFW_KEY_DOWN,
+			PageUp = GLFW_KEY_PAGE_UP,
+			PageDown = GLFW_KEY_PAGE_DOWN,
+			Home = GLFW_KEY_HOME,
+			End = GLFW_KEY_END,
+			CapsLock = GLFW_KEY_CAPS_LOCK,
+			ScrollLock = GLFW_KEY_SCROLL_LOCK,
+			NumLock = GLFW_KEY_NUM_LOCK,
+			PrintScreen = GLFW_KEY_PRINT_SCREEN,
+			Pause = GLFW_KEY_PAUSE,
+			F1 = GLFW_KEY_F1,
+			F2 = GLFW_KEY_F2,
+			F3 = GLFW_KEY_F3,
+			F4 = GLFW_KEY_F4,
+			F5 = GLFW_KEY_F5,
+			F6 = GLFW_KEY_F6,
+			F7 = GLFW_KEY_F7,
+			F8 = GLFW_KEY_F8,
+			F9 = GLFW_KEY_F9,
+			F10 = GLFW_KEY_F10,
+			F11 = GLFW_KEY_F11,
+			F12 = GLFW_KEY_F12,
+			KeyPadZero = GLFW_KEY_KP_0,
+			KeypadOne = GLFW_KEY_KP_1,
+			KeyPadTwo = GLFW_KEY_KP_2,
+			KeyPadThree = GLFW_KEY_KP_3,
+			KeyPadFour = GLFW_KEY_KP_4,
+			KeyPadFive = GLFW_KEY_KP_5,
+			KeyPadSix = GLFW_KEY_KP_6,
+			KeyPadSeven = GLFW_KEY_KP_7,
+			KeyPadEight = GLFW_KEY_KP_8,
+			KeyPadNine = GLFW_KEY_KP_9,
+			KeyPadDecimal = GLFW_KEY_KP_DECIMAL,
+			KeyPadDivide = GLFW_KEY_KP_DIVIDE,
+			KeyPadTimes = GLFW_KEY_KP_MULTIPLY,
+			KeyPadMinus = GLFW_KEY_KP_SUBTRACT,
+			KeyPadPlus = GLFW_KEY_KP_ADD,
+			KeyPadEnter = GLFW_KEY_KP_ENTER,
+			KeyPadEquals = GLFW_KEY_KP_EQUAL,
+			LeftShift = GLFW_KEY_LEFT_SHIFT,
+			RightShift = GLFW_KEY_RIGHT_SHIFT,
+			LeftControl = GLFW_KEY_LEFT_CONTROL,
+			RightControl = GLFW_KEY_RIGHT_CONTROL,
+			LeftAlt = GLFW_KEY_LEFT_ALT,
+			RightAlt = GLFW_KEY_RIGHT_ALT,
+			LeftSuper = GLFW_KEY_LEFT_SUPER,
+			RightSuper = GLFW_KEY_RIGHT_SUPER,
+			Menu = GLFW_KEY_MENU
+		};
+
+		//input helper class
+		class TTN_Input {
+		public:
+			//checks if a key is being pressed this frame
+			static bool GetKey(TTN_KeyCode key);
+
+			//checks if a key button has been pressed for it's first frame this frame
+			static bool GetKeyDown(TTN_KeyCode key);
+
+			//checks if a key button has been released this frame
+			static bool GetKeyUp(TTN_KeyCode key);
+
+		protected:
+			static std::unordered_map<TTN_KeyCode, bool> KeyWasPressedMap;
+		};
 	};
 }
-

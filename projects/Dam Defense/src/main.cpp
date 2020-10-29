@@ -124,7 +124,20 @@ int main() {
 		auto& camTrans = testScene.Get<TTN_Transform>(testScene.GetCamEntity());
 		camTrans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
 		
-		printf("fps: %f\n", 1.0f/dt);
+		//note:: always call keydown first
+		if (TTN_Application::TTN_Input::GetKeyDown(TTN_Application::TTN_KeyCode::Space)) {
+			printf("Space down\n");
+		}
+
+		if (TTN_Application::TTN_Input::GetKey(TTN_Application::TTN_KeyCode::Space)) {
+			printf("Space held\n");
+		}
+
+		if (TTN_Application::TTN_Input::GetKeyUp(TTN_Application::TTN_KeyCode::Space)) {
+			printf("Space released\n");
+		}
+
+		//printf("fps: %f\n", 1.0f/dt);
 		//render the screen
 		TTN_Application::Update();
 	}

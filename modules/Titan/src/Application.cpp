@@ -13,6 +13,7 @@ namespace Titan {
 	float TTN_Application::m_dt = 0.0f;
 	float TTN_Application::m_previousFrameTime = 0.0f;
 	std::vector<TTN_Scene> TTN_Application::scenes = std::vector<TTN_Scene>();
+	std::unordered_map<TTN_Application::TTN_KeyCode, bool> TTN_Application::TTN_Input::KeyWasPressedMap;
 
 	//function to initialize a new window 
 	void TTN_Application::Init(const std::string name, int width, int height)
@@ -118,5 +119,62 @@ namespace Titan {
 		
 		//swap the buffers so all the drawings that the scenes just did are acutally visible 
 		glfwSwapBuffers(m_window);
+	}
+
+	//checks if a key is being pressed
+	bool TTN_Application::TTN_Input::GetKey(TTN_KeyCode key)
+	{
+		//check if the keyinputted currently exists in the map
+		if (KeyWasPressedMap.find(key) == KeyWasPressedMap.end())
+		{
+			//if it doesn't, add it to the map (doing this here means we only add keys to the map if the user acutally wants to use them) 
+			KeyWasPressedMap[key] = false;
+		}
+		//check if the key has been pressed
+		if (glfwGetKey(m_window, static_cast<int>(key)))
+		{
+			//if it has, set it's place in the map to true
+			KeyWasPressedMap.at(key) = true;
+			//return true as the key is being pressed
+			return true;
+		}
+		//if it hasn't been pressed, return false
+		return false;
+	}
+
+	bool TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode key)
+	{
+		//check first if the key exists in the map
+		if (KeyWasPressedMap.find(key) == KeyWasPressedMap.end())
+		{
+			//if it doesn't, pass it onto the getKey so it can create a place in the map, and check if it is being pressed
+			if (GetKey(key))
+			{
+				//if it returns true that means the key has been pressed this frame
+				return true;
+			}
+		}
+		//if it does exist in the map, check if the value in the map is false and if the key is being pressed
+		else if (!KeyWasPressedMap.at(key) && GetKey(key))
+			//if it is, then this is the first frame where it's being pressed so return true
+			return true;
+
+		//if none of those are true, then either the key isn't being pressed, or this isn't the first frame it's being pressed
+		//either way, return false
+		return false;
+	}
+
+	//checks if a key was pressed down, but has now been released
+	bool TTN_Application::TTN_Input::GetKeyUp(TTN_KeyCode key)
+	{
+		//check if the key is currently down, if it isn't, and it was marked as being down, that means it's been release this frame
+		if (!GetKey(key) && KeyWasPressedMap.at(key))
+		{
+			//return true to say it's been released
+			KeyWasPressedMap.at(key) = false;
+			return true;
+		}
+		//if not then the key is either still down, or was never put down in the first place, so just return false
+		return false;
 	}
 }
