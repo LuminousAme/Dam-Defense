@@ -38,6 +38,9 @@ namespace Titan {
 		void RotateRelative(glm::vec3 rotation);
 		void RotateFixed(glm::vec3 rotation);
 
+		void LookAt(glm::vec3 target, glm::vec3 up);
+		void LookAlong(glm::vec3 direction, glm::vec3 up);
+
 
 	private:
 		//function that will recalculate the transformation matrix, call from the setters (so whenever a change is made to the object) 

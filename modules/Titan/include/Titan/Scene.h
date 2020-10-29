@@ -39,7 +39,7 @@ namespace Titan {
 
 		//attaches a component to an entity, and makes that component a copy of whatever object is passed in 
 		template<typename T>
-		void AttachCopy(entt::entity entity, T copy);
+		void AttachCopy(entt::entity entity, const T& copy);
 
 		//returns a reference to the component of the relevant entity 
 		template<typename T>
@@ -91,13 +91,10 @@ namespace Titan {
 	}
 
 	template<typename T>
-	inline void TTN_Scene::AttachCopy(entt::entity entity, T copy)
+	inline void TTN_Scene::AttachCopy(entt::entity entity, const T& copy)
 	{
 		//assign the component to the entity 
-		m_Registry->emplace<T>(entity);
-
-		//copy the passed in object into the component 
-		m_Registry->get<T>(entity) = copy;
+		m_Registry->emplace_or_replace<T>(entity, copy);
 	}
 
 	template<typename T>

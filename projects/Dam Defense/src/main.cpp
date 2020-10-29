@@ -64,6 +64,7 @@ int main() {
 		auto& camTrans = testScene.Get<TTN_Transform>(camera);
 		camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		testScene.Get<TTN_Camera>(camera).CalcPerspective(90.0f, 1.0f, 0.01f, 100.f);
 		testScene.Get<TTN_Camera>(camera).View();
 	}
@@ -145,8 +146,7 @@ int main() {
 	TTN_Application::SetClearColor(glm::vec4(0.0f, 0.2f, 8.0f, 1.0f));
 	
 	float speed = -1.0f;
-	float rotY = 0;
-	float rotSpeed = 5;
+
 
 	while (!TTN_Application::GetIsClosing()) {
 		//get the change in time for the frame
@@ -160,6 +160,7 @@ int main() {
 		if (boatTrans.GetPos().x < -5.0f || boatTrans.GetPos().x > 2.0f)
 			speed *= -1;
 
+<<<<<<< HEAD
 		auto& pboat = testScene.Get<TTN_Physics>(boat);
 		pboat.SetMin(glm::vec3(boatTrans.GetPos().x - 0.50f, boatTrans.GetPos().y - 8.0f, boatTrans.GetPos().z - 6.0f));
 		pboat.SetMax(glm::vec3(boatTrans.GetPos().x + 0.50f, boatTrans.GetPos().y + 8.0f, boatTrans.GetPos().z + 6.0f));
@@ -194,6 +195,43 @@ int main() {
 		while (rotY > 360.0f)
 			rotY -= 360.f;
 
+=======
+		auto& tree2Trans = testScene.Get<TTN_Transform>(tree2);
+		tree2Trans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
+
+		auto& camTrans = testScene.Get<TTN_Transform>(testScene.GetCamEntity());
+		camTrans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
+		
+		//note:: always call keydown first
+		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Space)) {
+			printf("Space down\n");
+		}
+
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Space)) {
+			printf("Space held\n");
+		}
+
+		if (TTN_Application::TTN_Input::GetKeyUp(TTN_KeyCode::Space)) {
+			printf("Space released\n");
+		}
+
+		printf("mousePos x: %f, %f\n", TTN_Application::TTN_Input::GetMousePosition().x, TTN_Application::TTN_Input::GetMousePosition().y);
+
+		//note:: always call GetMouseButtonDown first
+		if (TTN_Application::TTN_Input::GetMouseButtonDown(TTN_MouseButton::Left)) {
+			printf("left click down\n");
+		}
+
+		if (TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left)) {
+			printf("left click held\n");
+		}
+
+		if (TTN_Application::TTN_Input::GetMouseButtonUp(TTN_MouseButton::Left)) {
+			printf("left click released\n");
+		}
+
+		//printf("fps: %f\n", 1.0f/dt);
+>>>>>>> Ame
 		//render the screen
 
 		TTN_Application::Update();
