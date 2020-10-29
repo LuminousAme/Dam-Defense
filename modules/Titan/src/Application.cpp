@@ -246,6 +246,7 @@ namespace Titan {
 		return false;
 	}
 
+	//checks if a mouse button has been pressed but has now been released
 	bool TTN_Application::TTN_Input::GetMouseButtonUp(TTN_MouseButton button)
 	{
 		//check if the button is currently down, if it isn't, and it was marked as being down, that means it's been release this frame
@@ -257,6 +258,15 @@ namespace Titan {
 		}
 		//if not then the button is either still down, or was never put down in the first place, so just return false
 		return false;
+	}
+
+	//sets wheter or not the cursor is visible
+	void TTN_Application::TTN_Input::SetCursorHidden(bool hidden)
+	{
+		//if they want to hide the cursor, tell glfw to make it invisible
+		if(!hidden) glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		//otherwise make it visible as normal
+		else  glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 
 	//gets from glfw wheter or not the mouse is in the frame, do not call as user

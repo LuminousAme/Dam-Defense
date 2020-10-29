@@ -206,6 +206,9 @@ namespace Titan {
 			//checks if a mouse button has been released this frame
 			static bool GetMouseButtonUp(TTN_MouseButton button);
 
+			//hides or unhides the cursor based on an inputed bool
+			static void SetCursorHidden(bool hidden);
+
 			//gets from glfw wheter or not the mouse is in frame, do not call as user
 			static void cursorEnterFrameCallback(GLFWwindow *window, int entered);
 
