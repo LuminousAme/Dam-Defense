@@ -125,16 +125,31 @@ int main() {
 		camTrans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
 		
 		//note:: always call keydown first
-		if (TTN_Application::TTN_Input::GetKeyDown(TTN_Application::TTN_KeyCode::Space)) {
+		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Space)) {
 			printf("Space down\n");
 		}
 
-		if (TTN_Application::TTN_Input::GetKey(TTN_Application::TTN_KeyCode::Space)) {
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Space)) {
 			printf("Space held\n");
 		}
 
-		if (TTN_Application::TTN_Input::GetKeyUp(TTN_Application::TTN_KeyCode::Space)) {
+		if (TTN_Application::TTN_Input::GetKeyUp(TTN_KeyCode::Space)) {
 			printf("Space released\n");
+		}
+
+		printf("mousePos x: %f, %f\n", TTN_Application::TTN_Input::GetMousePosition().x, TTN_Application::TTN_Input::GetMousePosition().y);
+
+		//note:: always call GetMouseButtonDown first
+		if (TTN_Application::TTN_Input::GetMouseButtonDown(TTN_MouseButton::Left)) {
+			printf("left click down\n");
+		}
+
+		if (TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left)) {
+			printf("left click held\n");
+		}
+
+		if (TTN_Application::TTN_Input::GetMouseButtonUp(TTN_MouseButton::Left)) {
+			printf("left click released\n");
 		}
 
 		//printf("fps: %f\n", 1.0f/dt);
