@@ -6,7 +6,7 @@
 
 namespace Titan {
 	//constructor, creates a renderer object from a mesh
-	TTN_Renderer::TTN_Renderer(TTN_Mesh* mesh)
+	TTN_Renderer::TTN_Renderer(TTN_Mesh::smptr mesh)
 	{
 		//set the mesh
 		SetMesh(mesh);
@@ -14,7 +14,7 @@ namespace Titan {
 		m_Shader = nullptr;
 	}
 
-	TTN_Renderer::TTN_Renderer(TTN_Mesh* mesh, TTN_Shader::sshptr shader)
+	TTN_Renderer::TTN_Renderer(TTN_Mesh::smptr mesh, TTN_Shader::sshptr shader)
 	{
 		//set the mesh
 		SetMesh(mesh);
@@ -35,7 +35,7 @@ namespace Titan {
 	}
 
 	//sets the mesh, loading all it's VBOs into a VAO that OpenGL can use to draw
-	void TTN_Renderer::SetMesh(TTN_Mesh* mesh)
+	void TTN_Renderer::SetMesh(TTN_Mesh::smptr mesh)
 	{
 		m_mesh = mesh;
 	}

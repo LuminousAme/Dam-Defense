@@ -15,9 +15,9 @@ int main() {
 	shaderProgam->Link(); 
 
 	//create mesh pointers and set up their vaos
-	TTN_Mesh* boatMesh = TTN_ObjLoader::LoadFromFile("boat.obj"); // boat
+	TTN_Mesh::smptr boatMesh = TTN_ObjLoader::LoadFromFile("boat.obj"); // boat
 	boatMesh->SetUpVao();
-	TTN_Mesh* treeMesh = TTN_ObjLoader::LoadFromFile("tree.obj"); // tree
+	TTN_Mesh::smptr treeMesh = TTN_ObjLoader::LoadFromFile("tree.obj"); // tree
 	treeMesh->SetUpVao();
 
 	//create a new scene

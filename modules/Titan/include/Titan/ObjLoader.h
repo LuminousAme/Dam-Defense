@@ -10,7 +10,7 @@ namespace Titan {
 	//class to parse ObjFiles into TTN_Model objects
 	class TTN_ObjLoader {
 	public:
-		static TTN_Mesh* LoadFromFile(const std::string& fileName);
+		static TTN_Mesh::smptr LoadFromFile(const std::string& fileName);
 
 	protected:
 		TTN_ObjLoader() = default;

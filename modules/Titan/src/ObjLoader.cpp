@@ -37,7 +37,7 @@ namespace Titan {
 
 #pragma endregion 
 
-	TTN_Mesh* TTN_ObjLoader::LoadFromFile(const std::string& fileName)
+	TTN_Mesh::smptr TTN_ObjLoader::LoadFromFile(const std::string& fileName)
 	{
 		//Vectors for storing data parsed in 
 		std::vector<glm::vec3> vertexPos;
@@ -161,6 +161,11 @@ namespace Titan {
 		}
 
 		//create and return the mesh from that data
-		return new TTN_Mesh(meshVertPos, meshVertNorms, meshVertUvs);
+		TTN_Mesh::smptr newMesh = TTN_Mesh::Create();
+		newMesh->setVertices(meshVertPos);
+		newMesh->setNormals(meshVertNorms);
+		newMesh->setUVs(meshVertUvs);
+
+		return newMesh;
 	}
 }

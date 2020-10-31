@@ -14,12 +14,23 @@ namespace Titan {
 	//class representing 3D meshes 
 	class TTN_Mesh {
 	public:
+		//defines a special easier to use name for shared(smart) pointers to the class 
+		typedef std::shared_ptr<TTN_Mesh> smptr;
+
+		//creates and returns a shared(smart) pointer to the class 
+		static inline smptr Create() {
+			return std::make_shared<TTN_Mesh>();
+		}
+	public:
+		//ensuring moving and copying is not allowed so we can control destructor calls through pointers
+		TTN_Mesh(const TTN_Mesh& other) = delete;
+		TTN_Mesh(TTN_Mesh& other) = delete;
+		TTN_Mesh& operator=(const TTN_Mesh& other) = delete;
+		TTN_Mesh& operator=(TTN_Mesh&& other) = delete;
+
+	public:
 		//constructor
 		TTN_Mesh();
-		//copy constructors
-		TTN_Mesh(const TTN_Mesh&) = default;
-		TTN_Mesh(TTN_Mesh&&) = default;
-		TTN_Mesh& operator=(TTN_Mesh&) = default;
 
 		//constructor with data built in 
 		TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec3>& uvs);
