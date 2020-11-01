@@ -3,9 +3,10 @@
 
 #include "Titan/Camera.h"
 #include "GLM/gtx/transform.hpp"
-
+#include <iostream>
 
 namespace Titan {
+
 
 	TTN_Camera::TTN_Camera(){
 		m_position = (glm::vec3(0.0f)); //origin
@@ -15,6 +16,8 @@ namespace Titan {
 		m_projection = (glm::mat4(1.0f));
 		m_viewProjection = (glm::mat4(1.0f));
 		m_target = m_forward; //camera facing forward
+		m_above = (glm::vec3(1.0f, 0.0f, 0.0f)); //x axis
+
 	}
 
 	void TTN_Camera::View(){
@@ -23,6 +26,29 @@ namespace Titan {
 
 	void TTN_Camera::LookAt(const glm::vec3& point){
 		m_forward = -glm::normalize(m_position - point);
+	}
+
+	void TTN_Camera::keyInput(GLFWwindow* window) {
+		const float m_speed = 0.1f; 
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+			//m_target += m_speed * m_forward;
+			m_target += glm::normalize(glm::cross(m_forward, m_above)) * m_speed;
+		}
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+			//m_target -= m_speed * m_forward;
+			m_target -= glm::normalize(glm::cross(m_forward, m_above)) * m_speed;
+		}
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+			m_target -= glm::normalize(glm::cross(m_forward, m_up)) * m_speed;
+		}
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+			m_target += glm::normalize(glm::cross(m_forward, m_up)) * m_speed;
+		}
+
+		SetTarget(m_target);
+		View();
+	
+
 	}
 
 	const glm::mat4& TTN_Camera::GetVP(){
