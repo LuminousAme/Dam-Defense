@@ -4,7 +4,6 @@
 
 //include texture class
 #include "Texture.h"
-//import required features
 
 namespace Titan {
 	//class for materials on 3D objects

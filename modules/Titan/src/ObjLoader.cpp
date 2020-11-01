@@ -41,7 +41,7 @@ namespace Titan {
 	{
 		//Vectors for storing data parsed in 
 		std::vector<glm::vec3> vertexPos;
-		std::vector<glm::vec3> vertexUV; //stored in a vec3 because of the implementation of our VAO class, z value should be set to 0.0f
+		std::vector<glm::vec2> vertexUV; 
 		std::vector<glm::vec3> vertexNorms; 
 
 		std::vector<GLint> vertexPosIndices; 
@@ -90,8 +90,6 @@ namespace Titan {
 				vertexUV.push_back(glm::vec3(1.0f));
 				//copy the line into it
 				ss >> vertexUV[vertexUV.size() - 1].x >> vertexUV[vertexUV.size() - 1].y;
-				//set the z to 0
-				vertexUV[vertexUV.size() - 1].z = 0.0f;
 			}
 			//if not then check if it's a normal
 			else if (line.substr(0, 2) == "vn") {
@@ -139,11 +137,11 @@ namespace Titan {
 		//create a new vectors with all the positions, uvs, and normals (this is the lenght of the indices, as these are all the vertices needed to construct the faces, some of which
 		//may have the same values twice) 
 		std::vector <glm::vec3> meshVertPos; 
-		std::vector <glm::vec3> meshVertUvs;
+		std::vector <glm::vec2> meshVertUvs;
 		std::vector <glm::vec3> meshVertNorms;
 		//make that those vector the lenght of the their indices vector equilavents
 		meshVertPos.resize(vertexPosIndices.size(), glm::vec3());
-		meshVertUvs.resize(vertexUvsIndices.size(), glm::vec3());
+		meshVertUvs.resize(vertexUvsIndices.size(), glm::vec2());
 		meshVertNorms.resize(vertexNormIndices.size(), glm::vec3());
 		
 		//copy the data from the first set of vectors into the new vectors based on the indices so that they can used by the mesh

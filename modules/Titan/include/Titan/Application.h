@@ -21,7 +21,7 @@
 namespace Titan {
 	//input enum class, converts titan keyboard input type to glfw keyboard input types
 	enum TTN_KeyCode {
-		Unknown = GLFW_KEY_UNKNOWN,
+		Key_Unknown = GLFW_KEY_UNKNOWN,
 		Space = GLFW_KEY_SPACE,
 		Apostrophe = GLFW_KEY_APOSTROPHE,
 		Comma = GLFW_KEY_COMMA,

@@ -58,7 +58,6 @@ namespace Titan {
 		m_Shader->Bind();
 		//send the uniforms to openGL 
 		m_Shader->SetUniformMatrix("MVP", VP * model);
-		m_Shader->SetUniform("LightPos", glm::vec3(0.0f, 3.0f, 2.0f));
 		//render the VAO
 		m_mesh->GetVAOPointer()->Render();
 		//unbind the shader

@@ -5,20 +5,43 @@
 using namespace Titan;
 
 int main() {
+	Logger::Init();
 	TTN_Application::Init("Dam Defense", 800, 800);
 
 	//create a shader program object
-	TTN_Shader::sshptr shaderProgam = TTN_Shader::Create(); 
+	TTN_Shader::sshptr shaderProgam = TTN_Shader::Create();
 	//load the shaders into the shader program 
-	shaderProgam->LoadShaderStageFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
-	shaderProgam->LoadShaderStageFromFile("shaders/blinn_phong_frag_shader.glsl", GL_FRAGMENT_SHADER);
-	shaderProgam->Link(); 
+	shaderProgam->LoadDefaultShader(TTN_DefaultShaders::VERT_NO_COLOR);
+	shaderProgam->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_NO_TEXTURE);
+	shaderProgam->Link();
+
+	//create a shader program object for textured objects
+	TTN_Shader::sshptr shaderProgamTextured = TTN_Shader::Create();
+	//load the shaders into the shader program
+	shaderProgamTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_NO_COLOR);
+	shaderProgamTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
+	shaderProgamTextured->Link();
 
 	//create mesh pointers and set up their vaos
 	TTN_Mesh::smptr boatMesh = TTN_ObjLoader::LoadFromFile("boat.obj"); // boat
 	boatMesh->SetUpVao();
 	TTN_Mesh::smptr treeMesh = TTN_ObjLoader::LoadFromFile("tree.obj"); // tree
 	treeMesh->SetUpVao();
+	TTN_Mesh::smptr swordMesh = TTN_ObjLoader::LoadFromFile("Sword.obj"); //sword, texture test
+	swordMesh->SetUpVao();
+
+	//texture for the sword 
+	TTN_Texture::stptr swordText = TTN_Texture::Create();
+	//load the texture from a file
+	swordText->LoadFromFile("Sword_Texture.png");
+
+	//material for the sword 
+	TTN_Material::smatptr swordMat = TTN_Material::Create();
+	//add the texture to material and set the shininess
+	swordMat->SetAlbedo(swordText);
+	swordMat->SetShininess(128.0f);
+	//put the sword mat in the sword mesh
+	swordMesh->SetMat(swordMat);
 
 	//create a new scene
 	TTN_Scene testScene = TTN_Scene();
@@ -37,6 +60,45 @@ int main() {
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		testScene.Get<TTN_Camera>(camera).CalcPerspective(90.0f, 1.0f, 0.01f, 100.f);
 		testScene.Get<TTN_Camera>(camera).View();
+	}
+
+	//entity for the light in testScene
+	entt::entity light;
+	{
+		//create an entity in the scene for a light
+		light = testScene.CreateEntity();
+		testScene.SetLightEntity(light);
+
+		//set up a trasnform for the light
+		TTN_Transform lightTrans = TTN_Transform();
+		lightTrans.SetPos(glm::vec3(0.0f, 3.0f, 0.0f));
+		//attach that transform to the light entity
+		testScene.AttachCopy<TTN_Transform>(light, lightTrans);
+
+		//set up a light component for the light
+		TTN_Light lightLight = TTN_Light(glm::vec3(1.0f), 0.3f, 1.0f, 0.3f, 0.3f, 0.3f);
+		//attach that light to the light entity
+		testScene.AttachCopy<TTN_Light>(light, lightLight);
+	}
+
+
+	//entity for the sword in testScene
+	entt::entity sword;
+	{
+		sword = testScene.CreateEntity();
+
+		//setup a mesh renderer for the sword
+		TTN_Renderer swordRenderer = TTN_Renderer(swordMesh, shaderProgamTextured);
+		//attach that renderer to the tree entity
+		testScene.AttachCopy<TTN_Renderer>(sword, swordRenderer);
+		 
+		//setup a transform for the first tree
+		TTN_Transform swordTrans = TTN_Transform();
+		swordTrans.SetPos(glm::vec3(0.0f, 0.0f, 2.0f));
+		swordTrans.SetScale(glm::vec3(1.f, 1.f, 1.f));
+		swordTrans.RotateFixed(glm::vec3(270.0f, 0.f, 90.0f));
+		//attach that transform to the tree entity
+		testScene.AttachCopy<TTN_Transform>(sword, swordTrans);
 	}
 
 	//entity for the first tree in testScene
@@ -98,6 +160,8 @@ int main() {
 		boatTrans.RotateFixed(glm::vec3(0.0f, 270.0f, 0.0f));
 		boatTrans.SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
 	}
+
+	//entity for 
 
 	//add the scene to the application
 	TTN_Application::scenes.push_back(testScene);

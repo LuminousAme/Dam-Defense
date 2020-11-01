@@ -4,6 +4,8 @@
 
 //include the opengl wrap around classes
 #include "VertexArrayObject.h"
+//include materials class
+#include "Material.h"
 //include glm features
 #include "GLM/glm.hpp"
 //import other required features
@@ -32,8 +34,11 @@ namespace Titan {
 		//constructor
 		TTN_Mesh();
 
-		//constructor with data built in 
-		TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec3>& uvs);
+		//constructor with data built in (minus colors)
+		TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec2>& uvs, TTN_Material::smatptr material = nullptr);
+
+		//constructor with data built in (including colors)
+		TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& colors, TTN_Material::smatptr material = nullptr);
 
 		//destructor
 		~TTN_Mesh();
@@ -47,11 +52,21 @@ namespace Titan {
 		//sets the normals of the mesh and loads them into a normal VBO
 		void setNormals(std::vector<glm::vec3>& norms);
 		//sets the UVs of the mesh and loads them into a uv VBO
-		void setUVs(std::vector<glm::vec3>& uvs);
+		void setUVs(std::vector<glm::vec2>& uvs);
+		//sets the vertex colors of the mesh, returns wheter or not they were set succesfully
+		bool SetColors(std::vector<glm::vec3>& colors);
+		//sets the material for the mesh
+		void SetMat(TTN_Material::smatptr material);
 
 		//GETTERS
 		//Gets the pointer to the meshes vao
 		TTN_VertexArrayObject::svaptr GetVAOPointer();
+		//Gets the number of the vertices in the mesh
+		int GetVertCount() { return m_Vertices.size(); }
+		//Gets wheter or not the mesh has vertex colors
+		bool GetHasVertColors() { return m_HasVertColors; }
+		//Gets the pointer to the mat
+		TTN_Material::smatptr GetMatPointer() { return m_Mat; }
 
 	protected:
 		//a vector containing all the vertices on the mesh 
@@ -59,10 +74,16 @@ namespace Titan {
 		//a vector containing all the normals of the mesh
 		std::vector<glm::vec3> m_Normals;
 		//a vector containing all the uvs of a mesh
-		std::vector<glm::vec3> m_Uvs;
+		std::vector<glm::vec2> m_Uvs;
+		//a vector containing all the vertex colors
+		std::vector<glm::vec3> m_Colors;
+		//a boolean for if the mesh has colors
+		bool m_HasVertColors;
+		//a material for the mesh
+		TTN_Material::smatptr m_Mat;
 
-		//array of VBO smart pointers, 0 for pos, 1 for normals, 2 for uvs. 
-		TTN_VertexBuffer::svbptr m_vbos[3];
+		//array of VBO smart pointers, 0 for pos, 1 for normals, 2 for uvs, 3 for colors. 
+		TTN_VertexBuffer::svbptr m_vbos[4];
 		//smart pointer with the VAO for the mesh 
 		TTN_VertexArrayObject::svaptr m_vao;
 
