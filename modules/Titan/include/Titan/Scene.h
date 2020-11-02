@@ -8,6 +8,7 @@
 #include "Transform.h"
 #include "Renderer.h"
 #include "Camera.h"
+#include "Light.h"
 //include all the graphics features we need
 #include "Shader.h"
 #include "Physics.h"
@@ -20,6 +21,8 @@ namespace Titan {
 	public:
 		//constructor 
 		TTN_Scene();
+
+		TTN_Scene(glm::vec3 AmbientLightingColor, float AmbientLightingStrength);
 
 		//copy, move, and assingment operators
 		TTN_Scene(const TTN_Scene& oldScene) = default;
@@ -59,9 +62,17 @@ namespace Titan {
 
 		//sets wheter or not the scene should be rendered 
 		void SetShouldRender(bool _shouldRender);
+		//sets the ambient color of the lighting in the scene
+		void SetSceneAmbientColor(glm::vec3 color);
+		//sets the strenght of the abmient lighting in the scene
+		void SetSceneAmbientLightStrength(float str);
 
 		//gets wheter or not the scene should be rendered 
 		bool GetShouldRender();
+		//gets the ambient color of the lighting in the scene
+		glm::vec3 GetSceneAmbientColor();
+		//gets the strength of the ambient lighting in the scene
+		float GetSceneAmbientLightStrength();
 
 #pragma endregion Graphics_functions_dec
 
@@ -70,16 +81,29 @@ namespace Titan {
 		//gets the camera entity
 		const entt::entity& GetCamEntity() { return m_Cam; }
 
+		//sets the light entity reference
+		void SetLightEntity(const entt::entity& light) { m_Light = light; }
+		//gets the light entity
+		const entt::entity& GetLightEntity() { return m_Light; }
+
 
 	private:
 		//context that contains all our entities, their ids, and components 
 		entt::registry* m_Registry = nullptr;
 
 		//boolean to store wheter or not this scene should currently be rendered
-		bool shouldRender; 
+		bool m_ShouldRender; 
 
 		//variable to store the entity for the camera
 		entt::entity m_Cam;
+
+		//variable to store the entity of the light
+		entt::entity m_Light;
+
+		//the colour of the scene's ambient lighting
+		glm::vec3 m_AmbientColor;
+		//the strenght of that ambient color
+		float m_AmbientStrength;
 	};
 
 #pragma region ECS_functions_def

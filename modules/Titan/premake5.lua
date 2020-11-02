@@ -51,6 +51,10 @@ project "Titan"
         "26439"
     }
 
+	postbuildcommands {
+    "(xcopy /Q /E /Y /I /C \"%{prj.location}res\" \"%{wks.location}shared_assets\\res\")"
+	} 
+
     filter "system:windows"
         systemversion "latest"
 
