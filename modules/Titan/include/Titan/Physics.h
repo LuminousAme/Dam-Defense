@@ -7,6 +7,7 @@
 #include "Shader.h"
 #include "Mesh.h"
 #include "Material.h"
+#include "Renderer.h"
 //include glm features
 #include "GLM/glm.hpp"
 //import other required features
@@ -77,6 +78,8 @@ namespace Titan {
 		static TTN_Material::smatptr mat;
 		static TTN_Mesh::smptr mesh;
 		static bool renderingSetUp;
+		static TTN_Renderer renderer;
+
 
 		void CalculateCorners();
 		void InitCorners();

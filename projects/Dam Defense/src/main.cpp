@@ -11,7 +11,7 @@ using namespace Titan;
 int main() {
 	Logger::Init();
 	TTN_Application::Init("Dam Defense", 800, 800);
-	TTN_Physics::SetUpPhysicsBoxRendering();
+	TTN_Physics::SetUpPhysicsBoxRendering(); 
 
 	//create a shader program object
 	TTN_Shader::sshptr shaderProgam = TTN_Shader::Create();
@@ -45,8 +45,6 @@ int main() {
 	//add the texture to material and set the shininess
 	swordMat->SetAlbedo(swordText);
 	swordMat->SetShininess(128.0f);
-	//put the sword mat in the sword mesh
-	swordMesh->SetMat(swordMat);
 
 	//create a new scene
 	TTN_Scene testScene = TTN_Scene();
@@ -95,6 +93,8 @@ int main() {
 
 		//setup a mesh renderer for the sword
 		TTN_Renderer swordRenderer = TTN_Renderer(swordMesh, shaderProgamTextured);
+		//attach the material to the renderer
+		swordRenderer.SetMat(swordMat);
 		//attach that renderer to the tree entity
 		testScene.AttachCopy<TTN_Renderer>(sword, swordRenderer);
 		 

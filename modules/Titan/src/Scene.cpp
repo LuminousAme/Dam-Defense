@@ -110,21 +110,21 @@ namespace Titan {
 			shader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetPos());
 
 			//if the mesh has a material send data from that
-			if (renderer.GetMesh()->GetMatPointer() != nullptr)
+			if (renderer.GetMat() != nullptr)
 			{
 				//give openGL the shinniess
-				shader->SetUniform("u_Shininess", renderer.GetMesh()->GetMatPointer()->GetShininess());
+				shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
 				//if they're using a texture 
 				if (shader->GetFragShaderDefaultStatus() == 4 || shader->GetFragShaderDefaultStatus() == 5)
 				{
 					//bind it so openGL can see it
-					renderer.GetMesh()->GetMatPointer()->GetAlbedo()->Bind(0);
+					renderer.GetMat()->GetAlbedo()->Bind(0);
 				}
 				//if they're using a specular map 
 				if (shader->GetFragShaderDefaultStatus() == 5) 
 				{
 					//bind it so openGL can see it
-					renderer.GetMesh()->GetMatPointer()->GetSpecularMap()->Bind(1);
+					renderer.GetMat()->GetSpecularMap()->Bind(1);
 				}
 			}
 			//otherwise send a default shinnies value

@@ -36,11 +36,15 @@ namespace Titan {
 		void SetMesh(TTN_Mesh::smptr mesh);
 		//sets a shader
 		void SetShader(TTN_Shader::sshptr shader);
+		//sets a materail
+		void SetMat(TTN_Material::smatptr mat);
 
 		//gets the mesh
 		const TTN_Mesh::smptr GetMesh() { return m_mesh; }
 		//gets the shader
 		const TTN_Shader::sshptr GetShader() { return m_Shader;  }
+		//gets the material 
+		const TTN_Material::smatptr GetMat() { return m_Mat; }
 
 		void Render(glm::mat4 model, glm::mat4 VP);
 
@@ -48,5 +52,6 @@ namespace Titan {
 		//a pointer to the shader that should be used to render this object
 		TTN_Shader::sshptr m_Shader;
 		TTN_Mesh::smptr m_mesh;
+		TTN_Material::smatptr m_Mat;
 	};
 }

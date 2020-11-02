@@ -15,6 +15,7 @@ namespace Titan {
 	TTN_Material::smatptr TTN_Physics::mat = nullptr;
 	TTN_Mesh::smptr TTN_Physics::mesh = nullptr;
 	bool TTN_Physics::renderingSetUp = false;
+	TTN_Renderer TTN_Physics::renderer = TTN_Renderer();
 
 	//default constructor, constructs a basic 1x1x1 physics body around the origin
 	TTN_Physics::TTN_Physics()
@@ -272,8 +273,10 @@ namespace Titan {
 
 		//set the texture
 		mat->SetAlbedo(texture);
-		//and set the material
-		mesh->SetMat(mat);
+		
+		//setup the renderer
+		renderer = TTN_Renderer(mesh, shader);
+		renderer.SetMat(mat);
 
 		//the rendering can be flagged as set up
 		renderingSetUp = true;
@@ -292,15 +295,8 @@ namespace Titan {
 			//if it isn't, then stop then return so the later code doesn't break the entire program
 			return;
 
-		//bind the shader this model uses
-		shader->Bind();
-		//send the uniforms to openGL 
-		shader->SetUniformMatrix("MVP", vp * m_trans.GetMatrix());
-		mesh->GetMatPointer()->GetAlbedo()->Bind(0);
-		//render the VAO
-		mesh->GetVAOPointer()->Render();
-		//unbind the shader
-		shader->UnBind();
+		renderer.GetMat()->GetAlbedo()->Bind(0);
+		renderer.Render(m_trans.GetMatrix(), vp);
 	}
 
 	//recalculates all the corners of the physics body and sets the min and max value
