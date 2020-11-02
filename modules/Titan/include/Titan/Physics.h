@@ -19,44 +19,10 @@ namespace Titan {
 
 		//default constructor
 		TTN_Physics();
-
-<<<<<<< HEAD
-		TTN_Physics(glm::vec3 min, glm::vec3 max);
-		TTN_Physics(glm::vec3 c, glm::vec3 min, glm::vec3 max);
 		
-		//TTN_Physics();
-		~TTN_Physics() = default;
-
-
-		static void Projections();
-
-		void GetNormals();
-
-
-		static void Intersects(TTN_Physics b1, TTN_Physics b2);
-
-		// return true if 2 boxs are intersecting
-		static bool Inter(TTN_Physics b1, TTN_Physics b2);
-
-		void SetMin(glm::vec3 min);
-		void SetMax(glm::vec3 max);
-
-		glm::vec3 GetCenter() { return center; };
-		glm::vec3 GetMin() { return min; };
-		glm::vec3 GetMax() { return max; };
-
-		glm::vec3 center; //center of object
-		glm::vec3 min; //corner of smallest  coord
-		glm::vec3 max; //corner of largest coord
-
-		glm::vec3 axis;
-		glm::vec3 normals;
-		glm::vec3 points;
-
-
-
-=======
+		//aabb
 		TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
+
 		~TTN_Physics() = default;
 
 		//copy, move, and assingment constrcutors for ENTT
@@ -64,7 +30,15 @@ namespace Titan {
 		TTN_Physics(TTN_Physics&&) = default;
 		TTN_Physics& operator=(TTN_Physics&) = default;
 
-		static void Intersects(TTN_Physics& b1, TTN_Physics& b2);
+		//sat stuff
+		static void Projections();
+		void GetNormals();
+
+		void CalcNormals(TTN_Physics& b1);
+
+		glm::vec3 axis;
+		glm::vec3 normals;
+		glm::vec3 points;
 
 		static bool Inter(TTN_Physics& b1, TTN_Physics& b2);
 
@@ -99,7 +73,10 @@ namespace Titan {
 
 		void CalculateCorners();
 		void InitCorners();
->>>>>>> Ame
+
+
+
+
 	};
 
 }

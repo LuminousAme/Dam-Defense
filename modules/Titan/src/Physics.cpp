@@ -8,10 +8,7 @@
 #include <iostream>
 
 namespace Titan {
-<<<<<<< HEAD
-	
 
-=======
 	//initlization for static rendering variables
 	TTN_Shader::sshptr TTN_Physics::shader = nullptr;
 	TTN_Texture::stptr TTN_Physics::texture = nullptr;
@@ -20,7 +17,6 @@ namespace Titan {
 	bool TTN_Physics::renderingSetUp = false;
 
 	//default constructor, constructs a basic 1x1x1 physics body around the origin
->>>>>>> Ame
 	TTN_Physics::TTN_Physics()
 	{
 		m_trans = TTN_Transform();
@@ -49,35 +45,18 @@ namespace Titan {
 		CalculateCorners();
 	}
 
-<<<<<<< HEAD
 	void TTN_Physics::Projections()
 	{
 
-
 	}
-
-	void TTN_Physics::GetNormals()
-	{
 		
-
-
-	}
-
-	void TTN_Physics::Intersects(TTN_Physics b1, TTN_Physics b2)
-=======
-	//idk what this is here for tbh
-	void TTN_Physics::Intersects(TTN_Physics& b1, TTN_Physics& b2)
->>>>>>> Ame
+	void TTN_Physics::CalcNormals(TTN_Physics& b1)
 	{
-		if ((b1.GetMin().x <= b2.GetMax().x && b1.GetMax().x >= b2.GetMin().x) &&
-			(b1.GetMin().y <= b2.GetMax().y && b1.GetMax().y >= b2.GetMin().y) &&
-			(b1.GetMin().z <= b2.GetMax().z && b1.GetMax().z >= b2.GetMin().z))
-		{
+		glm::vec3 pos = b1.GetCenter();
+		glm::vec3 norm = glm::normalize(pos);
+		b1.normals = norm;
 
-			std::cout << "Hello" << std::endl;
-		}
-
-	}
+	}	
 
 	//AABB coolision check, returns true if the two enters physics bodies are colliding, false if not
 	bool TTN_Physics::Inter(TTN_Physics& b1, TTN_Physics& b2)

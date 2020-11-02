@@ -29,11 +29,9 @@ int main() {
 	shaderProgamTextured->Link();
 
 	//create mesh pointers and set up their vaos
-<<<<<<< HEAD
-	TTN_Mesh* boatMesh = TTN_ObjLoader::LoadFromFile("tank.obj"); // boat
-=======
+
 	TTN_Mesh::smptr boatMesh = TTN_ObjLoader::LoadFromFile("boat.obj"); // boat
->>>>>>> Ame
+
 	boatMesh->SetUpVao();
 	TTN_Mesh::smptr treeMesh = TTN_ObjLoader::LoadFromFile("tree.obj"); // tree
 	treeMesh->SetUpVao();
@@ -129,17 +127,11 @@ int main() {
 		treeTrans.SetScale(glm::vec3(1.f, 1.f, 1.f));
 		//attach that transform to the tree entity
 		testScene.AttachCopy<TTN_Transform>(tree1, treeTrans);
-
-<<<<<<< HEAD
-		TTN_Physics pbody = TTN_Physics( glm::vec3(treeTrans.GetPos().x - 0.50f, treeTrans.GetPos().y - 8.0f, treeTrans.GetPos().z - 8.0f),
-			glm::vec3(treeTrans.GetPos().x + 0.50f, treeTrans.GetPos().y + 8.0f, treeTrans.GetPos().z + 8.0f) );
-		
+			
 		//TTN_Physics pbody = TTN_Physics(glm::vec3(treeTrans.GetPos().x , treeTrans.GetPos().y , treeTrans.GetPos().z ));
 
-=======
 		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
 		 
->>>>>>> Ame
 		testScene.AttachCopy<TTN_Physics>(tree1, pbody);
 	}
 
@@ -183,22 +175,15 @@ int main() {
 		boatTrans.RotateFixed(glm::vec3(0.0f, 270.0f, 0.0f));
 		boatTrans.SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
 
-<<<<<<< HEAD
 		//TTN_Physics pbody = TTN_Physics(glm::vec3(-1.0f, -4.0f, 4.f), glm::vec3(1.0f, -2.0f, 6.f));
-		TTN_Physics pbody = TTN_Physics(glm::vec3(boatTrans.GetPos().x - 1.0f, boatTrans.GetPos().y - 6.0f, boatTrans.GetPos().z - 6.0f),
-			glm::vec3(boatTrans.GetPos().x + 1.0f, boatTrans.GetPos().y + 6.0f, boatTrans.GetPos().z + 6.0f));
-
 		//TTN_Physics pbody = TTN_Physics(glm::vec3(boatTrans.GetPos().x , boatTrans.GetPos().y , boatTrans.GetPos().z));
-
-=======
 		
 		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
->>>>>>> Ame
+
 		testScene.AttachCopy<TTN_Physics>(boat, pbody);
 	}
 
 	//entity for 
-
 	//add the scene to the application
 	TTN_Application::scenes.push_back(testScene);
 	//set the background to a blue
@@ -213,63 +198,29 @@ int main() {
 		auto& treeTrans = testScene.Get<TTN_Transform>(tree1);
 		//move the boat 
 		auto& boatTrans = testScene.Get<TTN_Transform>(boat);
-<<<<<<< HEAD
+
 		//boatTrans.SetPos(glm::vec3(boatTrans.GetPos().x + speed * dt, boatTrans.GetPos().y, boatTrans.GetPos().z ));
 		boatTrans.RotateFixed(glm::vec3(0, 1.5f * speed, 0));
 		//flip the speed if it gets to a certain point
 	//	if (boatTrans.GetPos().x < -5.0f || boatTrans.GetPos().x > 2.0f)
 		//	speed *= -1; 
 
-		auto& pboat = testScene.Get<TTN_Physics>(boat);
-		pboat.SetMin(glm::vec3(boatTrans.GetPos().x - 0.50f, boatTrans.GetPos().y - 34.0f, boatTrans.GetPos().z - 56.0f));
-		pboat.SetMax(glm::vec3(boatTrans.GetPos().x + 0.50f, boatTrans.GetPos().y + 34.0f, boatTrans.GetPos().z + 56.0f));
-		//pboat.SetPos(glm::vec3(boatTrans.GetPos().x, boatTrans.GetPos().y, boatTrans.GetPos().z));
-
-		auto& ptree = testScene.Get<TTN_Physics>(tree1);
-		ptree.SetMin(glm::vec3(treeTrans.GetPos().x - 1.50f, treeTrans.GetPos().y - 12.0f, treeTrans.GetPos().z - 1.0f));
-		ptree.SetMax(glm::vec3(treeTrans.GetPos().x + 1.50f, treeTrans.GetPos().y + 12.0f, treeTrans.GetPos().z + 1.0f));
-		//ptree.SetPos(glm::vec3(treeTrans.GetPos().x, treeTrans.GetPos().y, treeTrans.GetPos().z));
-
-		//TTN_Physics::Intersects(pboat, ptree);
-		if (TTN_Physics::Inter(pboat, ptree)) {
-			
-			/*std::cout << "Touching " << (pboat.min.x <= ptree.max.x && pboat.max.x >= ptree.min.x) <<
-				(pboat.min.y <= ptree.max.y && pboat.max.y >= ptree.min.y) <<
-				(pboat.min.z <= ptree.max.z && pboat.max.z >= ptree.min.z)  <<std::endl;
-
-			speed = 0;*/
-
-		}
-		else
-		{
-			/*std::cout << "Not Touching " << (pboat.min.x <= ptree.max.x && pboat.max.x >= ptree.min.x) <<
-				(pboat.min.y <= ptree.max.y && pboat.max.y >= ptree.min.y) <<
-				(pboat.min.z <= ptree.max.z && pboat.max.z >= ptree.min.z) << std::endl;*/
-
-			//std::cout << glm::to_string(pboat.GetMin()) << std::endl;
-			//std::cout << glm::to_string(pboat.GetMax()) << std::endl;
-		}
-
 		
 		//rotate the second tree 
 		//rotY += rotSpeed * dt;
 	/*	while (rotY > 360.0f)
 			rotY -= 360.f;*/
-=======
 		boatTrans.SetPos(glm::vec3(boatTrans.GetPos().x, boatTrans.GetPos().y + speed * dt, boatTrans.GetPos().z ));
 		//flip the speed if it gets to a certain point
 		if (boatTrans.GetPos().y < -5.0f || boatTrans.GetPos().y > 2.0f)
 			speed *= -1;
->>>>>>> Ame
+
 
 		auto& tree2Trans = testScene.Get<TTN_Transform>(tree2);
 		tree2Trans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
 
-<<<<<<< HEAD
-		//auto& camTrans = testScene.Get<TTN_Transform>(testScene.GetCamEntity());
-=======
+
 		auto& camTrans = testScene.Get<TTN_Transform>(testScene.GetCamEntity());
->>>>>>> Ame
 		//camTrans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
 		
 		//note:: always call keydown first
@@ -300,14 +251,11 @@ int main() {
 			printf("left click released\n");
 		}
 
-<<<<<<< HEAD
 		//printf("fps: %f\n", 1.0f/dt);
-=======
-		
+
 		auto& pboat = testScene.Get<TTN_Physics>(boat);
 
 		auto& ptree = testScene.Get<TTN_Physics>(tree1);
-
 		
 		pboat.SetPos(boatTrans.GetPos());
 		ptree.SetPos(treeTrans.GetPos());
@@ -329,7 +277,7 @@ int main() {
 
 		}
 
->>>>>>> Ame
+
 		//render the screen
 
 		TTN_Application::Update(); 
