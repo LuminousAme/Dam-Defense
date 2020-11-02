@@ -2,6 +2,7 @@
 #include <iostream>
 
 namespace Titan {
+	
 
 	TTN_Physics::TTN_Physics()
 	{
@@ -21,6 +22,19 @@ namespace Titan {
 		center = c;
 		min = minimum;
 		max = maximum;
+	}
+
+	void TTN_Physics::Projections()
+	{
+
+
+	}
+
+	void TTN_Physics::GetNormals()
+	{
+		
+
+
 	}
 
 	void TTN_Physics::Intersects(TTN_Physics b1, TTN_Physics b2)
