@@ -88,9 +88,11 @@ namespace Titan {
 
 		//sets up collisions
 		void SetUpCollisions(entt::entity entity);
-
+		//removes all collisions with a given entity, to be called when an entity is being deleted
+		void CleanUpCollisions(entt::entity entity);
 		//finds a collision based on it's underlying physics bodies
 		TTN_Collision::scolptr FindCollisionPointer(TTN_Physics* b1, TTN_Physics* b2);
+
 
 	private:
 		//context that contains all our entities, their ids, and components 

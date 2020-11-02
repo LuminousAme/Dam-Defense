@@ -126,7 +126,8 @@ int main() {
 		testScene.AttachCopy<TTN_Transform>(tree1, treeTrans);
 
 		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
-		 
+		pbody.SetIsStaticBody(true);
+
 		testScene.AttachCopy<TTN_Physics>(tree1, pbody);
 		testScene.SetUpCollisions(tree1);
 	}
@@ -167,12 +168,12 @@ int main() {
 		testScene.Attach<TTN_Transform>(boat);
 		//grab a reference to that transform and set it up
 		auto& boatTrans = testScene.Get<TTN_Transform>(boat);
-		boatTrans.SetPos(glm::vec3(-3.0f, -4.5f, 5.0f));
+		boatTrans.SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
 		boatTrans.RotateFixed(glm::vec3(0.0f, 270.0f, 0.0f));
 		boatTrans.SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
 
 		
-		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
+		TTN_Physics pbody = TTN_Physics(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
 		testScene.AttachCopy<TTN_Physics>(boat, pbody);
 		testScene.SetUpCollisions(boat);
 	}
@@ -185,19 +186,13 @@ int main() {
 	TTN_Application::SetClearColor(glm::vec4(0.0f, 0.2f, 8.0f, 1.0f));
 	
 	float speed = 1.0f;
-
+	glm::vec3 velo = glm::vec3(0.0f);
 
 	while (!TTN_Application::GetIsClosing()) {
 		//get the change in time for the frame
 		float dt = TTN_Application::GetDeltaTime();
 
 		auto& treeTrans = testScene.Get<TTN_Transform>(tree1);
-		//move the boat 
-		auto& boatTrans = testScene.Get<TTN_Transform>(boat);
-		boatTrans.SetPos(glm::vec3(boatTrans.GetPos().x, boatTrans.GetPos().y + speed * dt, boatTrans.GetPos().z ));
-		//flip the speed if it gets to a certain point
-		if (boatTrans.GetPos().y < -5.0f || boatTrans.GetPos().y > 2.0f)
-			speed *= -1;
 
 		auto& tree2Trans = testScene.Get<TTN_Transform>(tree2);
 		tree2Trans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
@@ -238,9 +233,39 @@ int main() {
 
 		auto& ptree = testScene.Get<TTN_Physics>(tree1);
 
+		//control the boat through keyboard keys
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
+			velo += glm::vec3(0.0f, 1.0f, 0.0f);
+			if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
+				velo = glm::normalize(velo);
+			}
+			pboat.SetVelocity(velo * speed);
+		}
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
+			velo += glm::vec3(0.0f, -1.0f, 0.0f);
+			if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
+				velo = glm::normalize(velo);
+			}
+			pboat.SetVelocity(velo * speed);
+		}
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
+			velo += glm::vec3(-1.0f, 0.0f, 0.0f);
+			if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
+				velo = glm::normalize(velo);
+			}
+			pboat.SetVelocity(velo * speed);
+		}
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
+			velo += glm::vec3(1.0f, 0.0f, 0.0f);
+			if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
+				velo = glm::normalize(velo);
+			}
+			pboat.SetVelocity(velo * speed);
+		}
+
+
 		
-		pboat.SetPos(boatTrans.GetPos());
-		ptree.SetPos(treeTrans.GetPos());
+
 		//get a pointer to the collosion object between the tree and boat
 		TTN_Collision::scolptr col = testScene.FindCollisionPointer(&ptree, &pboat);
 		if (col == nullptr)

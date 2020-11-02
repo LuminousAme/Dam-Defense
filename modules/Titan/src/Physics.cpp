@@ -6,6 +6,7 @@
 //include other required features
 #include "Titan/ObjLoader.h"
 #include <iostream>
+#include "..\include\Titan\Physics.h"
 
 namespace Titan {
 	//initlization for static rendering variables
@@ -28,6 +29,9 @@ namespace Titan {
 
 		m_IsStaticBody = false;
 
+		m_Velocity = glm::vec3(0.0f);
+		m_ShouldBounce = true;
+
 		InitCorners();
 		CalculateCorners();
 	}
@@ -43,6 +47,9 @@ namespace Titan {
 		m_Center = position;
 
 		m_IsStaticBody = false;
+		m_ShouldBounce = true;
+		
+		m_Velocity = glm::vec3(0.0f);
 
 		InitCorners();
 		CalculateCorners();
@@ -69,11 +76,121 @@ namespace Titan {
 			(b1.GetMin().y <= b2.GetMax().y && b1.GetMax().y >= b2.GetMin().y) &&
 			(b1.GetMin().z <= b2.GetMax().z && b1.GetMax().z >= b2.GetMin().z))
 		{
+			//calculate the contact normals
+			glm::vec3 temp = b2.GetPosition() - b1.GetPosition();
+
+			//find the largest component
+			float largestComponentAbs = glm::abs(temp.x);
+			float largestComponentSigned = temp.x;
+			int largestAxis = 0;
+			if (glm::abs(temp.y) > largestComponentAbs) {
+				largestComponentAbs = glm::abs(temp.y);
+				largestComponentSigned = temp.y;
+				largestAxis = 1;
+			}
+			if (glm::abs(temp.z) > largestComponentAbs) {
+				largestComponentAbs = glm::abs(temp.z);
+				largestComponentSigned = temp.z;
+				largestAxis = 2;
+			}
+
+			glm::vec3 normalForb1 = glm::vec3(0.0f); //normal of the edge of b2 that b1 is bouncing off of 
+			glm::vec3 normalForb2 = glm::vec3(0.0f);; //normal of the edge of b1 that b2 is bouncing off of 
+
+			//that largest component represents the two contact normals
+			if (largestAxis == 0) normalForb2 = glm::vec3(largestComponentSigned, 0.0f, 0.0f);
+			else if (largestAxis == 1)  normalForb2 = glm::vec3(0.0f, largestComponentSigned, 0.0f);
+			else if (largestAxis == 2)  normalForb2 = glm::vec3(0.0f, 0.0f, largestComponentSigned);
+			normalForb2 = glm::normalize(normalForb2);
+			normalForb1 = normalForb2 * -1.0f;
+
+			//resolve the collision
+			//find the higher minmum and lower maximum on that axis 
+			float higherMin, lowerMax;
+
+			if (largestAxis == 0) {
+				higherMin = (b1.GetMin().x >= b2.GetMin().x) ? b1.GetMin().x : b2.GetMin().x;
+				lowerMax = (b1.GetMax().x <= b2.GetMax().x) ? b1.GetMax().x : b2.GetMax().x;
+			}
+			else if (largestAxis == 1) {
+				higherMin = (b1.GetMin().y >= b2.GetMin().y) ? b1.GetMin().y : b2.GetMin().y;
+				lowerMax = (b1.GetMax().y <= b2.GetMax().y) ? b1.GetMax().y : b2.GetMax().y;
+			}
+			else if (largestAxis == 2) {
+				higherMin = (b1.GetMin().z >= b2.GetMin().z) ? b1.GetMin().z : b2.GetMin().z;
+				lowerMax = (b1.GetMax().z <= b2.GetMax().z) ? b1.GetMax().z : b2.GetMax().z;
+			}
+
+			//we can then use those to caculate the pentration depth of the colision
+			float depth = lowerMax - higherMin;
+
+			//and then combining that with the normals we can resolve the colision
+
+			//if both objects are dynamic
+			if (!b1.GetIsStaticBody() && !b2.GetIsStaticBody()) {
+				//resolve both of them by half of the depth
+				b1.SetPos(b1.GetPosition() + normalForb1 * depth/2.0f);
+				b2.SetPos(b2.GetPosition() + normalForb2 * depth / 2.0f);
+			}
+			//if only b1 is dynamic
+			else if (!b1.GetIsStaticBody() && b2.GetIsStaticBody()) {
+				//resolve only b1 by the full depth
+				b1.SetPos(b1.GetPosition() + normalForb1 * depth);
+			}
+			//if only b2 is dyanmic
+			else if (b1.GetIsStaticBody() && !b2.GetIsStaticBody()) {
+				//resolve only b2 by the full depth
+				b2.SetPos(b2.GetPosition() + normalForb2 * depth);
+			}
+
+			//the colision should now be resolved so the last thing to do is call the bounce for both bodies
+			b1.Bounce(normalForb1);
+			b2.Bounce(normalForb2);
+
 			return true;
 		}
-		//otherwise returns false
+
+		//if there was no collision return false
 		else
 			return false;
+	}
+
+	//causes the object to bounce when it collides with another object 
+	void TTN_Physics::Bounce(glm::vec3 Contactnormal)
+	{
+		//only bounce the object if it is dynamic (acutally moves) and should bounce
+		if (!m_IsStaticBody && m_ShouldBounce) {
+			//make a vector to store the new velocity, start with the old velocity
+			glm::vec3 newVelo = m_Velocity;
+
+			//copy the direction of the normal from the contactNormal into the new vector
+			if (Contactnormal.x != 0.0f)
+				newVelo.x = Contactnormal.x;
+
+			if (Contactnormal.y != 0.0f)
+				newVelo.y = Contactnormal.y;
+
+			if (Contactnormal.x != 0.0f)
+				newVelo.y = Contactnormal.y;
+
+			//normalize the new velocity
+			newVelo = glm::normalize(newVelo);
+
+			//multiply by the magnintude of the original velocity so the speed is the same 
+			newVelo = newVelo * glm::length(m_Velocity);
+
+			//we now have a new velocity that has bounced off the other object, so set our object's velocity to it
+			m_Velocity = newVelo;
+		}
+	}
+
+	//updates the position of the physics body based on the velocity and deltaTime
+	void TTN_Physics::Update(float deltaTime)
+	{
+		if (!m_IsStaticBody) {
+			//updates the position of the physics body
+			SetPos(GetPosition() + (m_Velocity * deltaTime));
+		}
 	}
 
 	//sets the position of the physics body
@@ -81,6 +198,7 @@ namespace Titan {
 	{
 		//pass the position to the underlying transform
 		m_trans.SetPos(pos);
+		m_Center = pos;
 		//recalculate the corners
 		CalculateCorners();
 	}
@@ -116,6 +234,19 @@ namespace Titan {
 	void TTN_Physics::SetIsStaticBody(bool isStatic)
 	{
 		m_IsStaticBody = isStatic;
+		if (isStatic) m_ShouldBounce = false;
+	}
+
+	//sets the velocity of the physics body
+	void TTN_Physics::SetVelocity(glm::vec3 Velo)
+	{
+		m_Velocity = Velo;
+	}
+
+	void TTN_Physics::SetShouldBounce(bool bounce)
+	{
+		if (!m_IsStaticBody)
+			m_ShouldBounce = bounce;
 	}
 
 	//sets up the data required to render physic bodies 

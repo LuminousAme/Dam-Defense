@@ -41,6 +41,22 @@ namespace Titan {
 
 	void TTN_Scene::Update(float deltaTime)
 	{
+		//run through all of the physicsbody in the scene
+		auto physicsBodyView = m_Registry->view<TTN_Physics>();
+		for (auto entity : physicsBodyView) {
+			//call the physics body's update
+			Get<TTN_Physics>(entity).Update(deltaTime);
+		}
+
+		//run through all of the entities with both a physics body and a transform in the scene
+		auto transAndPhysicsView = m_Registry->view<TTN_Transform, TTN_Physics>();
+		for (auto entity : transAndPhysicsView) {
+			if (!Get<TTN_Physics>(entity).GetIsStaticBody()) {
+				//copy the position of the physics body into the position of the transform
+				Get<TTN_Transform>(entity).SetPos(Get<TTN_Physics>(entity).GetPosition());
+			}
+		}
+
 		//run through all the colisions objects in the scene and run their checks
 		for (auto it = m_CollisionMap.begin(); it != m_CollisionMap.end(); it++)
 		{
@@ -200,6 +216,36 @@ namespace Titan {
 					newCollision->SetBody2(b2);
 					//and add it to the map
 					m_CollisionMap[std::pair<TTN_Physics*, TTN_Physics*>(b1, b2)] = newCollision;
+				}
+			}
+		}
+	}
+
+	//removes all collisions with a given entity, to be called when an entity is being deleted
+	void TTN_Scene::CleanUpCollisions(entt::entity entity)
+	{
+		//iterate through all the collisions
+		//create a few of all the entities in the scene with physics bodies
+		auto physicsBodyView = m_Registry->view<TTN_Physics>();
+
+		//go through each entity in that view
+		for (auto ent : physicsBodyView)
+		{
+			//if the current object in the view is the one first we're setting up with, skip it, it doesn't have a collision with itself anyways
+			if (ent == entity) {
+				continue;
+			}
+			//otherwise it must be a different entity, so check if there's a collision that needs to be deleted
+			else {
+				//check both posible key permutations
+				auto it = m_CollisionMap.find(std::pair<TTN_Physics*, TTN_Physics*>(&Get<TTN_Physics>(entity), &Get<TTN_Physics>(ent)));
+				auto it2 = m_CollisionMap.find(std::pair<TTN_Physics*, TTN_Physics*>(&Get<TTN_Physics>(ent), &Get<TTN_Physics>(entity)));
+				//if either has a collision, delete it
+				if (it != m_CollisionMap.end()) {
+					m_CollisionMap.erase(it);
+				}
+				if (it2 != m_CollisionMap.end()) {
+					m_CollisionMap.erase(it2);
 				}
 			}
 		}

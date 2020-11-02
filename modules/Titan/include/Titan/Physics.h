@@ -32,16 +32,26 @@ namespace Titan {
 
 		static bool Inter(TTN_Physics& b1, TTN_Physics& b2);
 
+		void Bounce(glm::vec3 Contactnormal);
+
+		void Update(float deltaTime);
+
 		void SetPos(glm::vec3 pos);
 		void SetScale(glm::vec3 scale);
 		void RotateFixed(glm::vec3 rotation);
 		void RotateLocal(glm::vec3 rotation);
 		void SetIsStaticBody(bool isStatic);
+		void SetVelocity(glm::vec3 Velo);
+		void SetShouldBounce(bool bounce);
 
 		glm::vec3 GetCenter() { return m_Center; }
 		glm::vec3 GetMin() { return m_Min; }
 		glm::vec3 GetMax() { return m_Max; }
+		glm::vec3 GetPosition() { return m_trans.GetPos(); }
+		glm::vec3 GetScale() { return m_trans.GetScale(); }
 		bool GetIsStaticBody() { return m_IsStaticBody; }
+		glm::vec3 GetVelocity() { return m_Velocity; }
+		bool GetShouldBounce() { return m_ShouldBounce; }
 
 		static void SetUpPhysicsBoxRendering();
 		static bool GetRenderingIsSetUp();
@@ -57,6 +67,9 @@ namespace Titan {
 		glm::vec3 m_Corners[8]; //the positions of each corner of the physics body
 
 		bool m_IsStaticBody;
+
+		glm::vec3 m_Velocity;
+		bool m_ShouldBounce;
 
 		//data for rendering the physics box
 		static TTN_Shader::sshptr shader;
