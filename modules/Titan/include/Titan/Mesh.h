@@ -35,10 +35,10 @@ namespace Titan {
 		TTN_Mesh();
 
 		//constructor with data built in (minus colors)
-		TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec2>& uvs, TTN_Material::smatptr material = nullptr);
+		TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec2>& uvs);
 
 		//constructor with data built in (including colors)
-		TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& colors, TTN_Material::smatptr material = nullptr);
+		TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& colors);
 
 		//destructor
 		~TTN_Mesh();
@@ -55,8 +55,6 @@ namespace Titan {
 		void setUVs(std::vector<glm::vec2>& uvs);
 		//sets the vertex colors of the mesh, returns wheter or not they were set succesfully
 		bool SetColors(std::vector<glm::vec3>& colors);
-		//sets the material for the mesh
-		void SetMat(TTN_Material::smatptr material);
 
 		//GETTERS
 		//Gets the pointer to the meshes vao
@@ -65,8 +63,6 @@ namespace Titan {
 		int GetVertCount() { return m_Vertices.size(); }
 		//Gets wheter or not the mesh has vertex colors
 		bool GetHasVertColors() { return m_HasVertColors; }
-		//Gets the pointer to the mat
-		TTN_Material::smatptr GetMatPointer() { return m_Mat; }
 
 	protected:
 		//a vector containing all the vertices on the mesh 
@@ -79,8 +75,6 @@ namespace Titan {
 		std::vector<glm::vec3> m_Colors;
 		//a boolean for if the mesh has colors
 		bool m_HasVertColors;
-		//a material for the mesh
-		TTN_Material::smatptr m_Mat;
 
 		//array of VBO smart pointers, 0 for pos, 1 for normals, 2 for uvs, 3 for colors. 
 		TTN_VertexBuffer::svbptr m_vbos[4];

@@ -20,7 +20,7 @@ namespace Titan {
 	}
 
 	//Constructor, creates a mesh with the data given
-	TTN_Mesh::TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec2>& uvs, TTN_Material::smatptr material)
+	TTN_Mesh::TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec2>& uvs)
 	{
 		//initliaze the array of VBO pointers
 		for (int i = 0; i < 3; i++)
@@ -36,15 +36,12 @@ namespace Titan {
 		//set the uvs
 		setUVs(uvs);
 
-		//copy the material pointer
-		m_Mat = material;
-
 		//set the mesh to not having vertex colors
 		m_HasVertColors = false;
 	}
 
 	//Constructor, creates a mesh with the data given
-	TTN_Mesh::TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& colors, TTN_Material::smatptr material)
+	TTN_Mesh::TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& colors)
 	{
 		//initliaze the array of VBO pointers
 		for (int i = 0; i < 3; i++)
@@ -61,9 +58,6 @@ namespace Titan {
 		setUVs(uvs);
 		//set up the colors
 		SetColors(colors);
-
-		//copy the material pointer
-		m_Mat = material;
 	}
 
 	//destructor
@@ -126,13 +120,6 @@ namespace Titan {
 		}
 
 		return false;
-	}
-
-	//sets the material for the mesh
-	void TTN_Mesh::SetMat(TTN_Material::smatptr material)
-	{
-		//copy the mat pointer
-		m_Mat = material;
 	}
 
 	//gets the pointer to the meshes vao 

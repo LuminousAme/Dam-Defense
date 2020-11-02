@@ -12,7 +12,7 @@ using namespace Titan;
 int main() {
 	Logger::Init();
 	TTN_Application::Init("Dam Defense", 800, 800);
-	TTN_Physics::SetUpPhysicsBoxRendering();
+	TTN_Physics::SetUpPhysicsBoxRendering(); 
 
 	//create a shader program object
 	TTN_Shader::sshptr shaderProgam = TTN_Shader::Create();
@@ -48,8 +48,6 @@ int main() {
 	//add the texture to material and set the shininess
 	swordMat->SetAlbedo(swordText);
 	swordMat->SetShininess(128.0f);
-	//put the sword mat in the sword mesh
-	swordMesh->SetMat(swordMat);
 
 	//create a new scene
 	TTN_Scene testScene = TTN_Scene();
@@ -98,6 +96,8 @@ int main() {
 
 		//setup a mesh renderer for the sword
 		TTN_Renderer swordRenderer = TTN_Renderer(swordMesh, shaderProgamTextured);
+		//attach the material to the renderer
+		swordRenderer.SetMat(swordMat);
 		//attach that renderer to the tree entity
 		testScene.AttachCopy<TTN_Renderer>(sword, swordRenderer);
 		 
@@ -131,8 +131,10 @@ int main() {
 		//TTN_Physics pbody = TTN_Physics(glm::vec3(treeTrans.GetPos().x , treeTrans.GetPos().y , treeTrans.GetPos().z ));
 
 		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
-		 
+		pbody.SetIsStaticBody(true);
+
 		testScene.AttachCopy<TTN_Physics>(tree1, pbody);
+		testScene.SetUpCollisions(tree1);
 	}
 
 	//entity for the second tree in testScene
@@ -171,16 +173,21 @@ int main() {
 		testScene.Attach<TTN_Transform>(boat);
 		//grab a reference to that transform and set it up
 		auto& boatTrans = testScene.Get<TTN_Transform>(boat);
-		boatTrans.SetPos(glm::vec3(-3.0f, -4.5f, 5.0f));
+		boatTrans.SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
 		boatTrans.RotateFixed(glm::vec3(0.0f, 270.0f, 0.0f));
 		boatTrans.SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
 
 		//TTN_Physics pbody = TTN_Physics(glm::vec3(-1.0f, -4.0f, 4.f), glm::vec3(1.0f, -2.0f, 6.f));
 		//TTN_Physics pbody = TTN_Physics(glm::vec3(boatTrans.GetPos().x , boatTrans.GetPos().y , boatTrans.GetPos().z));
 		
+<<<<<<< HEAD
 		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
 
+=======
+		TTN_Physics pbody = TTN_Physics(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
+>>>>>>> Ame
 		testScene.AttachCopy<TTN_Physics>(boat, pbody);
+		testScene.SetUpCollisions(boat);
 	}
 
 	//entity for 
@@ -190,12 +197,17 @@ int main() {
 	TTN_Application::SetClearColor(glm::vec4(0.0f, 0.2f, 8.0f, 1.0f));
 	
 	float speed = 1.0f;
+<<<<<<< HEAD
+=======
+	glm::vec3 velo = glm::vec3(0.0f);
+>>>>>>> Ame
 
 	while (!TTN_Application::GetIsClosing()) {
 		//get the change in time for the frame
 		float dt = TTN_Application::GetDeltaTime();
 
 		auto& treeTrans = testScene.Get<TTN_Transform>(tree1);
+<<<<<<< HEAD
 		//move the boat 
 		auto& boatTrans = testScene.Get<TTN_Transform>(boat);
 
@@ -214,6 +226,8 @@ int main() {
 		//flip the speed if it gets to a certain point
 		if (boatTrans.GetPos().y < -5.0f || boatTrans.GetPos().y > 2.0f)
 			speed *= -1;
+=======
+>>>>>>> Ame
 
 
 		auto& tree2Trans = testScene.Get<TTN_Transform>(tree2);
@@ -256,10 +270,49 @@ int main() {
 		auto& pboat = testScene.Get<TTN_Physics>(boat);
 
 		auto& ptree = testScene.Get<TTN_Physics>(tree1);
+<<<<<<< HEAD
+=======
+
+		//control the boat through keyboard keys
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
+			velo += glm::vec3(0.0f, 1.0f, 0.0f);
+			if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
+				velo = glm::normalize(velo);
+			}
+			pboat.SetVelocity(velo * speed);
+		}
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
+			velo += glm::vec3(0.0f, -1.0f, 0.0f);
+			if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
+				velo = glm::normalize(velo);
+			}
+			pboat.SetVelocity(velo * speed);
+		}
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
+			velo += glm::vec3(-1.0f, 0.0f, 0.0f);
+			if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
+				velo = glm::normalize(velo);
+			}
+			pboat.SetVelocity(velo * speed);
+		}
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
+			velo += glm::vec3(1.0f, 0.0f, 0.0f);
+			if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
+				velo = glm::normalize(velo);
+			}
+			pboat.SetVelocity(velo * speed);
+		}
+
+
+>>>>>>> Ame
 		
-		pboat.SetPos(boatTrans.GetPos());
-		ptree.SetPos(treeTrans.GetPos());
-		if (TTN_Physics::Inter(pboat, ptree)) {
+
+		//get a pointer to the collosion object between the tree and boat
+		TTN_Collision::scolptr col = testScene.FindCollisionPointer(&ptree, &pboat);
+		if (col == nullptr)
+			printf("failed\n");
+
+		else if (col->GetHasCollided()) {
 			
 			std::cout << "Touching " << (pboat.GetMin().x <= ptree.GetMax().x && pboat.GetMax().x >= ptree.GetMin().x) <<
 				(pboat.GetMin().y <= ptree.GetMax().y && pboat.GetMax().y >= ptree.GetMin().y) <<

@@ -46,6 +46,12 @@ namespace Titan {
 		m_Shader = shader;
 	}
 
+	//sets a material
+	void TTN_Renderer::SetMat(TTN_Material::smatptr mat)
+	{
+		m_Mat = mat;
+	}
+
 	//function that will send the uniforms with how to draw the object arounding to the camera to openGL
 	void TTN_Renderer::Render(glm::mat4 model, glm::mat4 VP)
 	{
