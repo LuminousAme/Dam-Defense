@@ -86,6 +86,11 @@ namespace Titan {
 		//gets the light entity
 		const entt::entity& GetLightEntity() { return m_Light; }
 
+		//sets up collisions
+		void SetUpCollisions(entt::entity entity);
+
+		//finds a collision based on it's underlying physics bodies
+		TTN_Collision::scolptr FindCollisionPointer(TTN_Physics* b1, TTN_Physics* b2);
 
 	private:
 		//context that contains all our entities, their ids, and components 
@@ -104,6 +109,9 @@ namespace Titan {
 		glm::vec3 m_AmbientColor;
 		//the strenght of that ambient color
 		float m_AmbientStrength;
+
+		//map of all the collisions
+		std::map<std::pair<TTN_Physics*, TTN_Physics*>, TTN_Collision::scolptr> m_CollisionMap;
 	};
 
 #pragma region ECS_functions_def

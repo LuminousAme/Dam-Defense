@@ -128,6 +128,7 @@ int main() {
 		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
 		 
 		testScene.AttachCopy<TTN_Physics>(tree1, pbody);
+		testScene.SetUpCollisions(tree1);
 	}
 
 	//entity for the second tree in testScene
@@ -173,6 +174,7 @@ int main() {
 		
 		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
 		testScene.AttachCopy<TTN_Physics>(boat, pbody);
+		testScene.SetUpCollisions(boat);
 	}
 
 	//entity for 
@@ -239,7 +241,12 @@ int main() {
 		
 		pboat.SetPos(boatTrans.GetPos());
 		ptree.SetPos(treeTrans.GetPos());
-		if (TTN_Physics::Inter(pboat, ptree)) {
+		//get a pointer to the collosion object between the tree and boat
+		TTN_Collision::scolptr col = testScene.FindCollisionPointer(&ptree, &pboat);
+		if (col == nullptr)
+			printf("failed\n");
+
+		else if (col->GetHasCollided()) {
 			
 			std::cout << "Touching " << (pboat.GetMin().x <= ptree.GetMax().x && pboat.GetMax().x >= ptree.GetMin().x) <<
 				(pboat.GetMin().y <= ptree.GetMax().y && pboat.GetMax().y >= ptree.GetMin().y) <<

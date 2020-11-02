@@ -26,6 +26,8 @@ namespace Titan {
 		m_Min = glm::vec3(-1.0f, -1.0f, -1.f);
 		m_Max = glm::vec3(1.0f, 1.0f, 1.f);
 
+		m_IsStaticBody = false;
+
 		InitCorners();
 		CalculateCorners();
 	}
@@ -39,6 +41,8 @@ namespace Titan {
 		m_trans.SetScale(scale);
 
 		m_Center = position;
+
+		m_IsStaticBody = false;
 
 		InitCorners();
 		CalculateCorners();
@@ -106,6 +110,12 @@ namespace Titan {
 		m_trans.RotateRelative(rotation);
 		//recalculate the corners
 		CalculateCorners();
+	}
+
+	//sets wheter or not this physics body is static(doesn't move)
+	void TTN_Physics::SetIsStaticBody(bool isStatic)
+	{
+		m_IsStaticBody = isStatic;
 	}
 
 	//sets up the data required to render physic bodies 
@@ -205,5 +215,60 @@ namespace Titan {
 		m_Corners[5] = glm::vec3(1.0f, 1.0f, -1.0f);
 		m_Corners[6] = glm::vec3(-1.0f, 1.0f, 1.0f);
 		m_Corners[7] = glm::vec3(1.0f, 1.0f, 1.0f);
+	}
+
+	//default collision constructor
+	TTN_Collision::TTN_Collision()
+		: m_Body1(nullptr), m_Body2(nullptr)
+	{
+		m_HasHappened = false;
+	}
+
+	//constructs a collision from 2 physics body references
+	TTN_Collision::TTN_Collision(TTN_Physics* b1, TTN_Physics* b2)
+		: m_Body1(b1), m_Body2(b2)
+	{
+		m_HasHappened = false;
+	}
+
+	//destructor
+	TTN_Collision::~TTN_Collision()
+	{
+	}
+
+	//Gets the first physics body in the collision object
+	TTN_Physics* TTN_Collision::GetBody1()
+	{
+		return m_Body1;
+	}
+
+	//Gets the second physics body in the collision object
+	TTN_Physics* TTN_Collision::GetBody2()
+	{
+		return m_Body2;
+	}
+
+	//returns a boolean representing wheter or not a collision has happened this frame
+	bool TTN_Collision::GetHasCollided()
+	{
+		return m_HasHappened;
+	}
+
+	//sets the refernece for the first body
+	void TTN_Collision::SetBody1(TTN_Physics* b)
+	{
+		m_Body1 = b;
+	}
+
+	//sets the reference for the second body
+	void TTN_Collision::SetBody2(TTN_Physics* b)
+	{
+		m_Body2 = b;
+	}
+
+	//check for if a collision between this object's 2 physics bodies has occured, if so, save data about it
+	void TTN_Collision::CheckCollision()
+	{
+		m_HasHappened = TTN_Physics::Inter(*m_Body1, *m_Body2);
 	}
 }
