@@ -110,6 +110,15 @@ namespace Titan {
 			//and finsih by rendering the mesh
 			renderer.Render(Get<TTN_Transform>(entity).GetMatrix(), vp);
 		}
+
+		//now that all the opaque objects have been rendered, let's render the physics boxes
+		if (TTN_Physics::GetRenderingIsSetUp()) {
+			auto physicsBodyView = m_Registry->view<TTN_Physics>(); 
+			for (auto entity:physicsBodyView) {
+				Get<TTN_Physics>(entity).Render(vp);
+			}
+		}
+			
 	}
 
 	//sets wheter or not the scene should be rendered

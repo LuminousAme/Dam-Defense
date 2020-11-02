@@ -1,5 +1,5 @@
-#include "Titan/Scene.h"
 #include "Titan/Application.h"
+#include "Titan/Scene.h"
 #include "Titan/ObjLoader.h"
 #include "Titan/Renderer.h"
 #include "Titan/Transform.h"
@@ -11,6 +11,7 @@ using namespace Titan;
 int main() {
 	Logger::Init();
 	TTN_Application::Init("Dam Defense", 800, 800);
+	TTN_Physics::SetUpPhysicsBoxRendering();
 
 	//create a shader program object
 	TTN_Shader::sshptr shaderProgam = TTN_Shader::Create();
@@ -62,7 +63,8 @@ int main() {
 		camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		testScene.Get<TTN_Camera>(camera).CalcPerspective(90.0f, 1.0f, 0.01f, 100.f);
+		testScene.Get<TTN_Camera>(camera).CalcOrtho(-800.0f/100.0f, 800.0f/100.0f, -800.0f/100.0f, 800.0f/100.0f, 0.001f, 100.0f);
+		//testScene.Get<TTN_Camera>(camera).CalcPerspective(90.0f, 1.0f, 0.01f, 100.f);
 		testScene.Get<TTN_Camera>(camera).View();
 	}
 
@@ -123,10 +125,8 @@ int main() {
 		//attach that transform to the tree entity
 		testScene.AttachCopy<TTN_Transform>(tree1, treeTrans);
 
-		//TTN_Physics pbody = TTN_Physics(glm::vec3(-3.0f, -4.0f, 4.f), glm::vec3(-1.0f, -2.0f, 6.f));
-		TTN_Physics pbody = TTN_Physics( glm::vec3(treeTrans.GetPos().x - 0.50f, treeTrans.GetPos().y - 8.0f, treeTrans.GetPos().z - 8.0f),
-			glm::vec3(treeTrans.GetPos().x + 0.50f, treeTrans.GetPos().y + 8.0f, treeTrans.GetPos().z + 8.0f) );
-		
+		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
+		 
 		testScene.AttachCopy<TTN_Physics>(tree1, pbody);
 	}
 
@@ -166,13 +166,12 @@ int main() {
 		testScene.Attach<TTN_Transform>(boat);
 		//grab a reference to that transform and set it up
 		auto& boatTrans = testScene.Get<TTN_Transform>(boat);
-		boatTrans.SetPos(glm::vec3(1.f, -3.0f, 5.0f));
+		boatTrans.SetPos(glm::vec3(-3.0f, -4.5f, 5.0f));
 		boatTrans.RotateFixed(glm::vec3(0.0f, 270.0f, 0.0f));
 		boatTrans.SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
 
-		//TTN_Physics pbody = TTN_Physics(glm::vec3(-1.0f, -4.0f, 4.f), glm::vec3(1.0f, -2.0f, 6.f));
-		TTN_Physics pbody = TTN_Physics(glm::vec3(boatTrans.GetPos().x - 1.0f, boatTrans.GetPos().y - 6.0f, boatTrans.GetPos().z - 6.0f),
-			glm::vec3(boatTrans.GetPos().x + 1.0f, boatTrans.GetPos().y + 6.0f, boatTrans.GetPos().z + 6.0f));
+		
+		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
 		testScene.AttachCopy<TTN_Physics>(boat, pbody);
 	}
 
@@ -183,7 +182,7 @@ int main() {
 	//set the background to a blue
 	TTN_Application::SetClearColor(glm::vec4(0.0f, 0.2f, 8.0f, 1.0f));
 	
-	float speed = -1.0f;
+	float speed = 1.0f;
 
 
 	while (!TTN_Application::GetIsClosing()) {
@@ -193,16 +192,16 @@ int main() {
 		auto& treeTrans = testScene.Get<TTN_Transform>(tree1);
 		//move the boat 
 		auto& boatTrans = testScene.Get<TTN_Transform>(boat);
-		boatTrans.SetPos(glm::vec3(boatTrans.GetPos().x - speed * dt, boatTrans.GetPos().y, boatTrans.GetPos().z ));
+		boatTrans.SetPos(glm::vec3(boatTrans.GetPos().x, boatTrans.GetPos().y + speed * dt, boatTrans.GetPos().z ));
 		//flip the speed if it gets to a certain point
-		if (boatTrans.GetPos().x < -5.0f || boatTrans.GetPos().x > 2.0f)
+		if (boatTrans.GetPos().y < -5.0f || boatTrans.GetPos().y > 2.0f)
 			speed *= -1;
 
 		auto& tree2Trans = testScene.Get<TTN_Transform>(tree2);
 		tree2Trans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
 
 		auto& camTrans = testScene.Get<TTN_Transform>(testScene.GetCamEntity());
-		camTrans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
+		//camTrans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
 		
 		//note:: always call keydown first
 		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Space)) {
@@ -217,7 +216,7 @@ int main() {
 			printf("Space released\n");
 		}
 
-		printf("mousePos x: %f, %f\n", TTN_Application::TTN_Input::GetMousePosition().x, TTN_Application::TTN_Input::GetMousePosition().y);
+		//printf("mousePos x: %f, %f\n", TTN_Application::TTN_Input::GetMousePosition().x, TTN_Application::TTN_Input::GetMousePosition().y);
 
 		//note:: always call GetMouseButtonDown first
 		if (TTN_Application::TTN_Input::GetMouseButtonDown(TTN_MouseButton::Left)) {
@@ -231,38 +230,36 @@ int main() {
 		if (TTN_Application::TTN_Input::GetMouseButtonUp(TTN_MouseButton::Left)) {
 			printf("left click released\n");
 		}
-		auto& pboat = testScene.Get<TTN_Physics>(boat);
-		pboat.SetMin(glm::vec3(boatTrans.GetPos().x - 0.50f, boatTrans.GetPos().y - 8.0f, boatTrans.GetPos().z - 6.0f));
-		pboat.SetMax(glm::vec3(boatTrans.GetPos().x + 0.50f, boatTrans.GetPos().y + 8.0f, boatTrans.GetPos().z + 6.0f));
-
-		auto& ptree = testScene.Get<TTN_Physics>(tree1);
-		ptree.SetMin(glm::vec3(treeTrans.GetPos().x - 0.50f, treeTrans.GetPos().y - 8.0f, treeTrans.GetPos().z - 6.0f));
-		ptree.SetMax(glm::vec3(treeTrans.GetPos().x + 0.50f, treeTrans.GetPos().y + 8.0f, treeTrans.GetPos().z + 6.0f));
 
 		
+		auto& pboat = testScene.Get<TTN_Physics>(boat);
 
-		//TTN_Physics::Intersects(pboat, ptree);
+		auto& ptree = testScene.Get<TTN_Physics>(tree1);
+
+		
+		pboat.SetPos(boatTrans.GetPos());
+		ptree.SetPos(treeTrans.GetPos());
 		if (TTN_Physics::Inter(pboat, ptree)) {
 			
-			std::cout << "Touching " << (pboat.min.x <= ptree.max.x && pboat.max.x >= ptree.min.x) <<
-				(pboat.min.y <= ptree.max.y && pboat.max.y >= ptree.min.y) <<
-				(pboat.min.z <= ptree.max.z && pboat.max.z >= ptree.min.z)  <<std::endl;
+			std::cout << "Touching " << (pboat.GetMin().x <= ptree.GetMax().x && pboat.GetMax().x >= ptree.GetMin().x) <<
+				(pboat.GetMin().y <= ptree.GetMax().y && pboat.GetMax().y >= ptree.GetMin().y) <<
+				(pboat.GetMin().z <= ptree.GetMax().z && pboat.GetMax().z >= ptree.GetMin().z)  <<std::endl;
 
-			speed = 0;
+			//speed = 0;
 
 		}
 
 		else
 		{
-			std::cout << "Not Touching " << (pboat.min.x <= ptree.max.x && pboat.max.x >= ptree.min.x) <<
-				(pboat.min.y <= ptree.max.y && pboat.max.y >= ptree.min.y) <<
-				(pboat.min.z <= ptree.max.z && pboat.max.z >= ptree.min.z) << std::endl;
+			std::cout << "Not Touching " << (pboat.GetMin().x <= ptree.GetMax().x && pboat.GetMax().x >= ptree.GetMin().x) <<
+				(pboat.GetMin().y <= ptree.GetMax().y && pboat.GetMax().y >= ptree.GetMin().y) <<
+				(pboat.GetMin().z <= ptree.GetMax().z && pboat.GetMax().z >= ptree.GetMin().z) << std::endl;
 
 		}
 
 		//render the screen
 
-		TTN_Application::Update();
+		TTN_Application::Update(); 
 	}
 		
 	return 0;

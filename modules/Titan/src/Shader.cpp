@@ -67,7 +67,7 @@ namespace Titan {
 			LOG_ERROR("Failed to compile shader stage:\n{}", log);
 
 			//clean up the memory of our log (it's been dumped to an external file so we don't need it here anymore)
-			delete[] log;
+			delete[] log; 
 
 			//Delete the broken shader stage so it doesn't waste memory 
 			glDeleteShader(handle);
