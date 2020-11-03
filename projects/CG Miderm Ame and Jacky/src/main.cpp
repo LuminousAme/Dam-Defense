@@ -5,13 +5,15 @@
 //include titan headers
 #include "Titan/Application.h"
 #include "Titan/ObjLoader.h"
-//include project headers
+#include "Titan/Scene.h"
 #include "Player.h"
+#include "iostream"
 //include other features
 #include <GLM/gtx/rotate_vector.hpp>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctime>
+#include "glm/ext.hpp"
 
 using namespace Titan;
 
@@ -22,7 +24,7 @@ int main() {
 	//set up the window through Titan
 	TTN_Application::Init("CG midterm, Ame Gilham and Jackie Zhou", 1920, 1080);
 	//set up the phyiscs body to render on screen so we can set them up properly
-	//TTN_Physics::SetUpPhysicsBoxRendering();
+	TTN_Physics::SetUpPhysicsBoxRendering();
 
 	//random number generation seed
 	srand(time(NULL));
@@ -179,10 +181,10 @@ int main() {
 		redTrans.SetScale(glm::vec3(0.1f));
 		redTrans.RotateFixed(glm::vec3(270.0f, 0.0f, 90.0f));
 
-
 		//set up a player data component for the red player
 		tanksScene.Attach<PlayerComponent>(redPlayer);
 		auto& redplayComp = tanksScene.Get<PlayerComponent>(redPlayer);
+
 		//make the direction face the same as the tank
 		glm::vec4 newDirection = glm::vec4(redplayComp.GetDirection().x, redplayComp.GetDirection().y, redplayComp.GetDirection().z, 1.0f);
 		newDirection = redTrans.GetMatrix() * newDirection;
@@ -213,7 +215,6 @@ int main() {
 		blueTrans.SetPos(glm::vec3(-4.5f, 0.0f, -1.0f));
 		blueTrans.SetScale(glm::vec3(0.1f));
 		blueTrans.RotateFixed(glm::vec3(270.0f, 0.0f, 270.0f));
-
 
 		//set up a player data component for the blue player
 		tanksScene.Attach<PlayerComponent>(bluePlayer);
@@ -352,6 +353,51 @@ int main() {
 		blueScoreTrans.RotateFixed(glm::vec3(270.0f, 0.0f, 0.0f));
 	}
 
+	entt::entity redBullet;
+	{
+		redBullet = tanksScene.CreateEntity();
+
+		//set up a meshrenderer for the red bullet
+		tanksScene.Attach<TTN_Renderer>(redBullet);
+		auto& redRenderer = tanksScene.Get<TTN_Renderer>(redBullet);
+		redRenderer = TTN_Renderer(tankMesh, shaderProgram);
+		redRenderer.SetMat(redTankMat);
+
+		//set up a transform for the red bullet
+		tanksScene.Attach<TTN_Transform>(redBullet);
+		auto& redTransB = tanksScene.Get<TTN_Transform>(redBullet);
+		redTransB.SetPos(glm::vec3(100.f, 100.f, -1.0f));
+		redTransB.SetScale(glm::vec3(0.1f));
+		redTransB.RotateFixed(glm::vec3(270.0f, 0.0f, 90.0f));
+
+		//physics body for bullet
+		TTN_Physics physicBod = TTN_Physics(redTransB.GetPos(), glm::vec3(0.0f), glm::vec3(0.35f, 0.30f, 0.30f));
+		tanksScene.AttachCopy<TTN_Physics>(redBullet, physicBod);
+	}
+
+	entt::entity blueBullet;
+	{
+		blueBullet = tanksScene.CreateEntity();
+
+		//set up a meshrenderer for the red bullet
+		tanksScene.Attach<TTN_Renderer>(blueBullet);
+		auto& blueRenderer = tanksScene.Get<TTN_Renderer>(blueBullet);
+		blueRenderer = TTN_Renderer(tankMesh, shaderProgram);
+		blueRenderer.SetMat(blueTankMat);
+
+		//set up a transform for the red bullet
+		tanksScene.Attach<TTN_Transform>(blueBullet);
+		auto& blueTransB = tanksScene.Get<TTN_Transform>(blueBullet);
+		blueTransB.SetPos(glm::vec3(-100.f, 100.f, -1.0f));
+		blueTransB.SetScale(glm::vec3(0.1f));
+		blueTransB.RotateFixed(glm::vec3(270.0f, 0.0f, 90.0f));
+
+		//physics body for bullet
+		TTN_Physics physicBod = TTN_Physics(blueTransB.GetPos(), glm::vec3(0.0f), glm::vec3(0.35f, 0.30f, 0.30f));
+		tanksScene.AttachCopy<TTN_Physics>(blueBullet, physicBod);
+		//tanksScene.SetUpCollisions(physicBod);
+	}
+
 	//add the scene to the application
 	TTN_Application::scenes.push_back(tanksScene);
 	//set the background to a green
@@ -363,6 +409,8 @@ int main() {
 	//the directions the players are facing
 	glm::vec2 redPlayerDir = glm::vec2(-1.0f, 0.0f);
 	glm::vec2 bluePlayerDir = glm::vec2(1.0f, 0.0f);
+	int bounceCountR = 0;
+	int bounceCountB = 0;
 
 	//the score of each player
 	int scoreRed = 0;
@@ -410,6 +458,7 @@ int main() {
 		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
 			redPlayerDir = glm::rotate(redPlayerDir, glm::radians(-50.0f * dt));
 			redTrans.RotateFixed(glm::vec3(0.0f, 0.0f, -50.0f * dt));
+			//std::cout << /*glm::to_string */(redTrans.GetRotation().z) << std::endl;
 		}
 		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
 			redPlayerDir = glm::rotate(redPlayerDir, glm::radians(50.0f * dt));
@@ -431,12 +480,147 @@ int main() {
 			}
 		}
 
-		/// BLUE TANK MOVMEMENT /// 
+		//red and blue bullet physics body
+		auto& redPhysBodBullet = tanksScene.Get<TTN_Physics>(redBullet);
+		auto& bluePhysBodBullet = tanksScene.Get<TTN_Physics>(blueBullet);
+
+		//keycode for red player to shoot a bullet
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::E) /*&& (redPhysBodBullet.GetPosition() == glm::vec3(100.f, 100.f, -1.0f))*/) {
+			auto& redTransB = tanksScene.Get<TTN_Transform>(redBullet);
+			auto& redTransP = tanksScene.Get<TTN_Transform>(redPlayer);
+
+			/*redTransB.SetPos(glm::vec3(redTransP.GetPos().x - (glm::normalize(redTransP.GetPos().x)/4.0f),
+				redTransP.GetPos().y + (glm::normalize(redTransP.GetPos().y)/1.6f), -1.0f));*/
+
+				//redTransB.SetPos(glm::vec3(redTransP.GetPos().x - (glm::normalize(redTransP.GetPos().x) ), redTransP.GetPos().y , -1.0f));
+
+			if (redTransP.GetRotation().z <= 42 && redTransP.GetRotation().z >= -49) {
+
+				redTransB.SetPos(glm::vec3((redPlayerDir.x) + (redPhysBod.GetPosition().x + 0.1f),
+					(redPlayerDir.y) + (redPhysBod.GetPosition().y - 0.15f), -1.0f));
+				std::cout << /*glm::to_string */"HELPPPPP 1 " << std::endl;
+
+			}
+
+			else if (redTransP.GetRotation().z >= 139 || redTransP.GetRotation().z <= -139) {
+				redTransB.SetPos(glm::vec3((redPlayerDir.x) + (redPhysBod.GetPosition().x - 0.15f),
+					(redPlayerDir.y) + (redPhysBod.GetPosition().y + 0.04f), -1.0f));
+				std::cout << /*glm::to_string */"HELPPPPP 2" << std::endl;
+
+			}
+
+			else if (redTransP.GetRotation().z <= -50 && redTransP.GetRotation().z >= -139){
+				redTransB.SetPos(glm::vec3((redPlayerDir.x) + (redPhysBod.GetPosition().x + 0.04f),
+					(redPlayerDir.y) + (redPhysBod.GetPosition().y + 0.15f), -1.0f));
+				std::cout << /*glm::to_string */"HELPPPPP 3 " << std::endl;
+
+			}
+
+			else {
+				redTransB.SetPos(glm::vec3((redPlayerDir.x) + (redPhysBod.GetPosition().x + 0.05f),
+					(redPlayerDir.y) + (redPhysBod.GetPosition().y + 0.05f), -1.0f));
+				std::cout << /*glm::to_string */"HELPPPPP 4" << std::endl;
+			}
+
+
+
+			redPhysBodBullet.SetPos(redTransB.GetPos());
+
+			redPhysBodBullet.SetVelocity(glm::vec3(glm::normalize(redPlayerDir).x* playerSpeed* dt* 2.0f, 
+				glm::normalize(redPlayerDir).y* playerSpeed* dt*2.0f, 0.0f));
+
+			//if ()
+			bounceCountR = 0;
+		}
+
 
 		//get a reference to the blue player's transform and physics body
 		auto& blueTrans = tanksScene.Get<TTN_Transform>(bluePlayer);
 		auto& bluePhysBod = tanksScene.Get<TTN_Physics>(bluePlayer);
 
+		//blue player bullets
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::M) /*&& (bluePhysBodBullet.GetPosition() == glm::vec3(-100.f, 100.f, -1.0f))*/) {
+			auto& blueTransB = tanksScene.Get<TTN_Transform>(blueBullet);
+			auto& blueTransP = tanksScene.Get<TTN_Transform>(bluePlayer);
+
+			if (blueTransP.GetRotation().z <= 42 && blueTransP.GetRotation().z >= -49) {
+
+				blueTransB.SetPos(glm::vec3((bluePlayerDir.x) + (bluePhysBod.GetPosition().x + 0.1f),
+					(bluePlayerDir.y) + (bluePhysBod.GetPosition().y - 0.15f), -1.0f));
+				std::cout << /*glm::to_string */"HELPPPPP 1 " << std::endl;
+
+			}
+
+			else if (blueTransP.GetRotation().z >= 139 || blueTransP.GetRotation().z <= -139) {
+				blueTransB.SetPos(glm::vec3((bluePlayerDir.x) + (bluePhysBod.GetPosition().x - 0.15f),
+					(bluePlayerDir.y) + (bluePhysBod.GetPosition().y + 0.04f), -1.0f));
+				std::cout << /*glm::to_string */"HELPPPPP 2" << std::endl;
+
+			}
+
+			else if (blueTransP.GetRotation().z <= -50 && blueTransP.GetRotation().z >= -139) {
+				blueTransB.SetPos(glm::vec3((bluePlayerDir.x) + (bluePhysBod.GetPosition().x + 0.04f),
+					(bluePlayerDir.y) + (bluePhysBod.GetPosition().y + 0.15f), -1.0f));
+				std::cout << /*glm::to_string */"HELPPPPP 3 " << std::endl;
+
+			}
+
+			else {
+				blueTransB.SetPos(glm::vec3((bluePlayerDir.x) + (bluePhysBod.GetPosition().x + 0.05f),
+					(bluePlayerDir.y) + (bluePhysBod.GetPosition().y + 0.05f), -1.0f));
+				std::cout << /*glm::to_string */"HELPPPPP 4" << std::endl;
+			}
+
+			bluePhysBodBullet.SetPos(blueTransB.GetPos());
+
+			bluePhysBodBullet.SetVelocity(glm::vec3(glm::normalize(bluePlayerDir).x * playerSpeed * dt * 2.0f,
+				glm::normalize(bluePlayerDir).y * playerSpeed * dt * 2.0f, 0.0f));
+
+			//if ()
+			bounceCountB = 0;
+		}
+
+		/// RED BULLET COLLISIONS ////
+		//if it collides with player they will be reset to spawn
+		if (TTN_Physics::Inter(redPhysBodBullet, redPhysBod)) {
+			redPhysBodBullet.SetPos(glm::vec3(100.f, 100.f, -1.0f));
+			redPhysBodBullet.SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+
+			redPhysBod.SetPos(glm::vec3(4.5f, 0.0f, -1.0f));
+		}
+
+		if (TTN_Physics::Inter(redPhysBodBullet, bluePhysBod)) {
+			redPhysBodBullet.SetPos(glm::vec3(100.f, 100.f, -1.0f));
+			redPhysBodBullet.SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+
+			bluePhysBod.SetPos(glm::vec3(-4.5f, 0.0f, -1.0f));
+		}
+
+		/// BLUE BULLET COLLISIONS ////
+		//if it collides with player they will be reset to spawn
+		if (TTN_Physics::Inter(bluePhysBodBullet, redPhysBod)) {
+			bluePhysBodBullet.SetPos(glm::vec3(100.f, 100.f, -1.0f));
+			bluePhysBodBullet.SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+
+			redPhysBod.SetPos(glm::vec3(4.5f, 0.0f, -1.0f));
+		}
+
+		if (TTN_Physics::Inter(bluePhysBodBullet, bluePhysBod)) {
+			bluePhysBodBullet.SetPos(glm::vec3(100.f, 100.f, -1.0f));
+			bluePhysBodBullet.SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+
+			bluePhysBod.SetPos(glm::vec3(-4.5f, 0.0f, -1.0f));
+		}
+
+		//collsion with other bullet
+		if (TTN_Physics::Inter(redPhysBodBullet, bluePhysBodBullet)) {
+			redPhysBodBullet.SetPos(glm::vec3(100.f, 100.f, -1.0f));
+			redPhysBodBullet.SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+			bluePhysBodBullet.SetPos(glm::vec3(-100.f, 100.f, -1.0f));
+			bluePhysBodBullet.SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		}
+
+		/// BLUE TANK MOVMEMENT /// 
 		//allow the blue player to rotate their tank
 		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::LeftArrow)) {
 			bluePlayerDir = glm::rotate(bluePlayerDir, glm::radians(-50.0f * dt));
@@ -512,6 +696,29 @@ int main() {
 		}
 		//clear the space key thing
 		TTN_Application::TTN_Input::GetKeyUp(TTN_KeyCode::Space);
+
+		/// WALL COLLISIONS /////
+		//if the bullet collides with something it will bounce and increase the counter (this should be used for walls physics body)
+		if (TTN_Physics::Inter(redPhysBodBullet, bluePhysBod)) {
+			bounceCountR++;
+			//std::cout << bounceCountR << std::endl;
+		}
+		if (TTN_Physics::Inter(bluePhysBodBullet, bluePhysBod)) {
+			bounceCountB++;
+			//std::cout << bounceCountR << std::endl;
+		}
+
+		//if the bullet bounces for 2 times then the third time it collides it will be 'destroyed' (teleported back to base location)
+		if (bounceCountR == 2) {
+			redPhysBodBullet.SetPos(glm::vec3(100.f, 100.f, -1.0f));
+			redPhysBodBullet.SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		}
+		if (bounceCountB == 2) {
+			bluePhysBodBullet.SetPos(glm::vec3(-100.f, 100.f, -1.0f));
+			bluePhysBodBullet.SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		}
+
+
 
 		//call all the backend updates and render everything
 		TTN_Application::Update();

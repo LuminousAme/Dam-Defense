@@ -9,6 +9,7 @@
 #include "..\include\Titan\Physics.h"
 
 namespace Titan {
+
 	//initlization for static rendering variables
 	TTN_Shader::sshptr TTN_Physics::shader = nullptr;
 	TTN_Texture::stptr TTN_Physics::texture = nullptr;
@@ -56,18 +57,18 @@ namespace Titan {
 		CalculateCorners();
 	}
 
-	//idk what this is here for tbh
-	void TTN_Physics::Intersects(TTN_Physics& b1, TTN_Physics& b2)
+	void TTN_Physics::Projections()
 	{
-		if ((b1.GetMin().x <= b2.GetMax().x && b1.GetMax().x >= b2.GetMin().x) &&
-			(b1.GetMin().y <= b2.GetMax().y && b1.GetMax().y >= b2.GetMin().y) &&
-			(b1.GetMin().z <= b2.GetMax().z && b1.GetMax().z >= b2.GetMin().z))
-		{
-
-			std::cout << "Hello" << std::endl;
-		}
 
 	}
+		
+	void TTN_Physics::CalcNormals(TTN_Physics& b1)
+	{
+		glm::vec3 pos = b1.GetCenter();
+		glm::vec3 norm = glm::normalize(pos);
+		b1.normals = norm;
+
+	}	
 
 	//AABB coolision check, returns true if the two enters physics bodies are colliding, false if not
 	bool TTN_Physics::Inter(TTN_Physics& b1, TTN_Physics& b2)

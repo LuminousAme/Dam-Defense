@@ -21,7 +21,9 @@ namespace Titan {
 		//default constructor
 		TTN_Physics();
 
+		//aabb
 		TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
+
 		~TTN_Physics() = default;
 
 		//copy, move, and assingment constrcutors for ENTT
@@ -29,7 +31,15 @@ namespace Titan {
 		TTN_Physics(TTN_Physics&&) = default;
 		TTN_Physics& operator=(TTN_Physics&) = default;
 
-		static void Intersects(TTN_Physics& b1, TTN_Physics& b2);
+		//sat stuff
+		static void Projections();
+		void GetNormals();
+
+		void CalcNormals(TTN_Physics& b1);
+
+		glm::vec3 axis;
+		glm::vec3 normals;
+		glm::vec3 points;
 
 		static bool Inter(TTN_Physics& b1, TTN_Physics& b2);
 
@@ -83,7 +93,11 @@ namespace Titan {
 
 		void CalculateCorners();
 		void InitCorners();
+
 	};
+
+
+
 
 	//class representing a collision
 	class TTN_Collision {
@@ -133,5 +147,7 @@ namespace Titan {
 		//bool for if the 2 physics body have collided this frame
 		bool m_HasHappened;
 	};
+
+
 
 }
