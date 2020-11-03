@@ -215,7 +215,7 @@ namespace Titan {
 					newCollision->SetBody1(b1);
 					newCollision->SetBody2(b2);
 					//and add it to the map
-					m_CollisionMap[std::pair<TTN_Physics*, TTN_Physics*>(b1, b2)] = newCollision;
+					m_CollisionMap.emplace(std::pair<TTN_Physics*, TTN_Physics*>(b1, b2), newCollision);
 				}
 			}
 		}
