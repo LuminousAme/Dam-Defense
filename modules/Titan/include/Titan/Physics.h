@@ -20,7 +20,7 @@ namespace Titan {
 
 		//default constructor
 		TTN_Physics();
-		
+
 		//aabb
 		TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
 
@@ -94,15 +94,11 @@ namespace Titan {
 		void CalculateCorners();
 		void InitCorners();
 
-
-
-
 	};
 
-<<<<<<< HEAD
-}
 
-=======
+
+
 	//class representing a collision
 	class TTN_Collision {
 	public:
@@ -152,5 +148,6 @@ namespace Titan {
 		bool m_HasHappened;
 	};
 
+
+
 }
->>>>>>> Ame

@@ -36,6 +36,9 @@ namespace Titan {
 		//creates a new entity 
 		entt::entity CreateEntity();
 
+		//deletes an entity
+		void DeleteEntity(entt::entity entity);
+
 		//attaches a compontent to an entity 
 		template<typename T>
 		void Attach(entt::entity entity);

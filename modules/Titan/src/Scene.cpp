@@ -39,6 +39,12 @@ namespace Titan {
 		return entity;
 	}
 
+	void TTN_Scene::DeleteEntity(entt::entity entity)
+	{
+		m_Registry->destroy(entity);
+
+	}
+
 	void TTN_Scene::Update(float deltaTime)
 	{
 		//run through all of the physicsbody in the scene
