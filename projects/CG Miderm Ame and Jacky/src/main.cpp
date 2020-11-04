@@ -23,6 +23,8 @@ int main() {
 	Logger::Init();
 	//set up the window through Titan
 	TTN_Application::Init("CG midterm, Ame Gilham and Jackie Zhou", 1920, 1080);
+	//set up the phyiscs body to render on screen so we can set them up properly
+	TTN_Physics::SetUpPhysicsBoxRendering();
 
 	//random number generation seed
 	srand(time(NULL));
@@ -41,10 +43,6 @@ int main() {
 	cannonballMesh->SetUpVao();
 	TTN_Mesh::smptr planeMesh = TTN_ObjLoader::LoadFromFile("plane.obj"); //plane mesh
 	planeMesh->SetUpVao();
-	TTN_Mesh::smptr cubeMesh = TTN_ObjLoader::LoadFromFile("wall.obj"); // cube mesh for walls
-	cubeMesh->SetUpVao();
-	TTN_Mesh::smptr expolsionMesh = TTN_ObjLoader::LoadFromFile("expolsion.obj"); //mesh for the 2D expolsion effect
-	expolsionMesh->SetUpVao();
 
 	//score meshes
 	TTN_Mesh::smptr scoreMesh[10];
@@ -60,15 +58,7 @@ int main() {
 	TTN_Texture::stptr blueTankText = TTN_Texture::Create();
 	blueTankText->LoadFromFile("blue_tank.png"); //blue tank and cannonball
 	TTN_Texture::stptr backgroundText = TTN_Texture::Create();
-	backgroundText->LoadFromFile("background.png"); //background
-	TTN_Texture::stptr wallText = TTN_Texture::Create();
-	wallText->LoadFromFile("wall.png"); //wall 
-	TTN_Texture::stptr redScoreText = TTN_Texture::Create();
-	redScoreText->LoadFromFile("score_red.png"); //texture for the score meshes for the red player
-	TTN_Texture::stptr blueScoreText = TTN_Texture::Create();
-	blueScoreText->LoadFromFile("score_blue.png"); //texture for the score meshes for the blue player
-	TTN_Texture::stptr expolsionText = TTN_Texture::Create();
-	expolsionText->LoadFromFile("expolsion.png"); //texture for the expolsions when a tank is hit
+	backgroundText->LoadFromFile("background.png");
 
 
 	//Create our materials
@@ -78,24 +68,11 @@ int main() {
 	blueTankMat->SetShininess(64.0f);
 	TTN_Material::smatptr backgroundMat = TTN_Material::Create(); //background
 	backgroundMat->SetShininess(128.0f);
-	TTN_Material::smatptr wallMat = TTN_Material::Create(); //walls
-	wallMat->SetShininess(128.0f);
-	TTN_Material::smatptr redScoreMat = TTN_Material::Create(); //red's score
-	redScoreMat->SetShininess(128.0f);
-	TTN_Material::smatptr blueScoreMat = TTN_Material::Create(); //blue's score
-	blueScoreMat->SetShininess(128.0f);
-	TTN_Material::smatptr expolsionMat = TTN_Material::Create(); //expolsion effect
-	expolsionMat->SetShininess(2.0f);
-
 	
 	//Link our textures and materials together so we can link them to the mesh renderer components later
 	redTankMat->SetAlbedo(redTankText);
 	blueTankMat->SetAlbedo(blueTankText);
 	backgroundMat->SetAlbedo(backgroundText);
-	wallMat->SetAlbedo(wallText);
-	redScoreMat->SetAlbedo(redScoreText);
-	blueScoreMat->SetAlbedo(blueScoreText);
-	expolsionMat->SetAlbedo(expolsionText);
 
 	//Create a new scene
 	TTN_Scene tanksScene = TTN_Scene(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f);
@@ -374,7 +351,7 @@ int main() {
 		tanksScene.Attach<TTN_Transform>(redBullet);
 		auto& redTransB = tanksScene.Get<TTN_Transform>(redBullet);
 		redTransB.SetPos(glm::vec3(100.f, 100.f, -1.0f));
-		redTransB.SetScale(glm::vec3(0.1f / 3.0f));
+		redTransB.SetScale(glm::vec3(0.1f));
 		redTransB.RotateFixed(glm::vec3(270.0f, 0.0f, 90.0f));
 
 		//physics body for bullet
@@ -397,7 +374,7 @@ int main() {
 		tanksScene.Attach<TTN_Transform>(blueBullet);
 		auto& blueTransB = tanksScene.Get<TTN_Transform>(blueBullet);
 		blueTransB.SetPos(glm::vec3(-100.f, 100.f, -1.0f));
-		blueTransB.SetScale(glm::vec3(0.1f / 3.0f));
+		blueTransB.SetScale(glm::vec3(0.1f));
 		blueTransB.RotateFixed(glm::vec3(270.0f, 0.0f, 90.0f));
 
 		//physics body for bullet
@@ -563,9 +540,7 @@ int main() {
 		auto& bluePhysBodBullet = tanksScene.Get<TTN_Physics>(blueBullet);
 
 		//keycode for red player to shoot a bullet
-		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::E) && (redPhysBodBullet.GetPosition() == glm::vec3(100.f, 100.f, -1.0f))) {
-			shakeDuration = 0.25f;
-
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::E) /*&& (redPhysBodBullet.GetPosition() == glm::vec3(100.f, 100.f, -1.0f))*/) {
 			auto& redTransB = tanksScene.Get<TTN_Transform>(redBullet);
 			auto& redTransP = tanksScene.Get<TTN_Transform>(redPlayer);
 
@@ -604,9 +579,7 @@ int main() {
 		auto& bluePhysBod = tanksScene.Get<TTN_Physics>(bluePlayer);
 
 		//blue player bullets
-		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::M) && (bluePhysBodBullet.GetPosition() == glm::vec3(-100.f, 100.f, -1.0f))) {
-			shakeDuration = 0.25f;
-
+		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::M) /*&& (bluePhysBodBullet.GetPosition() == glm::vec3(-100.f, 100.f, -1.0f))*/) {
 			auto& blueTransB = tanksScene.Get<TTN_Transform>(blueBullet);
 			auto& blueTransP = tanksScene.Get<TTN_Transform>(bluePlayer);
 
@@ -614,22 +587,28 @@ int main() {
 
 				blueTransB.SetPos(glm::vec3((bluePlayerDir.x) + (bluePhysBod.GetPosition().x + 0.1f),
 					(bluePlayerDir.y) + (bluePhysBod.GetPosition().y - 0.15f), -1.0f));
+				std::cout << /*glm::to_string */"HELPPPPP 1 " << std::endl;
+
 			}
 
 			else if (blueTransP.GetRotation().z >= 139 || blueTransP.GetRotation().z <= -139) {
 				blueTransB.SetPos(glm::vec3((bluePlayerDir.x) + (bluePhysBod.GetPosition().x - 0.15f),
 					(bluePlayerDir.y) + (bluePhysBod.GetPosition().y + 0.04f), -1.0f));
+				std::cout << /*glm::to_string */"HELPPPPP 2" << std::endl;
 
 			}
 
 			else if (blueTransP.GetRotation().z <= -50 && blueTransP.GetRotation().z >= -139) {
 				blueTransB.SetPos(glm::vec3((bluePlayerDir.x) + (bluePhysBod.GetPosition().x + 0.04f),
 					(bluePlayerDir.y) + (bluePhysBod.GetPosition().y + 0.15f), -1.0f));
+				std::cout << /*glm::to_string */"HELPPPPP 3 " << std::endl;
+
 			}
 
 			else {
 				blueTransB.SetPos(glm::vec3((bluePlayerDir.x) + (bluePhysBod.GetPosition().x + 0.05f),
 					(bluePlayerDir.y) + (bluePhysBod.GetPosition().y + 0.05f), -1.0f));
+				std::cout << /*glm::to_string */"HELPPPPP 4" << std::endl;
 			}
 
 			bluePhysBodBullet.SetPos(blueTransB.GetPos());
@@ -795,14 +774,30 @@ int main() {
 		}
 
 
+		//allow the player to move forwards and backwards
+		if (!TTN_Application::TTN_Input::GetKey(TTN_KeyCode::LeftArrow) && !TTN_Application::TTN_Input::GetKey(TTN_KeyCode::RightArrow)) {
+			//if the player isn't rotating check if they're trying to move forwards or backwards
+			if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::UpArrow)) {
+				//if the player is pressing the up arrow, move them forwards
+				bluePhysBod.SetVelocity(glm::vec3(glm::normalize(bluePlayerDir).x * playerSpeed * dt, glm::normalize(bluePlayerDir).y * playerSpeed * dt, 0.0f));
+			}
+			if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::DownArrow)) {
+				//if they are pressing the down arrow move them backwards
+				bluePhysBod.SetVelocity(-1.0f * glm::vec3(glm::normalize(bluePlayerDir).x * playerSpeed * dt, glm::normalize(bluePlayerDir).y * playerSpeed * dt, 0.0f));
+			}
+		}
+	
 
-		/// Check if game is over, and reset if so /// 
-		if (scoreRed > 9 || scoreBlue > 9) {
-			//reset both scores
-			scoreRed = 0;
-			scoreBlue = 0;
-			tanksScene.Get<TTN_Renderer>(redScoreEntity).SetMesh(scoreMesh[0]);
-			tanksScene.Get<TTN_Renderer>(blueScoreEntity).SetMesh(scoreMesh[0]);
+		/// WALL COLLISIONS /////
+		//if the bullet collides with something it will bounce and increase the counter (this should be used for walls physics body)
+		if (TTN_Physics::Inter(redPhysBodBullet, bluePhysBod)) {
+			bounceCountR++;
+			//std::cout << bounceCountR << std::endl;
+		}
+		if (TTN_Physics::Inter(bluePhysBodBullet, bluePhysBod)) {
+			bounceCountB++;
+			//std::cout << bounceCountR << std::endl;
+		}
 
 			//reset red's position
 			redPhysBod.SetPos(glm::vec3(4.5f, 0.0f, -1.0f));
