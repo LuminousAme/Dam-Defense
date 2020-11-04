@@ -236,7 +236,7 @@ namespace Titan {
 	void TTN_Physics::SetIsStaticBody(bool isStatic)
 	{
 		m_IsStaticBody = isStatic;
-		if (isStatic) m_ShouldBounce = false;
+		m_ShouldBounce = (!m_IsStaticBody);
 	}
 
 	//sets the velocity of the physics body
