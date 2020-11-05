@@ -81,7 +81,7 @@ namespace Titan {
 		Get<TTN_Camera>(m_Cam).SetPosition(Get<TTN_Transform>(m_Cam).GetPos());
 		//save the view and projection matrix
 		vp = Get<TTN_Camera>(m_Cam).GetProj();
-		glm::mat4 viewMat = glm::inverse(Get<TTN_Transform>(m_Cam).GetMatrix());
+		glm::mat4 viewMat = glm::inverse(Get<TTN_Transform>(m_Cam).GetGlobal());
 		vp *= viewMat;
 
 
@@ -142,7 +142,7 @@ namespace Titan {
 			shader->UnBind();
 
 			//and finsih by rendering the mesh
-			renderer.Render(Get<TTN_Transform>(entity).GetMatrix(), vp);
+			renderer.Render(Get<TTN_Transform>(entity).GetGlobal(), vp);
 		}
 
 		//now that all the opaque objects have been rendered, let's render the physics boxes

@@ -12,7 +12,7 @@ using namespace Titan;
 int main() {
 	Logger::Init();
 	TTN_Application::Init("Dam Defense", 800, 800);
-	TTN_Physics::SetUpPhysicsBoxRendering(); 
+	//TTN_Physics::SetUpPhysicsBoxRendering(); 
 
 	//create a shader program object
 	TTN_Shader::sshptr shaderProgam = TTN_Shader::Create();
@@ -104,8 +104,8 @@ int main() {
 		//setup a transform for the first tree
 		TTN_Transform swordTrans = TTN_Transform();
 		swordTrans.SetPos(glm::vec3(0.0f, 0.0f, 2.0f));
-		swordTrans.SetScale(glm::vec3(1.f, 1.f, 1.f));
-		swordTrans.RotateFixed(glm::vec3(270.0f, 0.f, 90.0f));
+		swordTrans.SetScale(glm::vec3(15.f, 15.f, 15.f));
+		swordTrans.RotateFixed(glm::vec3(0.0f, 0.f, 90.0f));
 		//attach that transform to the tree entity
 		testScene.AttachCopy<TTN_Transform>(sword, swordTrans);
 	}
@@ -175,7 +175,7 @@ int main() {
 		auto& boatTrans = testScene.Get<TTN_Transform>(boat);
 		boatTrans.SetPos(glm::vec3(0.0f, 0.0f, 5.0f));
 		boatTrans.RotateFixed(glm::vec3(0.0f, 270.0f, 0.0f));
-		boatTrans.SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
+		boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
 
 		//TTN_Physics pbody = TTN_Physics(glm::vec3(-1.0f, -4.0f, 4.f), glm::vec3(1.0f, -2.0f, 6.f));
 		//TTN_Physics pbody = TTN_Physics(glm::vec3(boatTrans.GetPos().x , boatTrans.GetPos().y , boatTrans.GetPos().z));
@@ -199,6 +199,8 @@ int main() {
 
 	glm::vec3 velo = glm::vec3(0.0f);
 
+	//sets the boat at the sword's parent
+	testScene.Get<TTN_Transform>(sword).SetParent(&testScene.Get<TTN_Transform>(boat));
 
 	while (!TTN_Application::GetIsClosing()) {
 		//get the change in time for the frame
@@ -208,12 +210,6 @@ int main() {
 
 		//move the boat 
 		auto& boatTrans = testScene.Get<TTN_Transform>(boat);
-
-		//boatTrans.SetPos(glm::vec3(boatTrans.GetPos().x + speed * dt, boatTrans.GetPos().y, boatTrans.GetPos().z ));
-		boatTrans.RotateFixed(glm::vec3(0, 1.5f * speed, 0));
-		//flip the speed if it gets to a certain point
-	//	if (boatTrans.GetPos().x < -5.0f || boatTrans.GetPos().x > 2.0f)
-		//	speed *= -1; 
 
 		
 		//rotate the second tree 
