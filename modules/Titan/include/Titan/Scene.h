@@ -55,9 +55,33 @@ namespace Titan {
 		template<typename T>
 		void Remove(entt::entity entity);
 
-		//updates all the entities in the scene
-		void Update(float deltaTime);
+		//sets the registry
+		void SetScene(entt::registry* reg);
+		//gets the registry
+		entt::registry* GetScene() { return m_Registry; }
+
+		//deletes and clears the scene
+		void Unload();
+		
 #pragma endregion ECS_functions_dec
+
+		//Derivable functions 
+
+		//updates all the entities in the scene
+		virtual void Update(float deltaTime);
+
+		//input checks
+		//keyboard
+		virtual void KeyDownChecks() {}
+		virtual void KeyChecks() {}
+		virtual void KeyUpChecks() {}
+		//mouse
+		virtual void MouseButtonDownChecks() {}
+		virtual void MouseButtonChecks() {}
+		virtual void MouseButtonUpChecks() {}
+
+		//init
+		virtual void InitScene() {} 
 
 #pragma region Graphics_functions_dec
 		//renders all the entities with meshes and transforms in the scene 

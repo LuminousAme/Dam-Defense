@@ -12,7 +12,7 @@ namespace Titan {
 	GLFWwindow* TTN_Application::m_window = nullptr;
 	float TTN_Application::m_dt = 0.0f;
 	float TTN_Application::m_previousFrameTime = 0.0f;
-	std::vector<TTN_Scene> TTN_Application::scenes = std::vector<TTN_Scene>();
+	std::vector<TTN_Scene*> TTN_Application::scenes = std::vector<TTN_Scene*>();
 	std::unordered_map<TTN_KeyCode, bool> TTN_Application::TTN_Input::KeyWasPressedMap;
 	std::unordered_map<TTN_MouseButton, bool> TTN_Application::TTN_Input::MouseWasPressedMap;
 	glm::vec2 TTN_Application::TTN_Input::mousePos = glm::vec2(0.0f);
@@ -113,10 +113,18 @@ namespace Titan {
 		//go through each scene 
 		for (int i = 0; i < TTN_Application::scenes.size(); i++) {
 			//and check if they should be rendered
-			if (TTN_Application::scenes[i].GetShouldRender()) {
-				//if they should, then update and render them 
-				TTN_Application::scenes[i].Update(m_dt);
-				TTN_Application::scenes[i].Render();
+			if (TTN_Application::scenes[i]->GetShouldRender()) {
+				//if they should, then check input, update, and render them 
+				TTN_Application::scenes[i]->KeyDownChecks();
+				TTN_Application::scenes[i]->KeyChecks();
+				TTN_Application::scenes[i]->KeyUpChecks();
+
+				TTN_Application::scenes[i]->MouseButtonDownChecks();
+				TTN_Application::scenes[i]->MouseButtonChecks();
+				TTN_Application::scenes[i]->MouseButtonUpChecks();
+
+				TTN_Application::scenes[i]->Update(m_dt);
+				TTN_Application::scenes[i]->Render();
 			}
 		}
 

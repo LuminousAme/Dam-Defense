@@ -45,6 +45,21 @@ namespace Titan {
 
 	}
 
+	//sets the underlying entt registry of the scene
+	void TTN_Scene::SetScene(entt::registry* reg)
+	{
+		m_Registry = reg;
+	}
+
+	//unloads the scene, deleting the registry
+	void TTN_Scene::Unload()
+	{
+		if (m_Registry != nullptr) {
+			delete m_Registry;
+			m_Registry = nullptr;
+		}
+	}
+
 	void TTN_Scene::Update(float deltaTime)
 	{
 		//run through all of the physicsbody in the scene
