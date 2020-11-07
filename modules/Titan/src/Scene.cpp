@@ -45,6 +45,21 @@ namespace Titan {
 
 	}
 
+	//sets the underlying entt registry of the scene
+	void TTN_Scene::SetScene(entt::registry* reg)
+	{
+		m_Registry = reg;
+	}
+
+	//unloads the scene, deleting the registry
+	void TTN_Scene::Unload()
+	{
+		if (m_Registry != nullptr) {
+			delete m_Registry;
+			m_Registry = nullptr;
+		}
+	}
+
 	void TTN_Scene::Update(float deltaTime)
 	{
 		//run through all of the physicsbody in the scene
@@ -81,7 +96,7 @@ namespace Titan {
 		Get<TTN_Camera>(m_Cam).SetPosition(Get<TTN_Transform>(m_Cam).GetPos());
 		//save the view and projection matrix
 		vp = Get<TTN_Camera>(m_Cam).GetProj();
-		glm::mat4 viewMat = glm::inverse(Get<TTN_Transform>(m_Cam).GetMatrix());
+		glm::mat4 viewMat = glm::inverse(Get<TTN_Transform>(m_Cam).GetGlobal());
 		vp *= viewMat;
 
 
@@ -142,7 +157,7 @@ namespace Titan {
 			shader->UnBind();
 
 			//and finsih by rendering the mesh
-			renderer.Render(Get<TTN_Transform>(entity).GetMatrix(), vp);
+			renderer.Render(Get<TTN_Transform>(entity).GetGlobal(), vp);
 		}
 
 		//now that all the opaque objects have been rendered, let's render the physics boxes

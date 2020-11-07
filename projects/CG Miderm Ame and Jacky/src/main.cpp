@@ -97,9 +97,9 @@ int main() {
 		camTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 180.0f));
 
 		//setup an orthographic projection for the camera
+		//tanksScene.Get<TTN_Camera>(camera).CalcOrtho(-1920/200, 1920/200, -1080/200, 1080/200, 0.01, 1000);
 		tanksScene.Get<TTN_Camera>(camera).CalcPerspective(80.0f, 1920.0f/1080.0f, 0.01, 1000.0f);
-		//tanksScene.Get<TTN_Camera>(camera).CalcPerspective(90.0f, 1.0f, 0.01f, 100.f);
-		//setup the view for the camera
+		//setup the view for the camera 
 		tanksScene.Get<TTN_Camera>(camera).View();
 	}
 
@@ -113,7 +113,7 @@ int main() {
 
 		//set up a trasnform for the light
 		TTN_Transform lightTrans = TTN_Transform();
-		lightTrans.SetPos(glm::vec3(0.0f, 0.0f, -4.0f));
+		lightTrans.SetPos(glm::vec3(0.0f, 2.0f, -2.0f));
 		//attach that transform to the light entity
 		tanksScene.AttachCopy<TTN_Transform>(light, lightTrans);
 

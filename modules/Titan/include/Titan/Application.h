@@ -181,7 +181,7 @@ namespace Titan {
 
 	public:
 		//vector for all the scenes in the application
-		static std::vector<TTN_Scene> scenes;
+		static std::vector<TTN_Scene*> scenes;
 		static GLFWwindow* m_window;
 
 	protected:

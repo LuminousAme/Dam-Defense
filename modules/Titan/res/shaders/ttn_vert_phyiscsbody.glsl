@@ -14,14 +14,18 @@ layout(location = 3) out vec3 outColor;
 
 //model, view, projection matrix
 uniform mat4 MVP;
+//model matrix only
+uniform mat4 Model; 
+//normal matrix
+uniform mat3 NormalMat;
 
 void main() {
 	//calculate the position
 	vec4 newPos = MVP * vec4(inPos, 1.0);
 
 	//pass data onto the frag shader
-	outPos = newPos.xyz;
-	outNormal = inNormal;
+	outPos = (Model * vec4(inPos, 1.0)).xyz;
+	outNormal = NormalMat * inNormal;
 	outUV = inUV;
 	outColor = vec3(1, 1, 1);
 
