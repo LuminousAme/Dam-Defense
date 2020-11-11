@@ -62,6 +62,7 @@ namespace Titan {
 
 	void TTN_Scene::Update(float deltaTime)
 	{
+			
 		//run through all of the physicsbody in the scene
 		auto physicsBodyView = m_Registry->view<TTN_Physics>();
 		for (auto entity : physicsBodyView) {
