@@ -111,6 +111,11 @@ namespace Titan {
 		//run through all of the physicsbody in the scene
 		auto physicsBodyView = m_Registry->view<TTN_Physics>();
 		for (auto entity : physicsBodyView) {
+			//if the physics body isn't in the world, add it
+			if (!Get<TTN_Physics>(entity).GetIsInWorld()) {
+				m_physicsWorld->addRigidBody(Get<TTN_Physics>(entity).GetRigidBody());
+				Get<TTN_Physics>(entity).SetIsInWorld(true);
+			}
 			//call the physics body's update
 			Get<TTN_Physics>(entity).Update(deltaTime);
 		}
