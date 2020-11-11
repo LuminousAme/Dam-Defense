@@ -23,9 +23,6 @@ namespace Titan {
 
 		//set gravity to default none
 		m_physicsWorld->setGravity(btVector3(0.0f, 0.0f, 0.0f));
-
-		std::map<std::pair<TTN_Physics*, TTN_Physics*>, TTN_Collision::scolptr> m_CollisionMap 
-							= std::map<std::pair<TTN_Physics*, TTN_Physics*>, TTN_Collision::scolptr>();
 	}
 
 	TTN_Scene::TTN_Scene(glm::vec3 AmbientLightingColor, float AmbientLightingStrength)
@@ -45,13 +42,10 @@ namespace Titan {
 
 		//set gravity to default none
 		m_physicsWorld->setGravity(btVector3(0.0f, 0.0f, 0.0f));
-
-		std::map<std::pair<TTN_Physics*, TTN_Physics*>, TTN_Collision::scolptr> m_CollisionMap
-			= std::map<std::pair<TTN_Physics*, TTN_Physics*>, TTN_Collision::scolptr>();
 	}
 
 	TTN_Scene::~TTN_Scene() {
-
+		Unload();
 	}
 
 	entt::entity TTN_Scene::CreateEntity()
@@ -66,7 +60,6 @@ namespace Titan {
 	void TTN_Scene::DeleteEntity(entt::entity entity)
 	{
 		m_Registry->destroy(entity);
-
 	}
 
 	//sets the underlying entt registry of the scene
@@ -125,17 +118,10 @@ namespace Titan {
 		//run through all of the entities with both a physics body and a transform in the scene
 		auto transAndPhysicsView = m_Registry->view<TTN_Transform, TTN_Physics>();
 		for (auto entity : transAndPhysicsView) {
-			if (!Get<TTN_Physics>(entity).GetIsStaticBody()) {
+			if (!Get<TTN_Physics>(entity).GetIsStatic()) {
 				//copy the position of the physics body into the position of the transform
-				Get<TTN_Transform>(entity).SetPos(Get<TTN_Physics>(entity).GetPosition());
+				Get<TTN_Transform>(entity).SetPos(Get<TTN_Physics>(entity).GetTrans().GetPos());
 			}
-		}
-
-		//run through all the colisions objects in the scene and run their checks
-		for (auto it = m_CollisionMap.begin(); it != m_CollisionMap.end(); it++)
-		{
-			//have it check it's collisions
-			it->second->CheckCollision();
 		}
 	}
 
@@ -213,13 +199,14 @@ namespace Titan {
 			renderer.Render(Get<TTN_Transform>(entity).GetGlobal(), vp);
 		}
 
+		/*
 		//now that all the opaque objects have been rendered, let's render the physics boxes
 		if (TTN_Physics::GetRenderingIsSetUp()) {
 			auto physicsBodyView = m_Registry->view<TTN_Physics>(); 
 			for (auto entity:physicsBodyView) {
 				Get<TTN_Physics>(entity).Render(vp);
 			}
-		}
+		}*/
 			
 	}
 
@@ -269,92 +256,6 @@ namespace Titan {
 	glm::vec3 TTN_Scene::GetGravity()
 	{
 		btVector3 grav = m_physicsWorld->getGravity();
-		return glm::vec3((float)grav.x, (float)grav.y, (float)grav.z);
+		return glm::vec3((float)grav.getX(), (float)grav.getY(), (float)grav.getZ());
 	}
-
-	void TTN_Scene::SetUpCollisions(entt::entity entity)
-	{
-		//create a few of all the entities in the scene with physics bodies
-		auto physicsBodyView = m_Registry->view<TTN_Physics>();
-
-		//go through each entity in that view
-		for (auto ent : physicsBodyView)
-		{
-			//if the current object in the view is the one first we're setting up with, skip it, don't need it colliding with itself
-			if (ent == entity) {
-				continue;
-			}
-			//otherwise it must be a different entity, so check if a collision should be setup
-			else {
-				//get references to both entities physics bodies 
-				TTN_Physics* b1 = &Get<TTN_Physics>(entity);
-				TTN_Physics* b2 = &Get<TTN_Physics>(ent);
-				
-				//if both bodies are static, skip it, no need to check collisions between 2 objects that don't move
-				if (b1->GetIsStaticBody() && b2->GetIsStaticBody()) {
-					continue;
-				}
-				//otherwise atleast one has to be dynamic, so set up a collison object for them
-				else {
-					//creat the collision pointer
-					TTN_Collision::scolptr newCollision = TTN_Collision::Create();
-					//set it's physics bodies
-					newCollision->SetBody1(b1);
-					newCollision->SetBody2(b2);
-					//and add it to the map
-					m_CollisionMap.emplace(std::pair<TTN_Physics*, TTN_Physics*>(b1, b2), newCollision);
-				}
-			}
-		}
-	}
-
-	//removes all collisions with a given entity, to be called when an entity is being deleted
-	void TTN_Scene::CleanUpCollisions(entt::entity entity)
-	{
-		//iterate through all the collisions
-		//create a few of all the entities in the scene with physics bodies
-		auto physicsBodyView = m_Registry->view<TTN_Physics>();
-
-		//go through each entity in that view
-		for (auto ent : physicsBodyView)
-		{
-			//if the current object in the view is the one first we're setting up with, skip it, it doesn't have a collision with itself anyways
-			if (ent == entity) {
-				continue;
-			}
-			//otherwise it must be a different entity, so check if there's a collision that needs to be deleted
-			else {
-				//check both posible key permutations
-				auto it = m_CollisionMap.find(std::pair<TTN_Physics*, TTN_Physics*>(&Get<TTN_Physics>(entity), &Get<TTN_Physics>(ent)));
-				auto it2 = m_CollisionMap.find(std::pair<TTN_Physics*, TTN_Physics*>(&Get<TTN_Physics>(ent), &Get<TTN_Physics>(entity)));
-				//if either has a collision, delete it
-				if (it != m_CollisionMap.end()) {
-					m_CollisionMap.erase(it);
-				}
-				if (it2 != m_CollisionMap.end()) {
-					m_CollisionMap.erase(it2);
-				}
-			}
-		}
-	}
-
-	//finds a collision pointer based on the objects that could have collided, if it finds one it returns it, otherwise it returns a nullptr
-	TTN_Collision::scolptr TTN_Scene::FindCollisionPointer(TTN_Physics* b1, TTN_Physics* b2)
-	{
-		//search the map
-		if(m_CollisionMap.find(std::pair<TTN_Physics*, TTN_Physics*>(b1, b2)) != m_CollisionMap.end()) {
-			//if it finds one, return it
-			return m_CollisionMap.at(std::pair<TTN_Physics*, TTN_Physics*>(b1, b2));
-		}
-		//if can't be found then try searching the map with the pointers reverse (it is order senestive)
-		else if (m_CollisionMap.find(std::pair<TTN_Physics*, TTN_Physics*>(b2, b1)) != m_CollisionMap.end()) {
-			//if it finds one return it
-				//if it finds one, return it
-			return m_CollisionMap.at(std::pair<TTN_Physics*, TTN_Physics*>(b2, b1));
-		}
-
-		//otherwise return a nullptr
-		return nullptr;
-	}
-
 }

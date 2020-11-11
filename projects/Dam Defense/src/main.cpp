@@ -14,7 +14,7 @@ using namespace Titan;
 int main() {
 	Logger::Init();
 	TTN_Application::Init("Dam Defense", 800, 800);
-	TTN_Physics::SetUpPhysicsBoxRendering(); 
+	//TTN_Physics::SetUpPhysicsBoxRendering(); 
 
 	//create a new scene
 	TTN_Scene* demo = new DemoScene;

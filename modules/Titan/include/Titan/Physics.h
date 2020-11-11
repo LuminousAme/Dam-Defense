@@ -23,7 +23,7 @@ namespace Titan {
 		//default constructor
 		TTN_Physics();
 
-		//aabb
+		//contrustctor with data
 		TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, bool dynamic = true, float mass = 1.0f);
 
 		~TTN_Physics();
@@ -33,7 +33,31 @@ namespace Titan {
 		TTN_Physics(TTN_Physics&&) = default;
 		TTN_Physics& operator=(TTN_Physics&) = default;
 
+		//update function, keeps data up to date, call once a frame
 		void Update(float deltaTime);
+
+		//getters
+		TTN_Transform GetTrans() { return m_trans; }
+		bool GetIsStatic() { return m_IsStaticBody; }
+		float GetMass() { return m_Mass; }
+		btRigidBody* GetRigidBody() { return m_body; }
+		bool GetIsInWorld() { return m_InWorld; }
+		glm::vec3 GetLinearVelocity();
+		glm::vec3 GetAngularVelocity();
+		bool GetHasGravity() { return m_hasGravity; }
+
+		//setters
+		void SetIsStatic(bool isStatic);
+		void SetIsInWorld(bool inWorld);
+		void SetMass(float mass);
+		void SetLinearVelocity(glm::vec3 velocity);
+		void SetAngularVelocity(glm::vec3 velocity);
+		void SetHasGravity(bool hasGrav);
+
+		//forces
+		void AddForce(glm::vec3 force);
+		void AddImpulse(glm::vec3 impulseForce);
+		void ClearForces();
 
 	protected:
 		TTN_Transform m_trans; //transform with the position, rotation, and scale of the physics body
@@ -42,6 +66,7 @@ namespace Titan {
 
 		//bullet data
 		float m_Mass; //mass of the object
+		bool m_hasGravity; //is the object affected by gravity
 		btCollisionShape* m_colShape; //the shape of it's collider, includes scale
 		btTransform m_bulletTrans;  //it's internal transform, does not include scale
 		btDefaultMotionState* m_MotionState; //motion state for it, need to extract the transform out of this every update if the body is dynamic

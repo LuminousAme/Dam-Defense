@@ -117,10 +117,9 @@ void DemoScene::InitScene()
 		//TTN_Physics pbody = TTN_Physics(glm::vec3(treeTrans.GetPos().x , treeTrans.GetPos().y , treeTrans.GetPos().z ));
 
 		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
-		pbody.SetIsStaticBody(true);
+		pbody.SetIsStatic(true);
 
 		AttachCopy<TTN_Physics>(tree1, pbody);
-		SetUpCollisions(tree1);
 	}
 
 	//entity for the second tree in testScene
@@ -170,7 +169,6 @@ void DemoScene::InitScene()
 		//TTN_Physics pbody = TTN_Physics(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
 
 		AttachCopy<TTN_Physics>(boat, pbody);
-		SetUpCollisions(boat);
 	}
 
 	speed = 1.0f;
@@ -197,30 +195,6 @@ void DemoScene::Update(float deltaTime)
 	auto& pboat = Get<TTN_Physics>(boat);
 	auto& ptree = Get<TTN_Physics>(tree1);
 
-	//get a pointer to the collosion object between the tree and boat
-	TTN_Collision::scolptr col = FindCollisionPointer(&ptree, &pboat);
-	if (col == nullptr)
-		printf("failed\n");
-
-	else if (col->GetHasCollided()) {
-
-		std::cout << "Touching " << (pboat.GetMin().x <= ptree.GetMax().x && pboat.GetMax().x >= ptree.GetMin().x) <<
-			(pboat.GetMin().y <= ptree.GetMax().y && pboat.GetMax().y >= ptree.GetMin().y) <<
-			(pboat.GetMin().z <= ptree.GetMax().z && pboat.GetMax().z >= ptree.GetMin().z) << std::endl;
-
-		//speed = 0;
-
-	}
-
-	else
-	{
-		std::cout << "Not Touching " << (pboat.GetMin().x <= ptree.GetMax().x && pboat.GetMax().x >= ptree.GetMin().x) <<
-			(pboat.GetMin().y <= ptree.GetMax().y && pboat.GetMax().y >= ptree.GetMin().y) <<
-			(pboat.GetMin().z <= ptree.GetMax().z && pboat.GetMax().z >= ptree.GetMin().z) << std::endl;
-
-	}
-
-
 	//Please don't forget to call the base scene's update at the end of the child class' update
 	TTN_Scene::Update(deltaTime);
 }
@@ -242,34 +216,36 @@ void DemoScene::KeyChecks()
 	auto& pboat = Get<TTN_Physics>(boat);
 	auto& ptree = Get<TTN_Physics>(tree1);
 
+	velo = glm::vec3(0.0f);
+
 	//control the boat through keyboard keys
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
 		velo += glm::vec3(0.0f, 1.0f, 0.0f);
 		if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
 			velo = glm::normalize(velo);
 		}
-		pboat.SetVelocity(velo * speed);
+		pboat.SetLinearVelocity(velo);
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
 		velo += glm::vec3(0.0f, -1.0f, 0.0f);
 		if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
 			velo = glm::normalize(velo);
 		}
-		pboat.SetVelocity(velo * speed);
+		pboat.SetLinearVelocity(velo);
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
 		velo += glm::vec3(-1.0f, 0.0f, 0.0f);
 		if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
 			velo = glm::normalize(velo);
 		}
-		pboat.SetVelocity(velo * speed);
+		pboat.SetLinearVelocity(velo);
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
 		velo += glm::vec3(1.0f, 0.0f, 0.0f);
 		if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
 			velo = glm::normalize(velo);
 		}
-		pboat.SetVelocity(velo * speed);
+		pboat.SetLinearVelocity(velo);
 	}
 }
 

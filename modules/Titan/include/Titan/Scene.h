@@ -119,15 +119,6 @@ namespace Titan {
 		//gets the gravity
 		glm::vec3 GetGravity();
 
-
-		//sets up collisions
-		void SetUpCollisions(entt::entity entity);
-		//removes all collisions with a given entity, to be called when an entity is being deleted
-		void CleanUpCollisions(entt::entity entity);
-		//finds a collision based on it's underlying physics bodies
-		TTN_Collision::scolptr FindCollisionPointer(TTN_Physics* b1, TTN_Physics* b2);
-
-
 	private:
 		//context that contains all our entities, their ids, and components 
 		entt::registry* m_Registry = nullptr;
@@ -153,9 +144,6 @@ namespace Titan {
 		btSequentialImpulseConstraintSolver* solver;
 		//physics world
 		btDiscreteDynamicsWorld* m_physicsWorld;
-
-		//map of all the collisions
-		std::map<std::pair<TTN_Physics*, TTN_Physics*>, TTN_Collision::scolptr> m_CollisionMap;
 	};
 
 #pragma region ECS_functions_def

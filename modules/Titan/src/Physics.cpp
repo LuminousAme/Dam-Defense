@@ -48,12 +48,15 @@ namespace Titan {
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(m_Mass, m_MotionState, m_colShape, localIntertia);
 		m_body = new btRigidBody(rbInfo);
 
+		m_hasGravity = true;
+
 		m_InWorld = false;
 	}
 
 	//constructor that makes a physics body out of a position, rotation, and scale
 	Titan::TTN_Physics::TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, bool dynamic, float mass)
 	{
+		//set up titan transform
 		m_trans = TTN_Transform();
 		m_trans.SetPos(position);
 		m_trans.RotateFixed(rotation);
@@ -81,15 +84,13 @@ namespace Titan {
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(m_Mass, m_MotionState, m_colShape, localIntertia);
 		m_body = new btRigidBody(rbInfo);
 
+		m_hasGravity = true;
+
 		m_InWorld = false;
 	}
 
 	TTN_Physics::~TTN_Physics()
-	{
-		delete m_body;
-		delete m_MotionState;
-		delete m_colShape;
-	}
+	{}
 
 
 	//updates the position of the physics body based on the velocity and deltaTime
@@ -98,7 +99,7 @@ namespace Titan {
 		//updates the titan transform of the physics body
 
 		//fetch the bullet transform
-		if (m_body->getMotionState != nullptr) {
+		if (m_body->getMotionState() != nullptr) {
 			m_body->getMotionState()->getWorldTransform(m_bulletTrans);
 
 		}
@@ -112,5 +113,94 @@ namespace Titan {
 		//copy the rotation
 		btQuaternion rot = m_bulletTrans.getRotation();
 		m_trans.SetRotationQuat(glm::quat(rot.getW(), rot.getX(), rot.getY(), rot.getZ()));
+	}
+
+	//reads the velocity out from bullet
+	glm::vec3 TTN_Physics::GetLinearVelocity()
+	{
+		//get the linear velocity
+		btVector3 velo = m_body->getLinearVelocity();
+		//cast it to a glm vec3 and return it
+		return glm::vec3((float)velo.getX(), (float)velo.getY(), (float)velo.getZ());
+	}
+
+	//gets the angular velocity out of bullet
+	glm::vec3 TTN_Physics::GetAngularVelocity()
+	{
+		btVector3 velo = m_body->getAngularVelocity();
+		return glm::vec3((float)velo.getX(), (float)velo.getY(), (float)velo.getZ());
+	}
+
+	void TTN_Physics::SetIsStatic(bool isStatic)
+	{
+		m_IsStaticBody = isStatic;
+		if (m_IsStaticBody) {
+			SetMass(0.0f);
+		}
+		else if (!m_IsStaticBody && m_Mass == 0.0f) {
+			SetMass(1.0f);
+		}
+	}
+
+	//sets the flag for if it's in the physics world or not
+	void TTN_Physics::SetIsInWorld(bool inWorld)
+	{
+		m_InWorld = inWorld;
+	}
+
+	//sets the mass of the object
+	void TTN_Physics::SetMass(float mass)
+	{
+		//save the mass
+		m_Mass = mass;
+		//update it in bullet
+		//clear velocities
+		btVector3 linearVelo = m_body->getLinearVelocity();
+		btVector3 angularVelo = m_body->getAngularVelocity();
+		m_body->setLinearVelocity(btVector3(0,0,0));
+		m_body->setAngularVelocity(btVector3(0, 0, 0));
+		//update mass
+		m_body->setMassProps(m_Mass, btVector3(0,0,0));
+		//check if the body is still dynamic
+		if (m_Mass == 0.0f) {
+			//if it isn't mark it as static
+			m_IsStaticBody = true;
+		}
+		else {
+			//if it is, mark it as dynamic, and restore the velocities
+			m_IsStaticBody = false;
+			m_body->setLinearVelocity(linearVelo);
+			m_body->setAngularVelocity(angularVelo);
+		}
+	}
+
+	void TTN_Physics::SetLinearVelocity(glm::vec3 velocity)
+	{
+		m_body->setLinearVelocity(btVector3(velocity.x, velocity.y, velocity.z));
+	}
+
+	void TTN_Physics::SetAngularVelocity(glm::vec3 velocity)
+	{
+		m_body->setAngularVelocity(btVector3(velocity.x, velocity.y, velocity.z));
+	}
+
+	void TTN_Physics::SetHasGravity(bool hasGrav)
+	{
+		m_hasGravity = hasGrav;
+	}
+
+	void TTN_Physics::AddForce(glm::vec3 force)
+	{
+		m_body->applyCentralForce(btVector3(force.x, force.y, force.z));
+	}
+
+	void TTN_Physics::AddImpulse(glm::vec3 impulseForce)
+	{
+		m_body->applyCentralImpulse(btVector3(impulseForce.x, impulseForce.y, impulseForce.z));
+	}
+
+	void TTN_Physics::ClearForces()
+	{
+		m_body->clearForces();
 	}
 }
