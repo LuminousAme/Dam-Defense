@@ -12,6 +12,18 @@ namespace Titan {
 		m_AmbientColor = glm::vec3(1.0f);
 		m_AmbientStrength = 1.0f;
 
+		//setting up physics world
+		collisionConfig = new btDefaultCollisionConfiguration(); //default collision config
+		dispatcher = new btCollisionDispatcher(collisionConfig); //default collision dispatcher
+		overlappingPairCache = new btDbvtBroadphase();//basic board phase
+		solver = new btSequentialImpulseConstraintSolver;//default collision solver
+
+		//create the physics world
+		m_physicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfig);
+
+		//set gravity to default none
+		m_physicsWorld->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+
 		std::map<std::pair<TTN_Physics*, TTN_Physics*>, TTN_Collision::scolptr> m_CollisionMap 
 							= std::map<std::pair<TTN_Physics*, TTN_Physics*>, TTN_Collision::scolptr>();
 	}
@@ -21,6 +33,18 @@ namespace Titan {
 	{
 		m_ShouldRender = true;
 		m_Registry = new entt::registry();
+
+		//setting up physics world
+		collisionConfig = new btDefaultCollisionConfiguration(); //default collision config
+		dispatcher = new btCollisionDispatcher(collisionConfig); //default collision dispatcher
+		overlappingPairCache = new btDbvtBroadphase();//basic board phase
+		solver = new btSequentialImpulseConstraintSolver;//default collision solver
+
+		//create the physics world
+		m_physicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfig);
+
+		//set gravity to default none
+		m_physicsWorld->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 
 		std::map<std::pair<TTN_Physics*, TTN_Physics*>, TTN_Collision::scolptr> m_CollisionMap
 			= std::map<std::pair<TTN_Physics*, TTN_Physics*>, TTN_Collision::scolptr>();
@@ -51,9 +75,35 @@ namespace Titan {
 		m_Registry = reg;
 	}
 
-	//unloads the scene, deleting the registry
+	//unloads the scene, deleting the registry and physics world
 	void TTN_Scene::Unload()
-	{
+	{		
+		//delete all the physics world stuff
+		//delete the physics objects
+		for (auto i = m_physicsWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
+			//get the object and it's rigid body
+			btCollisionObject* PhyObject = m_physicsWorld->getCollisionObjectArray()[i];
+			btRigidBody* PhysRigidBod = btRigidBody::upcast(PhyObject);
+			//if it has a motion state, remove that
+			if (PhysRigidBod != nullptr && PhysRigidBod->getMotionState() != nullptr) {
+				delete PhysRigidBod->getMotionState();
+			}
+			//remove the object from the physics world
+			m_physicsWorld->removeCollisionObject(PhyObject);
+			//and delete it 
+			delete PhyObject;
+		}
+
+		//supposed to delete collision shapes acoording to quickstart guide but uses local variables that they don't define so idk what I'm supposed to do lol
+
+		//delete the physics world and it's attributes
+		delete m_physicsWorld;
+		delete solver;
+		delete overlappingPairCache;
+		delete dispatcher;
+		delete collisionConfig;
+
+		//delete registry
 		if (m_Registry != nullptr) {
 			delete m_Registry;
 			m_Registry = nullptr;
@@ -62,6 +112,9 @@ namespace Titan {
 
 	void TTN_Scene::Update(float deltaTime)
 	{
+		//call the step simulation for bullet
+		m_physicsWorld->stepSimulation(deltaTime);
+
 		//run through all of the physicsbody in the scene
 		auto physicsBodyView = m_Registry->view<TTN_Physics>();
 		for (auto entity : physicsBodyView) {
@@ -204,6 +257,19 @@ namespace Titan {
 	float TTN_Scene::GetSceneAmbientLightStrength()
 	{
 		return m_AmbientStrength;
+	}
+
+	//set the gravity for the physics world
+	void TTN_Scene::SetGravity(glm::vec3 gravity)
+	{
+		btVector3 grav = btVector3(gravity.x, gravity.y, gravity.z);
+		m_physicsWorld->setGravity(grav);
+	}
+
+	glm::vec3 TTN_Scene::GetGravity()
+	{
+		btVector3 grav = m_physicsWorld->getGravity();
+		return glm::vec3((float)grav.x, (float)grav.y, (float)grav.z);
 	}
 
 	void TTN_Scene::SetUpCollisions(entt::entity entity)

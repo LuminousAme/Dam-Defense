@@ -53,6 +53,14 @@ namespace Titan {
 		Recompute();
 	}
 
+	void TTN_Transform::SetRotationQuat(glm::quat rotationQuat)
+	{
+		//copy the rotation
+		m_rotation = rotationQuat;
+		//recompute the matrix represneting the overall transform
+		Recompute();
+	}
+
 	//sets the transform that acts as this object's parent
 	void TTN_Transform::SetParent(TTN_Transform* parent)
 	{

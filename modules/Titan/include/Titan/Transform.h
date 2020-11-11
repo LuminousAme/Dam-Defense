@@ -28,6 +28,8 @@ namespace Titan {
 		void SetPos(glm::vec3 pos);
 		//scale
 		void SetScale(glm::vec3 scale);
+		//rotation
+		void SetRotationQuat(glm::quat rotationQuat);
 		//parent
 		void SetParent(TTN_Transform* parent);
 
@@ -39,6 +41,7 @@ namespace Titan {
 		glm::vec3 GetScale();
 		//rotation
 		glm::vec3 GetRotation();
+		glm::quat GetRotQuat() { return m_rotation; }
 		//transform matrix 
 		glm::mat4 GetMatrix();
 		//global transform matrix

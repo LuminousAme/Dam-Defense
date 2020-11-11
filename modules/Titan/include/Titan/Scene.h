@@ -113,6 +113,13 @@ namespace Titan {
 		//gets the light entity
 		const entt::entity& GetLightEntity() { return m_Light; }
 
+		//bullet physics stuff
+		//set the gravity
+		void SetGravity(glm::vec3 gravity);
+		//gets the gravity
+		glm::vec3 GetGravity();
+
+
 		//sets up collisions
 		void SetUpCollisions(entt::entity entity);
 		//removes all collisions with a given entity, to be called when an entity is being deleted
@@ -138,6 +145,14 @@ namespace Titan {
 		glm::vec3 m_AmbientColor;
 		//the strenght of that ambient color
 		float m_AmbientStrength;
+
+		//physics world properties
+		btDefaultCollisionConfiguration* collisionConfig;
+		btCollisionDispatcher* dispatcher;
+		btBroadphaseInterface* overlappingPairCache;
+		btSequentialImpulseConstraintSolver* solver;
+		//physics world
+		btDiscreteDynamicsWorld* m_physicsWorld;
 
 		//map of all the collisions
 		std::map<std::pair<TTN_Physics*, TTN_Physics*>, TTN_Collision::scolptr> m_CollisionMap;
