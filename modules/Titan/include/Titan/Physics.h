@@ -12,6 +12,8 @@
 #include "GLM/glm.hpp"
 //import other required features
 #include <vector>
+//import the bullet physics engine
+#include <bullet/btBulletCollisionCommon.h>
 
 namespace Titan {
 	class TTN_Physics
