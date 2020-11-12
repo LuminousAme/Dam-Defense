@@ -316,10 +316,16 @@ namespace Titan {
 		m_hasGravity = true;
 
 		m_InWorld = false;
+
+		m_entity = static_cast<entt::entity>(-1);
+
+
+		m_body->setUserPointer(&m_entity);
+	
 	}
 
 	//constructor that makes a physics body out of a position, rotation, and scale
-	Titan::TTN_Physics::TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, bool dynamic, float mass)
+	Titan::TTN_Physics::TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, entt::entity entityNum, bool dynamic, float mass)
 	{
 		//set up titan transform
 		m_trans = TTN_Transform();
@@ -352,6 +358,10 @@ namespace Titan {
 		m_hasGravity = true;
 
 		m_InWorld = false;
+
+		m_entity = entityNum;
+
+		m_body->setUserPointer(static_cast<void*>(&m_entity));
 	}
 
 	TTN_Physics::~TTN_Physics()
@@ -468,8 +478,4 @@ namespace Titan {
 	{
 		m_body->clearForces();
 	}
-	
-	
-
-
 }

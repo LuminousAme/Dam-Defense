@@ -75,8 +75,13 @@ void DemoScene::InitScene()
 		camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+<<<<<<< HEAD
 	//	Get<TTN_Camera>(camera).CalcOrtho(-800.0f / 100.0f, 800.0f / 100.0f, -800.0f / 100.0f, 800.0f / 100.0f, 0.001f, 100.0f);
 		Get<TTN_Camera>(camera).CalcPerspective(90.0f, 1.0f, 0.01f, 100.f);
+=======
+		//Get<TTN_Camera>(camera).CalcOrtho(-800.0f / 100.0f, 800.0f / 100.0f, -800.0f / 100.0f, 800.0f / 100.0f, 0.001f, 100.0f);
+		Get<TTN_Camera>(camera).CalcPerspective(90.0f, 1.78f, 0.01f, 100.f);
+>>>>>>> Ame
 		Get<TTN_Camera>(camera).View();
 	}
 
@@ -135,11 +140,23 @@ void DemoScene::InitScene()
 		//attach that transform to the tree entity
 		AttachCopy<TTN_Transform>(tree1, treeTrans);
 
+<<<<<<< HEAD
 		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
+=======
+		//TTN_Physics pbody = TTN_Physics(glm::vec3(treeTrans.GetPos().x , treeTrans.GetPos().y , treeTrans.GetPos().z ));
+
+		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), tree1);
+>>>>>>> Ame
 		pbody.SetIsStatic(true);
 
 		AttachCopy<TTN_Physics>(tree1, pbody);
 
+<<<<<<< HEAD
+=======
+		//add a tag to the tree
+		TTN_Tag treeTag = TTN_Tag("Tree");
+		AttachCopy<TTN_Tag>(tree1, treeTag);
+>>>>>>> Ame
 	}
 
 	//entity for the second tree in testScene
@@ -187,34 +204,56 @@ void DemoScene::InitScene()
 		/*TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
 		AttachCopy<TTN_Physics>(boat, pbody);
 
+<<<<<<< HEAD
 		SetUpCollisions(boat);*/
+=======
+		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boat);
+>>>>>>> Ame
 
 		TTN_PhysicsB pbody = TTN_PhysicsB(boatTrans.GetPos(), m_world, m_PhysicsObjects);
 		AttachCopy<TTN_PhysicsB>(boat, pbody);
 
+<<<<<<< HEAD
+=======
+		AttachCopy<TTN_Physics>(boat, pbody);
+
+		//add a tag to the boat
+		TTN_Tag boatTag = TTN_Tag("Boat");
+		AttachCopy<TTN_Tag>(boat, boatTag);
+>>>>>>> Ame
 	}
 
 	speed = 1.0f;
 	velo = glm::vec3(0.0f);
 
 	//sets the boat at the sword's parent
+<<<<<<< HEAD
 	Get<TTN_Transform>(sword).SetParent(&Get<TTN_Transform>(boat));
 
+=======
+	Get<TTN_Transform>(sword).SetParent(&Get<TTN_Transform>(boat), &boat);
+>>>>>>> Ame
 }
 
 void DemoScene::Update(float deltaTime)
 {
+<<<<<<< HEAD
 	//move the boat 
 	auto& boatTrans = Get<TTN_Transform>(boat);
 	boatTrans.SetPos(glm::vec3(boatTrans.GetPos().x + deltaTime, boatTrans.GetPos().y, boatTrans.GetPos().z));
 	//flip the speed if it gets to a certain point
 	if (boatTrans.GetPos().y < -5.0f || boatTrans.GetPos().y > 2.0f)
 		speed *= -1;
+=======
+	//transform of the sword (for debugging the scenegraph breaking
+	auto& swordTrans = Get<TTN_Transform>(sword);
+>>>>>>> Ame
 
 	//rotate the second tree
 	auto& tree2Trans = Get<TTN_Transform>(tree2);
 	tree2Trans.RotateFixed(glm::vec3(0, 5.0f * deltaTime, 0));
 
+<<<<<<< HEAD
 	//tree and boat physics bodies
 
 	auto& pboat = Get<TTN_PhysicsB>(boat);
@@ -260,6 +299,70 @@ void DemoScene::Update(float deltaTime)
 	m_world->stepSimulation(1.f / 60.f, 10);
 	auto& pboat = Get<TTN_Physics>(boat);
 	auto& ptree = Get<TTN_Physics>(tree1);
+=======
+	//get the collisions from the base scene
+	std::vector<TTN_Collision::scolptr> collisionsThisFrame = TTN_Scene::GetCollisions();
+
+	//make a vector of entites that need to be deleted
+	std::vector<entt::entity> entitiesToDelete;
+
+	//iterate through the collisions
+	for (int i = 0; i < collisionsThisFrame.size(); i++) {
+		printf("processing collision %d\n", i);
+		//get both the rigidbodies and normals
+		const btRigidBody* b1 = collisionsThisFrame[i]->GetBody1();
+		const btRigidBody* b2 = collisionsThisFrame[i]->GetBody2();
+		glm::vec3 norm1 = collisionsThisFrame[i]->GetNormal1();
+		glm::vec3 norm2 = collisionsThisFrame[i]->GetNormal2();
+		//get the entity number from each body
+		entt::entity entity1Ptr = *static_cast<entt::entity*>(b1->getUserPointer());
+		entt::entity entity2Ptr = *static_cast<entt::entity*>(b2->getUserPointer());
+
+		//check if the entity b1 is attached to still exists
+		if (TTN_Scene::GetScene()->valid(entity1Ptr)) {
+			printf("processing object 1 of collision %d\n", i);
+			//if it, check if it is a boat
+			if (TTN_Scene::Has<TTN_Tag>(entity1Ptr) && TTN_Scene::Get<TTN_Tag>(entity1Ptr).getName() == "Boat") {
+				printf("object 1 of of collision %d is a boat\n", i);
+				//if it then have it bounce
+				//TTN_Scene::Get<TTN_Physics>(entity1Ptr).AddImpulse(norm1 * 5.0f);
+			}
+			//otherwise check if it's a tree
+			else if (TTN_Scene::Has<TTN_Tag>(entity1Ptr) && TTN_Scene::Get<TTN_Tag>(entity1Ptr).getName() == "Tree") {
+				//if it, then add it to the list of entities to be deleted
+				printf("object 1 of of collision %d is a tree\n", i);
+				bool shouldAdd = true;
+				for (int j = 0; j < entitiesToDelete.size(); j++)
+					if (entity1Ptr == entitiesToDelete[j]) shouldAdd = false;
+				if (shouldAdd) entitiesToDelete.push_back(entity1Ptr);
+			}
+		}
+		//check if the entity in b2 is attached to still exists
+		if (TTN_Scene::GetScene()->valid(entity2Ptr)) {
+			printf("processing object 2 of collision %d\n", i);
+			//if it, check if it is a boat
+			if (TTN_Scene::Has<TTN_Tag>(entity2Ptr) && TTN_Scene::Get<TTN_Tag>(entity2Ptr).getName() == "Boat") {
+				printf("object 2 of of collision %d is a boat\n", i);
+				//if it then have it bounce
+				//TTN_Scene::Get<TTN_Physics>(entity2Ptr).AddImpulse(norm2 * 5.0f);
+			}
+			//otherwise check if it's a tree
+			else if (TTN_Scene::Has<TTN_Tag>(entity2Ptr) && TTN_Scene::Get<TTN_Tag>(entity2Ptr).getName() == "Tree") {
+				//if it, then add it to the list of entities to be deleted
+				printf("object 2 of of collision %d is a tree\n", i);
+				bool shouldAdd = true;
+				for (int j = 0; j < entitiesToDelete.size(); j++)
+					if (entity2Ptr == entitiesToDelete[j]) shouldAdd = false;
+				if (shouldAdd) entitiesToDelete.push_back(entity2Ptr);
+			}
+		}
+	}
+
+	//when all the collisions have been processed, delete the entites that should be delete
+	for (int i = 0; i < entitiesToDelete.size(); i++) {
+		TTN_Scene::DeleteEntity(entitiesToDelete[i]);
+	}
+>>>>>>> Ame
 
 	//Please don't forget to call the base scene's update at the end of the child class' update
 	TTN_Scene::Update(deltaTime);
@@ -267,21 +370,18 @@ void DemoScene::Update(float deltaTime)
 
 void DemoScene::KeyDownChecks()
 {
-	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Space)) {
-		printf("Space down\n");
-	}
 }
 
 void DemoScene::KeyChecks()
 {
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Space)) {
-		printf("Space held\n");
-	}
-
 	//phyiscs bodies for the boat and tree
+<<<<<<< HEAD
 	auto& pboat = Get<TTN_PhysicsB>(boat);
 	auto& ptree = Get<TTN_PhysicsB>(tree1);
 	auto& camTrans = Get<TTN_Transform>(camera);
+=======
+	auto& pboat = Get<TTN_Physics>(boat);
+>>>>>>> Ame
 
 	velo = glm::vec3(0.0f);
 
@@ -291,68 +391,72 @@ void DemoScene::KeyChecks()
 		if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
 			velo = glm::normalize(velo);
 		}
+<<<<<<< HEAD
 
 		//camTrans.SetPos(glm::vec3(camTrans.GetPos().x+velo, camTrans.GetPos().y, camTrans.GetPos().z));
 		//pboat.SetVelocity(velo * speed)
 		//pboat.SetLinearVelocity(velo);
+=======
+		pboat.AddImpulse(velo);
+>>>>>>> Ame
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
 		velo += glm::vec3(0.0f, -1.0f, 0.0f);
 		if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
 			velo = glm::normalize(velo);
 		}
+<<<<<<< HEAD
 		//pboat.SetVelocity(velo * speed);
 		//.SetLinearVelocity(velo);
 
+=======
+		pboat.AddImpulse(velo);
+>>>>>>> Ame
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
 		velo += glm::vec3(-1.0f, 0.0f, 0.0f);
 		if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
 			velo = glm::normalize(velo);
 		}
+<<<<<<< HEAD
 
 		//pboat.SetVelocity(velo * speed);
 
 		//pboat.SetLinearVelocity(velo);
 
+=======
+		pboat.AddImpulse(velo);
+>>>>>>> Ame
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
 		velo += glm::vec3(1.0f, 0.0f, 0.0f);
 		if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
 			velo = glm::normalize(velo);
 		}
+<<<<<<< HEAD
 
 		//pboat.SetVelocity(velo * speed);
 
 		//pboat.SetLinearVelocity(velo);
 
+=======
+		pboat.AddImpulse(velo);
+>>>>>>> Ame
 	}
 }
 
 void DemoScene::KeyUpChecks()
 {
-	if (TTN_Application::TTN_Input::GetKeyUp(TTN_KeyCode::Space)) {
-		printf("Space released\n");
-	}
 }
 
 void DemoScene::MouseButtonDownChecks()
 {
-	if (TTN_Application::TTN_Input::GetMouseButtonDown(TTN_MouseButton::Left)) {
-		printf("left click down\n");
-	}
 }
 
 void DemoScene::MouseButtonChecks()
 {
-	if (TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left)) {
-		printf("left click held\n");
-	}
 }
 
 void DemoScene::MouseButtonUpChecks()
 {
-	if (TTN_Application::TTN_Input::GetMouseButtonUp(TTN_MouseButton::Left)) {
-		printf("left click released\n");
-	}
 }

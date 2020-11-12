@@ -6,6 +6,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "GLM/glm.hpp"
 #include "GLM/gtx/quaternion.hpp"
+#include "entt.hpp"
 //include other required features
 #include <vector>
 
@@ -18,7 +19,7 @@ namespace Titan {
 		TTN_Transform();
 
 		//constructor that takes all the data and makes a transform out of it
-		TTN_Transform(glm::vec3 pos, glm::vec3 rotation, glm::vec3 scale, TTN_Transform* parent = nullptr);
+		TTN_Transform(glm::vec3 pos, glm::vec3 rotation, glm::vec3 scale, TTN_Transform* parent = nullptr, entt::entity* parentEntity = nullptr);
 
 		//destructor 
 		~TTN_Transform();
@@ -31,7 +32,7 @@ namespace Titan {
 		//rotation
 		void SetRotationQuat(glm::quat rotationQuat);
 		//parent
-		void SetParent(TTN_Transform* parent);
+		void SetParent(TTN_Transform* parent, entt::entity* parentEntity);
 
 
 		//GETTERS
@@ -48,6 +49,7 @@ namespace Titan {
 		glm::mat4 GetGlobal();
 		//parent 
 		TTN_Transform* GetParent();
+		entt::entity* GetParentEntity() { return m_parentEntity; }
 
 		//rotates by inputed value
 		void RotateRelative(glm::vec3 rotation);
@@ -69,6 +71,7 @@ namespace Titan {
 	private:
 		/// Hierararchy ///
 		TTN_Transform* m_Parent;
+		entt::entity* m_parentEntity; //needed to reconstruct the parenting relationship when entt's interal stuff changes 
 		std::vector<TTN_Transform*> m_Children;
 
 		/// LOCAL /// 
