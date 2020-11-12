@@ -51,10 +51,16 @@ namespace Titan {
 		m_hasGravity = true;
 
 		m_InWorld = false;
+
+		m_entity = static_cast<entt::entity>(-1);
+
+
+		m_body->setUserPointer(&m_entity);
+	
 	}
 
 	//constructor that makes a physics body out of a position, rotation, and scale
-	Titan::TTN_Physics::TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, bool dynamic, float mass)
+	Titan::TTN_Physics::TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, entt::entity entityNum, bool dynamic, float mass)
 	{
 		//set up titan transform
 		m_trans = TTN_Transform();
@@ -87,6 +93,10 @@ namespace Titan {
 		m_hasGravity = true;
 
 		m_InWorld = false;
+
+		m_entity = entityNum;
+
+		m_body->setUserPointer(static_cast<void*>(&m_entity));
 	}
 
 	TTN_Physics::~TTN_Physics()
@@ -202,5 +212,41 @@ namespace Titan {
 	void TTN_Physics::ClearForces()
 	{
 		m_body->clearForces();
+	}
+
+	void TTN_Physics::SetEntity(entt::entity entity)
+	{
+		//save the entity in titan
+		m_entity = entity;
+		//save the entity in bullet
+		m_body->setUserPointer(static_cast<void*>(&m_entity));
+	}
+
+	TTN_Collision::TTN_Collision()
+	{
+		b1 = nullptr;
+		b2 = nullptr;
+		norm1 = glm::vec3();
+		norm2 = glm::vec3();
+	}
+
+	void TTN_Collision::SetBody1(const btRigidBody* body)
+	{
+		b1 = body;
+	}
+
+	void TTN_Collision::SetBody2(const btRigidBody* body)
+	{
+		b2 = body;
+	}
+
+	void TTN_Collision::SetNormal1(btVector3 normal)
+	{
+		norm1 = glm::vec3((float)normal.getX(), (float)normal.getY(), (float)normal.getZ());
+	}
+
+	void TTN_Collision::SetNormal2(btVector3 normal)
+	{
+		norm2 = glm::vec3((float)normal.getX(), (float)normal.getY(), (float)normal.getZ());
 	}
 }

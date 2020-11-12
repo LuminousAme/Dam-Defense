@@ -12,6 +12,7 @@
 #include "GLM/glm.hpp"
 //import other required features
 #include <vector>
+#include "entt.hpp"
 //import the bullet physics engine
 #include <bullet/btBulletDynamicsCommon.h>
 
@@ -24,7 +25,7 @@ namespace Titan {
 		TTN_Physics();
 
 		//contrustctor with data
-		TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, bool dynamic = true, float mass = 1.0f);
+		TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, entt::entity entityNum, bool dynamic = true, float mass = 1.0f);
 
 		~TTN_Physics();
 
@@ -45,6 +46,7 @@ namespace Titan {
 		glm::vec3 GetLinearVelocity();
 		glm::vec3 GetAngularVelocity();
 		bool GetHasGravity() { return m_hasGravity; }
+		entt::entity GetEntity() { return m_entity; }
 
 		//setters
 		void SetIsStatic(bool isStatic);
@@ -58,6 +60,9 @@ namespace Titan {
 		void AddForce(glm::vec3 force);
 		void AddImpulse(glm::vec3 impulseForce);
 		void ClearForces();
+
+		//identifier
+		void SetEntity(entt::entity entity);
 
 	protected:
 		TTN_Transform m_trans; //transform with the position, rotation, and scale of the physics body
@@ -73,6 +78,8 @@ namespace Titan {
 		btRigidBody* m_body; //rigidbody, acutally does the collision stuff, have to get the transform out of this every update if the body is static
 		bool m_InWorld; //boolean marking if it's been added to the bullet physics world yet, used to make sure that the physics body
 
+		entt::entity m_entity; //the entity number that gets stored as a void pointer in bullet so that it can be used to indentify the objects later
+
 		//data for rendering the physics box
 		static TTN_Shader::sshptr shader;
 		static TTN_Texture::stptr texture;
@@ -80,5 +87,49 @@ namespace Titan {
 		static TTN_Mesh::smptr mesh;
 		static bool renderingSetUp;
 		static TTN_Renderer renderer;
+	};
+
+	class TTN_Collision {
+	public:
+		//defines a special easier to use name for the shared(smart) pointer to the class
+		typedef std::shared_ptr<TTN_Collision> scolptr;
+
+		//creates and returns a shared(smart) pointer to the class
+		static inline scolptr Create() {
+			return std::make_shared<TTN_Collision>();
+		}
+	public:
+		//ensure moving and copying is not allowed so we can control destructor calls through pointers
+		TTN_Collision(const TTN_Collision& other) = delete;
+		TTN_Collision(TTN_Collision& other) = delete;
+		TTN_Collision& operator=(const TTN_Collision& other) = delete;
+		TTN_Collision& operator=(TTN_Collision&& other) = delete;
+
+	public:
+		//constructor
+		TTN_Collision();
+
+		//destructor
+		~TTN_Collision() = default;
+
+		//getters
+		const btRigidBody* GetBody1() { return b1; }
+		const btRigidBody* GetBody2() { return b2; }
+		glm::vec3 GetNormal1() { return norm1; }
+		glm::vec3 GetNormal2() { return norm2; }
+
+		//setters
+		void SetBody1(const btRigidBody* body);
+		void SetBody2(const btRigidBody* body);
+		void SetNormal1(btVector3 normal);
+		void SetNormal2(btVector3 normal);
+
+	protected:
+		//rigidbodies for the colliding objects (which should also contain a reference to the entity)
+		const btRigidBody* b1;
+		const btRigidBody* b2;
+		//normals for the collision
+		glm::vec3 norm1;
+		glm::vec3 norm2;
 	};
 }

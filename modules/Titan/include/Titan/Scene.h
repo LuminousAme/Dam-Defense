@@ -9,6 +9,7 @@
 #include "Renderer.h"
 #include "Camera.h"
 #include "Light.h"
+#include "Tag.h"
 //include all the graphics features we need
 #include "Shader.h"
 #include "Physics.h"
@@ -50,6 +51,10 @@ namespace Titan {
 		//returns a reference to the component of the relevant entity 
 		template<typename T>
 		T& Get(entt::entity entity);
+
+		//returns true if the entity has a given component and false otherwise
+		template<typename T>
+		bool Has(entt::entity entity);
 
 		//removes a component from an object 
 		template<typename T>
@@ -119,6 +124,9 @@ namespace Titan {
 		//gets the gravity
 		glm::vec3 GetGravity();
 
+		//gets all the collisions for the frame
+		std::vector<TTN_Collision::scolptr> GetCollisions() { return collisions; }
+
 	private:
 		//context that contains all our entities, their ids, and components 
 		entt::registry* m_Registry = nullptr;
@@ -144,6 +152,12 @@ namespace Titan {
 		btSequentialImpulseConstraintSolver* solver;
 		//physics world
 		btDiscreteDynamicsWorld* m_physicsWorld;
+
+		//vector of titan collision objects, containing pointers to the rigid bodies (from which you can get entity numbers) and glm vec3s for collision normals
+		std::vector<TTN_Collision::scolptr> collisions;
+
+		//constructs the TTN_Collision objects
+		void ConstructCollisions();
 	};
 
 #pragma region ECS_functions_def
@@ -166,6 +180,13 @@ namespace Titan {
 	{
 		//return a reference to the component 
 		return m_Registry->get<T>(entity);
+	}
+
+	//returns true if an entity has the given component, and false otherwise
+	template<typename T>
+	inline bool TTN_Scene::Has(entt::entity entity)
+	{
+		return m_Registry->has<T>(entity);
 	}
 
 	template<typename T>
