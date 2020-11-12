@@ -53,8 +53,8 @@ void DemoScene::InitScene()
 		camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		Get<TTN_Camera>(camera).CalcOrtho(-800.0f / 100.0f, 800.0f / 100.0f, -800.0f / 100.0f, 800.0f / 100.0f, 0.001f, 100.0f);
-		Get<TTN_Camera>(camera).CalcPerspective(90.0f, 1.0f, 0.01f, 100.f);
+		//Get<TTN_Camera>(camera).CalcOrtho(-800.0f / 100.0f, 800.0f / 100.0f, -800.0f / 100.0f, 800.0f / 100.0f, 0.001f, 100.0f);
+		Get<TTN_Camera>(camera).CalcPerspective(90.0f, 1.78f, 0.01f, 100.f);
 		Get<TTN_Camera>(camera).View();
 	}
 
@@ -264,17 +264,10 @@ void DemoScene::Update(float deltaTime)
 
 void DemoScene::KeyDownChecks()
 {
-	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Space)) {
-		printf("Space down\n");
-	}
 }
 
 void DemoScene::KeyChecks()
 {
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Space)) {
-		printf("Space held\n");
-	}
-
 	//phyiscs bodies for the boat and tree
 	auto& pboat = Get<TTN_Physics>(boat);
 
@@ -313,28 +306,16 @@ void DemoScene::KeyChecks()
 
 void DemoScene::KeyUpChecks()
 {
-	if (TTN_Application::TTN_Input::GetKeyUp(TTN_KeyCode::Space)) {
-		printf("Space released\n");
-	}
 }
 
 void DemoScene::MouseButtonDownChecks()
 {
-	if (TTN_Application::TTN_Input::GetMouseButtonDown(TTN_MouseButton::Left)) {
-		printf("left click down\n");
-	}
 }
 
 void DemoScene::MouseButtonChecks()
 {
-	if (TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left)) {
-		printf("left click held\n");
-	}
 }
 
 void DemoScene::MouseButtonUpChecks()
 {
-	if (TTN_Application::TTN_Input::GetMouseButtonUp(TTN_MouseButton::Left)) {
-		printf("left click released\n");
-	}
 }
