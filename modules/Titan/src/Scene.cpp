@@ -53,6 +53,17 @@ namespace Titan {
 		//create the entity
 		auto entity = m_Registry->create();
 
+		//reconstruct any scenegraph relationships
+		auto transView = m_Registry->view<TTN_Transform>();
+		for (auto entity : transView) {
+			//if it should have a parent
+			if (Get<TTN_Transform>(entity).GetParentEntity() != nullptr) {
+				//then reatach that parent
+				Get<TTN_Transform>(entity).SetParent(&Get<TTN_Transform>(*Get<TTN_Transform>(entity).GetParentEntity()), 
+													Get<TTN_Transform>(entity).GetParentEntity());
+			}
+		}
+
 		//return the entity id 
 		return entity;
 	}
@@ -70,6 +81,17 @@ namespace Titan {
 
 		//delete the entity from the registry
 		m_Registry->destroy(entity);
+
+		//reconstruct any scenegraph relationships
+		auto transView = m_Registry->view<TTN_Transform>();
+		for (auto entity : transView) {
+			//if it should have a parent
+			if (Get<TTN_Transform>(entity).GetParentEntity() != nullptr) {
+				//then reatach that parent
+				Get<TTN_Transform>(entity).SetParent(&Get<TTN_Transform>(*Get<TTN_Transform>(entity).GetParentEntity()),
+					Get<TTN_Transform>(entity).GetParentEntity());
+			}
+		}
 	}
 
 	//sets the underlying entt registry of the scene

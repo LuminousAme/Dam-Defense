@@ -183,11 +183,14 @@ void DemoScene::InitScene()
 	velo = glm::vec3(0.0f);
 
 	//sets the boat at the sword's parent
-	Get<TTN_Transform>(sword).SetParent(&Get<TTN_Transform>(boat));
+	Get<TTN_Transform>(sword).SetParent(&Get<TTN_Transform>(boat), &boat);
 }
 
 void DemoScene::Update(float deltaTime)
 {
+	//transform of the sword (for debugging the scenegraph breaking
+	auto& swordTrans = Get<TTN_Transform>(sword);
+
 	//rotate the second tree
 	auto& tree2Trans = Get<TTN_Transform>(tree2);
 	tree2Trans.RotateFixed(glm::vec3(0, 5.0f * deltaTime, 0));
