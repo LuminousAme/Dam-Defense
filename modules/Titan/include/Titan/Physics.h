@@ -18,6 +18,8 @@
 
 //import other required features
 #include <vector>
+//import the bullet physics engine
+#include <bullet/btBulletDynamicsCommon.h>
 
 namespace Titan {
 
@@ -130,66 +132,55 @@ namespace Titan {
 		//default constructor
 		TTN_Physics();
 
-		//aabb
-		TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
+		//contrustctor with data
+		TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, bool dynamic = true, float mass = 1.0f);
 
-		~TTN_Physics() = default;
+		~TTN_Physics();
 
 		//copy, move, and assingment constrcutors for ENTT
 		TTN_Physics(const TTN_Physics&) = default;
 		TTN_Physics(TTN_Physics&&) = default;
 		TTN_Physics& operator=(TTN_Physics&) = default;
 
-		//sat stuff
-		static void Projections();
-		void GetNormals();
-
-		void CalcNormals(TTN_Physics& b1);
-
-		glm::vec3 axis;
-		glm::vec3 normals;
-		glm::vec3 points;
-
-		static bool Inter(TTN_Physics& b1, TTN_Physics& b2);
-
-		void Bounce(glm::vec3 Contactnormal);
-
+		//update function, keeps data up to date, call once a frame
 		void Update(float deltaTime);
 
-		void SetPos(glm::vec3 pos);
-		void SetScale(glm::vec3 scale);
-		void RotateFixed(glm::vec3 rotation);
-		void RotateLocal(glm::vec3 rotation);
-		void SetIsStaticBody(bool isStatic);
-		void SetVelocity(glm::vec3 Velo);
-		void SetShouldBounce(bool bounce);
+		//getters
+		TTN_Transform GetTrans() { return m_trans; }
+		bool GetIsStatic() { return m_IsStaticBody; }
+		float GetMass() { return m_Mass; }
+		btRigidBody* GetRigidBody() { return m_body; }
+		bool GetIsInWorld() { return m_InWorld; }
+		glm::vec3 GetLinearVelocity();
+		glm::vec3 GetAngularVelocity();
+		bool GetHasGravity() { return m_hasGravity; }
 
-		glm::vec3 GetCenter() { return m_Center; }
-		glm::vec3 GetMin() { return m_Min; }
-		glm::vec3 GetMax() { return m_Max; }
-		glm::vec3 GetPosition() { return m_trans.GetPos(); }
-		glm::vec3 GetScale() { return m_trans.GetScale(); }
-		bool GetIsStaticBody() { return m_IsStaticBody; }
-		glm::vec3 GetVelocity() { return m_Velocity; }
-		bool GetShouldBounce() { return m_ShouldBounce; }
+		//setters
+		void SetIsStatic(bool isStatic);
+		void SetIsInWorld(bool inWorld);
+		void SetMass(float mass);
+		void SetLinearVelocity(glm::vec3 velocity);
+		void SetAngularVelocity(glm::vec3 velocity);
+		void SetHasGravity(bool hasGrav);
 
-		static void SetUpPhysicsBoxRendering();
-		static bool GetRenderingIsSetUp();
-		void Render(glm::mat4 vp);
+		//forces
+		void AddForce(glm::vec3 force);
+		void AddImpulse(glm::vec3 impulseForce);
+		void ClearForces();
 
 	protected:
-		glm::vec3 m_Center; //center of object
-		glm::vec3 m_Min; //corner of smallest  coord
-		glm::vec3 m_Max; //corner of largest coord
-
-		glm::vec3 m_Scale; //scale of the object on each axis
 		TTN_Transform m_trans; //transform with the position, rotation, and scale of the physics body
-		glm::vec3 m_Corners[8]; //the positions of each corner of the physics body
 
-		bool m_IsStaticBody;
+		bool m_IsStaticBody; //is the body dynamic or static
 
-		glm::vec3 m_Velocity;
-		bool m_ShouldBounce;
+		//bullet data
+		float m_Mass; //mass of the object
+		bool m_hasGravity; //is the object affected by gravity
+		btCollisionShape* m_colShape; //the shape of it's collider, includes scale
+		btTransform m_bulletTrans;  //it's internal transform, does not include scale
+		btDefaultMotionState* m_MotionState; //motion state for it, need to extract the transform out of this every update if the body is dynamic
+		btRigidBody* m_body; //rigidbody, acutally does the collision stuff, have to get the transform out of this every update if the body is static
+		bool m_InWorld; //boolean marking if it's been added to the bullet physics world yet, used to make sure that the physics body
 
 		//data for rendering the physics box
 		static TTN_Shader::sshptr shader;
@@ -198,12 +189,8 @@ namespace Titan {
 		static TTN_Mesh::smptr mesh;
 		static bool renderingSetUp;
 		static TTN_Renderer renderer;
-
-
-		void CalculateCorners();
-		void InitCorners();
-
 	};
+<<<<<<< HEAD
 
 	//class representing a collision
 	class TTN_Collision {
@@ -255,4 +242,6 @@ namespace Titan {
 	};
 
 
+=======
+>>>>>>> Ame
 }

@@ -136,6 +136,7 @@ void DemoScene::InitScene()
 		AttachCopy<TTN_Transform>(tree1, treeTrans);
 
 		//TTN_Physics pbody = TTN_Physics(glm::vec3(treeTrans.GetPos().x , treeTrans.GetPos().y , treeTrans.GetPos().z ));
+<<<<<<< HEAD
 		/*TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
 		pbody.SetIsStaticBody(true);
 		AttachCopy<TTN_Physics>(tree1, pbody);
@@ -143,6 +144,13 @@ void DemoScene::InitScene()
 
 		TTN_PhysicsB pbody = TTN_PhysicsB(treeTrans.GetPos(), m_world, m_PhysicsObjects);
 		AttachCopy<TTN_PhysicsB>(tree1, pbody);
+=======
+
+		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
+		pbody.SetIsStatic(true);
+
+		AttachCopy<TTN_Physics>(tree1, pbody);
+>>>>>>> Ame
 	}
 
 	//entity for the second tree in testScene
@@ -189,10 +197,13 @@ void DemoScene::InitScene()
 
 		/*TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f));
 		AttachCopy<TTN_Physics>(boat, pbody);
+<<<<<<< HEAD
 		SetUpCollisions(boat);*/
 
 		TTN_PhysicsB pbody = TTN_PhysicsB(boatTrans.GetPos(), m_world, m_PhysicsObjects);
 		AttachCopy<TTN_PhysicsB>(boat, pbody);
+=======
+>>>>>>> Ame
 	}
 
 	speed = 1.0f;
@@ -217,6 +228,7 @@ void DemoScene::Update(float deltaTime)
 	tree2Trans.RotateFixed(glm::vec3(0, 5.0f * deltaTime, 0));
 
 	//tree and boat physics bodies
+<<<<<<< HEAD
 	auto& pboat = Get<TTN_PhysicsB>(boat);
 	auto& ptree = Get<TTN_PhysicsB>(tree1);
 
@@ -258,6 +270,10 @@ void DemoScene::Update(float deltaTime)
 
 	m_world->debugDrawWorld(); ///draw the debug
 	m_world->stepSimulation(1.f / 60.f, 10);
+=======
+	auto& pboat = Get<TTN_Physics>(boat);
+	auto& ptree = Get<TTN_Physics>(tree1);
+>>>>>>> Ame
 
 	//Please don't forget to call the base scene's update at the end of the child class' update
 	TTN_Scene::Update(deltaTime);
@@ -281,35 +297,53 @@ void DemoScene::KeyChecks()
 	auto& ptree = Get<TTN_PhysicsB>(tree1);
 	auto& camTrans = Get<TTN_Transform>(camera);
 
+	velo = glm::vec3(0.0f);
+
 	//control the boat through keyboard keys
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
 		velo += glm::vec3(0.0f, 1.0f, 0.0f);
 		if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
 			velo = glm::normalize(velo);
 		}
+<<<<<<< HEAD
 		//camTrans.SetPos(glm::vec3(camTrans.GetPos().x+velo, camTrans.GetPos().y, camTrans.GetPos().z));
 		//pboat.SetVelocity(velo * speed);
+=======
+		pboat.SetLinearVelocity(velo);
+>>>>>>> Ame
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
 		velo += glm::vec3(0.0f, -1.0f, 0.0f);
 		if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
 			velo = glm::normalize(velo);
 		}
+<<<<<<< HEAD
 		//pboat.SetVelocity(velo * speed);
+=======
+		pboat.SetLinearVelocity(velo);
+>>>>>>> Ame
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
 		velo += glm::vec3(-1.0f, 0.0f, 0.0f);
 		if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
 			velo = glm::normalize(velo);
 		}
+<<<<<<< HEAD
 		//pboat.SetVelocity(velo * speed);
+=======
+		pboat.SetLinearVelocity(velo);
+>>>>>>> Ame
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
 		velo += glm::vec3(1.0f, 0.0f, 0.0f);
 		if (velo.x != 0 || velo.y != 0 || velo.z != 0) {
 			velo = glm::normalize(velo);
 		}
+<<<<<<< HEAD
 		//pboat.SetVelocity(velo * speed);
+=======
+		pboat.SetLinearVelocity(velo);
+>>>>>>> Ame
 	}
 }
 
