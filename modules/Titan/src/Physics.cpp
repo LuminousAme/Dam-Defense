@@ -3,7 +3,6 @@
 
 //include the header
 #include "Titan/Physics.h"
-#include "Titan/GlutStuff.h"
 //include other required features
 #include "Titan/ObjLoader.h"
 #include <iostream>

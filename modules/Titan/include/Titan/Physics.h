@@ -124,7 +124,6 @@ namespace Titan {
 	};
 
 
-
 	class TTN_Physics
 	{
 	public:
@@ -190,7 +189,7 @@ namespace Titan {
 		static bool renderingSetUp;
 		static TTN_Renderer renderer;
 	};
-<<<<<<< HEAD
+
 
 	//class representing a collision
 	class TTN_Collision {
@@ -242,6 +241,5 @@ namespace Titan {
 	};
 
 
-=======
->>>>>>> Ame
+
 }
