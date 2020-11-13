@@ -9,6 +9,7 @@ namespace Titan {
 	TTN_Scene::TTN_Scene() {
 		m_ShouldRender = true;
 		m_Registry = new entt::registry();
+		m_RenderGroup = std::make_unique<RenderGroupType>(m_Registry->group<TTN_Transform, TTN_Renderer>());
 		m_AmbientColor = glm::vec3(1.0f);
 		m_AmbientStrength = 1.0f;
 
@@ -30,6 +31,7 @@ namespace Titan {
 	{
 		m_ShouldRender = true;
 		m_Registry = new entt::registry();
+		m_RenderGroup = std::make_unique<RenderGroupType>(m_Registry->group<TTN_Transform, TTN_Renderer>());
 
 		//setting up physics world
 		collisionConfig = new btDefaultCollisionConfiguration(); //default collision config
@@ -53,17 +55,6 @@ namespace Titan {
 		//create the entity
 		auto entity = m_Registry->create();
 
-		//reconstruct any scenegraph relationships
-		auto transView = m_Registry->view<TTN_Transform>();
-		for (auto entity : transView) {
-			//if it should have a parent
-			if (Get<TTN_Transform>(entity).GetParentEntity() != nullptr) {
-				//then reatach that parent
-				Get<TTN_Transform>(entity).SetParent(&Get<TTN_Transform>(*Get<TTN_Transform>(entity).GetParentEntity()), 
-													Get<TTN_Transform>(entity).GetParentEntity());
-			}
-		}
-
 		//return the entity id 
 		return entity;
 	}
@@ -81,17 +72,6 @@ namespace Titan {
 
 		//delete the entity from the registry
 		m_Registry->destroy(entity);
-
-		//reconstruct any scenegraph relationships
-		auto transView = m_Registry->view<TTN_Transform>();
-		for (auto entity : transView) {
-			//if it should have a parent
-			if (Get<TTN_Transform>(entity).GetParentEntity() != nullptr) {
-				//then reatach that parent
-				Get<TTN_Transform>(entity).SetParent(&Get<TTN_Transform>(*Get<TTN_Transform>(entity).GetParentEntity()),
-					Get<TTN_Transform>(entity).GetParentEntity());
-			}
-		}
 	}
 
 	//sets the underlying entt registry of the scene
@@ -179,12 +159,34 @@ namespace Titan {
 		glm::mat4 viewMat = glm::inverse(Get<TTN_Transform>(m_Cam).GetGlobal());
 		vp *= viewMat;
 
+		//sort our render group
+		m_RenderGroup->sort<TTN_Renderer>([](const TTN_Renderer& l, const TTN_Renderer& r) {
+			//sort by render layer first, higher render layers get drawn later
+			if (l.GetRenderLayer() < r.GetRenderLayer()) return true;
+			if (l.GetRenderLayer() > r.GetRenderLayer()) return true;
+
+			//sort by shader pointer to minimize state changes on active shader
+			if (l.GetShader() < r.GetShader()) return true;
+			if (l.GetShader() > r.GetShader()) return false;
+
+			//sort by material pointer to  minimize state changes on textures and stuff
+			if (l.GetMat() < r.GetMat()) return true;
+			if (l.GetMat() > r.GetMat()) return false;
+		});
+
+		//reconstruct any scenegraph relationships
+		auto transView = m_Registry->view<TTN_Transform>();
+		for (auto entity : transView) {
+			//if it should have a parent
+			if (Get<TTN_Transform>(entity).GetParentEntity() != nullptr) {
+				//then reatach that parent
+				Get<TTN_Transform>(entity).SetParent(&Get<TTN_Transform>(*Get<TTN_Transform>(entity).GetParentEntity()),
+					Get<TTN_Transform>(entity).GetParentEntity());
+			}
+		}
 
 		//go through every entity with a transform and a mesh renderer and render the mesh
-		auto meshView = m_Registry->view<TTN_Transform, TTN_Renderer>();
-		for (auto entity : meshView) {
-			//get the mesh renderer
-			auto& renderer = Get<TTN_Renderer>(entity);
+		m_RenderGroup->each([&](entt::entity, TTN_Transform& transform, TTN_Renderer& renderer) {
 			//get the shader pointer
 			TTN_Shader::sshptr shader = renderer.GetShader();
 
@@ -195,7 +197,7 @@ namespace Titan {
 			//scene level ambient lighting
 			shader->SetUniform("u_AmbientCol", m_AmbientColor);
 			shader->SetUniform("u_AmbientStrength", m_AmbientStrength);
-				
+
 			//stuff from the light
 			auto& light = Get<TTN_Light>(m_Light);
 			auto& lightTrans = Get<TTN_Transform>(m_Light);
@@ -222,7 +224,7 @@ namespace Titan {
 					renderer.GetMat()->GetAlbedo()->Bind(0);
 				}
 				//if they're using a specular map 
-				if (shader->GetFragShaderDefaultStatus() == 5) 
+				if (shader->GetFragShaderDefaultStatus() == 5)
 				{
 					//bind it so openGL can see it
 					renderer.GetMat()->GetSpecularMap()->Bind(1);
@@ -232,23 +234,13 @@ namespace Titan {
 			else {
 				shader->SetUniform("u_Shininess", 128.0f);
 			}
-	
+
 			//unbind the shader
 			shader->UnBind();
 
 			//and finsih by rendering the mesh
-			renderer.Render(Get<TTN_Transform>(entity).GetGlobal(), vp);
-		}
-
-		/*
-		//now that all the opaque objects have been rendered, let's render the physics boxes
-		if (TTN_Physics::GetRenderingIsSetUp()) {
-			auto physicsBodyView = m_Registry->view<TTN_Physics>(); 
-			for (auto entity:physicsBodyView) {
-				Get<TTN_Physics>(entity).Render(vp);
-			}
-		}*/
-			
+			renderer.Render(transform.GetGlobal(), vp);
+		});
 	}
 
 	//sets wheter or not the scene should be rendered

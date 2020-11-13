@@ -78,7 +78,7 @@ namespace Titan {
 	}
 
 	void TTN_Camera::CalcPerspective(float fovDegrees, float aspectRatio, float near, float far){
-		m_projection = glm::perspective(fovDegrees, aspectRatio, near, far);
+		m_projection = glm::perspective(glm::radians(fovDegrees), aspectRatio, near, far);
 	}
 
 }

@@ -32,7 +32,7 @@ void DemoScene::InitScene()
 	swordMesh->SetUpVao();
 
 	//texture for the sword 
-	swordText = TTN_Texture::Create();
+	swordText = TTN_Texture2D::Create();
 	//load the texture from a file
 	swordText->LoadFromFile("Sword_Texture.png");
 
@@ -41,6 +41,15 @@ void DemoScene::InitScene()
 	//add the texture to material and set the shininess
 	swordMat->SetAlbedo(swordText);
 	swordMat->SetShininess(128.0f);
+
+	//plane stuff
+	plane = TTN_ObjLoader::LoadFromFile("Review3/water.obj");
+	plane->SetUpVao();
+	waterText = TTN_Texture2D::Create();
+	waterText->LoadFromFile("Review3/water_text.png");
+	waterMat = TTN_Material::Create();
+	waterMat->SetAlbedo(waterText);
+	waterMat->SetShininess(128.0f);
 
 	//entity for the camera in testScene
 	{
@@ -179,11 +188,26 @@ void DemoScene::InitScene()
 		AttachCopy<TTN_Tag>(boat, boatTag);
 	}
 
-	speed = 1.0f;
-	velo = glm::vec3(0.0f);
+	{
+		water = CreateEntity();
+
+		//setup a mesh renderer for the water
+		TTN_Renderer waterRenderer = TTN_Renderer(plane, shaderProgamTextured);
+		waterRenderer.SetMat(waterMat);
+		//and attach that renderer to the entity
+		AttachCopy<TTN_Renderer>(water, waterRenderer);
+
+		//setup a transform for the water
+		TTN_Transform waterTrans = TTN_Transform(glm::vec3(0.f, -7.f, 0.0f), glm::vec3(0.0f), glm::vec3(200.0f, 1.0f, 50.0f));
+		//and attach that transform to the entity
+		AttachCopy<TTN_Transform>(water, waterTrans);
+	}
 
 	//sets the boat at the sword's parent
 	Get<TTN_Transform>(sword).SetParent(&Get<TTN_Transform>(boat), &boat);
+
+	speed = 1.0f;
+	velo = glm::vec3(0.0f);
 }
 
 void DemoScene::Update(float deltaTime)

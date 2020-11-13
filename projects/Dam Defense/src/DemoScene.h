@@ -35,10 +35,13 @@ public:
 	TTN_Mesh::smptr boatMesh;
 	TTN_Mesh::smptr treeMesh;
 	TTN_Mesh::smptr swordMesh;
+	TTN_Mesh::smptr plane;
 
-	TTN_Texture::stptr swordText;
+	TTN_Texture2D::stptr swordText;
+	TTN_Texture2D::stptr waterText;
 
 	TTN_Material::smatptr swordMat;
+	TTN_Material::smatptr waterMat;
 
 protected:
 	entt::entity camera;
@@ -47,6 +50,7 @@ protected:
 	entt::entity tree1;
 	entt::entity tree2;
 	entt::entity boat;
+	entt::entity water;
 
 	float speed;
 	glm::vec3 velo;

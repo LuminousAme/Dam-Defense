@@ -3,7 +3,7 @@
 #pragma once
 
 //include texture class
-#include "Texture.h"
+#include "Texture2D.h"
 
 namespace Titan {
 	//class for materials on 3D objects
@@ -31,18 +31,18 @@ namespace Titan {
 		~TTN_Material();
 
 		//setters
-		void SetAlbedo(TTN_Texture::stptr albedo);
+		void SetAlbedo(TTN_Texture2D::stptr albedo);
 		void SetShininess(float shininess);
-		void SetSpecularMap(TTN_Texture::stptr specular);
+		void SetSpecularMap(TTN_Texture2D::stptr specular);
 
 		//getters
-		TTN_Texture::stptr GetAlbedo() { return m_Albedo; }
+		TTN_Texture2D::stptr GetAlbedo() { return m_Albedo; }
 		float GetShininess() { return m_Shininess; }
-		TTN_Texture::stptr GetSpecularMap() { return m_SpecularMap; }
+		TTN_Texture2D::stptr GetSpecularMap() { return m_SpecularMap; }
 
 	private:
-		TTN_Texture::stptr m_Albedo;
-		TTN_Texture::stptr m_SpecularMap;
+		TTN_Texture2D::stptr m_Albedo;
+		TTN_Texture2D::stptr m_SpecularMap;
 		float m_Shininess;
 	};
 }
