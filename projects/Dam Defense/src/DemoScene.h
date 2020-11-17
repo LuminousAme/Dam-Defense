@@ -3,6 +3,8 @@
 #pragma once
 
 #include "Titan/Application.h"
+#include "Titan/Physics.h"
+#include "Titan/Particle.h"
 #include "Titan/ObjLoader.h"
 #include <iostream>
 

@@ -1,7 +1,6 @@
 //Titan Engine, by Atlas X Games 
 // Scene.cpp - source file for the class that handles ECS, render calls, etc. 
 #include "Titan/Scene.h"
-
 #include <GLM/gtc/matrix_transform.hpp>
 
 namespace Titan {
@@ -137,13 +136,9 @@ namespace Titan {
 
 	void TTN_Scene::Update(float deltaTime)
 	{
-<<<<<<< HEAD
-			
-=======
 		//call the step simulation for bullet
 		m_physicsWorld->stepSimulation(deltaTime);
-
->>>>>>> Ame
+ 
 		//run through all of the physicsbody in the scene
 		auto physicsBodyView = m_Registry->view<TTN_Physics>();
 		for (auto entity : physicsBodyView) {

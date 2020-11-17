@@ -16,7 +16,6 @@ int main() {
 	Logger::Init();
 	TTN_Application::Init("Dam Defense", 1920, 1080);
 	//TTN_Physics::SetUpPhysicsBoxRendering(); 
-
 	//create a new scene
 	TTN_Scene* test = new DemoScene;
 	TTN_Scene* demo = new Review3Scene;

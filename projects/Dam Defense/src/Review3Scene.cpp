@@ -1,4 +1,6 @@
 #include "Review3Scene.h"
+#include "Titan/Physics.h"
+#include "Titan/Particle.h"
 
 Review3Scene::Review3Scene()
 	: TTN_Scene()
@@ -40,9 +42,19 @@ void Review3Scene::InitScene()
 	waterMat->SetAlbedo(waterText);
 	waterMat->SetShininess(128.0f);
 
+	ParticleData data;
+	//data.m_max = 100;
+	data.m_position = glm::vec3(0.0f, 0.0f, 0.0f);
+	data.m_velocity = glm::vec3(0.0f, 1.0f, 0.0f);
+	data.ColorBegin = glm::vec4(1.0f, 1.0f, 0.5f, 1.0f);
+	data.ColorEnd = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+
+	data.SizeEnd = 1.0f;
+	data.SizeBegin = 2.0f;
+	data.LifeTime = 5.0f;
+	//data.m_angle = glm::tan(glm::radians(25.0f));
 
 	////////// entities /////////////////
-
 	//entity for the camera
 	{
 		//create an entity in the scene for the camera
@@ -91,8 +103,7 @@ void Review3Scene::InitScene()
 		//attach that transform to the entity
 		AttachCopy<TTN_Transform>(cannon, cannonTrans);
 	}
-
-	
+		
 	//entity for the water
 	{
 		water = CreateEntity();
@@ -122,6 +133,10 @@ void Review3Scene::InitScene()
 		TTN_Transform treeTrans = TTN_Transform(glm::vec3(5.f, 2.f, 10.0f), glm::vec3(0.0f), glm::vec3(0.5f));
 		//and attach that transform to the entity
 		AttachCopy<TTN_Transform>(tree1, treeTrans);
+
+		TTN_Particle treePart = TTN_Particle();
+		AttachCopy<TTN_Particle>(tree1, treePart);
+
 	}
 
 	//set the camera to be a child of the cannon
@@ -137,9 +152,7 @@ void Review3Scene::Update(float deltaTime)
 	//get the mouse position
 	glm::vec2 tempMousePos = TTN_Application::TTN_Input::GetMousePosition();
 	
-
 	//Get<TTN_Transform>(cannon).RotateFixed(glm::vec3(0.0f, 5.0f * deltaTime, 0.0f));
-	
 	//check if the mouse has moved on the x-axis
 	/*if (tempMousePos.x != mousePos.x) {
 		//if it, get the difference

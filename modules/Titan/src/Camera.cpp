@@ -6,7 +6,7 @@
 #include <iostream>
 
 namespace Titan {
-
+		
 
 	TTN_Camera::TTN_Camera(){
 		m_position = (glm::vec3(0.0f)); //origin

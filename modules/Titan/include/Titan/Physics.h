@@ -1,13 +1,7 @@
 //Titan Engine, by Atlas X Games 
 // Physics.h - header for the class that represents physics bodies
 #pragma once
-
-#include <bullet/btBulletDynamicsCommon.h>
-#include<bullet/btBulletCollisionCommon.h>
-#include <LinearMath/btIDebugDraw.h>
-
 //include other headers
-//#include "GlutStuff.h"
 #include "Transform.h"
 #include "Shader.h"
 #include "Mesh.h"
@@ -20,111 +14,111 @@
 #include <vector>
 #include "entt.hpp"
 //import the bullet physics engine
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 namespace Titan {
 
+#pragma region old
 	//class for bullet3 collisions
-	class TTN_PhysicsB
-	{
-	public:
-		TTN_PhysicsB();
-		~TTN_PhysicsB()=default;
+	//class TTN_PhysicsB
+	//{
+	//public:
+	//	TTN_PhysicsB();
+	//	~TTN_PhysicsB()=default;
 
-		TTN_PhysicsB(glm::vec3 pos, btDiscreteDynamicsWorld* world, btAlignedObjectArray<btCollisionShape*> parray);
+	//	TTN_PhysicsB(glm::vec3 pos, btDiscreteDynamicsWorld* world, btAlignedObjectArray<btCollisionShape*> parray);
 
-		void InitCollision(); // initiailizes stuff required to detect and solve collisions
+	//	void InitCollision(); // initiailizes stuff required to detect and solve collisions
 
-		void SetMass(btScalar mass);
-		void SetTrans(btVector3 trans);
+	//	void SetMass(btScalar mass);
+	//	void SetTrans(btVector3 trans);
 
-		btTransform GetTrans() { return m_trans; };
+	//	btTransform GetTrans() { return m_trans; };
 
-		//btDiscreteDynamicsWorld* GetWorld() { return m_world; };
-		//btBroadphaseInterface* GetBroad() { return m_broadphase; };
+	//	//btDiscreteDynamicsWorld* GetWorld() { return m_world; };
+	//	//btBroadphaseInterface* GetBroad() { return m_broadphase; };
 
-		//btBroadphaseInterface* m_broadphase;
-		/*static btDefaultCollisionConfiguration* m_config;
-		static btCollisionDispatcher* m_dispatcher;
+	//	//btBroadphaseInterface* m_broadphase;
+	//	/*static btDefaultCollisionConfiguration* m_config;
+	//	static btCollisionDispatcher* m_dispatcher;
 
-		static btSequentialImpulseConstraintSolver* m_solver;
-		static btDiscreteDynamicsWorld* m_world;
-		static btDefaultMotionState* m_MotionState;*/
+	//	static btSequentialImpulseConstraintSolver* m_solver;
+	//	static btDiscreteDynamicsWorld* m_world;
+	//	static btDefaultMotionState* m_MotionState;*/
 
-		btTransform m_trans;
-		//collision object
-		btCollisionObject m_col;
-		//mass of object
-		btScalar m_mass;
+	//	btTransform m_trans;
+	//	//collision object
+	//	btCollisionObject m_col;
+	//	//mass of object
+	//	btScalar m_mass;
 
-	};
+	//};
 
+	//class TTN_Debug : public btIDebugDraw {
+	///*public:
 
-	class TTN_Debug : public btIDebugDraw {
-	/*public:
+	//	struct Line {
+	//		GLfloat vertices[6];
+	//		
+	//		Line(const btVector3& from, const btVector3& to) {
+	//			vertices[0] = from.x();
+	//			vertices[1] = from.y();
+	//			vertices[2] = from.z();
 
-		struct Line {
-			GLfloat vertices[6];
-			
-			Line(const btVector3& from, const btVector3& to) {
-				vertices[0] = from.x();
-				vertices[1] = from.y();
-				vertices[2] = from.z();
-
-				vertices[3] = to.x();
-				vertices[4] = to.y();
-				vertices[5] = to.z();}
-		};
-
-
-		TTN_Debug();
-		virtual ~TTN_Debug();
-
-		virtual void setDebugMode(int debugmode);
-
-		virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color);
-		
-		virtual void lines(const btVector3& from, const btVector3& to);
-
-		virtual void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color);
-
-		virtual void reportErrorWarning(const char* warningString);
-
-		virtual void draw3dText(const btVector3& location, const char* textString);
-
-		virtual int getDebugMode() const;
+	//			vertices[3] = to.x();
+	//			vertices[4] = to.y();
+	//			vertices[5] = to.z();}
+	//	};
 
 
-		int m_debugMode;*/
+	//	TTN_Debug();
+	//	virtual ~TTN_Debug();
 
-		int m_debugMode;
+	//	virtual void setDebugMode(int debugmode);
 
-	public:
+	//	virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color);
+	//	
+	//	virtual void lines(const btVector3& from, const btVector3& to);
 
-		TTN_Debug();
-		virtual ~TTN_Debug();
+	//	virtual void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color);
 
-		virtual void	drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor);
+	//	virtual void reportErrorWarning(const char* warningString);
 
-		virtual void	drawLine(const btVector3& from, const btVector3& to, const btVector3& color);
+	//	virtual void draw3dText(const btVector3& location, const char* textString);
 
-		virtual void	drawSphere(const btVector3& p, btScalar radius, const btVector3& color);
-
-		virtual void	drawTriangle(const btVector3& a, const btVector3& b, const btVector3& c, const btVector3& color, btScalar alpha);
-
-		virtual void	drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color);
-
-		virtual void	reportErrorWarning(const char* warningString);
-
-		virtual void	draw3dText(const btVector3& location, const char* textString);
-
-		virtual void	setDebugMode(int debugMode);
-
-		virtual int		getDebugMode() const { return m_debugMode; }
-
-	};
+	//	virtual int getDebugMode() const;
 
 
+	//	int m_debugMode;*/
+
+	//	int m_debugMode;
+
+	//public:
+
+	//	TTN_Debug();
+	//	virtual ~TTN_Debug();
+
+	//	virtual void	drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor);
+
+	//	virtual void	drawLine(const btVector3& from, const btVector3& to, const btVector3& color);
+
+	//	virtual void	drawSphere(const btVector3& p, btScalar radius, const btVector3& color);
+
+	//	virtual void	drawTriangle(const btVector3& a, const btVector3& b, const btVector3& c, const btVector3& color, btScalar alpha);
+
+	//	virtual void	drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color);
+
+	//	virtual void	reportErrorWarning(const char* warningString);
+
+	//	virtual void	draw3dText(const btVector3& location, const char* textString);
+
+	//	virtual void	setDebugMode(int debugMode);
+
+	//	virtual int		getDebugMode() const { return m_debugMode; }
+
+	//};
+
+#pragma endregion 
 	class TTN_Physics
 	{
 	public:
@@ -197,22 +191,6 @@ namespace Titan {
 		static TTN_Renderer renderer;
 	};
 
-<<<<<<< HEAD
-
-	//class representing a collision
-	class TTN_Collision {
-	public:
-		//defines a special easier to use name for shared(smart) pointers to the class 
-		typedef std::shared_ptr<TTN_Collision> scolptr;
-
-		//creates and returns a shared(smart) pointer to the class 
-		static inline scolptr Create() {
-			return std::make_shared<TTN_Collision>();
-		}
-
-	public:
-		//ensuring moving and copying is not allowed so we can manually control destructor calls
-=======
 	class TTN_Collision {
 	public:
 		//defines a special easier to use name for the shared(smart) pointer to the class
@@ -224,47 +202,12 @@ namespace Titan {
 		}
 	public:
 		//ensure moving and copying is not allowed so we can control destructor calls through pointers
->>>>>>> Ame
 		TTN_Collision(const TTN_Collision& other) = delete;
 		TTN_Collision(TTN_Collision& other) = delete;
 		TTN_Collision& operator=(const TTN_Collision& other) = delete;
 		TTN_Collision& operator=(TTN_Collision&& other) = delete;
 
 	public:
-<<<<<<< HEAD
-		//default constructor that creates a new collision object
-		TTN_Collision();
-
-		//contrscutor that creates a new collision object from two physics bodies
-		TTN_Collision(TTN_Physics* b1, TTN_Physics* b2);
-
-		//destructor
-		~TTN_Collision();
-
-		//Getters
-		TTN_Physics* GetBody1();
-		TTN_Physics* GetBody2();
-		bool GetHasCollided();
-
-		//Setters
-		void SetBody1(TTN_Physics* b);
-		void SetBody2(TTN_Physics* b);
-
-		//checks if a collision has happened and saves data about it if it has
-		void CheckCollision();
-
-	protected:
-		//the objects this collision tracks
-		TTN_Physics* m_Body1;
-		TTN_Physics* m_Body2;
-
-		//bool for if the 2 physics body have collided this frame
-		bool m_HasHappened;
-	};
-
-
-
-=======
 		//constructor
 		TTN_Collision();
 
@@ -291,5 +234,5 @@ namespace Titan {
 		glm::vec3 norm1;
 		glm::vec3 norm2;
 	};
->>>>>>> Ame
+ 
 }
