@@ -42,10 +42,12 @@ public:
 	TTN_Mesh::smptr tree1Mesh;
 
 	//textures
-	TTN_Texture::stptr waterText;
+	TTN_Texture2D::stptr waterText;
+	TTN_Texture2D::stptr cannonText;
 
 	//materials
 	TTN_Material::smatptr waterMat;
+	TTN_Material::smatptr cannonMat;
 
 protected:
 	//entities

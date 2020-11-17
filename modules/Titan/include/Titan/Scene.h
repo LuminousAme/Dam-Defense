@@ -14,6 +14,7 @@
 #include "Physics.h"
 
 namespace Titan {
+	typedef entt::basic_group<entt::entity, entt::exclude_t<>, entt::get_t<>, TTN_Transform, TTN_Renderer> RenderGroupType;
 
 	//scene class, handles the ECS, render class, etc. 
 	class TTN_Scene
@@ -129,6 +130,9 @@ namespace Titan {
 	private:
 		//context that contains all our entities, their ids, and components 
 		entt::registry* m_Registry = nullptr;
+
+		//entt group that has all the entities with renderer and transform components so we can edit and render them live
+		std::unique_ptr<RenderGroupType> m_RenderGroup;
 
 		//boolean to store wheter or not this scene should currently be rendered
 		bool m_ShouldRender; 

@@ -1,8 +1,8 @@
 //Titan Engine, by Atlas X Games 
-// Texture.cpp - source file for the class that represents texture images
+// Texture2D.cpp - source file for the class that represents 2d texture images
 
 //include the header
-#include "Titan/Texture.h"
+#include "Titan/Texture2D.h"
 //include other required features
 #include <stb_image.h>
 #include <filesystem>
@@ -89,14 +89,14 @@ namespace Titan {
 	}
 
 	//default constructor
-	TTN_Texture::TTN_Texture()
+	TTN_Texture2D::TTN_Texture2D()
 		: m_Handle(0)
 	{
-		m_data = TTN_Texture_Data();
+		m_data = TTN_Texture2D_Data();
 	}
 
 	//default desctructor
-	TTN_Texture::~TTN_Texture()
+	TTN_Texture2D::~TTN_Texture2D()
 	{
 		//delete the texture from openGL's state machine
 		if (glIsTexture(m_Handle)) {
@@ -105,13 +105,13 @@ namespace Titan {
 	}
 
 	//loads a texture in from a file
-	void TTN_Texture::LoadFromFile(const std::string& fileName, bool flipped, bool forceRgba)
+	void TTN_Texture2D::LoadFromFile(const std::string& fileName, bool flipped, bool forceRgba)
 	{
 		TTN_Texture2DData::st2ddptr data = TTN_Texture2DData::LoadFromFile(fileName, flipped, forceRgba);
 		LoadData(data);
 	}
 
-	void TTN_Texture::LoadData(const TTN_Texture2DData::st2ddptr& data)
+	void TTN_Texture2D::LoadData(const TTN_Texture2DData::st2ddptr& data)
 	{
 		if (m_data.format == Texture_Internal_Format::Interal_Format_Unknown) {
 			m_data.format = data->GetRecommendedFormat();
@@ -141,7 +141,7 @@ namespace Titan {
 	}
 
 	//sets the color of an entire texture
-	void TTN_Texture::SetClearColor(const glm::vec4 color)
+	void TTN_Texture2D::SetClearColor(const glm::vec4 color)
 	{
 		if (m_Handle != 0) {
 			glClearTexImage(m_Handle, 0, GL_RGBA, GL_FLOAT, &color[0]);
@@ -149,7 +149,7 @@ namespace Titan {
 	}
 
 	//binds the texture to the given openGL slot
-	void TTN_Texture::Bind(int slot)
+	void TTN_Texture2D::Bind(int slot)
 	{
 		if (m_Handle != 0) {
 			glActiveTexture(GL_TEXTURE0 + slot);
@@ -158,14 +158,14 @@ namespace Titan {
 	}
 
 	//unbinds whatever textures is at the given openGL slot
-	void TTN_Texture::UnBind(int slot)
+	void TTN_Texture2D::UnBind(int slot)
 	{
 		glActiveTexture(GL_TEXTURE0 + slot);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	//sets the minification filter
-	void TTN_Texture::SetMinFilter(Texture_Min_Filter filter)
+	void TTN_Texture2D::SetMinFilter(Texture_Min_Filter filter)
 	{
 		m_data.minificationFilter = filter;
 		if (m_Handle != 0)
@@ -174,7 +174,7 @@ namespace Titan {
 
 
 	////sets the magnification filter
-	void TTN_Texture::SetMagFilter(Texture_Mag_Filter filter)
+	void TTN_Texture2D::SetMagFilter(Texture_Mag_Filter filter)
 	{
 		m_data.magnificationFilter = filter;
 		if (m_Handle != 0)
@@ -182,14 +182,14 @@ namespace Titan {
 	}
 
 	//sets the horizontal wrap mode
-	void TTN_Texture::SetHoriWrapMode(Texture_Wrap_Mode mode)
+	void TTN_Texture2D::SetHoriWrapMode(Texture_Wrap_Mode mode)
 	{
 		m_data.horiWrapMode = mode;
 		if (m_Handle != 0)
 			glTextureParameteri(m_Handle, GL_TEXTURE_WRAP_S, (GLenum)m_data.horiWrapMode);
 	}
 
-	void TTN_Texture::SetVertWrapMode(Texture_Wrap_Mode mode)
+	void TTN_Texture2D::SetVertWrapMode(Texture_Wrap_Mode mode)
 	{
 		m_data.vertWrapMode = mode;
 		if (m_Handle != 0)
@@ -197,7 +197,7 @@ namespace Titan {
 	}
 
 	//recreates the texture in openGL
-	void TTN_Texture::RecreateTexture()
+	void TTN_Texture2D::RecreateTexture()
 	{
 		if (m_Handle != 0) {
 			glDeleteTextures(1, &m_Handle);

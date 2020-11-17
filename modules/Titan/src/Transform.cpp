@@ -79,6 +79,8 @@ namespace Titan {
 		if(m_Parent != nullptr)
 			//add this object as a child of the new parent
 			m_Parent->AddChild(this);
+
+		Recompute();
 	}
 
 	//returns the position value

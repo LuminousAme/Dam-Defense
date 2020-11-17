@@ -10,11 +10,11 @@ namespace Titan {
 		: m_Shininess(0)
 	{
 		//set the albedo to an all white texture by default
-		m_Albedo = TTN_Texture::Create();
+		m_Albedo = TTN_Texture2D::Create();
 		m_Albedo->SetClearColor(glm::vec4(1.0f));
 
 		//set the specular to an all white texture by default
-		m_SpecularMap = TTN_Texture::Create();
+		m_SpecularMap = TTN_Texture2D::Create();
 		m_SpecularMap->SetClearColor(glm::vec4(1.0f));
 	}
 
@@ -23,7 +23,7 @@ namespace Titan {
 	{ }
 
 	//sets the albedo texture
-	void TTN_Material::SetAlbedo(TTN_Texture::stptr albedo)
+	void TTN_Material::SetAlbedo(TTN_Texture2D::stptr albedo)
 	{
 		m_Albedo = albedo;
 	}
@@ -35,7 +35,7 @@ namespace Titan {
 	}
 
 	//sets the specular map texture
-	void TTN_Material::SetSpecularMap(TTN_Texture::stptr specular)
+	void TTN_Material::SetSpecularMap(TTN_Texture2D::stptr specular)
 	{
 		m_SpecularMap = specular;
 	}

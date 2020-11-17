@@ -12,14 +12,20 @@ namespace Titan {
 		SetMesh(mesh);
 		//sets the shader to a nullpointer
 		m_Shader = nullptr;
+		//sets the material to a nullpointer
+		m_Mat = nullptr;
 	}
 
-	TTN_Renderer::TTN_Renderer(TTN_Mesh::smptr mesh, TTN_Shader::sshptr shader)
+	TTN_Renderer::TTN_Renderer(TTN_Mesh::smptr mesh, TTN_Shader::sshptr shader, TTN_Material::smatptr material, int Renderlayer)
 	{
 		//set the mesh
 		SetMesh(mesh);
 		//sets the shader
 		m_Shader = shader;
+		//sets the material
+		m_Mat = material;
+		//sets the render layer
+		m_RenderLayer = Renderlayer;
 	}
 
 	//default constructor
@@ -27,6 +33,8 @@ namespace Titan {
 	{
 		m_mesh = nullptr;
 		m_Shader = nullptr;
+		m_Mat = nullptr;
+		m_RenderLayer = 0;
 	}
 
 	//destructor, destroys the object
@@ -50,6 +58,12 @@ namespace Titan {
 	void TTN_Renderer::SetMat(TTN_Material::smatptr mat)
 	{
 		m_Mat = mat;
+	}
+
+	//sets the renderlayer
+	void TTN_Renderer::SetRenderLayer(int renderLayer)
+	{
+		m_RenderLayer = renderLayer;
 	}
 
 	//function that will send the uniforms with how to draw the object arounding to the camera to openGL

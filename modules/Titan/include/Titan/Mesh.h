@@ -4,8 +4,6 @@
 
 //include the opengl wrap around classes
 #include "VertexArrayObject.h"
-//include materials class
-#include "Material.h"
 //include glm features
 #include "GLM/glm.hpp"
 //import other required features
