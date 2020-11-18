@@ -77,7 +77,7 @@ namespace Titan {
 		return CreateFromImages(data);
 	}
 
-	void TTN_TextureCubeMapData::LoadFaceData(const TTN_Texture2DData::st2ddptr data, CubeMapFace face)
+	void TTN_TextureCubeMapData::LoadFaceData(const TTN_Texture2DData::st2ddptr& data, CubeMapFace face)
 	{
 		if (data != nullptr) {
 			LOG_ASSERT(data->GetWidth() == data->GetHeight() && data->GetWidth() == _size, "Data is not square or does not match size of cubemap! {}x{} vs {}", data->GetWidth(), data->GetHeight(), _size);
@@ -89,6 +89,95 @@ namespace Titan {
 		}
 		else {
 			LOG_WARN("Data for face {} was null, ignoring", face);
+		}
+	}
+
+	//default constructor
+	TTN_TextureCubeMap::TTN_TextureCubeMap()
+		: TTN_ITexture()
+	{
+		m_data = TTN_TextureCubeMapDesc();
+	}
+
+	//constructor that takes in a description
+	TTN_TextureCubeMap::TTN_TextureCubeMap(const TTN_TextureCubeMapDesc& description)
+		: TTN_ITexture(), m_data(description)
+	{
+		RecreateTexture();
+	}
+
+	//loads from data
+	void TTN_TextureCubeMap::LoadData(const TTN_TextureCubeMapData::stcmdptr& data)
+	{
+		if (m_data.Size != data->GetSize()) {
+			m_data.Size = data->GetSize();
+			if (m_data.Format == Texture_Internal_Format::Interal_Format_Unknown) {
+				m_data.Format = data->GetRecommendedInternalFormat();
+			}
+			RecreateTexture();
+		}
+
+		// We can get better error logs by attaching an object label!
+		if (!data->DebugName.empty()) {
+			glObjectLabel(GL_TEXTURE, _handle, data->DebugName.length(), data->DebugName.c_str());
+		}
+
+		// Align the data store to the size of a single component in
+		// See https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glPixelStore.xhtml
+		int componentSize = (GLint)GetTexelComponentSize(data->GetPixelType());
+		glPixelStorei(GL_PACK_ALIGNMENT, componentSize);
+		// Upload our data to our image
+		glTextureSubImage3D(_handle, 0, 0, 0, 0, m_data.Size, m_data.Size, 6, data->GetPixelFormat(), data->GetPixelType(), data->GetDataPtr());
+
+		if (m_data.GenerateMipMaps) {
+			glGenerateTextureMipmap(_handle);
+		}
+	}
+
+	//loads from 6 images
+	TTN_TextureCubeMap::stcmptr TTN_TextureCubeMap::LoadFromImages(const std::string& filePath)
+	{
+		TTN_TextureCubeMapData::stcmdptr data = TTN_TextureCubeMapData::LoadFromImages(filePath);
+		TTN_TextureCubeMap::stcmptr result = TTN_TextureCubeMap::Create();
+		result->LoadData(data);
+		return result;
+	}
+
+	//sets the minification filter
+	void TTN_TextureCubeMap::SetMinFilter(Texture_Min_Filter filter)
+	{
+		m_data.MinificationFilter = filter;
+		if (_handle != 0) {
+			glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, (GLenum)m_data.MinificationFilter);
+		}
+	}
+
+	//sets the magnification filter
+	void TTN_TextureCubeMap::SetMagFilter(Texture_Mag_Filter filter)
+	{
+		m_data.MagnificationFilter = filter;
+		if (_handle != 0) {
+			glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, (GLenum)m_data.MagnificationFilter);
+		}
+	}
+
+	//creates the texture in opengl
+	void TTN_TextureCubeMap::RecreateTexture()
+	{
+		if (_handle != 0) {
+			glDeleteTextures(1, &_handle);
+			_handle = 0;
+		}
+
+		glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &_handle);
+		if (m_data.Size > 0 && m_data.Format != Texture_Internal_Format::Interal_Format_Unknown)
+		{
+			glTextureStorage2D(_handle, 1, m_data.Format, m_data.Size, m_data.Size);
+			glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTextureParameteri(_handle, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, (GLenum)m_data.MinificationFilter);
+			glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, (GLenum)m_data.MagnificationFilter);
 		}
 	}
 }

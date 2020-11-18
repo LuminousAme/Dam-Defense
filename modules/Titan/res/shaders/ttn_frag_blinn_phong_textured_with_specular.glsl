@@ -16,13 +16,15 @@ uniform vec3  u_AmbientCol;
 uniform float u_AmbientStrength;
 
 //Specfic light stuff
-uniform vec3  u_LightPos;
-uniform vec3  u_LightCol;
-uniform float u_AmbientLightStrength;
-uniform float u_SpecularLightStrength;
-uniform float u_LightAttenuationConstant;
-uniform float u_LightAttenuationLinear;
-uniform float u_LightAttenuationQuadratic;
+uniform vec3  u_LightPos[16];
+uniform vec3  u_LightCol[16];
+uniform float u_AmbientLightStrength[16];
+uniform float u_SpecularLightStrength[16];
+uniform float u_LightAttenuationConstant[16];
+uniform float u_LightAttenuationLinear[16];
+uniform float u_LightAttenuationQuadratic[16];
+
+uniform int u_NumOfLights;
 
 //camera data
 uniform vec3  u_CamPos;
@@ -30,43 +32,56 @@ uniform vec3  u_CamPos;
 //result
 out vec4 frag_color;
 
+//functions 
+vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst, float attenLine, float attenQuad, vec3 norm, vec3 viewDir, float textSpec);
+
 // https://learnopengl.com/Advanced-Lighting/Advanced-Lighting
 void main() {
-	// Lecture 5
-	vec3 ambient = u_AmbientLightStrength * u_LightCol;
-
-	// Diffuse
+	//calcualte the vectors needed for lighting
 	vec3 N = normalize(inNormal);
-	vec3 lightDir = normalize(u_LightPos - inPos);
-
-	float dif = max(dot(N, lightDir), 0.0);
-	vec3 diffuse = dif * u_LightCol;// add diffuse intensity
-
-	//Attenuation
-	float dist = length(u_LightPos - inPos);
-	float attenuation = 1.0f / (
-		u_LightAttenuationConstant + 
-		u_LightAttenuationLinear * dist +
-		u_LightAttenuationQuadratic * dist * dist);
-
-	// Specular
 	vec3 viewDir  = normalize(u_CamPos - inPos);
-	vec3 h        = normalize(lightDir + viewDir);
-
-	// Get the specular power from the specular map
+	//sample the textures
 	float texSpec = texture(s_Specular, inUV).x;
-	float spec = pow(max(dot(N, h), 0.0), u_Shininess); // Shininess coefficient
-	vec3 specular = u_SpecularLightStrength * texSpec * spec * u_LightCol; // Can also use a specular color
-
-	// Get the albedo from the diffuse / albedo map
 	vec4 textureColor = texture(s_Diffuse, inUV);
 
 	//combine everything
-	vec3 result = (
-		(u_AmbientCol * u_AmbientStrength) + // global ambient light
-		(ambient + diffuse + specular) * attenuation // light factors from our single light
-		) * inColor * textureColor.rgb; // Object color
+	vec3 result = u_AmbientCol * u_AmbientStrength; // global ambient light
+
+	//add the results from all the lights
+	for(int i = 0; i < u_NumOfLights; i++) {
+		result = result + CalcLight(u_LightPos[i], u_LightCol[i], u_AmbientLightStrength[i], u_SpecularLightStrength[i], 
+					u_LightAttenuationConstant[i], u_LightAttenuationLinear[i], u_LightAttenuationQuadratic[i], 
+					N, viewDir, texSpec);
+	}
+
+	//add that to the texture color
+	result = result * inColor * textureColor.rgb;
 
 	//save the result and pass it on
 	frag_color = vec4(result, textureColor.a);
+}
+
+vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst, float attenLine, float attenQuad, vec3 norm, vec3 viewDir, float textSpec) {
+	//ambient 
+	vec3 ambient = ambStr * col;
+
+	//diffuse
+	vec3 lightDir = normalize(pos - inPos);
+	float dif = max(dot(norm, lightDir), 0.0);
+	vec3 diffuse = dif * col;
+
+	//attenuation
+	float dist = length(pos - inPos);
+	float attenuation = 1.0f / (
+		attenConst + 
+		attenLine * dist +
+		attenQuad * dist * dist);
+
+	//specular
+	vec3 halfWay =  normalize(lightDir + viewDir);
+	float spec = pow(max(dot(norm, halfWay), 0.0), u_Shininess); 
+	vec3 specular = specStr * textSpec * spec * col;
+	
+	//combine and return it all
+	return ((ambient + diffuse + specular) * attenuation);
 }

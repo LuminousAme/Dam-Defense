@@ -25,7 +25,9 @@ namespace Titan {
 		VERT_COLOR = 2,
 		FRAG_BLINN_PHONG_NO_TEXTURE = 3,
 		FRAG_BLINN_PHONG_ALBEDO_ONLY = 4,
-		FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR = 5
+		FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR = 5,
+		VERT_SKYBOX = 6,
+		FRAG_SKYBOX = 7
 	};
 
 	//class to wrap around an opengl shader 
@@ -82,7 +84,7 @@ namespace Titan {
 		//Gets the default status of the fragment shader
 		int GetFragShaderDefaultStatus() { return fragShaderTTNIdentity; }
 
-	public:
+	protected:
 		//Set a uniform for a 3x3 matrix 
 		void SetUniformMatrix(int location, const glm::mat3* value, int count = 1, bool transposed = false);
 		//Set a unform for  a 4x4 matrix 
@@ -112,15 +114,16 @@ namespace Titan {
 		//Set a uniform for 4 booleans
 		void SetUniform(int location, const glm::bvec4* value, int count = 1);
 
+	public:
 		//template function for setting a uniform based on just name and data
 		template <typename T>
-		void SetUniform(const std::string& name, const T& value) {
+		void SetUniform(const std::string& name, const T& value, int count = 1) {
 			//finds the location that the uniform of that name is stored at 
 			int location = __GetUniformLocation(name);
 			//check if the location exists
 			if (location != -1) {
 				//if it does, then set the uniform at that location
-				SetUniform(location, &value, 1);
+				SetUniform(location, &value, count);
 			}
 			else {
 				//if it doesn't log a warning

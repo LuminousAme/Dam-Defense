@@ -7,7 +7,10 @@
 #include <memory>
 #include <GLM/glm.hpp>
 #include <string>
+
+#include "ITexture.h"
 #include "TextureEnums.h"
+
 
 namespace Titan {
 	//class for the data of a 2D texture
@@ -64,15 +67,17 @@ namespace Titan {
 	};
 
 	//struct with data for a texture
-	struct TTN_Texture2D_Data {
+	struct TTN_Texture2DDesc {
 		//constructor, sets default values for everything
-		TTN_Texture2D_Data() : width(0), height(0),
+		TTN_Texture2DDesc() : width(0), height(0),
 			format(Texture_Internal_Format::Interal_Format_Unknown),
 			horiWrapMode(Texture_Wrap_Mode::Repeat),
 			vertWrapMode(Texture_Wrap_Mode::Repeat),
 			minificationFilter(Texture_Min_Filter::NearestMipLinear),
 			magnificationFilter(Texture_Mag_Filter::Mag_Linear),
-			data(nullptr) {};
+			data(nullptr), 
+			MaxAnisotropic(-1.0f),
+			GenerateMipMaps(true) {};
 
 		uint32_t width, height;
 		Texture_Internal_Format format;
@@ -81,16 +86,18 @@ namespace Titan {
 		Texture_Min_Filter minificationFilter;
 		Texture_Mag_Filter magnificationFilter;
 		uint8_t* data;
+		float MaxAnisotropic;
+		bool GenerateMipMaps;
 	};
 
 	//class for the 2D texture
-	class TTN_Texture2D {
+	class TTN_Texture2D final : public TTN_ITexture {
 	public:
 		//defines a special easier to use name for shared(smart) pointers to the class 
-		typedef std::shared_ptr<TTN_Texture2D> stptr;
+		typedef std::shared_ptr<TTN_Texture2D> st2dptr;
 
 		//creates and returns a shared(smart) pointer to the class 
-		static inline stptr Create() {
+		static inline st2dptr Create() {
 			return std::make_shared<TTN_Texture2D>();
 		}
 
@@ -104,24 +111,15 @@ namespace Titan {
 	public:
 		//default constructor
 		TTN_Texture2D();
+		//constructor that takes in a descpiriton for the texture
+		TTN_Texture2D(const TTN_Texture2DDesc& description);
 		//default destrcutor
-		~TTN_Texture2D();
+		~TTN_Texture2D() = default;
 
 		//loads a texture from a file
-		void LoadFromFile(const std::string& fileName, bool flipped = true, bool forceRgba = false);
+		static st2dptr LoadFromFile(const std::string& fileName, bool flipped = true, bool forceRgba = false);
 		//loads a texture from a texture data object
 		void LoadData(const TTN_Texture2DData::st2ddptr& data);
-
-		//set the clear colour of the texture
-		void SetClearColor(const glm::vec4 color);
-
-		//Binds the texture to a given texture slot
-		void Bind(int slot);
-		//Unbinds whatever texture is in a given slot
-		static void UnBind(int slot);
-
-		//Gets the underlying OpenGL handle for the texture
-		GLuint GetHandle() const { return m_Handle; };
 
 		//Getters for details about the texture
 		//width
@@ -138,6 +136,9 @@ namespace Titan {
 		Texture_Wrap_Mode GetHoriWrapMode() const { return m_data.horiWrapMode; }
 		//vertical wrap mode
 		Texture_Wrap_Mode GetVertWrapMode() const { return m_data.vertWrapMode; }
+		//underlying data
+		const TTN_Texture2DDesc& GetDescription() const { return m_data; }
+
 
 		//setters for the filters and wrap mode
 		//minification filter
@@ -148,12 +149,11 @@ namespace Titan {
 		void SetHoriWrapMode(Texture_Wrap_Mode mode);
 		//vertical wrap mode
 		void SetVertWrapMode(Texture_Wrap_Mode mode);
+		//Anisotropic filtering
+		void SetAnisotropicFiltering(float level = -1.0f);
 
 	private:
-		GLuint m_Handle;
-		TTN_Texture2D_Data m_data;
-
-		static int MAX_TEXTURE_SIZE;
+		TTN_Texture2DDesc m_data;
 
 		void RecreateTexture();
 	};

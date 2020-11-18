@@ -114,11 +114,6 @@ namespace Titan {
 		//gets the camera entity
 		const entt::entity& GetCamEntity() { return m_Cam; }
 
-		//sets the light entity reference
-		void SetLightEntity(const entt::entity& light) { m_Light = light; }
-		//gets the light entity
-		const entt::entity& GetLightEntity() { return m_Light; }
-
 		//bullet physics stuff
 		//set the gravity
 		void SetGravity(glm::vec3 gravity);
@@ -127,6 +122,9 @@ namespace Titan {
 
 		//gets all the collisions for the frame
 		std::vector<TTN_Collision::scolptr> GetCollisions() { return collisions; }
+
+		//variable to store the entities of the lights
+		std::vector<entt::entity> m_Lights;
 
 	private:
 		//context that contains all our entities, their ids, and components 
@@ -140,9 +138,6 @@ namespace Titan {
 
 		//variable to store the entity for the camera
 		entt::entity m_Cam;
-
-		//variable to store the entity of the light
-		entt::entity m_Light;
 
 		//the colour of the scene's ambient lighting
 		glm::vec3 m_AmbientColor;

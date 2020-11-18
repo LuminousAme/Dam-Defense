@@ -129,6 +129,10 @@ namespace Titan {
 				m_physicsWorld->addRigidBody(Get<TTN_Physics>(entity).GetRigidBody());
 				Get<TTN_Physics>(entity).SetIsInWorld(true);
 			}
+
+			//make sure the physics body are active on every frame
+			Get<TTN_Physics>(entity).GetRigidBody()->setActivationState(true);
+
 			//call the physics body's update
 			Get<TTN_Physics>(entity).Update(deltaTime);
 		}
@@ -199,18 +203,42 @@ namespace Titan {
 			shader->SetUniform("u_AmbientStrength", m_AmbientStrength);
 
 			//stuff from the light
-			auto& light = Get<TTN_Light>(m_Light);
-			auto& lightTrans = Get<TTN_Transform>(m_Light);
-			shader->SetUniform("u_LightPos", lightTrans.GetPos());
-			shader->SetUniform("u_LightCol", light.GetColor());
-			shader->SetUniform("u_AmbientLightStrength", light.GetAmbientStrength());
-			shader->SetUniform("u_SpecularLightStrength", light.GetSpecularStrength());
-			shader->SetUniform("u_LightAttenuationConstant", light.GetConstantAttenuation());
-			shader->SetUniform("u_LightAttenuationLinear", light.GetLinearAttenuation());
-			shader->SetUniform("u_LightAttenuationQuadratic", light.GetQuadraticAttenuation());
+			glm::vec3 lightPositions[16];
+			glm::vec3 lightColor[16];
+			float lightAmbientStr[16];
+			float lightSpecStr[16];
+			float lightAttenConst[16];
+			float lightAttenLinear[16];
+			float lightAttenQuadartic[16];
+
+			for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
+				auto& light = Get<TTN_Light>(m_Lights[i]);
+				auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
+				lightPositions[i] = lightTrans.GetPos();
+				lightColor[i] = light.GetColor();
+				lightAmbientStr[i] = light.GetAmbientStrength();
+				lightSpecStr[i] = light.GetSpecularStrength();
+				lightAttenConst[i] = light.GetConstantAttenuation();
+				lightAttenLinear[i] = light.GetConstantAttenuation();
+				lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
+			}
+
+			//send all the data about the lights to glsl
+			shader->SetUniform("u_LightPos", lightPositions[0], 16);
+			shader->SetUniform("u_LightCol", lightColor[0], 16);
+			shader->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
+			shader->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
+			shader->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
+			shader->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
+			shader->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
+
+			//and tell it how many lights there actually are
+			shader->SetUniform("u_NumOfLights", (int)m_Lights.size());
 
 			//stuff from the camera
 			shader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetPos());
+
+			//renderer.GetMat()->GetAlbedo()->Bind(0);
 
 			//if the mesh has a material send data from that
 			if (renderer.GetMat() != nullptr)
