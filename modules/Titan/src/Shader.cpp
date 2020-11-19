@@ -137,6 +137,13 @@ namespace Titan {
 			result = LoadShaderStageFromFile(filePath, GL_VERTEX_SHADER);
 			vertexShaderTTNIndentity = (int)shader;
 		}
+
+		else if (shader == TTN_DefaultShaders::VERT_COLOR_HEIGHTMAP) {
+			filePath = "shaders/ttn_vert_color_heightmap.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_VERTEX_SHADER);
+			vertexShaderTTNIndentity = (int)shader;
+		}
+
 		else if (shader == TTN_DefaultShaders::FRAG_BLINN_PHONG_NO_TEXTURE) {
 			filePath = "shaders/ttn_frag_blinn_phong_no_texture.glsl";
 			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
@@ -152,6 +159,7 @@ namespace Titan {
 			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
 			fragShaderTTNIdentity = (int)shader;
 		}
+
 		else {
 			//if the user tried to load a shader that doesn't,
 			LOG_ERROR("Default shader {} does not exist", shader);

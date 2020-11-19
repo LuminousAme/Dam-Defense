@@ -3,16 +3,24 @@
 #include <glm/gtx/compatibility.hpp>
 #include <GLM/gtx/transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
-
+#include <iostream>
+#include "glm/ext.hpp"
 
 namespace Titan {
+
+
 
 	TTN_Particle::TTN_Particle()
 	{
 		m_ParticlePool.resize(1000);
 	}
 
-	void TTN_Particle::OnUpdate(float deltatime)
+	float TTN_Particle::lerp(float a, float b, float f)
+	{
+			return a + f * (b - a);
+	}
+
+	void TTN_Particle::Update(float deltatime)
 	{
 		for (auto& particle : m_ParticlePool)
 		{
@@ -22,19 +30,46 @@ namespace Titan {
 			if (particle.LifeRemaining <= 0.0f)
 			{
 				particle.Active = false;
+
 				continue;
 			}
 
 			particle.LifeRemaining -= deltatime;
-			particle.Position += particle.Velocity * (float)deltatime;
+			particle.Position += particle.Velocity * deltatime;
 			particle.Rotation += 0.01f * deltatime;
+
+			if (particle.LifeRemaining <= 0.0f)
+			{
+				particle.LifeRemaining = 0.0f;
+				continue;
+			}
+
+			// Fade away particles
+			float life = particle.LifeRemaining / particle.LifeTime;
+			glm::vec4 color = glm::lerp(particle.ColorEnd, particle.ColorBegin, life);
+
+			//color.a = color.a * life;
+			float size = lerp(particle.SizeEnd, particle.SizeBegin, life);
+
+			// Render
+		/*	glm::mat4 transform = glm::translate(glm::mat4(1.0f), { particle.Position.x, particle.Position.y, 0.0f })
+				* glm::rotate(glm::mat4(1.0f), particle.Rotation, { 0.0f, 0.0f, 1.0f })
+				* glm::scale(glm::mat4(1.0f), { size, size, 1.0f });*/
+
+			//std::cout << glm::to_string(transform) << std::endl;
+
+			glBindVertexArray(m_QuadVA);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+			
 		}
+		
 	}
 
-	void TTN_Particle::OnRender()
+	void TTN_Particle::Render()
 	{
-		if (!m_QuadVA)
-		{
+		if (!m_QuadVA) {
+			std::cout << "Working" << std::endl;
+
 			float vertices[] = {
 				 -0.5f, -0.5f, 0.0f,
 				  0.5f, -0.5f, 0.0f,
@@ -60,43 +95,39 @@ namespace Titan {
 			glCreateBuffers(1, &quadIB);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadIB);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
 		}
 
+		//for (auto& particle : m_ParticlePool)
+		//{
+		//	if (!particle.Active)
+		//		continue;
 
-		for (auto& particle : m_ParticlePool)
-		{
-			if (!particle.Active)
-				continue;
+		//	// Fade away particles
+		//	float life = particle.LifeRemaining / particle.LifeTime;
+		//	glm::vec4 color = glm::lerp(particle.ColorEnd, particle.ColorBegin, life);
+		//	//color.a = color.a * life;
+		//	float size = glm::lerp(particle.SizeEnd, particle.SizeBegin, life);
 
-			// Fade away particles
-			float life = particle.LifeRemaining / particle.LifeTime;
-			glm::vec4 color = glm::lerp(particle.ColorEnd, particle.ColorBegin, life);
-			//color.a = color.a * life;
-
-			float size = glm::lerp(particle.SizeEnd, particle.SizeBegin, life);
-
-			// Render
-			glm::mat4 transform = glm::translate(glm::mat4(1.0f), { particle.Position.x, particle.Position.y, 0.0f })
-				* glm::rotate(glm::mat4(1.0f), particle.Rotation, { 0.0f, 0.0f, 1.0f })
-				* glm::scale(glm::mat4(1.0f), { size, size, 1.0f });
-		
-			glBindVertexArray(m_QuadVA);
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-		}
+		//	// Render
+		//	glm::mat4 transform = glm::translate(glm::mat4(1.0f), { particle.Position.x, particle.Position.y, 0.0f })
+		//		* glm::rotate(glm::mat4(1.0f), particle.Rotation, { 0.0f, 0.0f, 1.0f })
+		//		* glm::scale(glm::mat4(1.0f), { size, size, 1.0f });
+		//
+		//	glBindVertexArray(m_QuadVA);
+		//	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		//}
 	}
 
-	void TTN_Particle::Emit(const ParticleData& particleProps)
-	{
+	void TTN_Particle::Emit(const ParticleData& particleProps) {
 		Particle& particle = m_ParticlePool[m_PoolIndex];
 		particle.Active = true;
 		particle.Position = particleProps.m_position;
-		particle.Rotation = 2.0f * glm::pi<float>();
-
+		particle.Rotation = glm::tan(glm::radians(25.0f));
+		
 		// Velocity
 		particle.Velocity = particleProps.m_velocity;
-		particle.Velocity.x += particleProps.VelocityVariation.x * (rand() - 0.5f);
-		particle.Velocity.y += particleProps.VelocityVariation.y * (rand() - 0.5f);
+		//particle.Velocity.x += particleProps.VelocityVariation.x ;
+		//particle.Velocity.y += particleProps.VelocityVariation.y;
 
 		// Color
 		particle.ColorBegin = particleProps.ColorBegin;
@@ -104,14 +135,11 @@ namespace Titan {
 
 		particle.LifeTime = particleProps.LifeTime;
 		particle.LifeRemaining = particleProps.LifeTime;
-		particle.SizeBegin = particleProps.SizeBegin + particleProps.SizeVariation * (rand() - 0.5f);
+		particle.SizeBegin = particleProps.SizeBegin ;
 		particle.SizeEnd = particleProps.SizeEnd;
 
 		m_PoolIndex = --m_PoolIndex % m_ParticlePool.size();
 	}
-
-
-
 
 
 	//TTN_Particle::TTN_Particle() {

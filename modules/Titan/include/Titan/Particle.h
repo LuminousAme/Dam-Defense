@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Titan/Application.h"
 #include "Titan/Physics.h"
 #include "Titan/ObjLoader.h"
@@ -24,11 +23,17 @@ namespace Titan {
 	{
 	public:
 		TTN_Particle();
-
-		void OnUpdate(float deltaTime);
-		void OnRender();
+		
+		float lerp(float a, float b, float f);
+		
+		void Update(float deltaTime);
+		void Render();
 
 		void Emit(const ParticleData& particleProps);
+
+
+		//std::vector<ParticleData>* m_data;
+
 	private:
 		struct Particle
 		{
@@ -42,9 +47,14 @@ namespace Titan {
 			float LifeRemaining = 0.0f;
 
 			bool Active = false;
+			//Particle(const ParticleData& startParam);
+
 		};
 		std::vector<Particle> m_ParticlePool;
 		uint32_t m_PoolIndex = 999;
+		
+	
+		std::shared_ptr<ParticleData> m_data; //Causes refernce to deleted function error
 
 		GLuint m_QuadVA = 0;
 		//std::unique_ptr<GLCore::Utils::Shader> m_ParticleShader;
@@ -124,3 +134,25 @@ namespace Titan {
 	//};
 
 }
+
+
+
+//
+//Particle p;
+//p.Active = true;
+//p.Position = data.m_position;
+//p.Rotation = 2.0f * glm::pi<float>();
+//
+//// Velocity
+//p.Velocity = data.m_velocity;
+//p.Velocity.x += data.VelocityVariation.x * (rand() - 0.5f);
+//p.Velocity.y += data.VelocityVariation.y * (rand() - 0.5f);
+//
+//// Color
+//p.ColorBegin = data.ColorBegin;
+//p.ColorEnd = data.ColorEnd;
+//
+//p.LifeTime = data.LifeTime;
+//p.LifeRemaining = data.LifeTime;
+//p.SizeBegin = data.SizeBegin + data.SizeVariation * (rand() - 0.5f);
+//p.SizeEnd = data.SizeEnd;

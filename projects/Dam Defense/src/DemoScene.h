@@ -45,6 +45,9 @@ public:
 	TTN_Material::smatptr swordMat;
 	TTN_Material::smatptr waterMat;
 
+	TTN_Particle ParticleSystem;
+	ParticleData Particles;
+
 protected:
 	entt::entity camera;
 	entt::entity light;

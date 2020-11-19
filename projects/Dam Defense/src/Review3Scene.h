@@ -2,6 +2,7 @@
 //Review3Scene.h - header for the class that inherits from the scene class to make a scene represneting a demo of our final product for review 3
 #pragma once
 
+#include "Titan/Particle.h"
 #include "Titan/Application.h"
 #include "Titan/ObjLoader.h"
 #include <iostream>
@@ -35,6 +36,7 @@ public:
 	//shader programs
 	TTN_Shader::sshptr shaderProgam;
 	TTN_Shader::sshptr shaderProgamTextured;
+	TTN_Shader::sshptr shaderHeight;
 
 	//meshes
 	TTN_Mesh::smptr cannonMesh;
@@ -44,10 +46,15 @@ public:
 	//textures
 	TTN_Texture2D::stptr waterText;
 	TTN_Texture2D::stptr cannonText;
+	TTN_Texture2D::stptr heightmap;
 
 	//materials
 	TTN_Material::smatptr waterMat;
 	TTN_Material::smatptr cannonMat;
+	TTN_Material::smatptr heightMat;
+
+	TTN_Particle ParticleSystem;
+	ParticleData Particles;
 
 protected:
 	//entities
@@ -56,6 +63,7 @@ protected:
 	entt::entity cannon;
 	entt::entity water;
 	entt::entity tree1;
+	entt::entity height;
 	std::vector<entt::entity> cannonballs;
 
 

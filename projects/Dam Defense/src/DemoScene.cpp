@@ -42,9 +42,18 @@ void DemoScene::InitScene()
 	//add the texture to material and set the shininess
 	swordMat->SetAlbedo(swordText);
 	swordMat->SetShininess(128.0f);
-	//m_world->setGravity(btVector3(0, -0.80f, 0));//gravity
-	//m_world->setDebugDrawer(&debugger);
-	//m_world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	
+	ParticleData data;
+	//data.m_max = 100;
+	data.m_position = glm::vec3(10.f, -5.0f, 20.0f);
+	data.m_velocity = glm::vec3(1.0f, 5.0f, 0.0f);
+	data.ColorBegin = glm::vec4(1.0f, 1.0f, 1.5f, 1.0f);
+	data.ColorEnd = glm::vec4(0.0f, 0.0f, 1.0f, 0.5f);
+
+	data.SizeEnd = 10.0f;
+	data.SizeBegin = 20.0f;
+	data.LifeTime = 15.0f;
+	Particles = data;
 
 	//plane stuff
 	plane = TTN_ObjLoader::LoadFromFile("Review3/water.obj");
@@ -157,6 +166,7 @@ void DemoScene::InitScene()
 		treeTrans.SetPos(glm::vec3(2.0f, -3.0f, 3.0f));
 		treeTrans.SetScale(glm::vec3(1.f, 1.f, 1.f));
 
+
 		/*TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), tree2);
 		AttachCopy<TTN_Physics>(tree2, pbody);*/
 	}
@@ -207,13 +217,10 @@ void DemoScene::InitScene()
 
 	//sets the boat at the sword's parent
 	Get<TTN_Transform>(sword).SetParent(&Get<TTN_Transform>(boat), &boat);
-<<<<<<< HEAD
  
-=======
-
 	speed = 1.0f;
 	velo = glm::vec3(0.0f);
->>>>>>> Ame
+
 }
 
 void DemoScene::Update(float deltaTime)
