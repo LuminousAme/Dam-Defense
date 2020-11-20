@@ -32,10 +32,8 @@ void DemoScene::InitScene()
 	swordMesh = TTN_ObjLoader::LoadFromFile("Sword.obj"); //sword, texture test
 	swordMesh->SetUpVao();
 
-	//texture for the sword 
-	swordText = TTN_Texture2D::Create();
-	//load the texture from a file
-	swordText->LoadFromFile("Sword_Texture.png");
+	//load the texture for the sword from a file
+	swordText = TTN_Texture2D::LoadFromFile("Sword_Texture.png");
 
 	//material for the sword 
 	swordMat = TTN_Material::Create();
@@ -58,8 +56,7 @@ void DemoScene::InitScene()
 	//plane stuff
 	plane = TTN_ObjLoader::LoadFromFile("Review3/water.obj");
 	plane->SetUpVao();
-	waterText = TTN_Texture2D::Create();
-	waterText->LoadFromFile("Review3/water_text.png");
+	waterText = TTN_Texture2D::LoadFromFile("Review3/water_text.png");
 	waterMat = TTN_Material::Create();
 	waterMat->SetAlbedo(waterText);
 	waterMat->SetShininess(128.0f);

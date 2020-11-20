@@ -39,8 +39,8 @@ public:
 	TTN_Mesh::smptr swordMesh;
 	TTN_Mesh::smptr plane;
 
-	TTN_Texture2D::stptr swordText;
-	TTN_Texture2D::stptr waterText;
+	TTN_Texture2D::st2dptr swordText;
+	TTN_Texture2D::st2dptr waterText;
 
 	TTN_Material::smatptr swordMat;
 	TTN_Material::smatptr waterMat;

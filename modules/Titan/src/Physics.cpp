@@ -265,7 +265,7 @@ namespace Titan {
 
 	//initlization for static rendering variables
 	TTN_Shader::sshptr TTN_Physics::shader = nullptr;
-	TTN_Texture2D::stptr TTN_Physics::texture = nullptr;
+	TTN_Texture2D::st2dptr TTN_Physics::texture = nullptr;
 	TTN_Material::smatptr TTN_Physics::mat = nullptr;
 	TTN_Mesh::smptr TTN_Physics::mesh = nullptr;
 	bool TTN_Physics::renderingSetUp = false;

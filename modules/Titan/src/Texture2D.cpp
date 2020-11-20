@@ -90,38 +90,39 @@ namespace Titan {
 
 	//default constructor
 	TTN_Texture2D::TTN_Texture2D()
-		: m_Handle(0)
+		: TTN_ITexture()
 	{
-		m_data = TTN_Texture2D_Data();
+		m_data = TTN_Texture2DDesc();
 	}
 
-	//default desctructor
-	TTN_Texture2D::~TTN_Texture2D()
+	//constructor that takes in a descpiriton for the texture
+	TTN_Texture2D::TTN_Texture2D(const TTN_Texture2DDesc& description)
+		: TTN_ITexture(), m_data(description)
 	{
-		//delete the texture from openGL's state machine
-		if (glIsTexture(m_Handle)) {
-			glDeleteTextures(1, &m_Handle);
-		}
+		RecreateTexture();
 	}
 
 	//loads a texture in from a file
-	void TTN_Texture2D::LoadFromFile(const std::string& fileName, bool flipped, bool forceRgba)
+	TTN_Texture2D::st2dptr TTN_Texture2D::LoadFromFile(const std::string& fileName, bool flipped, bool forceRgba)
 	{
 		TTN_Texture2DData::st2ddptr data = TTN_Texture2DData::LoadFromFile(fileName, flipped, forceRgba);
-		LoadData(data);
+		LOG_ASSERT(data != nullptr, "Failed to load image from file!");
+		TTN_Texture2D::st2dptr result = TTN_Texture2D::Create();
+		result->LoadData(data);
+		return result;
 	}
 
 	void TTN_Texture2D::LoadData(const TTN_Texture2DData::st2ddptr& data)
 	{
-		if (m_data.format == Texture_Internal_Format::Interal_Format_Unknown) {
-			m_data.format = data->GetRecommendedFormat();
-		}
-
 		if (m_data.width != data->GetWidth() ||
 			m_data.height != data->GetHeight())
 		{
 			m_data.width = data->GetWidth();
 			m_data.height = data->GetHeight();
+
+			if (m_data.format == Texture_Internal_Format::Interal_Format_Unknown) {
+				m_data.format = data->GetRecommendedFormat();
+			}
 
 			RecreateTexture();
 		}
@@ -131,88 +132,85 @@ namespace Titan {
 		int componentSize = (GLint)GetTexelComponentSize(data->GetPixelType());
 		glPixelStorei(GL_PACK_ALIGNMENT, componentSize);
 		// Upload our data to our image
-		glTextureSubImage2D(m_Handle, 0, 0, 0, m_data.width, m_data.height, data->GetFormat(),
+		glTextureSubImage2D(_handle, 0, 0, 0, m_data.width, m_data.height, data->GetFormat(),
 			data->GetPixelType(), data->GetDataPtr());
 
 		// We can get better error logs by attaching an object label!
 		if (!data->DebugName.empty()) {
-			glObjectLabel(GL_TEXTURE, m_Handle, data->DebugName.length(), data->DebugName.c_str());
+			glObjectLabel(GL_TEXTURE, _handle, data->DebugName.length(), data->DebugName.c_str());
 		}
-	}
 
-	//sets the color of an entire texture
-	void TTN_Texture2D::SetClearColor(const glm::vec4 color)
-	{
-		if (m_Handle != 0) {
-			glClearTexImage(m_Handle, 0, GL_RGBA, GL_FLOAT, &color[0]);
+		//mipmaping
+		if (m_data.GenerateMipMaps) {
+			glGenerateTextureMipmap(_handle);
 		}
-	}
-
-	//binds the texture to the given openGL slot
-	void TTN_Texture2D::Bind(int slot)
-	{
-		if (m_Handle != 0) {
-			glActiveTexture(GL_TEXTURE0 + slot);
-			glBindTexture(GL_TEXTURE_2D, m_Handle);
-		}
-	}
-
-	//unbinds whatever textures is at the given openGL slot
-	void TTN_Texture2D::UnBind(int slot)
-	{
-		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	//sets the minification filter
 	void TTN_Texture2D::SetMinFilter(Texture_Min_Filter filter)
 	{
 		m_data.minificationFilter = filter;
-		if (m_Handle != 0)
-			glTextureParameteri(m_Handle, GL_TEXTURE_MIN_FILTER, (GLenum)m_data.minificationFilter);
+		if (_handle != 0)
+			glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, (GLenum)m_data.minificationFilter);
 	}
-
 
 	////sets the magnification filter
 	void TTN_Texture2D::SetMagFilter(Texture_Mag_Filter filter)
 	{
 		m_data.magnificationFilter = filter;
-		if (m_Handle != 0)
-			glTextureParameteri(m_Handle, GL_TEXTURE_MAG_FILTER, (GLenum)m_data.magnificationFilter);
+		if (_handle != 0)
+			glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, (GLenum)m_data.magnificationFilter);
 	}
 
 	//sets the horizontal wrap mode
 	void TTN_Texture2D::SetHoriWrapMode(Texture_Wrap_Mode mode)
 	{
 		m_data.horiWrapMode = mode;
-		if (m_Handle != 0)
-			glTextureParameteri(m_Handle, GL_TEXTURE_WRAP_S, (GLenum)m_data.horiWrapMode);
+		if (_handle != 0)
+			glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, (GLenum)m_data.horiWrapMode);
 	}
 
+	//sets the verticla wrap mode
 	void TTN_Texture2D::SetVertWrapMode(Texture_Wrap_Mode mode)
 	{
 		m_data.vertWrapMode = mode;
-		if (m_Handle != 0)
-		glTextureParameteri(m_Handle, GL_TEXTURE_WRAP_T, (GLenum)m_data.vertWrapMode);
+		if (_handle != 0)
+		glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, (GLenum)m_data.vertWrapMode);
+	}
+
+	//sets the Anisotropic filtering
+	void TTN_Texture2D::SetAnisotropicFiltering(float level)
+	{
+		if (level < 0.0f) {
+			level = TTN_Texture2D::GetLimits().MAX_ANISOTROPY;
+		}
+		m_data.MaxAnisotropic = level;
+		if (_handle != 0) {
+			glTextureParameterf(_handle, GL_TEXTURE_MAX_ANISOTROPY, m_data.MaxAnisotropic);
+		}
 	}
 
 	//recreates the texture in openGL
 	void TTN_Texture2D::RecreateTexture()
 	{
-		if (m_Handle != 0) {
-			glDeleteTextures(1, &m_Handle);
-			m_Handle = 0;
+		if (_handle != 0) {
+			glDeleteTextures(1, &_handle);
+			_handle = 0;
 		}
 
-		glCreateTextures(GL_TEXTURE_2D, 1, &m_Handle);
+		glCreateTextures(GL_TEXTURE_2D, 1, &_handle);
+
+		if (m_data.MaxAnisotropic < 0.0f) {
+			m_data.MaxAnisotropic = TTN_ITexture::GetLimits().MAX_ANISOTROPY;
+		}
 
 		if (m_data.width * m_data.height > 0 && m_data.format != Texture_Internal_Format::Interal_Format_Unknown)
 		{
-			glTextureStorage2D(m_Handle, 1, m_data.format, m_data.width, m_data.height);
-			glTextureParameteri(m_Handle, GL_TEXTURE_WRAP_S, (GLenum)m_data.horiWrapMode);
-			glTextureParameteri(m_Handle, GL_TEXTURE_WRAP_T, (GLenum)m_data.vertWrapMode);
-			glTextureParameteri(m_Handle, GL_TEXTURE_MIN_FILTER, (GLenum)m_data.minificationFilter);
-			glTextureParameteri(m_Handle, GL_TEXTURE_MAG_FILTER, (GLenum)m_data.magnificationFilter);
+			glTextureStorage2D(_handle, 1, m_data.format, m_data.width, m_data.height);
+			glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, (GLenum)m_data.horiWrapMode);
+			glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, (GLenum)m_data.vertWrapMode);
+			glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, (GLenum)m_data.minificationFilter);
+			glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, (GLenum)m_data.magnificationFilter);
 		}
 	}
 }

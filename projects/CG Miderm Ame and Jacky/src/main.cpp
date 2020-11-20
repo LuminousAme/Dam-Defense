@@ -109,7 +109,7 @@ int main() {
 		//create an entity in the scene for a light
 		light = tanksScene.CreateEntity();
 		//set that entity as the main light for the scene
-		tanksScene.SetLightEntity(light);
+		tanksScene.m_Lights.push_back(light);
 
 		//set up a trasnform for the light
 		TTN_Transform lightTrans = TTN_Transform();
@@ -175,9 +175,9 @@ int main() {
 		redplayComp.SetDirection(glm::vec3(newDirection.x, newDirection.y, newDirection.z));
 
 		//setup a physics body for the red player
-		tanksScene.Attach<TTN_Physics>(redPlayer);
-		TTN_Physics& physicBod = tanksScene.Get<TTN_Physics>(redPlayer);
-		physicBod = TTN_Physics(redTrans.GetPos(), glm::vec3(0.0f), glm::vec3(0.40f, 0.30f, 0.30f));
+		//tanksScene.Attach<TTN_Physics>(redPlayer);
+		//TTN_Physics& physicBod = tanksScene.Get<TTN_Physics>(redPlayer);
+		//physicBod = TTN_Physics(redTrans.GetPos(), glm::vec3(0.0f), glm::vec3(0.40f, 0.30f, 0.30f));
 	}
 
 	//entity for the blue player
@@ -209,9 +209,9 @@ int main() {
 		blueplayComp.SetDirection(glm::vec3(newDirection.x, newDirection.y, newDirection.z));
 
 		//setup a physics body for the blue player
-		tanksScene.Attach<TTN_Physics>(bluePlayer);
-		TTN_Physics& physicBod = tanksScene.Get<TTN_Physics>(bluePlayer);
-		physicBod = TTN_Physics(blueTrans.GetPos(), glm::vec3(0.0f), glm::vec3(0.40f, 0.30f, 0.30f));
+		//tanksScene.Attach<TTN_Physics>(bluePlayer);
+		//TTN_Physics& physicBod = tanksScene.Get<TTN_Physics>(bluePlayer);
+		//physicBod = TTN_Physics(blueTrans.GetPos(), glm::vec3(0.0f), glm::vec3(0.40f, 0.30f, 0.30f));
 	}
 
 	//entities for the walls
@@ -291,9 +291,9 @@ int main() {
 
 		//setup a physics body for the wall
 		tanksScene.Attach<TTN_Physics>(walls[i]);
-		TTN_Physics &physicBod = tanksScene.Get<TTN_Physics>(walls[i]);
-		physicBod = TTN_Physics(wallTrans.GetPos(), glm::vec3(0.0f), wallTrans.GetScale() + glm::vec3(0.0f, 0.0f ,0.001f));
-		physicBod.SetIsStaticBody(true); //make it static as the walls shouldn't move
+		//TTN_Physics &physicBod = tanksScene.Get<TTN_Physics>(walls[i]);
+		//physicBod = TTN_Physics(wallTrans.GetPos(), glm::vec3(0.0f), wallTrans.GetScale() + glm::vec3(0.0f, 0.0f ,0.001f));
+		//physicBod.SetIsStaticBody(true); //make it static as the walls shouldn't move
 	}
 
 	//score display for the red player
@@ -355,8 +355,8 @@ int main() {
 		redTransB.RotateFixed(glm::vec3(270.0f, 0.0f, 90.0f));
 
 		//physics body for bullet
-		TTN_Physics physicBod = TTN_Physics(redTransB.GetPos(), glm::vec3(0.0f), glm::vec3(0.10f, 0.10f, 0.10f));
-		tanksScene.AttachCopy<TTN_Physics>(redBullet, physicBod);
+		//TTN_Physics physicBod = TTN_Physics(redTransB.GetPos(), glm::vec3(0.0f), glm::vec3(0.10f, 0.10f, 0.10f));
+		//tanksScene.AttachCopy<TTN_Physics>(redBullet, physicBod);
 	}
 
 	//entity for the blue tank's projectiles
@@ -378,8 +378,8 @@ int main() {
 		blueTransB.RotateFixed(glm::vec3(270.0f, 0.0f, 90.0f));
 
 		//physics body for bullet
-		TTN_Physics physicBod = TTN_Physics(blueTransB.GetPos(), glm::vec3(0.0f), glm::vec3(0.10f, 0.10f, 0.10f));
-		tanksScene.AttachCopy<TTN_Physics>(blueBullet, physicBod);
+		//TTN_Physics physicBod = TTN_Physics(blueTransB.GetPos(), glm::vec3(0.0f), glm::vec3(0.10f, 0.10f, 0.10f));
+		//tanksScene.AttachCopy<TTN_Physics>(blueBullet, physicBod);
 	}
 
 	//entity for the red tank expolding
@@ -421,7 +421,7 @@ int main() {
 	}
 
 	//add the scene to the application
-	TTN_Application::scenes.push_back(tanksScene);
+	TTN_Application::scenes.push_back(&tanksScene);
 	//set the background to a green
 	TTN_Application::SetClearColor(glm::vec4(0.0f, 0.2f, 0.0f, 1.0f));
 	
@@ -502,7 +502,7 @@ int main() {
 			//reduce the remaining time on the screenshake
 			shakeDuration -= dt;
 		}
-
+		/*
 		/// RED TANK MOVEMENT /// 
 
 		//get a reference to the red player's transform and physics body
@@ -513,25 +513,25 @@ int main() {
 		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
 			redPlayerDir = glm::rotate(redPlayerDir, glm::radians(-50.0f * dt));
 			redTrans.RotateFixed(glm::vec3(0.0f, 0.0f, -50.0f * dt));
-			//std::cout << /*glm::to_string */(redTrans.GetRotation().z) << std::endl;
+			//std::cout << /*glm::to_string (redTrans.GetRotation().z) << std::endl;
 		}
 		if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
 			redPlayerDir = glm::rotate(redPlayerDir, glm::radians(50.0f * dt));
 			redTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 50.0f * dt));
 		}
-
-		redPhysBod.SetVelocity(glm::vec3(0.0f));
+		
+		//redPhysBod.SetVelocity(glm::vec3(0.0f));
 
 		//allow the player to move forwards and backwards
 		if (!TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A) && !TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
 			//if the player isn't rotating check if they're trying to move forwards or backwards
 			if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
 				//if the player is pressing w, move them forwards
-				redPhysBod.SetVelocity(glm::vec3(glm::normalize(redPlayerDir).x * playerSpeed * dt, glm::normalize(redPlayerDir).y * playerSpeed * dt, 0.0f));
+				//redPhysBod.SetVelocity(glm::vec3(glm::normalize(redPlayerDir).x * playerSpeed * dt, glm::normalize(redPlayerDir).y * playerSpeed * dt, 0.0f));
 			}
 			if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
 				//if they are pressing S move them backwards
-				redPhysBod.SetVelocity(-1.0f * glm::vec3(glm::normalize(redPlayerDir).x* playerSpeed* dt, glm::normalize(redPlayerDir).y* playerSpeed* dt, 0.0f));
+				//redPhysBod.SetVelocity(-1.0f * glm::vec3(glm::normalize(redPlayerDir).x* playerSpeed* dt, glm::normalize(redPlayerDir).y* playerSpeed* dt, 0.0f));
 			}
 		}
 
@@ -813,7 +813,7 @@ int main() {
 			bluePhysBodBullet.SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
 			bounceCountB = 0;
 		}
-
+			*/
 		//call all the backend updates and render everything
 		TTN_Application::Update();
 	}

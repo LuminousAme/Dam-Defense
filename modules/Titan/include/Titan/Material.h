@@ -31,18 +31,18 @@ namespace Titan {
 		~TTN_Material();
 
 		//setters
-		void SetAlbedo(TTN_Texture2D::stptr albedo);
+		void SetAlbedo(TTN_Texture2D::st2dptr albedo);
 		void SetShininess(float shininess);
-		void SetSpecularMap(TTN_Texture2D::stptr specular);
+		void SetSpecularMap(TTN_Texture2D::st2dptr specular);
 
 		//getters
-		TTN_Texture2D::stptr GetAlbedo() { return m_Albedo; }
+		TTN_Texture2D::st2dptr GetAlbedo() { return m_Albedo; }
 		float GetShininess() { return m_Shininess; }
-		TTN_Texture2D::stptr GetSpecularMap() { return m_SpecularMap; }
+		TTN_Texture2D::st2dptr GetSpecularMap() { return m_SpecularMap; }
 
 	private:
-		TTN_Texture2D::stptr m_Albedo;
-		TTN_Texture2D::stptr m_SpecularMap;
+		TTN_Texture2D::st2dptr m_Albedo;
+		TTN_Texture2D::st2dptr m_SpecularMap;
 		float m_Shininess;
 	};
 }

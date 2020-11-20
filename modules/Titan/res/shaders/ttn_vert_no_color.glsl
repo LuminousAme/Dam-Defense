@@ -26,7 +26,7 @@ void main() {
 	outPos = (Model * vec4(inPos, 1.0)).xyz;
 	outNormal = NormalMat * inNormal;
 	outUV = inUV;
-	outColor = vec3(0.5, 0.5, 0.5);
+	outColor = vec3(1.0, 1.0, 1.0);
 
 	//set the position of the vertex
 	gl_Position = newPos;

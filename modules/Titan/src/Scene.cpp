@@ -114,6 +114,7 @@ namespace Titan {
 		}
 	}
 
+<<<<<<< HEAD
 	void TTN_Scene::Update(float deltaTime)
 	{
 		//call the step simulation for bullet
@@ -279,6 +280,201 @@ namespace Titan {
 	}
 
 	//set the gravity for the physics world
+=======
+	void TTN_Scene::Update(float deltaTime)
+	{
+		//call the step simulation for bullet
+		m_physicsWorld->stepSimulation(deltaTime);
+
+		//run through all of the physicsbody in the scene
+		auto physicsBodyView = m_Registry->view<TTN_Physics>();
+		for (auto entity : physicsBodyView) {
+			//if the physics body isn't in the world, add it
+			if (!Get<TTN_Physics>(entity).GetIsInWorld()) {
+				Get<TTN_Physics>(entity).SetEntity(entity);
+				m_physicsWorld->addRigidBody(Get<TTN_Physics>(entity).GetRigidBody());
+				Get<TTN_Physics>(entity).SetIsInWorld(true);
+			}
+
+			//make sure the physics body are active on every frame
+			Get<TTN_Physics>(entity).GetRigidBody()->setActivationState(true);
+
+			//call the physics body's update
+			Get<TTN_Physics>(entity).Update(deltaTime);
+		}
+
+		//construct the collisions for the frame
+		ConstructCollisions();
+
+		//run through all of the entities with both a physics body and a transform in the scene
+		auto transAndPhysicsView = m_Registry->view<TTN_Transform, TTN_Physics>();
+		for (auto entity : transAndPhysicsView) {
+			if (!Get<TTN_Physics>(entity).GetIsStatic()) {
+				//copy the position of the physics body into the position of the transform
+				Get<TTN_Transform>(entity).SetPos(Get<TTN_Physics>(entity).GetTrans().GetPos());
+			}
+		}
+	}
+
+	//renders all the messes in our game
+	void TTN_Scene::Render()
+	{
+		//get the view and projection martix 
+		glm::mat4 vp; 
+		//update the camera for the scene
+		//set the camera's position to it's transform
+		Get<TTN_Camera>(m_Cam).SetPosition(Get<TTN_Transform>(m_Cam).GetPos());
+		//save the view and projection matrix
+		vp = Get<TTN_Camera>(m_Cam).GetProj();
+		glm::mat4 viewMat = glm::inverse(Get<TTN_Transform>(m_Cam).GetGlobal());
+		vp *= viewMat;
+
+		//sort our render group
+		m_RenderGroup->sort<TTN_Renderer>([](const TTN_Renderer& l, const TTN_Renderer& r) {
+			//sort by render layer first, higher render layers get drawn later
+			if (l.GetRenderLayer() < r.GetRenderLayer()) return true;
+			if (l.GetRenderLayer() > r.GetRenderLayer()) return true;
+
+			//sort by shader pointer to minimize state changes on active shader
+			if (l.GetShader() < r.GetShader()) return true;
+			if (l.GetShader() > r.GetShader()) return false;
+
+			//sort by material pointer to  minimize state changes on textures and stuff
+			if (l.GetMat() < r.GetMat()) return true;
+			if (l.GetMat() > r.GetMat()) return false;
+		});
+
+		//reconstruct any scenegraph relationships
+		auto transView = m_Registry->view<TTN_Transform>();
+		for (auto entity : transView) {
+			//if it should have a parent
+			if (Get<TTN_Transform>(entity).GetParentEntity() != nullptr) {
+				//then reatach that parent
+				Get<TTN_Transform>(entity).SetParent(&Get<TTN_Transform>(*Get<TTN_Transform>(entity).GetParentEntity()),
+					Get<TTN_Transform>(entity).GetParentEntity());
+			}
+		}
+
+		//go through every entity with a transform and a mesh renderer and render the mesh
+		m_RenderGroup->each([&](entt::entity, TTN_Transform& transform, TTN_Renderer& renderer) {
+			//get the shader pointer
+			TTN_Shader::sshptr shader = renderer.GetShader();
+
+			//bind the shader
+			shader->Bind();
+
+			//sets some uniforms
+			//scene level ambient lighting
+			shader->SetUniform("u_AmbientCol", m_AmbientColor);
+			shader->SetUniform("u_AmbientStrength", m_AmbientStrength);
+
+			//stuff from the light
+			glm::vec3 lightPositions[16];
+			glm::vec3 lightColor[16];
+			float lightAmbientStr[16];
+			float lightSpecStr[16];
+			float lightAttenConst[16];
+			float lightAttenLinear[16];
+			float lightAttenQuadartic[16];
+
+			for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
+				auto& light = Get<TTN_Light>(m_Lights[i]);
+				auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
+				lightPositions[i] = lightTrans.GetPos();
+				lightColor[i] = light.GetColor();
+				lightAmbientStr[i] = light.GetAmbientStrength();
+				lightSpecStr[i] = light.GetSpecularStrength();
+				lightAttenConst[i] = light.GetConstantAttenuation();
+				lightAttenLinear[i] = light.GetConstantAttenuation();
+				lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
+			}
+
+			//send all the data about the lights to glsl
+			shader->SetUniform("u_LightPos", lightPositions[0], 16);
+			shader->SetUniform("u_LightCol", lightColor[0], 16);
+			shader->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
+			shader->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
+			shader->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
+			shader->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
+			shader->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
+
+			//and tell it how many lights there actually are
+			shader->SetUniform("u_NumOfLights", (int)m_Lights.size());
+
+			//stuff from the camera
+			shader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetPos());
+
+			//renderer.GetMat()->GetAlbedo()->Bind(0);
+
+			//if the mesh has a material send data from that
+			if (renderer.GetMat() != nullptr)
+			{
+				//give openGL the shinniess
+				shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
+				//if they're using a texture 
+				if (shader->GetFragShaderDefaultStatus() == 4 || shader->GetFragShaderDefaultStatus() == 5)
+				{
+					//bind it so openGL can see it
+					renderer.GetMat()->GetAlbedo()->Bind(0);
+				}
+				//if they're using a specular map 
+				if (shader->GetFragShaderDefaultStatus() == 5)
+				{
+					//bind it so openGL can see it
+					renderer.GetMat()->GetSpecularMap()->Bind(1);
+				}
+			}
+			//otherwise send a default shinnies value
+			else {
+				shader->SetUniform("u_Shininess", 128.0f);
+			}
+
+			//unbind the shader
+			shader->UnBind();
+
+			//and finsih by rendering the mesh
+			renderer.Render(transform.GetGlobal(), vp);
+		});
+	}
+
+	//sets wheter or not the scene should be rendered
+	void TTN_Scene::SetShouldRender(bool _shouldRender)
+	{
+		m_ShouldRender = _shouldRender;
+	}
+
+	//sets the color of the scene's ambient lighting
+	void TTN_Scene::SetSceneAmbientColor(glm::vec3 color)
+	{
+		m_AmbientColor = color;
+	}
+
+	//sets the strenght of the scene's ambient lighting
+	void TTN_Scene::SetSceneAmbientLightStrength(float str)
+	{
+		m_AmbientStrength = str;
+	}
+
+	//returns wheter or not this scene should be rendered
+	bool TTN_Scene::GetShouldRender()
+	{
+		return m_ShouldRender;
+	}
+
+	//returns the color of the scene's ambient lighting
+	glm::vec3 TTN_Scene::GetSceneAmbientColor()
+	{
+		return m_AmbientColor;
+	}
+
+	//returns the strenght of the scene's ambient lighting
+	float TTN_Scene::GetSceneAmbientLightStrength()
+	{
+		return m_AmbientStrength;
+	}
+
+	//set the gravity for the physics world
+>>>>>>> Ame
 	void TTN_Scene::SetGravity(glm::vec3 gravity)
 	{
 		btVector3 grav = btVector3(gravity.x, gravity.y, gravity.z);

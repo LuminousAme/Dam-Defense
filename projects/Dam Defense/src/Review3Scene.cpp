@@ -42,12 +42,17 @@ void Review3Scene::InitScene()
 	tree1Mesh->SetUpVao();
 
 	//create textrure pointers and load the textures in 
+<<<<<<< HEAD
 	waterText = TTN_Texture2D::Create();
 	waterText->LoadFromFile("Review3/water_text.png");
 	cannonText = TTN_Texture2D::Create();
 	cannonText->LoadFromFile("Review3/Metal_Texture_2.jpg");
 	heightmap = TTN_Texture2D::Create();
 	heightmap->LoadFromFile("Review3/heightmap.bmp");
+=======
+	waterText = TTN_Texture2D::LoadFromFile("Review3/water_text.png");
+	cannonText = TTN_Texture2D::LoadFromFile("Review3/Metal_Texture_2.jpg");
+>>>>>>> Ame
 
 	//create material pointers and set them up
 	waterMat = TTN_Material::Create();

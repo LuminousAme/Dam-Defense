@@ -184,7 +184,7 @@ namespace Titan {
 
 		//data for rendering the physics box
 		static TTN_Shader::sshptr shader;
-		static TTN_Texture2D::stptr texture;
+		static TTN_Texture2D::st2dptr texture;
 		static TTN_Material::smatptr mat;
 		static TTN_Mesh::smptr mesh;
 		static bool renderingSetUp;
