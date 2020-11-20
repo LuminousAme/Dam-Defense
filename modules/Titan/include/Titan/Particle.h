@@ -56,7 +56,7 @@ namespace Titan {
 	
 		std::shared_ptr<ParticleData> m_data; //Causes refernce to deleted function error
 
-		GLuint m_QuadVA = 0;
+		GLuint m_ParticleRender = 0;
 		//std::unique_ptr<GLCore::Utils::Shader> m_ParticleShader;
 		//GLint m_ParticleShaderViewProj, m_ParticleShaderTransform, m_ParticleShaderColor;
 	};

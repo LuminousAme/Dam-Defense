@@ -6,9 +6,9 @@
 #include <iostream>
 #include "glm/ext.hpp"
 
+//code refernce: https://www.youtube.com/watch?v=GK0jHlv3e3w&t=515s
+
 namespace Titan {
-
-
 
 	TTN_Particle::TTN_Particle()
 	{
@@ -58,7 +58,7 @@ namespace Titan {
 
 			//std::cout << glm::to_string(transform) << std::endl;
 
-			glBindVertexArray(m_QuadVA);
+			glBindVertexArray(m_ParticleRender);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 			
 		}
@@ -67,7 +67,7 @@ namespace Titan {
 
 	void TTN_Particle::Render()
 	{
-		if (!m_QuadVA) {
+		if (!m_ParticleRender) {
 			std::cout << "Working" << std::endl;
 
 			float vertices[] = {
@@ -77,8 +77,8 @@ namespace Titan {
 				 -0.5f,  0.5f, 0.0f
 			};
 
-			glCreateVertexArrays(1, &m_QuadVA);
-			glBindVertexArray(m_QuadVA);
+			glCreateVertexArrays(1, &m_ParticleRender);
+			glBindVertexArray(m_ParticleRender);
 
 			GLuint quadVB, quadIB;
 			glCreateBuffers(1, &quadVB);

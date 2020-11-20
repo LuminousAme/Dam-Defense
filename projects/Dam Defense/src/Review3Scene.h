@@ -39,6 +39,7 @@ public:
 	TTN_Shader::sshptr shaderHeight;
 
 	//meshes
+	TTN_Mesh::smptr boatMesh;
 	TTN_Mesh::smptr cannonMesh;
 	TTN_Mesh::smptr plane;
 	TTN_Mesh::smptr tree1Mesh;
@@ -64,6 +65,7 @@ protected:
 	entt::entity water;
 	entt::entity tree1;
 	entt::entity height;
+	entt::entity boat;
 	std::vector<entt::entity> cannonballs;
 
 

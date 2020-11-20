@@ -32,6 +32,8 @@ void Review3Scene::InitScene()
 	shaderHeight->Link();
 
 	//create mesh pointers and set up their vaos
+	boatMesh = TTN_ObjLoader::LoadFromFile("boat.obj"); // boat
+	boatMesh->SetUpVao();
 	cannonMesh = TTN_ObjLoader::LoadFromFile("Review3/Cannon.obj");
 	cannonMesh->SetUpVao();
 	plane = TTN_ObjLoader::LoadFromFile("Review3/water.obj");
@@ -170,8 +172,38 @@ void Review3Scene::InitScene()
 		//setup a transform for the heightmap
 		TTN_Transform heightTrans = TTN_Transform(glm::vec3(0.f, -3.0f, 25.0f), glm::vec3(0.0f), glm::vec3(10.0f, 1.0f, 10.0f));
 		//and attach that transform to the entity
-		AttachCopy<TTN_Transform>(height, heightTrans);
+		//AttachCopy<TTN_Transform>(height, heightTrans);
 	}
+
+	//boat entity
+	{
+		//create an entity in the scene for the boat
+		boat = CreateEntity();
+
+		//attach a mesh renderer to the boat
+		Attach<TTN_Renderer>(boat);
+		//grab a referencce to that mesh renderer and set it up
+		auto& boatRenderer = Get<TTN_Renderer>(boat);
+		boatRenderer = TTN_Renderer(boatMesh, shaderProgam);
+
+		//attach a transform to the boat
+		Attach<TTN_Transform>(boat);
+		//grab a reference to that transform and set it up
+		auto& boatTrans = Get<TTN_Transform>(boat);
+		boatTrans.SetPos(glm::vec3(-4.0f, -2.0f, 15.0f));
+		boatTrans.RotateFixed(glm::vec3(0.0f, 270.0f, 0.0f));
+		boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
+
+		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boat);
+		//		TTN_PhysicsB pbody = TTN_PhysicsB(boatTrans.GetPos(), m_world, m_PhysicsObjects);
+		AttachCopy<TTN_Physics>(boat, pbody);
+
+		//add a tag to the boat
+		TTN_Tag boatTag = TTN_Tag("Boat");
+		AttachCopy<TTN_Tag>(boat, boatTag);
+
+	}
+
 
 	//set the camera to be a child of the cannon
 	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), &camera);
