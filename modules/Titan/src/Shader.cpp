@@ -11,6 +11,9 @@ namespace Titan {
 		_vs(0), _fs(0), _handle(0)
 	{
 		_handle = glCreateProgram();
+		setDefault = false;
+		vertexShaderTTNIndentity = 0;
+		fragShaderTTNIdentity = 0;
 	}
 
 	//destructor, deletes program 
@@ -27,6 +30,15 @@ namespace Titan {
 	//Load a shader stage into the pipeline 
 	bool TTN_Shader::LoadShaderStage(const char* sourceCode, GLenum shaderType)
 	{
+		//check if it's loading a default shader
+		if (!setDefault) {
+			//if it's not, then mark the shader as custom
+			if (shaderType == GL_VERTEX_SHADER)
+				vertexShaderTTNIndentity = 0;
+			else
+				fragShaderTTNIdentity = 0;
+		}
+
 		//Create the new shader steage (vs, fs, etc.)
 		GLuint handle = glCreateShader(shaderType);
 
@@ -55,7 +67,7 @@ namespace Titan {
 			LOG_ERROR("Failed to compile shader stage:\n{}", log);
 
 			//clean up the memory of our log (it's been dumped to an external file so we don't need it here anymore)
-			delete[] log;
+			delete[] log; 
 
 			//Delete the broken shader stage so it doesn't waste memory 
 			glDeleteShader(handle);
@@ -90,7 +102,7 @@ namespace Titan {
 			LOG_ERROR("Shader file not found: {}", filePath);
 			//and throw a runtime error
 			throw std::runtime_error("File not found, see logs");
-		}
+		} 
 		//if it did open correctly then make a stream to parse it 
 		std::stringstream stream;
 		//begin parsing it 
@@ -101,6 +113,64 @@ namespace Titan {
 		file.close();
 
 		//return the result of the earlier load
+		return result;
+	}
+
+	bool TTN_Shader::LoadDefaultShader(TTN_DefaultShaders shader)
+	{
+		//make a variable to store the filepath
+		const char* filePath;
+		//make a variable to store the result of the loading
+		bool result;
+
+		//mark the shader being loaded as default
+		setDefault = true;
+
+		//check which shader the user is trying to load, and set the filepath to the approriate shader
+		if (shader == TTN_DefaultShaders::VERT_NO_COLOR) {
+			filePath = "shaders/ttn_vert_no_color.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_VERTEX_SHADER);
+			vertexShaderTTNIndentity = (int)shader;
+		}
+		else if (shader == TTN_DefaultShaders::VERT_COLOR) {
+			filePath = "shaders/ttn_vert_color.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_VERTEX_SHADER);
+			vertexShaderTTNIndentity = (int)shader;
+		}
+
+		else if (shader == TTN_DefaultShaders::VERT_COLOR_HEIGHTMAP) {
+			filePath = "shaders/ttn_vert_color_heightmap.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_VERTEX_SHADER);
+			vertexShaderTTNIndentity = (int)shader;
+		}
+
+		else if (shader == TTN_DefaultShaders::FRAG_BLINN_PHONG_NO_TEXTURE) {
+			filePath = "shaders/ttn_frag_blinn_phong_no_texture.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
+			fragShaderTTNIdentity = (int)shader;
+		}
+		else if (shader == TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY) {
+			filePath = "shaders/ttn_frag_blinn_phong_textured_no_specular.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
+			fragShaderTTNIdentity = (int)shader;
+		}
+		else if (shader == TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR) {
+			filePath = "shaders/ttn_frag_blinn_phong_textured_with_specular.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
+			fragShaderTTNIdentity = (int)shader;
+		}
+
+		else {
+			//if the user tried to load a shader that doesn't,
+			LOG_ERROR("Default shader {} does not exist", shader);
+			//and throw a runtime error
+			throw std::runtime_error("Default Shader does not exist, see logs");
+			result = false;
+		}
+
+		//clear the shader being loaded bool
+		setDefault = false;
+
 		return result;
 	}
 

@@ -1,17 +1,20 @@
 //Titan Engine, by Atlas X Games 
 // Scene.h - header for the class that handles ECS, render calls, etc. 
 #pragma once
-
 //include the entity component system header
 #include "entt.hpp"
 //include all the component class definitions we need
 #include "Transform.h"
 #include "Renderer.h"
 #include "Camera.h"
+#include "Light.h"
+#include "Tag.h"
 //include all the graphics features we need
 #include "Shader.h"
+#include "Physics.h"
 
 namespace Titan {
+	typedef entt::basic_group<entt::entity, entt::exclude_t<>, entt::get_t<>, TTN_Transform, TTN_Renderer> RenderGroupType;
 
 	//scene class, handles the ECS, render class, etc. 
 	class TTN_Scene
@@ -19,6 +22,8 @@ namespace Titan {
 	public:
 		//constructor 
 		TTN_Scene();
+
+		TTN_Scene(glm::vec3 AmbientLightingColor, float AmbientLightingStrength);
 
 		//copy, move, and assingment operators
 		TTN_Scene(const TTN_Scene& oldScene) = default;
@@ -32,6 +37,9 @@ namespace Titan {
 		//creates a new entity 
 		entt::entity CreateEntity();
 
+		//deletes an entity
+		void DeleteEntity(entt::entity entity);
+
 		//attaches a compontent to an entity 
 		template<typename T>
 		void Attach(entt::entity entity);
@@ -44,13 +52,41 @@ namespace Titan {
 		template<typename T>
 		T& Get(entt::entity entity);
 
+		//returns true if the entity has a given component and false otherwise
+		template<typename T>
+		bool Has(entt::entity entity);
+
 		//removes a component from an object 
 		template<typename T>
 		void Remove(entt::entity entity);
 
-		//updates all the entities in the scene
-		void Update(float deltaTime);
+		//sets the registry
+		void SetScene(entt::registry* reg);
+		//gets the registry
+		entt::registry* GetScene() { return m_Registry; }
+
+		//deletes and clears the scene
+		void Unload();
+		
 #pragma endregion ECS_functions_dec
+
+		//Derivable functions 
+
+		//updates all the entities in the scene
+		virtual void Update(float deltaTime);
+
+		//input checks
+		//keyboard
+		virtual void KeyDownChecks() {}
+		virtual void KeyChecks() {}
+		virtual void KeyUpChecks() {}
+		//mouse
+		virtual void MouseButtonDownChecks() {}
+		virtual void MouseButtonChecks() {}
+		virtual void MouseButtonUpChecks() {}
+
+		//init
+		virtual void InitScene() {} 
 
 #pragma region Graphics_functions_dec
 		//renders all the entities with meshes and transforms in the scene 
@@ -58,9 +94,17 @@ namespace Titan {
 
 		//sets wheter or not the scene should be rendered 
 		void SetShouldRender(bool _shouldRender);
+		//sets the ambient color of the lighting in the scene
+		void SetSceneAmbientColor(glm::vec3 color);
+		//sets the strenght of the abmient lighting in the scene
+		void SetSceneAmbientLightStrength(float str);
 
 		//gets wheter or not the scene should be rendered 
 		bool GetShouldRender();
+		//gets the ambient color of the lighting in the scene
+		glm::vec3 GetSceneAmbientColor();
+		//gets the strength of the ambient lighting in the scene
+		float GetSceneAmbientLightStrength();
 
 #pragma endregion Graphics_functions_dec
 
@@ -69,16 +113,54 @@ namespace Titan {
 		//gets the camera entity
 		const entt::entity& GetCamEntity() { return m_Cam; }
 
+		//sets the light entity reference
+		void SetLightEntity(const entt::entity& light) { m_Light = light; }
+		//gets the light entity
+		const entt::entity& GetLightEntity() { return m_Light; }
+
+		//bullet physics stuff
+		//set the gravity
+		void SetGravity(glm::vec3 gravity);
+		//gets the gravity
+		glm::vec3 GetGravity();
+
+		//gets all the collisions for the frame
+		std::vector<TTN_Collision::scolptr> GetCollisions() { return collisions; }
 
 	private:
 		//context that contains all our entities, their ids, and components 
 		entt::registry* m_Registry = nullptr;
 
+		//entt group that has all the entities with renderer and transform components so we can edit and render them live
+		std::unique_ptr<RenderGroupType> m_RenderGroup;
+
 		//boolean to store wheter or not this scene should currently be rendered
-		bool shouldRender; 
+		bool m_ShouldRender; 
 
 		//variable to store the entity for the camera
 		entt::entity m_Cam;
+
+		//variable to store the entity of the light
+		entt::entity m_Light;
+
+		//the colour of the scene's ambient lighting
+		glm::vec3 m_AmbientColor;
+		//the strenght of that ambient color
+		float m_AmbientStrength;
+
+		//physics world properties
+		btDefaultCollisionConfiguration* collisionConfig;
+		btCollisionDispatcher* dispatcher;
+		btBroadphaseInterface* overlappingPairCache;
+		btSequentialImpulseConstraintSolver* solver;
+		//physics world
+		btDiscreteDynamicsWorld* m_physicsWorld;
+
+		//vector of titan collision objects, containing pointers to the rigid bodies (from which you can get entity numbers) and glm vec3s for collision normals
+		std::vector<TTN_Collision::scolptr> collisions;
+
+		//constructs the TTN_Collision objects
+		void ConstructCollisions();
 	};
 
 #pragma region ECS_functions_def
@@ -101,6 +183,13 @@ namespace Titan {
 	{
 		//return a reference to the component 
 		return m_Registry->get<T>(entity);
+	}
+
+	//returns true if an entity has the given component, and false otherwise
+	template<typename T>
+	inline bool TTN_Scene::Has(entt::entity entity)
+	{
+		return m_Registry->has<T>(entity);
 	}
 
 	template<typename T>

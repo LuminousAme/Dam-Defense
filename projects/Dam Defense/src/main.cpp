@@ -1,26 +1,23 @@
-#include "Titan/Scene.h"
 #include "Titan/Application.h"
+#include "Titan/Scene.h"
 #include "Titan/ObjLoader.h"
+#include "Titan/Renderer.h"
+#include "Titan/Transform.h"
+#include "Titan/Physics.h"
+#include <iostream>
+#include "glm/ext.hpp"
+
+#include "DemoScene.h"
+#include "Review3Scene.h"
 
 using namespace Titan;
 
 int main() {
-	TTN_Application::Init("Dam Defense", 800, 800);
-
-	//create a shader program object
-	TTN_Shader::sshptr shaderProgam = TTN_Shader::Create(); 
-	//load the shaders into the shader program 
-	shaderProgam->LoadShaderStageFromFile("shaders/vertex_shader.glsl", GL_VERTEX_SHADER);
-	shaderProgam->LoadShaderStageFromFile("shaders/blinn_phong_frag_shader.glsl", GL_FRAGMENT_SHADER);
-	shaderProgam->Link(); 
-
-	//create mesh pointers and set up their vaos
-	TTN_Mesh* boatMesh = TTN_ObjLoader::LoadFromFile("boat.obj"); // boat
-	boatMesh->SetUpVao();
-	TTN_Mesh* treeMesh = TTN_ObjLoader::LoadFromFile("tree.obj"); // tree
-	treeMesh->SetUpVao();
-
+	Logger::Init();
+	TTN_Application::Init("Dam Defense", 1920, 1080);
+	//TTN_Physics::SetUpPhysicsBoxRendering(); 
 	//create a new scene
+<<<<<<< HEAD
 	TTN_Scene testScene = TTN_Scene();
 
 	printf("a");
@@ -59,78 +56,34 @@ int main() {
 		//attach that transform to the tree entity
 		testScene.AttachCopy<TTN_Transform>(tree1, treeTrans);
 	}
+=======
+	TTN_Scene* test = new DemoScene;
+	TTN_Scene* demo = new Review3Scene;
+>>>>>>> Jacky
 
-	//entity for the second tree in testScene
-	entt::entity tree2;
-	{
-		//create an entity in the scene for the second tree
-		tree2 = testScene.CreateEntity();
+	test->InitScene();
+	demo->InitScene();
 
-		//attach a mesh renderer to the second tree 
-		testScene.Attach<TTN_Renderer>(tree2);
-		//grab a referencce to that mesh renderer and set it up
-		auto& treeRenderer = testScene.Get<TTN_Renderer>(tree2);
-		treeRenderer = TTN_Renderer(treeMesh, shaderProgam);
-
-		//attach a transform to the second tree
-		testScene.Attach<TTN_Transform>(tree2);
-		//grab a reference to that transform and set it up
-		auto& treeTrans = testScene.Get<TTN_Transform>(tree2);
-		treeTrans.SetPos(glm::vec3(2.0f, -3.0f, 3.0f));
-		treeTrans.SetScale(glm::vec3(1.f, 1.f, 1.f));
-	}
-
-	//entity for the boat in testScene
-	entt::entity boat;
-	{
-		//create an entity in the scene for the boat
-		boat = testScene.CreateEntity();
-
-		//attach a mesh renderer to the boat
-		testScene.Attach<TTN_Renderer>(boat);
-		//grab a referencce to that mesh renderer and set it up
-		auto& boatRenderer = testScene.Get<TTN_Renderer>(boat);
-		boatRenderer = TTN_Renderer(boatMesh, shaderProgam);
-
-		//attach a transform to the boat
-		testScene.Attach<TTN_Transform>(boat);
-		//grab a reference to that transform and set it up
-		auto& boatTrans = testScene.Get<TTN_Transform>(boat);
-		boatTrans.SetPos(glm::vec3(0.f, -3.0f, 5.0f));
-		boatTrans.RotateFixed(glm::vec3(0.0f, 270.0f, 0.0f));
-		boatTrans.SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
-	}
+	test->SetShouldRender(false);
 
 	//add the scene to the application
-	TTN_Application::scenes.push_back(testScene);
+	TTN_Application::scenes.push_back(test);
+	TTN_Application::scenes.push_back(demo);
 	//set the background to a blue
-	TTN_Application::SetClearColor(glm::vec4(0.0f, 0.2f, 8.0f, 1.0f));
+	TTN_Application::SetClearColor(glm::vec4(0.0f, 0.88f, 0.99f, 1.0f));
 	
-	float speed = -1.0f;
-
-
 	while (!TTN_Application::GetIsClosing()) {
-		//get the change in time for the frame
-		float dt = TTN_Application::GetDeltaTime();
 
-		//move the boat 
-		auto& boatTrans = testScene.Get<TTN_Transform>(boat);
-		boatTrans.SetPos(glm::vec3(boatTrans.GetPos().x, boatTrans.GetPos().y, boatTrans.GetPos().z + speed * dt));
-		//flip the speed if it gets to a certain point
-		if (boatTrans.GetPos().z < 3.0f || boatTrans.GetPos().z > 7.0f)
-			speed *= -1;
+		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Space)) {
+			printf("check\n");
+			test->SetShouldRender(!test->GetShouldRender());
+			demo->SetShouldRender(!demo->GetShouldRender());
+		}
 
-		auto& tree2Trans = testScene.Get<TTN_Transform>(tree2);
-		tree2Trans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
-
-		auto& camTrans = testScene.Get<TTN_Transform>(testScene.GetCamEntity());
-		camTrans.RotateFixed(glm::vec3(0, 5.0f * dt, 0));
-		
-		printf("fps: %f\n", 1.0f/dt);
-		//render the screen
-		TTN_Application::Update();
+		TTN_Application::TTN_Input::GetKeyUp(TTN_KeyCode::Space); //just to clear for the keydown
+		//update the scenes and render the screen
+		TTN_Application::Update(); 
 	}
 		
-
 	return 0;
 }

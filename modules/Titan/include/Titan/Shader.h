@@ -19,6 +19,15 @@
 #include "Logging.h"
 
 namespace Titan {
+	//enum for the different default shaders titan offers
+	enum TTN_DefaultShaders {
+		VERT_NO_COLOR = 1,
+		VERT_COLOR = 2,
+		FRAG_BLINN_PHONG_NO_TEXTURE = 3,
+		FRAG_BLINN_PHONG_ALBEDO_ONLY = 4,
+		FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR = 5,
+		VERT_COLOR_HEIGHTMAP = 6
+	};
 
 	//class to wrap around an opengl shader 
 	class TTN_Shader final {
@@ -53,6 +62,9 @@ namespace Titan {
 		//and returns true if sucessful, false if not 
 		bool LoadShaderStageFromFile(const char* filePath, GLenum shaderType);
 
+		//loads a default shader
+		bool LoadDefaultShader(TTN_DefaultShaders shader);
+
 		//Links the stages together creating the pipeline and making the shader program useable
 		//returns true if sucessful, false if not 
 		bool Link();
@@ -65,6 +77,11 @@ namespace Titan {
 
 		//Gets the OpenGL handle that it's wrapping around 
 		GLuint GetHandle() const { return _handle; }
+
+		//Gets the default status of the vertex shader
+		int GetVertexShaderDefaultStatus() { return vertexShaderTTNIndentity; }
+		//Gets the default status of the fragment shader
+		int GetFragShaderDefaultStatus() { return fragShaderTTNIdentity; }
 
 	public:
 		//Set a uniform for a 3x3 matrix 
@@ -133,6 +150,10 @@ namespace Titan {
 		GLuint _vs;
 		//fragment shader 
 		GLuint _fs;
+
+		//marker if they're using a default shader (and which one), 0 is a custom shader, 1-5 are custom shaders
+		int vertexShaderTTNIndentity, fragShaderTTNIdentity;
+		bool setDefault;
 
 		//handle for the shader program 
 		GLuint _handle;
