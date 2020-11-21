@@ -114,21 +114,27 @@ namespace Titan {
 		//getters
 		const entt::entity GetBody1() { return b1; }
 		const entt::entity GetBody2() { return b2; }
-		glm::vec3 GetNormal1() { return norm1; }
-		glm::vec3 GetNormal2() { return norm2; }
 
 		//setters
 		void SetBody1(const entt::entity body);
 		void SetBody2(const entt::entity body);
-		void SetNormal1(btVector3 normal);
-		void SetNormal2(btVector3 normal);
+
+		//checks if two collisions pointers represent a collision between the same objects
+		static bool same(scolptr collision1, scolptr collision2) {
+			//compare the entity numbers
+			if ((collision1->b1 == collision2->b1 && collision1->b2 == collision2->b2) ||
+				(collision1->b1 == collision2->b2 && collision1->b2 == collision2->b1)) {
+				//if they match across the collisions, then return true
+				return true;
+			}
+			else
+				//otherwise return false
+				return false;
+		}
 
 	protected:
 		//rigidbodies for the colliding objects (which should also contain a reference to the entity)
 		entt::entity b1;
 		entt::entity b2;
-		//normals for the collision
-		glm::vec3 norm1;
-		glm::vec3 norm2;
 	};
 }

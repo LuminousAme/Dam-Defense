@@ -216,7 +216,7 @@ namespace Titan {
 				for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
 					auto& light = Get<TTN_Light>(m_Lights[i]);
 					auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
-					lightPositions[i] = lightTrans.GetGlobal() * glm::vec4(0, 0, 0, 1);
+					lightPositions[i] = lightTrans.GetGlobalPos();
 					lightColor[i] = light.GetColor();
 					lightAmbientStr[i] = light.GetAmbientStrength();
 					lightSpecStr[i] = light.GetSpecularStrength();
@@ -351,10 +351,7 @@ namespace Titan {
 				btManifoldPoint& point = contactManifold->getContactPoint(j);
 				//if it's within the contact point distance
 				if (point.getDistance() < 0.f) {
-					//get the normals
-					const btVector3& normalA = -1 * point.m_normalWorldOnB;
-					const btVector3& normalB = point.m_normalWorldOnB;
-					//and the rigid bodies
+					//get the rigid bodies
 					const btRigidBody* b0 = btRigidBody::upcast(obj0);
 					const btRigidBody* b1 = btRigidBody::upcast(obj1);
 
@@ -362,11 +359,17 @@ namespace Titan {
 					TTN_Collision::scolptr newCollision = TTN_Collision::Create();
 					newCollision->SetBody1(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b0->getUserPointer())));
 					newCollision->SetBody2(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b1->getUserPointer())));
-					newCollision->SetNormal1(normalA);
-					newCollision->SetNormal2(normalB);
 
-					//and add that collision to the list of collisions
-					collisions.push_back(newCollision);
+					//compare it to all the previous collisions
+					bool shouldAdd = true;
+					for (int k = 0; k < collisions.size(); k++) {
+						if (TTN_Collision::same(newCollision, collisions[k])) {
+							shouldAdd = false;
+							break;
+						}
+					}
+					//if it's a new collision then add to the list of collisions
+					if(shouldAdd) collisions.push_back(newCollision);
 				}
 			}
 		}

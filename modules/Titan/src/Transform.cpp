@@ -89,6 +89,11 @@ namespace Titan {
 		return m_pos;
 	}
 
+	glm::vec3 TTN_Transform::GetGlobalPos()
+	{
+		return m_global * glm::vec4(0,0,0,1);
+	}
+
 	//returns the scale value
 	glm::vec3 TTN_Transform::GetScale()
 	{

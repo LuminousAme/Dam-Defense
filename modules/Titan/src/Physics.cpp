@@ -225,8 +225,6 @@ namespace Titan {
 	{
 		b1 = entt::null;
 		b2 = entt::null;
-		norm1 = glm::vec3();
-		norm2 = glm::vec3();
 	}
 
 	void TTN_Collision::SetBody1(const entt::entity body)
@@ -237,15 +235,5 @@ namespace Titan {
 	void TTN_Collision::SetBody2(const entt::entity body)
 	{
 		b2 = body;
-	}
-
-	void TTN_Collision::SetNormal1(btVector3 normal)
-	{
-		norm1 = glm::vec3((float)normal.getX(), (float)normal.getY(), (float)normal.getZ());
-	}
-
-	void TTN_Collision::SetNormal2(btVector3 normal)
-	{
-		norm2 = glm::vec3((float)normal.getX(), (float)normal.getY(), (float)normal.getZ());
 	}
 }
