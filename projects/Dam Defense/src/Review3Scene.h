@@ -2,7 +2,7 @@
 //Review3Scene.h - header for the class that inherits from the scene class to make a scene represneting a demo of our final product for review 3
 #pragma once
 
-#include "Titan/Particle.h"
+//#include "Titan/Particle.h"
 #include "Titan/Application.h"
 #include "Titan/ObjLoader.h"
 #include <iostream>
@@ -49,7 +49,7 @@ public:
 	TTN_Texture2D::st2dptr waterText;
 	TTN_Texture2D::st2dptr cannonText;
 	TTN_TextureCubeMap::stcmptr skyboxText;
-	TTN_Texture2D::stptr heightmap;
+	TTN_Texture2D::st2dptr heightmap;
 
 	//materials
 	TTN_Material::smatptr waterMat;
@@ -57,8 +57,8 @@ public:
 	TTN_Material::smatptr skyboxMat;
 	TTN_Material::smatptr heightMat;
 
-	TTN_Particle ParticleSystem;
-	ParticleData Particles;
+	//TTN_Particle ParticleSystem;
+	//ParticleData Particles;
 
 protected:
 	//entities

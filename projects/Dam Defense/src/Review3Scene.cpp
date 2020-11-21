@@ -52,8 +52,7 @@ void Review3Scene::InitScene()
 	waterText = TTN_Texture2D::LoadFromFile("Review3/water_text.png");
 	cannonText = TTN_Texture2D::LoadFromFile("Review3/Metal_Texture_2.jpg");
 	skyboxText = TTN_TextureCubeMap::LoadFromImages("cubemaps/skybox/ocean.jpg");
-	heightmap = TTN_Texture2D::Create();
-	heightmap->LoadFromFile("Review3/heightmap.bmp");
+	heightmap = TTN_Texture2D::LoadFromFile("Review3/heightmap.bmp");
 
 	//create material pointers and set them up
 	waterMat = TTN_Material::Create();
@@ -68,16 +67,16 @@ void Review3Scene::InitScene()
 	heightMat->SetAlbedo(heightmap);
 	heightMat->SetShininess(128.0f);
 
-	ParticleData data;
+	//ParticleData data;
 	//data.m_max = 100;
-	data.m_position = glm::vec3(10.f, -5.0f, 20.0f);
-	data.m_velocity = glm::vec3(1.0f, 5.0f, 0.0f);
-	data.ColorBegin = glm::vec4(1.0f, 1.0f, 1.5f, 1.0f);
-	data.ColorEnd = glm::vec4(0.0f, 0.0f, 1.0f, 0.5f);
+	//data.m_position = glm::vec3(10.f, -5.0f, 20.0f);
+	//data.m_velocity = glm::vec3(1.0f, 5.0f, 0.0f);
+	//data.ColorBegin = glm::vec4(1.0f, 1.0f, 1.5f, 1.0f);
+	//data.ColorEnd = glm::vec4(0.0f, 0.0f, 1.0f, 0.5f);
 
-	data.SizeEnd = 1.0f;
-	data.SizeBegin = 10.0f;
-	data.LifeTime = 1.0f;	
+	//data.SizeEnd = 1.0f;
+	//data.SizeBegin = 10.0f;
+	//data.LifeTime = 1.0f;	
 	//data.m_angle = glm::tan(glm::radians(25.0f));
 
 	////////// entities /////////////////
@@ -151,7 +150,7 @@ void Review3Scene::InitScene()
 		AttachCopy<TTN_Transform>(cannon, cannonTrans);
 	}
 
-	
+	/*
 	//entity for the water
 	{
 		water = CreateEntity();
@@ -182,9 +181,9 @@ void Review3Scene::InitScene()
 		//and attach that transform to the entity
 		AttachCopy<TTN_Transform>(tree1, treeTrans);
 
-		data.m_position = treeTrans.GetPos();
-		TTN_Particle treePart = TTN_Particle();
-		AttachCopy<TTN_Particle>(tree1, treePart);
+		//data.m_position = treeTrans.GetPos();
+		//TTN_Particle treePart = TTN_Particle();
+		//AttachCopy<TTN_Particle>(tree1, treePart);
 	}
 
 	//entity for heightmap
@@ -209,7 +208,7 @@ void Review3Scene::InitScene()
 	/////// other /////////
 	rotAmmount = glm::vec2(0.0f, 0.0f);
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
-	Particles = data;
+	//Particles = data;
 }
 
 void Review3Scene::Update(float deltaTime)

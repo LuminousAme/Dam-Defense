@@ -41,17 +41,17 @@ void DemoScene::InitScene()
 	swordMat->SetAlbedo(swordText);
 	swordMat->SetShininess(128.0f);
 	
-	ParticleData data;
+	//ParticleData data;
 	//data.m_max = 100;
-	data.m_position = glm::vec3(10.f, -5.0f, 20.0f);
-	data.m_velocity = glm::vec3(1.0f, 5.0f, 0.0f);
-	data.ColorBegin = glm::vec4(1.0f, 1.0f, 1.5f, 1.0f);
-	data.ColorEnd = glm::vec4(0.0f, 0.0f, 1.0f, 0.5f);
+	//data.m_position = glm::vec3(10.f, -5.0f, 20.0f);
+	//data.m_velocity = glm::vec3(1.0f, 5.0f, 0.0f);
+	//data.ColorBegin = glm::vec4(1.0f, 1.0f, 1.5f, 1.0f);
+	//data.ColorEnd = glm::vec4(0.0f, 0.0f, 1.0f, 0.5f);
 
-	data.SizeEnd = 10.0f;
-	data.SizeBegin = 20.0f;
-	data.LifeTime = 15.0f;
-	Particles = data;
+	//data.SizeEnd = 10.0f;
+	//data.SizeBegin = 20.0f;
+	//data.LifeTime = 15.0f;
+	//Particles = data;
 
 	//plane stuff
 	plane = TTN_ObjLoader::LoadFromFile("Review3/water.obj");
@@ -139,8 +139,8 @@ void DemoScene::InitScene()
 
 		AttachCopy<TTN_Physics>(tree1, pbody);
 
-		TTN_Particle treePart = TTN_Particle();
-		AttachCopy<TTN_Particle>(tree1, treePart);
+		//TTN_Particle treePart = TTN_Particle();
+		//AttachCopy<TTN_Particle>(tree1, treePart);
 
 		//add a tag to the tree
 		TTN_Tag treeTag = TTN_Tag("Tree");
@@ -268,11 +268,6 @@ void DemoScene::Update(float deltaTime)
 			//if it is, delete it
 			DeleteEntity(entity2Ptr);
 		}
-	}
-
-	//when all the collisions have been processed, delete the entites that should be delete
-	for (int i = 0; i < entitiesToDelete.size(); i++) {
-		TTN_Scene::DeleteEntity(entitiesToDelete[i]);
 	}
 
 	//Please don't forget to call the base scene's update at the end of the child class' update

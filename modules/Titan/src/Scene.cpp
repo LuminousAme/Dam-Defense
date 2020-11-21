@@ -312,114 +312,56 @@ namespace Titan {
 	}
 
 	//set the gravity for the physics world
-	void TTN_Scene::SetGravity(glm::vec3 gravity)
-	{
-		btVector3 grav = btVector3(gravity.x, gravity.y, gravity.z);
-		m_physicsWorld->setGravity(grav);
+	void TTN_Scene::SetGravity(glm::vec3 gravity)
+	{
+		btVector3 grav = btVector3(gravity.x, gravity.y, gravity.z);
+		m_physicsWorld->setGravity(grav);
 	}
-
-	glm::vec3 TTN_Scene::GetGravity()
-	{
-		btVector3 grav = m_physicsWorld->getGravity();
-		return glm::vec3((float)grav.getX(), (float)grav.getY(), (float)grav.getZ());
-	}
-	
-	//makes all the collision objects by going through all the overalapping manifolds in bullet
-	//based on code from https://andysomogyi.github.io/mechanica/bullet.html specfically the first block in the bullet callbacks and triggers section
-	void TTN_Scene::ConstructCollisions()
-	{
-		//clear all the collisions from the previous frame
-		collisions.clear();
-
-		int numManifolds = m_physicsWorld->getDispatcher()->getNumManifolds();
-		//iterate through all the manifolds
-		for (int i = 0; i < numManifolds; i++) {
-			//get the contact manifolds and both objects
-			btPersistentManifold* contactManifold = m_physicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
-			const btCollisionObject* obj0 = contactManifold->getBody0();
-			const btCollisionObject* obj1 = contactManifold->getBody1();
-
-			//iterate through all the contact points
-			int numOfContacts = contactManifold->getNumContacts();
-			for (int j = 0; j < numOfContacts; j++)
-			{
-				//get the contact point
-				btManifoldPoint& point = contactManifold->getContactPoint(j);
-				//if it's within the contact point distance
-				if (point.getDistance() < 0.f) {
-					//get the rigid bodies
-					const btRigidBody* b0 = btRigidBody::upcast(obj0);
-					const btRigidBody* b1 = btRigidBody::upcast(obj1);
-
-					//and make a collision object
-					TTN_Collision::scolptr newCollision = TTN_Collision::Create();
-					newCollision->SetBody1(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b0->getUserPointer())));
-					newCollision->SetBody2(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b1->getUserPointer())));
-
-					//compare it to all the previous collisions
-					bool shouldAdd = true;
-					for (int k = 0; k < collisions.size(); k++) {
-						if (TTN_Collision::same(newCollision, collisions[k])) {
-							shouldAdd = false;
-							break;
-						}
-					}
-					//if it's a new collision then add to the list of collisions
-					if(shouldAdd) collisions.push_back(newCollision);
-				}
-			}
-		}
-	}
-
 	glm::vec3 TTN_Scene::GetGravity()
 	{
 		btVector3 grav = m_physicsWorld->getGravity();
 		return glm::vec3((float)grav.getX(), (float)grav.getY(), (float)grav.getZ());
-	}
-
+	}
 	//makes all the collision objects by going through all the overalapping manifolds in bullet
 	//based on code from https://andysomogyi.github.io/mechanica/bullet.html specfically the first block in the bullet callbacks and triggers section
 	void TTN_Scene::ConstructCollisions()
 	{
 		//clear all the collisions from the previous frame
-		collisions.clear();
-
+		collisions.clear();
 		int numManifolds = m_physicsWorld->getDispatcher()->getNumManifolds();
 		//iterate through all the manifolds
 		for (int i = 0; i < numManifolds; i++) {
 			//get the contact manifolds and both objects
-			btPersistentManifold* contactManifold = m_physicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+			btPersistentManifold* contactManifold = m_physicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
 			const btCollisionObject* obj0 = contactManifold->getBody0();
-			const btCollisionObject* obj1 = contactManifold->getBody1();
-
+			const btCollisionObject* obj1 = contactManifold->getBody1();
 			//iterate through all the contact points
 			int numOfContacts = contactManifold->getNumContacts();
 			for (int j = 0; j < numOfContacts; j++)
-			{
+			{
 				//get the contact point
 				btManifoldPoint& point = contactManifold->getContactPoint(j);
 				//if it's within the contact point distance
 				if (point.getDistance() < 0.f) {
-					//get the normals
-					const btVector3& normalA = -1 * point.m_normalWorldOnB;
-					const btVector3& normalB = point.m_normalWorldOnB;
-					//and the rigid bodies
+					//get the rigid bodies
 					const btRigidBody* b0 = btRigidBody::upcast(obj0);
-					const btRigidBody* b1 = btRigidBody::upcast(obj1);
-
+					const btRigidBody* b1 = btRigidBody::upcast(obj1);
 					//and make a collision object
 					TTN_Collision::scolptr newCollision = TTN_Collision::Create();
-					newCollision->SetBody1(b0);
-					newCollision->SetBody2(b1);
-					newCollision->SetNormal1(normalA);
-					newCollision->SetNormal2(normalB);
-
-					//and add that collision to the list of collisions
-					collisions.push_back(newCollision);
-				}
-			}
-		}
+					newCollision->SetBody1(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b0->getUserPointer())));
+					newCollision->SetBody2(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b1->getUserPointer())));
+					//compare it to all the previous collisions
+					bool shouldAdd = true;
+					for (int k = 0; k < collisions.size(); k++) {
+						if (TTN_Collision::same(newCollision, collisions[k])) {
+							shouldAdd = false;
+							break;
+						}
+					}
+					//if it's a new collision then add to the list of collisions
+					if(shouldAdd) collisions.push_back(newCollision);
+				}
+			}
+		}
 	}
-
-
 }
