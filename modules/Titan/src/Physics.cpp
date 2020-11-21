@@ -151,6 +151,14 @@ namespace Titan {
 		return glm::vec3((float)velo.getX(), (float)velo.getY(), (float)velo.getZ());
 	}
 
+	glm::vec3 TTN_Physics::GetPos()
+	{
+		btTransform trans;
+		m_body->getMotionState()->getWorldTransform(trans);
+		btVector3 position = trans.getOrigin();
+		return glm::vec3((float)position.getX(), (float)position.getY(), (float)position.getZ());
+	}
+
 	//sets the flag for if it's in the physics world or not
 	void TTN_Physics::SetIsInWorld(bool inWorld)
 	{
@@ -185,6 +193,16 @@ namespace Titan {
 	void TTN_Physics::SetAngularVelocity(glm::vec3 velocity)
 	{
 		m_body->setAngularVelocity(btVector3(velocity.x, velocity.y, velocity.z));
+	}
+
+	void TTN_Physics::SetPos(glm::vec3 position)
+	{
+		btVector3 newPos = btVector3(position.x, position.y, position.z);
+		btTransform Trans;
+		m_body->getMotionState()->getWorldTransform(Trans);
+		Trans.setOrigin(newPos);
+		m_body->getMotionState()->setWorldTransform(Trans);
+		m_trans.SetPos(position);
 	}
 
 	void TTN_Physics::SetHasGravity(bool hasGrav)

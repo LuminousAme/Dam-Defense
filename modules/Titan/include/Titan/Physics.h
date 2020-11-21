@@ -61,6 +61,7 @@ namespace Titan {
 		bool GetIsInWorld() { return m_InWorld; }
 		glm::vec3 GetLinearVelocity();
 		glm::vec3 GetAngularVelocity();
+		glm::vec3 GetPos();
 		bool GetHasGravity() { return m_hasGravity; }
 		entt::entity GetEntity() { return m_entity; }
 
@@ -69,6 +70,7 @@ namespace Titan {
 		void SetMass(float mass);
 		void SetLinearVelocity(glm::vec3 velocity);
 		void SetAngularVelocity(glm::vec3 velocity);
+		void SetPos(glm::vec3 position);
 		void SetHasGravity(bool hasGrav);
 
 		//forces

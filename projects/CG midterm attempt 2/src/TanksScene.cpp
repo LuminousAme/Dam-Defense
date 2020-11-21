@@ -612,7 +612,7 @@ void TanksScene::InitEntities()
 
 		Attach<TTN_Physics>(walls[i]);
 		auto& wallPhysBod = Get<TTN_Physics>(walls[i]);
-		wallPhysBod = TTN_Physics(wallTrans.GetPos(), glm::vec3(0.0f), wallTrans.GetScale() + glm::vec3(0.8f), walls[i], false, 0.0f);
+		wallPhysBod = TTN_Physics(wallTrans.GetPos(), glm::vec3(0.0f), wallTrans.GetScale() + glm::vec3(0.8f), walls[i], TTN_PhysicsBodyType::STATIC, 0.0f);
 	}
 
 	//red score

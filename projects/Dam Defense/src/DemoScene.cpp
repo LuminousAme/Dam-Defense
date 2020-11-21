@@ -122,8 +122,7 @@ void DemoScene::InitScene()
 
 		//TTN_Physics pbody = TTN_Physics(glm::vec3(treeTrans.GetPos().x , treeTrans.GetPos().y , treeTrans.GetPos().z ));
 
-		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), tree1);
-		pbody.SetIsStatic(true);
+		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), tree1, TTN_PhysicsBodyType::STATIC, 0.0f);
 
 		AttachCopy<TTN_Physics>(tree1, pbody);
 
