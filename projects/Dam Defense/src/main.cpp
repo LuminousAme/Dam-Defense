@@ -16,7 +16,6 @@ int main() {
 	Logger::Init();
 	TTN_Application::Init("Dam Defense", 1920, 1080);
 	//TTN_Physics::SetUpPhysicsBoxRendering(); 
-
 	//create a new scene
 	TTN_Scene* test = new DemoScene;
 	TTN_Scene* demo = new Review3Scene;
@@ -30,8 +29,8 @@ int main() {
 	TTN_Application::scenes.push_back(test);
 	TTN_Application::scenes.push_back(demo);
 	//set the background to a blue
-	TTN_Application::SetClearColor(glm::vec4(0.0f, 0.88f, 1.0f, 1.0f));
-
+	TTN_Application::SetClearColor(glm::vec4(0.0f, 0.88f, 0.99f, 1.0f));
+	
 	while (!TTN_Application::GetIsClosing()) {
 
 		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Space)) {

@@ -1,7 +1,6 @@
 //Titan Engine, by Atlas X Games 
 // Physics.h - header for the class that represents physics bodies
 #pragma once
-
 //include other headers
 #include "Transform.h"
 #include "Shader.h"
@@ -10,11 +9,12 @@
 #include "Renderer.h"
 //include glm features
 #include "GLM/glm.hpp"
+
 //import other required features
 #include <vector>
 #include "entt.hpp"
 //import the bullet physics engine
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 namespace Titan {
 	enum class TTN_PhysicsBodyType {
@@ -155,4 +155,5 @@ namespace Titan {
 		entt::entity b1;
 		entt::entity b2;
 	};
+ 
 }

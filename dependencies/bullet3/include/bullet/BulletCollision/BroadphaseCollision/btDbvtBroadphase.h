@@ -17,8 +17,13 @@ subject to the following restrictions:
 #ifndef BT_DBVT_BROADPHASE_H
 #define BT_DBVT_BROADPHASE_H
 
+<<<<<<< HEAD
+#include"bullet/BulletCollision/BroadphaseCollision/btDbvt.h"
+#include "bullet/BulletCollision/BroadphaseCollision/btOverlappingPairCache.h"
+=======
 #include "BulletCollision/BroadphaseCollision/btDbvt.h"
 #include "BulletCollision/BroadphaseCollision/btOverlappingPairCache.h"
+>>>>>>> Ame
 
 //
 // Compile time config

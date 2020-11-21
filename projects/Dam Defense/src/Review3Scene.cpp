@@ -1,4 +1,6 @@
 #include "Review3Scene.h"
+#include "Titan/Physics.h"
+
 
 Review3Scene::Review3Scene()
 	: TTN_Scene()
@@ -8,7 +10,6 @@ Review3Scene::Review3Scene()
 void Review3Scene::InitScene()
 {
 	////////// resources /////////////////
-
 	//create a shader program object
 	shaderProgam = TTN_Shader::Create();
 	//load the shaders into the shader program 
@@ -30,6 +31,13 @@ void Review3Scene::InitScene()
 	shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::FRAG_SKYBOX);
 	shaderProgramSkybox->Link();
 
+	//create a shader program object for textured objects
+	shaderHeight = TTN_Shader::Create();
+	//load the shaders into the shader program
+	shaderHeight->LoadDefaultShader(TTN_DefaultShaders::VERT_COLOR_HEIGHTMAP);
+	shaderHeight->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
+	shaderHeight->Link();
+
 	//create mesh pointers and set up their vaos
 	cannonMesh = TTN_ObjLoader::LoadFromFile("Review3/Cannon.obj");
 	cannonMesh->SetUpVao();
@@ -44,6 +52,8 @@ void Review3Scene::InitScene()
 	waterText = TTN_Texture2D::LoadFromFile("Review3/water_text.png");
 	cannonText = TTN_Texture2D::LoadFromFile("Review3/Metal_Texture_2.jpg");
 	skyboxText = TTN_TextureCubeMap::LoadFromImages("cubemaps/skybox/ocean.jpg");
+	heightmap = TTN_Texture2D::Create();
+	heightmap->LoadFromFile("Review3/heightmap.bmp");
 
 	//create material pointers and set them up
 	waterMat = TTN_Material::Create();
@@ -54,10 +64,23 @@ void Review3Scene::InitScene()
 	cannonMat->SetShininess(128.0f);
 	skyboxMat = TTN_Material::Create();
 	skyboxMat->SetSkybox(skyboxText);
+	heightMat = TTN_Material::Create();
+	heightMat->SetAlbedo(heightmap);
+	heightMat->SetShininess(128.0f);
 
+	ParticleData data;
+	//data.m_max = 100;
+	data.m_position = glm::vec3(10.f, -5.0f, 20.0f);
+	data.m_velocity = glm::vec3(1.0f, 5.0f, 0.0f);
+	data.ColorBegin = glm::vec4(1.0f, 1.0f, 1.5f, 1.0f);
+	data.ColorEnd = glm::vec4(0.0f, 0.0f, 1.0f, 0.5f);
+
+	data.SizeEnd = 1.0f;
+	data.SizeBegin = 10.0f;
+	data.LifeTime = 1.0f;	
+	//data.m_angle = glm::tan(glm::radians(25.0f));
 
 	////////// entities /////////////////
-
 	//entity for the camera
 	{
 		//create an entity in the scene for the camera
@@ -128,7 +151,7 @@ void Review3Scene::InitScene()
 		AttachCopy<TTN_Transform>(cannon, cannonTrans);
 	}
 
-	/*
+	
 	//entity for the water
 	{
 		water = CreateEntity();
@@ -158,6 +181,26 @@ void Review3Scene::InitScene()
 		TTN_Transform treeTrans = TTN_Transform(glm::vec3(10.f, -5.0f, 20.0f), glm::vec3(0.0f), glm::vec3(0.5f));
 		//and attach that transform to the entity
 		AttachCopy<TTN_Transform>(tree1, treeTrans);
+
+		data.m_position = treeTrans.GetPos();
+		TTN_Particle treePart = TTN_Particle();
+		AttachCopy<TTN_Particle>(tree1, treePart);
+	}
+
+	//entity for heightmap
+	{
+		height = CreateEntity();
+
+		//setup a mesh renderer for the heightmap
+		TTN_Renderer heightRender = TTN_Renderer(plane, shaderHeight);
+		heightRender.SetMat(heightMat);
+		//and attach that renderer to the entity
+		AttachCopy<TTN_Renderer>(height, heightRender);
+
+		//setup a transform for the heightmap
+		TTN_Transform heightTrans = TTN_Transform(glm::vec3(0.f, -3.0f, 25.0f), glm::vec3(0.0f), glm::vec3(10.0f, 1.0f, 10.0f));
+		//and attach that transform to the entity
+		AttachCopy<TTN_Transform>(height, heightTrans);
 	}
 
 	//set the camera to be a child of the cannon
@@ -166,6 +209,7 @@ void Review3Scene::InitScene()
 	/////// other /////////
 	rotAmmount = glm::vec2(0.0f, 0.0f);
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
+	Particles = data;
 }
 
 void Review3Scene::Update(float deltaTime)
@@ -173,7 +217,7 @@ void Review3Scene::Update(float deltaTime)
 	//get the mouse position
 	glm::vec2 tempMousePos = TTN_Application::TTN_Input::GetMousePosition();
 	
-
+	//Get<TTN_Transform>(cannon).RotateFixed(glm::vec3(0.0f, 5.0f * deltaTime, 0.0f));
 	//Get<TTN_Transform>(camera).RotateFixed(glm::vec3(0.0f, 5.0f * deltaTime, 0.0f));
 
 	auto& transCannon = Get<TTN_Transform>(cannon);

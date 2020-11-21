@@ -6,9 +6,262 @@
 //include other required features
 #include "Titan/ObjLoader.h"
 #include <iostream>
+
 #include "..\include\Titan\Physics.h"
+#include <stdio.h> //printf debugging
 
 namespace Titan {
+
+#pragma region test code
+	//TTN_PhysicsB::TTN_PhysicsB()
+	//{
+	//	btCollisionShape* boxCol = new btBoxShape(btVector3(1.0f, 1.0f, 1.0f));
+
+	//}
+
+	//TTN_PhysicsB::TTN_PhysicsB(glm::vec3 pos, btDiscreteDynamicsWorld* m_world, btAlignedObjectArray<btCollisionShape*> parray)
+	//{
+	//	static btDefaultMotionState* m_MotionState;
+
+	//	btCollisionShape* boxCol = new btBoxShape(btVector3(2.0f, 2.0f, 2.0f)); //size
+	//	parray.push_back(boxCol); //add hitbox to array
+
+	//	m_mass = 2.0f;
+	//	m_trans.setIdentity();
+	//	m_trans.setOrigin(btVector3(pos.x, pos.y, pos.z));
+
+	//	//rigidbody is dynamic if and only if mass is non zero, otherwise static
+	//	bool isDynamic = (m_mass != 0.f);
+
+	//	btVector3 m_inertia(0, 0, 0);
+	//	if (isDynamic)
+	//		boxCol->calculateLocalInertia(m_mass,m_inertia);
+
+	//	//using motionstate is optional, it provides interpolation capabilities, and only synchronizes 'active' objects
+	//	m_MotionState= new btDefaultMotionState(m_trans);
+	//	btRigidBody::btRigidBodyConstructionInfo rbInfo(m_mass, m_MotionState, boxCol, m_inertia);// first: mass in kg, last:local interia in btvec3
+	//	btRigidBody* body = new btRigidBody(rbInfo);
+
+	//	//add the body to the world
+	//	m_world->addRigidBody(body);		
+
+	//}
+
+	//void TTN_PhysicsB::InitCollision()
+	//{
+	//	// Build the broadphase which essentially detects overlapping aabb pairs
+	//	//m_broadphase = new btDbvtBroadphase();
+
+	//	//// Set up the collision configuration and dispatcher
+	//	//m_config = new btDefaultCollisionConfiguration();
+	//	//m_dispatcher = new btCollisionDispatcher(m_config);
+
+	//	//// The actual physics solver
+	//	//m_solver = new btSequentialImpulseConstraintSolver();
+
+	//	//// The world.
+	//	//m_world = new btDiscreteDynamicsWorld(m_dispatcher, m_broadphase, m_solver, m_config);
+	//	//m_world->setGravity(btVector3(0, -9.80f, 0));
+
+	//}
+
+	//void TTN_PhysicsB::SetMass(btScalar mass)
+	//{
+	//	m_mass = mass;
+	//}
+
+	//void TTN_PhysicsB::SetTrans(btVector3 trans)
+	//{
+	//	m_trans.setOrigin(trans);
+	//}
+
+
+	//TTN_Debug::TTN_Debug() 
+	//	: m_debugMode(0)
+	//{
+	//	
+	//}
+
+	//TTN_Debug::~TTN_Debug()
+	//{
+	//}
+
+	//void TTN_Debug::drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor)
+	//{
+	//	GLfloat points[6];
+
+	//	points[0] = from.x();
+	//	points[1] = from.y();
+	//	points[2] = from.z();
+
+	//	points[3] = to.x();
+	//	points[4] = to.y();
+	//	points[5] = to.z();
+
+	//	btVector3 result = to - from;
+	//	glm::vec3 colors = { result.x(), result.y(), result.z() };
+	//	colors = glm::normalize(colors);
+	//	GLuint indices[] = { 0,1 };
+
+	//	GLuint vao, vbo, ebo;
+
+	//	glGenVertexArrays(1, &vao);
+	//	glGenBuffers(1, &vbo);
+	//	glGenBuffers(1, &ebo);
+
+	//	glBindVertexArray(vao);
+
+	//	//UPLOADING VERTEX
+	//	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	//	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
+	//	//UPLOADING INDEXES
+	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	//	glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(GLuint) * 2, indices,GL_STATIC_DRAW);
+	//	glEnableVertexAttribArray(0);
+	//	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,sizeof(GLfloat) * 3, (GLvoid*)0);
+	//	glBindVertexArray(0);
+
+	//	//use geometry
+	//	glBindVertexArray(vao);
+	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	//	glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT, 0);
+	//	glBindVertexArray(0);
+
+	//	////delete buffers
+	//	glDeleteVertexArrays(1, &vao);
+	//	glDeleteBuffers(1, &vbo);
+	//	glDeleteBuffers(1, &ebo);
+	//}
+
+	//void TTN_Debug::drawLine(const btVector3& from, const btVector3& to, const btVector3& color)
+	//{
+	//	drawLine(from, to, color, color);
+	//}
+
+	//void TTN_Debug::drawSphere(const btVector3& p, btScalar radius, const btVector3& color)
+	//{
+	//}
+
+	//void TTN_Debug::drawTriangle(const btVector3& a, const btVector3& b, const btVector3& c, const btVector3& color, btScalar alpha)
+	//{
+	//}
+
+	//void TTN_Debug::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color)
+	//{
+	//}
+
+	//void TTN_Debug::reportErrorWarning(const char* warningString)
+	//{
+	//}
+
+	//void TTN_Debug::draw3dText(const btVector3& location, const char* textString)
+	//{
+	//}
+
+	//void TTN_Debug::setDebugMode(int debugMode)
+	//{
+	//	m_debugMode = debugMode;
+	//}
+
+
+
+	//void TTN_Debug::setDebugMode(int debugmode)
+	//{
+
+	//}
+
+	//void TTN_Debug::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {
+
+	//	// Vertex data
+	//	/*GLfloat points[12];
+
+	//	points[0] = from.x();
+	//	points[1] = from.y();
+	//	points[2] = from.z();
+	//	points[3] = color.x();
+	//	points[4] = color.y();
+	//	points[5] = color.z();
+
+	//	points[6] = to.x();
+	//	points[7] = to.y();
+	//	points[8] = to.z();
+	//	points[9] = color.x();
+	//	points[10] = color.y();
+	//	points[11] = color.z();
+
+	//	glGenVertexArrays(1, &vao);
+	//	glBindVertexArray(VertexArrayID);
+	//	
+	//	glGenBuffers(1, &vertexbuffer);
+	//	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	//	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
+
+	//	glEnableVertexAttribArray(0);
+	//	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+	//	glEnableVertexAttribArray(1);
+	//	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	//	glDrawArrays(GL_LINES, 0, 2);
+	//	glBindVertexArray(0);*/
+	//}
+
+	//void TTN_Debug::lines(const btVector3& from, const btVector3& to)
+	//{
+	//	GLfloat points[6];
+
+	//	points[0] = from.x();
+	//	points[1] = from.y();
+	//	points[2] = from.z();
+	//	
+	//	points[3] = to.x();
+	//	points[4] = to.y();
+	//	points[5] = to.z();
+	//
+	//	btVector3 result = to - from;
+	//	glm::vec3 colors = { result.x(), result.y(), result.z() };
+	//	colors = glm::normalize(colors);
+	//	GLuint indices[] = { 0,1 };
+
+	//	GLuint vao, vbo, ebo;
+
+	//	glGenVertexArrays(1, &vao);
+	//	glGenBuffers(1, &vbo);
+	//	glGenBuffers(1, &ebo);
+
+	//	glBindVertexArray(vao);
+
+	//	//UPLOADING VERTEX
+	//	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	//	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
+	//	//UPLOADING INDEXES
+	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	//	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+	//		sizeof(GLuint) * 2,
+	//		indices,
+	//		GL_STATIC_DRAW);
+	//	glEnableVertexAttribArray(0);
+	//	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+	//		sizeof(GLfloat) * 3, (GLvoid*)0);
+	//	glBindVertexArray(0);
+
+	//	//use program
+	///*	material_->use();
+	//	material_->setValue(glm::value_ptr(colors), "ph_objectColor");
+	//	material_->setProjectionMatrix(gmeinstance->getCurrentCamera()->getProjectionMatrix());
+	//	material_->setViewMatrix(gmeinstance->getCurrentCamera()->getViewMatrix());*/
+
+	//	//use geometry
+	//	glBindVertexArray(vao);
+	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	//	glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT, 0);
+	//	glBindVertexArray(0);
+
+	//	//delete buffers
+	//	glDeleteVertexArrays(1, &vao);
+	//	glDeleteBuffers(1, &vbo);
+	//	glDeleteBuffers(1, &ebo);
+	//}
+
+#pragma endregion
 
 	//initlization for static rendering variables
 	TTN_Shader::sshptr TTN_Physics::shader = nullptr;
@@ -224,7 +477,6 @@ namespace Titan {
 	{
 		m_body->clearForces();
 	}
-
 	void TTN_Physics::SetEntity(entt::entity entity)
 	{
 		//save the entity in titan

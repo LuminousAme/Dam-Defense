@@ -16,9 +16,15 @@ subject to the following restrictions:
 #ifndef BT_BROADPHASE_PROXY_H
 #define BT_BROADPHASE_PROXY_H
 
+<<<<<<< HEAD
+#include "bullet/LinearMath/btScalar.h"  //for SIMD_FORCE_INLINE
+#include "bullet/LinearMath/btVector3.h"
+#include "bullet/LinearMath/btAlignedAllocator.h"
+=======
 #include "LinearMath/btScalar.h"  //for SIMD_FORCE_INLINE
 #include "LinearMath/btVector3.h"
 #include "LinearMath/btAlignedAllocator.h"
+>>>>>>> Ame
 
 /// btDispatcher uses these types
 /// IMPORTANT NOTE:The types are ordered polyhedral, implicit convex and concave

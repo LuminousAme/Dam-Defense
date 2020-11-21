@@ -41,7 +41,11 @@ protected:
 	btBroadphaseRayCallback() {}
 };
 
+<<<<<<< HEAD
+#include "bullet/LinearMath/btVector3.h"
+=======
 #include "LinearMath/btVector3.h"
+>>>>>>> Ame
 
 ///The btBroadphaseInterface class provides an interface to detect aabb-overlapping object pairs.
 ///Some implementations for this broadphase interface include btAxisSweep3, bt32BitAxisSweep3 and btDbvtBroadphase.
