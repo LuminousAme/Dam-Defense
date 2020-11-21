@@ -17,6 +17,12 @@
 #include <bullet/btBulletDynamicsCommon.h>
 
 namespace Titan {
+	enum class TTN_PhysicsBodyType {
+		STATIC = 0,
+		DYNAMIC = 1,
+		KINEMATIC = 2
+	};
+
 	class TTN_Physics
 	{
 	public:
@@ -24,7 +30,7 @@ namespace Titan {
 		TTN_Physics();
 
 		//contrustctor with data
-		TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, entt::entity entityNum, bool dynamic = true, float mass = 1.0f);
+		TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, entt::entity entityNum, TTN_PhysicsBodyType bodyType = TTN_PhysicsBodyType::DYNAMIC, float mass = 1.0f);
 
 		~TTN_Physics();
 
@@ -38,7 +44,18 @@ namespace Titan {
 
 		//getters
 		TTN_Transform GetTrans() { return m_trans; }
-		bool GetIsStatic() { return m_IsStaticBody; }
+		bool GetIsStatic() {
+			if (m_bodyType == TTN_PhysicsBodyType::STATIC) return true;
+			else return false;
+		}
+		bool GetIsDynamic() {
+			if (m_bodyType == TTN_PhysicsBodyType::DYNAMIC) return true;
+			else return false;
+		}
+		bool GetIsKinematic() {
+			if (m_bodyType == TTN_PhysicsBodyType::KINEMATIC) return true;
+			else return false;
+		}
 		float GetMass() { return m_Mass; }
 		btRigidBody* GetRigidBody() { return m_body; }
 		bool GetIsInWorld() { return m_InWorld; }
@@ -48,7 +65,6 @@ namespace Titan {
 		entt::entity GetEntity() { return m_entity; }
 
 		//setters
-		void SetIsStatic(bool isStatic);
 		void SetIsInWorld(bool inWorld);
 		void SetMass(float mass);
 		void SetLinearVelocity(glm::vec3 velocity);
@@ -66,7 +82,7 @@ namespace Titan {
 	protected:
 		TTN_Transform m_trans; //transform with the position, rotation, and scale of the physics body
 
-		bool m_IsStaticBody; //is the body dynamic or static
+		TTN_PhysicsBodyType m_bodyType;
 
 		//bullet data
 		float m_Mass; //mass of the object

@@ -130,9 +130,6 @@ namespace Titan {
 				Get<TTN_Physics>(entity).SetIsInWorld(true);
 			}
 
-			//make sure the physics body are active on every frame
-			Get<TTN_Physics>(entity).GetRigidBody()->setActivationState(true);
-
 			//call the physics body's update
 			Get<TTN_Physics>(entity).Update(deltaTime);
 		}

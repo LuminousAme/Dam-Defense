@@ -38,15 +38,14 @@ namespace Titan {
 		//setup mass, static v dynmaic status, and local internia
 		btVector3 localIntertia(0, 0, 0);
 		m_Mass = 1.0f;
-		m_IsStaticBody = false;
-		if (m_IsStaticBody) {
-			m_Mass = 0.0f;
-			m_colShape->calculateLocalInertia(m_Mass, localIntertia);
-		}
+
+		m_bodyType = TTN_PhysicsBodyType::DYNAMIC;
 
 		//create the rigidbody
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(m_Mass, m_MotionState, m_colShape, localIntertia);
 		m_body = new btRigidBody(rbInfo);
+
+		m_body->setActivationState(DISABLE_DEACTIVATION);
 
 		m_hasGravity = true;
 
@@ -60,7 +59,7 @@ namespace Titan {
 	}
 
 	//constructor that makes a physics body out of a position, rotation, and scale
-	Titan::TTN_Physics::TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, entt::entity entityNum, bool dynamic, float mass)
+	TTN_Physics::TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, entt::entity entityNum, TTN_PhysicsBodyType bodyType, float mass)
 	{
 		//set up titan transform
 		m_trans = TTN_Transform();
@@ -80,15 +79,27 @@ namespace Titan {
 		//setup mass, static v dynmaic status, and local internia
 		btVector3 localIntertia(0, 0, 0);
 		m_Mass = mass;
-		m_IsStaticBody = (!dynamic);
-		if (m_IsStaticBody) {
-			m_Mass = 0.0f;
-			m_colShape->calculateLocalInertia(m_Mass, localIntertia);
-		}
+		
+		//take the body type 
+		m_bodyType = bodyType;
+
+		//if it's static or kinematic
+		if (m_bodyType == TTN_PhysicsBodyType::STATIC || m_bodyType == TTN_PhysicsBodyType::KINEMATIC)
+			m_Mass = 0;
 
 		//create the rigidbody
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(m_Mass, m_MotionState, m_colShape, localIntertia);
 		m_body = new btRigidBody(rbInfo);
+
+		//if it's kinematic, set the kinematic flag
+		if (m_bodyType == TTN_PhysicsBodyType::KINEMATIC) {
+			m_body->setCollisionFlags(m_body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+		}
+		else if (m_bodyType == TTN_PhysicsBodyType::STATIC) {
+			m_body->setCollisionFlags(m_body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+		}
+
+		m_body->setActivationState(DISABLE_DEACTIVATION);
 
 		m_hasGravity = true;
 
@@ -140,17 +151,6 @@ namespace Titan {
 		return glm::vec3((float)velo.getX(), (float)velo.getY(), (float)velo.getZ());
 	}
 
-	void TTN_Physics::SetIsStatic(bool isStatic)
-	{
-		m_IsStaticBody = isStatic;
-		if (m_IsStaticBody) {
-			SetMass(0.0f);
-		}
-		else if (!m_IsStaticBody && m_Mass == 0.0f) {
-			SetMass(1.0f);
-		}
-	}
-
 	//sets the flag for if it's in the physics world or not
 	void TTN_Physics::SetIsInWorld(bool inWorld)
 	{
@@ -171,13 +171,7 @@ namespace Titan {
 		//update mass
 		m_body->setMassProps(m_Mass, btVector3(0,0,0));
 		//check if the body is still dynamic
-		if (m_Mass == 0.0f) {
-			//if it isn't mark it as static
-			m_IsStaticBody = true;
-		}
-		else {
-			//if it is, mark it as dynamic, and restore the velocities
-			m_IsStaticBody = false;
+		if (m_Mass != 0.0f) {
 			m_body->setLinearVelocity(linearVelo);
 			m_body->setAngularVelocity(angularVelo);
 		}
