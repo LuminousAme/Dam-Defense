@@ -68,7 +68,7 @@ void DemoScene::InitScene()
 	{
 		//create an entity in the scene for a light
 		light = CreateEntity();
-		SetLightEntity(light);
+		m_Lights.push_back(light);
 
 		//set up a trasnform for the light
 		TTN_Transform lightTrans = TTN_Transform();
@@ -226,13 +226,11 @@ void DemoScene::Update(float deltaTime)
 	for (int i = 0; i < collisionsThisFrame.size(); i++) {
 		printf("processing collision %d\n", i);
 		//get both the rigidbodies and normals
-		const btRigidBody* b1 = collisionsThisFrame[i]->GetBody1();
-		const btRigidBody* b2 = collisionsThisFrame[i]->GetBody2();
-		glm::vec3 norm1 = collisionsThisFrame[i]->GetNormal1();
-		glm::vec3 norm2 = collisionsThisFrame[i]->GetNormal2();
+		//const btRigidBody* b1 = collisionsThisFrame[i]->GetBody1();
+		//const btRigidBody* b2 = collisionsThisFrame[i]->GetBody2();
 		//get the entity number from each body
-		entt::entity entity1Ptr = *static_cast<entt::entity*>(b1->getUserPointer());
-		entt::entity entity2Ptr = *static_cast<entt::entity*>(b2->getUserPointer());
+		entt::entity entity1Ptr = collisionsThisFrame[i]->GetBody1();
+		entt::entity entity2Ptr = collisionsThisFrame[i]->GetBody2();
 
 		//check if the entity b1 is attached to still exists
 		if (TTN_Scene::GetScene()->valid(entity1Ptr)) {

@@ -55,6 +55,8 @@ namespace Titan {
 		//visible anyways
 		glEnable(GL_CULL_FACE);
 
+		glDepthFunc(GL_LEQUAL);
+
 		//Set the background colour for our scene to the base black
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	}

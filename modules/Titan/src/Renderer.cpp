@@ -14,6 +14,8 @@ namespace Titan {
 		m_Shader = nullptr;
 		//sets the material to a nullpointer
 		m_Mat = nullptr;
+		//set the renderlayer to zero
+		m_RenderLayer = 0;
 	}
 
 	TTN_Renderer::TTN_Renderer(TTN_Mesh::smptr mesh, TTN_Shader::sshptr shader, TTN_Material::smatptr material, int Renderlayer)

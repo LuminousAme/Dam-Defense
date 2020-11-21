@@ -153,12 +153,12 @@ namespace Titan {
 			fragShaderTTNIdentity = (int)shader;
 		}
 		else if (shader == TTN_DefaultShaders::VERT_SKYBOX) {
-			filePath = "shaders/tnn_vert_skybox.glsl";
+			filePath = "shaders/ttn_vert_skybox.glsl";
 			result = LoadShaderStageFromFile(filePath, GL_VERTEX_SHADER);
 			vertexShaderTTNIndentity = (int)shader;
 		}
 		else if (shader == TTN_DefaultShaders::FRAG_SKYBOX) {
-			filePath = "shaders/tnn_frag_skybox.glsl";
+			filePath = "shaders/ttn_frag_skybox.glsl";
 			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
 			fragShaderTTNIdentity = (int)shader;
 		}

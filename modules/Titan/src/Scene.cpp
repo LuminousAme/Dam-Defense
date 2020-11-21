@@ -167,7 +167,7 @@ namespace Titan {
 		m_RenderGroup->sort<TTN_Renderer>([](const TTN_Renderer& l, const TTN_Renderer& r) {
 			//sort by render layer first, higher render layers get drawn later
 			if (l.GetRenderLayer() < r.GetRenderLayer()) return true;
-			if (l.GetRenderLayer() > r.GetRenderLayer()) return true;
+			if (l.GetRenderLayer() > r.GetRenderLayer()) return false;
 
 			//sort by shader pointer to minimize state changes on active shader
 			if (l.GetShader() < r.GetShader()) return true;
@@ -197,54 +197,55 @@ namespace Titan {
 			//bind the shader
 			shader->Bind();
 
-			//sets some uniforms
-			//scene level ambient lighting
-			shader->SetUniform("u_AmbientCol", m_AmbientColor);
-			shader->SetUniform("u_AmbientStrength", m_AmbientStrength);
+			//if it's not the skybox shader, set some uniforms for lighting
+			if (shader->GetFragShaderDefaultStatus() != 8) {
+				//sets some uniforms
+				//scene level ambient lighting
+				shader->SetUniform("u_AmbientCol", m_AmbientColor);
+				shader->SetUniform("u_AmbientStrength", m_AmbientStrength);
 
-			//stuff from the light
-			glm::vec3 lightPositions[16];
-			glm::vec3 lightColor[16];
-			float lightAmbientStr[16];
-			float lightSpecStr[16];
-			float lightAttenConst[16];
-			float lightAttenLinear[16];
-			float lightAttenQuadartic[16];
+				//stuff from the light
+				glm::vec3 lightPositions[16];
+				glm::vec3 lightColor[16];
+				float lightAmbientStr[16];
+				float lightSpecStr[16];
+				float lightAttenConst[16];
+				float lightAttenLinear[16];
+				float lightAttenQuadartic[16];
 
-			for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
-				auto& light = Get<TTN_Light>(m_Lights[i]);
-				auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
-				lightPositions[i] = lightTrans.GetPos();
-				lightColor[i] = light.GetColor();
-				lightAmbientStr[i] = light.GetAmbientStrength();
-				lightSpecStr[i] = light.GetSpecularStrength();
-				lightAttenConst[i] = light.GetConstantAttenuation();
-				lightAttenLinear[i] = light.GetConstantAttenuation();
-				lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
+				for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
+					auto& light = Get<TTN_Light>(m_Lights[i]);
+					auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
+					lightPositions[i] = lightTrans.GetGlobal() * glm::vec4(0, 0, 0, 1);
+					lightColor[i] = light.GetColor();
+					lightAmbientStr[i] = light.GetAmbientStrength();
+					lightSpecStr[i] = light.GetSpecularStrength();
+					lightAttenConst[i] = light.GetConstantAttenuation();
+					lightAttenLinear[i] = light.GetConstantAttenuation();
+					lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
+				}
+
+				//send all the data about the lights to glsl
+				shader->SetUniform("u_LightPos", lightPositions[0], 16);
+				shader->SetUniform("u_LightCol", lightColor[0], 16);
+				shader->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
+				shader->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
+				shader->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
+				shader->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
+				shader->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
+
+				//and tell it how many lights there actually are
+				shader->SetUniform("u_NumOfLights", (int)m_Lights.size());
+
+				//stuff from the camera
+				shader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetPos());
 			}
-
-			//send all the data about the lights to glsl
-			shader->SetUniform("u_LightPos", lightPositions[0], 16);
-			shader->SetUniform("u_LightCol", lightColor[0], 16);
-			shader->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
-			shader->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
-			shader->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
-			shader->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
-			shader->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
-
-			//and tell it how many lights there actually are
-			shader->SetUniform("u_NumOfLights", (int)m_Lights.size());
-
-			//stuff from the camera
-			shader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetPos());
-
-			//renderer.GetMat()->GetAlbedo()->Bind(0);
-
+		
 			//if the mesh has a material send data from that
 			if (renderer.GetMat() != nullptr)
 			{
 				//give openGL the shinniess
-				shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
+				if(shader->GetFragShaderDefaultStatus() != 8) shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
 				//if they're using a texture 
 				if (shader->GetFragShaderDefaultStatus() == 4 || shader->GetFragShaderDefaultStatus() == 5)
 				{
@@ -257,14 +258,21 @@ namespace Titan {
 					//bind it so openGL can see it
 					renderer.GetMat()->GetSpecularMap()->Bind(1);
 				}
+				//if they're using a skybox
+				if (shader->GetFragShaderDefaultStatus() == 8)
+				{
+					//bind the skybox texture
+					renderer.GetMat()->GetSkybox()->Bind(0);
+					//set the rotation uniform
+					shader->SetUniformMatrix("u_EnvironmentRotation", glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(1, 0, 0))));
+					//set the skybox matrix uniform
+					shader->SetUniformMatrix("u_SkyboxMatrix", Get<TTN_Camera>(m_Cam).GetProj() * glm::mat4(glm::mat3(viewMat)));
+				}
 			}
 			//otherwise send a default shinnies value
 			else {
 				shader->SetUniform("u_Shininess", 128.0f);
 			}
-
-			//unbind the shader
-			shader->UnBind();
 
 			//and finsih by rendering the mesh
 			renderer.Render(transform.GetGlobal(), vp);
@@ -352,8 +360,8 @@ namespace Titan {
 
 					//and make a collision object
 					TTN_Collision::scolptr newCollision = TTN_Collision::Create();
-					newCollision->SetBody1(b0);
-					newCollision->SetBody2(b1);
+					newCollision->SetBody1(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b0->getUserPointer())));
+					newCollision->SetBody2(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b1->getUserPointer())));
 					newCollision->SetNormal1(normalA);
 					newCollision->SetNormal2(normalB);
 

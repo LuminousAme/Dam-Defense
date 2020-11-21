@@ -55,7 +55,7 @@ namespace Titan {
 		m_entity = static_cast<entt::entity>(-1);
 
 
-		m_body->setUserPointer(&m_entity);
+		m_body->setUserPointer(reinterpret_cast<void*>(static_cast<uint32_t>(m_entity)));
 	
 	}
 
@@ -96,7 +96,7 @@ namespace Titan {
 
 		m_entity = entityNum;
 
-		m_body->setUserPointer(static_cast<void*>(&m_entity));
+		m_body->setUserPointer(reinterpret_cast<void*>(static_cast<uint32_t>(m_entity)));
 	}
 
 	TTN_Physics::~TTN_Physics()
@@ -111,7 +111,6 @@ namespace Titan {
 		//fetch the bullet transform
 		if (m_body->getMotionState() != nullptr) {
 			m_body->getMotionState()->getWorldTransform(m_bulletTrans);
-
 		}
 		else {
 			m_bulletTrans = m_body->getWorldTransform();
@@ -219,23 +218,23 @@ namespace Titan {
 		//save the entity in titan
 		m_entity = entity;
 		//save the entity in bullet
-		m_body->setUserPointer(static_cast<void*>(&m_entity));
+		m_body->setUserPointer(reinterpret_cast<void*>(static_cast<uint32_t>(m_entity)));
 	}
 
 	TTN_Collision::TTN_Collision()
 	{
-		b1 = nullptr;
-		b2 = nullptr;
+		b1 = entt::null;
+		b2 = entt::null;
 		norm1 = glm::vec3();
 		norm2 = glm::vec3();
 	}
 
-	void TTN_Collision::SetBody1(const btRigidBody* body)
+	void TTN_Collision::SetBody1(const entt::entity body)
 	{
 		b1 = body;
 	}
 
-	void TTN_Collision::SetBody2(const btRigidBody* body)
+	void TTN_Collision::SetBody2(const entt::entity body)
 	{
 		b2 = body;
 	}

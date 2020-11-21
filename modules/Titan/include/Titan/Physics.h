@@ -20,7 +20,6 @@ namespace Titan {
 	class TTN_Physics
 	{
 	public:
-
 		//default constructor
 		TTN_Physics();
 
@@ -113,21 +112,21 @@ namespace Titan {
 		~TTN_Collision() = default;
 
 		//getters
-		const btRigidBody* GetBody1() { return b1; }
-		const btRigidBody* GetBody2() { return b2; }
+		const entt::entity GetBody1() { return b1; }
+		const entt::entity GetBody2() { return b2; }
 		glm::vec3 GetNormal1() { return norm1; }
 		glm::vec3 GetNormal2() { return norm2; }
 
 		//setters
-		void SetBody1(const btRigidBody* body);
-		void SetBody2(const btRigidBody* body);
+		void SetBody1(const entt::entity body);
+		void SetBody2(const entt::entity body);
 		void SetNormal1(btVector3 normal);
 		void SetNormal2(btVector3 normal);
 
 	protected:
 		//rigidbodies for the colliding objects (which should also contain a reference to the entity)
-		const btRigidBody* b1;
-		const btRigidBody* b2;
+		entt::entity b1;
+		entt::entity b2;
 		//normals for the collision
 		glm::vec3 norm1;
 		glm::vec3 norm2;

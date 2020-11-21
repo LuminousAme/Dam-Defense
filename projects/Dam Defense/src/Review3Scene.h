@@ -35,19 +35,23 @@ public:
 	//shader programs
 	TTN_Shader::sshptr shaderProgam;
 	TTN_Shader::sshptr shaderProgamTextured;
+	TTN_Shader::sshptr shaderProgramSkybox;
 
 	//meshes
 	TTN_Mesh::smptr cannonMesh;
 	TTN_Mesh::smptr plane;
 	TTN_Mesh::smptr tree1Mesh;
+	TTN_Mesh::smptr skyboxMesh;
 
 	//textures
 	TTN_Texture2D::st2dptr waterText;
 	TTN_Texture2D::st2dptr cannonText;
+	TTN_TextureCubeMap::stcmptr skyboxText;
 
 	//materials
 	TTN_Material::smatptr waterMat;
 	TTN_Material::smatptr cannonMat;
+	TTN_Material::smatptr skyboxMat;
 
 protected:
 	//entities
@@ -56,6 +60,7 @@ protected:
 	entt::entity cannon;
 	entt::entity water;
 	entt::entity tree1;
+	entt::entity skybox;
 	std::vector<entt::entity> cannonballs;
 
 
