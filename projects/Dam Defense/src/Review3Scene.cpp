@@ -24,6 +24,13 @@ void Review3Scene::InitScene()
 	shaderProgamTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
 	shaderProgamTextured->Link();
 
+	//create a shader program object for the skybox
+	shaderProgramSkybox = TTN_Shader::Create();
+	//load the shaders into the shader program
+	shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::VERT_SKYBOX);
+	shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::FRAG_SKYBOX);
+	shaderProgramSkybox->Link();
+
 	//create a shader program object for textured objects
 	shaderHeight = TTN_Shader::Create();
 	//load the shaders into the shader program
@@ -40,11 +47,19 @@ void Review3Scene::InitScene()
 	plane->SetUpVao();
 	tree1Mesh = TTN_ObjLoader::LoadFromFile("Review3/Tree 1.obj");
 	tree1Mesh->SetUpVao();
+	skyboxMesh = TTN_ObjLoader::LoadFromFile("SkyboxMesh.obj");
+	skyboxMesh->SetUpVao();
 
 	//create textrure pointers and load the textures in 
 	waterText = TTN_Texture2D::LoadFromFile("Review3/water_text.png");
 	cannonText = TTN_Texture2D::LoadFromFile("Review3/Metal_Texture_2.jpg");
+<<<<<<< HEAD
  
+=======
+	skyboxText = TTN_TextureCubeMap::LoadFromImages("cubemaps/skybox/ocean.jpg");
+	heightmap = TTN_Texture2D::LoadFromFile("Review3/heightmap.bmp");
+
+>>>>>>> Ame
 	//create material pointers and set them up
 	waterMat = TTN_Material::Create();
 	waterMat->SetAlbedo(waterText);
@@ -52,17 +67,25 @@ void Review3Scene::InitScene()
 	cannonMat = TTN_Material::Create();
 	cannonMat->SetAlbedo(cannonText);
 	cannonMat->SetShininess(128.0f);
+<<<<<<< HEAD
+=======
+	skyboxMat = TTN_Material::Create();
+	skyboxMat->SetSkybox(skyboxText);
+	heightMat = TTN_Material::Create();
+	heightMat->SetAlbedo(heightmap);
+	heightMat->SetShininess(128.0f);
+>>>>>>> Ame
 
-	ParticleData data;
+	//ParticleData data;
 	//data.m_max = 100;
-	data.m_position = glm::vec3(10.f, -5.0f, 20.0f);
-	data.m_velocity = glm::vec3(1.0f, 5.0f, 0.0f);
-	data.ColorBegin = glm::vec4(1.0f, 1.0f, 1.5f, 1.0f);
-	data.ColorEnd = glm::vec4(0.0f, 0.0f, 1.0f, 0.5f);
+	//data.m_position = glm::vec3(10.f, -5.0f, 20.0f);
+	//data.m_velocity = glm::vec3(1.0f, 5.0f, 0.0f);
+	//data.ColorBegin = glm::vec4(1.0f, 1.0f, 1.5f, 1.0f);
+	//data.ColorEnd = glm::vec4(0.0f, 0.0f, 1.0f, 0.5f);
 
-	data.SizeEnd = 1.0f;
-	data.SizeBegin = 10.0f;
-	data.LifeTime = 1.0f;	
+	//data.SizeEnd = 1.0f;
+	//data.SizeBegin = 10.0f;
+	//data.LifeTime = 1.0f;	
 	//data.m_angle = glm::tan(glm::radians(25.0f));
 
 	////////// entities /////////////////
@@ -86,7 +109,11 @@ void Review3Scene::InitScene()
 	{
 		//create an entity in the scene for a light
 		light = CreateEntity();
+<<<<<<< HEAD
 		//SetLightEntity(light);
+=======
+		m_Lights.push_back(light);
+>>>>>>> Ame
 
 		//set up a trasnform for the light
 		TTN_Transform lightTrans = TTN_Transform();
@@ -99,6 +126,25 @@ void Review3Scene::InitScene()
 		//attach that light to the light entity
 		AttachCopy<TTN_Light>(light, lightLight);
 	}
+	
+	
+	//entity for the skybox
+	{
+		skybox = CreateEntity();
+
+		//setup a mesh renderer for the skybox
+		TTN_Renderer skyboxRenderer = TTN_Renderer(skyboxMesh, shaderProgramSkybox);
+		skyboxRenderer.SetMat(skyboxMat);
+		skyboxRenderer.SetRenderLayer(100);
+		//attach that renderer to the entity
+		AttachCopy<TTN_Renderer>(skybox, skyboxRenderer);
+
+		//setup a transform for the skybox
+		TTN_Transform skyboxTrans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		//attach that transform to the entity
+		AttachCopy<TTN_Transform>(skybox, skyboxTrans);
+	}
+	
 
 	//entity for the cannon
 	{
@@ -116,7 +162,8 @@ void Review3Scene::InitScene()
 		//attach that transform to the entity
 		AttachCopy<TTN_Transform>(cannon, cannonTrans);
 	}
-		
+
+	/*
 	//entity for the water
 	{
 		water = CreateEntity();
@@ -131,7 +178,7 @@ void Review3Scene::InitScene()
 		TTN_Transform waterTrans = TTN_Transform(glm::vec3(0.f, -7.0f, 0.0f), glm::vec3(0.0f), glm::vec3(200.0f, 1.0f, 200.0f));
 		//and attach that transform to the entity
 		AttachCopy<TTN_Transform>(water, waterTrans);
-	}
+	}*/
 
 	//entity for a tree
 	{
@@ -147,9 +194,9 @@ void Review3Scene::InitScene()
 		//and attach that transform to the entity
 		AttachCopy<TTN_Transform>(tree1, treeTrans);
 
-		data.m_position = treeTrans.GetPos();
-		TTN_Particle treePart = TTN_Particle();
-		AttachCopy<TTN_Particle>(tree1, treePart);
+		//data.m_position = treeTrans.GetPos();
+		//TTN_Particle treePart = TTN_Particle();
+		//AttachCopy<TTN_Particle>(tree1, treePart);
 	}
 
 	//boat entity
@@ -188,7 +235,11 @@ void Review3Scene::InitScene()
 	/////// other /////////
 	rotAmmount = glm::vec2(0.0f, 0.0f);
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
+<<<<<<< HEAD
 	
+=======
+	//Particles = data;
+>>>>>>> Ame
 }
 
 void Review3Scene::Update(float deltaTime)
@@ -202,12 +253,7 @@ void Review3Scene::Update(float deltaTime)
 	auto& transCannon = Get<TTN_Transform>(cannon);
 	auto& transCamera = Get<TTN_Transform>(camera);
 	
-	auto& PartCam = Get<TTN_Particle>(tree1);
-	PartCam.Update(deltaTime);
-	PartCam.Emit(Particles);
-	PartCam.Render();
-	
-
+	transCamera.RotateFixed(glm::vec3(0.0f, 5.0f * deltaTime, 0.0f));
 	//check if the mouse has moved on the x-axis
 	/*if (tempMousePos.x != mousePos.x) {
 		//if it, get the difference

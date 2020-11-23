@@ -159,18 +159,24 @@ namespace Titan {
 			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
 			fragShaderTTNIdentity = (int)shader;
 		}
+<<<<<<< HEAD
  
+=======
+>>>>>>> Ame
 		else if (shader == TTN_DefaultShaders::VERT_SKYBOX) {
-			filePath = "shaders/tnn_vert_skybox.glsl";
+			filePath = "shaders/ttn_vert_skybox.glsl";
 			result = LoadShaderStageFromFile(filePath, GL_VERTEX_SHADER);
 			vertexShaderTTNIndentity = (int)shader;
 		}
 		else if (shader == TTN_DefaultShaders::FRAG_SKYBOX) {
-			filePath = "shaders/tnn_frag_skybox.glsl";
+			filePath = "shaders/ttn_frag_skybox.glsl";
 			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
 			fragShaderTTNIdentity = (int)shader;
 		}
+<<<<<<< HEAD
  
+=======
+>>>>>>> Ame
 		else {
 			//if the user tried to load a shader that doesn't,
 			LOG_ERROR("Default shader {} does not exist", shader);

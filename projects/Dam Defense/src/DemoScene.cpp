@@ -41,17 +41,17 @@ void DemoScene::InitScene()
 	swordMat->SetAlbedo(swordText);
 	swordMat->SetShininess(128.0f);
 	
-	ParticleData data;
+	//ParticleData data;
 	//data.m_max = 100;
-	data.m_position = glm::vec3(10.f, -5.0f, 20.0f);
-	data.m_velocity = glm::vec3(1.0f, 5.0f, 0.0f);
-	data.ColorBegin = glm::vec4(1.0f, 1.0f, 1.5f, 1.0f);
-	data.ColorEnd = glm::vec4(0.0f, 0.0f, 1.0f, 0.5f);
+	//data.m_position = glm::vec3(10.f, -5.0f, 20.0f);
+	//data.m_velocity = glm::vec3(1.0f, 5.0f, 0.0f);
+	//data.ColorBegin = glm::vec4(1.0f, 1.0f, 1.5f, 1.0f);
+	//data.ColorEnd = glm::vec4(0.0f, 0.0f, 1.0f, 0.5f);
 
-	data.SizeEnd = 10.0f;
-	data.SizeBegin = 20.0f;
-	data.LifeTime = 15.0f;
-	Particles = data;
+	//data.SizeEnd = 10.0f;
+	//data.SizeBegin = 20.0f;
+	//data.LifeTime = 15.0f;
+	//Particles = data;
 
 	//plane stuff
 	plane = TTN_ObjLoader::LoadFromFile("Review3/water.obj");
@@ -83,7 +83,11 @@ void DemoScene::InitScene()
 	{
 		//create an entity in the scene for a light
 		light = CreateEntity();
+<<<<<<< HEAD
 		//SetLightEntity(light);
+=======
+		m_Lights.push_back(light);
+>>>>>>> Ame
 
 		//set up a trasnform for the light
 		TTN_Transform lightTrans = TTN_Transform();
@@ -133,13 +137,15 @@ void DemoScene::InitScene()
 		treeTrans.SetScale(glm::vec3(1.f, 1.f, 1.f));
 		//attach that transform to the tree entity
 		AttachCopy<TTN_Transform>(tree1, treeTrans);
-		 
-		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), tree1);
-		pbody.SetIsStatic(true);
+
+		//TTN_Physics pbody = TTN_Physics(glm::vec3(treeTrans.GetPos().x , treeTrans.GetPos().y , treeTrans.GetPos().z ));
+
+		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), tree1, TTN_PhysicsBodyType::STATIC, 0.0f);
+
 		AttachCopy<TTN_Physics>(tree1, pbody);
 
-		TTN_Particle treePart = TTN_Particle();
-		AttachCopy<TTN_Particle>(tree1, treePart);
+		//TTN_Particle treePart = TTN_Particle();
+		//AttachCopy<TTN_Particle>(tree1, treePart);
 
 		//add a tag to the tree
 		TTN_Tag treeTag = TTN_Tag("Tree");
@@ -252,66 +258,22 @@ void DemoScene::Update(float deltaTime)
 	//get the collisions from the base scene
 	std::vector<TTN_Collision::scolptr> collisionsThisFrame = TTN_Scene::GetCollisions();
 
-	//make a vector of entites that need to be deleted
-	std::vector<entt::entity> entitiesToDelete;
-
 	//iterate through the collisions
 	for (int i = 0; i < collisionsThisFrame.size(); i++) {
-		printf("processing collision %d\n", i);
-		//get both the rigidbodies and normals
-		const btRigidBody* b1 = collisionsThisFrame[i]->GetBody1();
-		const btRigidBody* b2 = collisionsThisFrame[i]->GetBody2();
-		glm::vec3 norm1 = collisionsThisFrame[i]->GetNormal1();
-		glm::vec3 norm2 = collisionsThisFrame[i]->GetNormal2();
-		//get the entity number from each body
-		entt::entity entity1Ptr = *static_cast<entt::entity*>(b1->getUserPointer());
-		entt::entity entity2Ptr = *static_cast<entt::entity*>(b2->getUserPointer());
+		entt::entity entity1Ptr = collisionsThisFrame[i]->GetBody1();
+		entt::entity entity2Ptr = collisionsThisFrame[i]->GetBody2();
 
-		//check if the entity b1 is attached to still exists
-		if (TTN_Scene::GetScene()->valid(entity1Ptr)) {
-			printf("processing object 1 of collision %d\n", i);
-			//if it, check if it is a boat
-			if (TTN_Scene::Has<TTN_Tag>(entity1Ptr) && TTN_Scene::Get<TTN_Tag>(entity1Ptr).getName() == "Boat") {
-				printf("object 1 of of collision %d is a boat\n", i);
-				//if it then have it bounce
-				//TTN_Scene::Get<TTN_Physics>(entity1Ptr).AddImpulse(norm1 * 5.0f);
-			}
-			//otherwise check if it's a tree
-			else if (TTN_Scene::Has<TTN_Tag>(entity1Ptr) && TTN_Scene::Get<TTN_Tag>(entity1Ptr).getName() == "Tree") {
-				//if it, then add it to the list of entities to be deleted
-				printf("object 1 of of collision %d is a tree\n", i);
-				bool shouldAdd = true;
-				for (int j = 0; j < entitiesToDelete.size(); j++)
-					if (entity1Ptr == entitiesToDelete[j]) shouldAdd = false;
-				if (shouldAdd) entitiesToDelete.push_back(entity1Ptr);
-			}
+		//check if entity 1 is a tree
+		if (TTN_Scene::Has<TTN_Tag>(entity1Ptr) && TTN_Scene::Get<TTN_Tag>(entity1Ptr).getName() == "Tree") {
+			//if it, then delete it
+			DeleteEntity(entity1Ptr);
 		}
-		//check if the entity in b2 is attached to still exists
-		if (TTN_Scene::GetScene()->valid(entity2Ptr)) {
-			printf("processing object 2 of collision %d\n", i);
-			//if it, check if it is a boat
-			if (TTN_Scene::Has<TTN_Tag>(entity2Ptr) && TTN_Scene::Get<TTN_Tag>(entity2Ptr).getName() == "Boat") {
-				printf("object 2 of of collision %d is a boat\n", i);
-				//if it then have it bounce
-				//TTN_Scene::Get<TTN_Physics>(entity2Ptr).AddImpulse(norm2 * 5.0f);
-			}
-			//otherwise check if it's a tree
-			else if (TTN_Scene::Has<TTN_Tag>(entity2Ptr) && TTN_Scene::Get<TTN_Tag>(entity2Ptr).getName() == "Tree") {
-				//if it, then add it to the list of entities to be deleted
-				printf("object 2 of of collision %d is a tree\n", i);
-				bool shouldAdd = true;
-				for (int j = 0; j < entitiesToDelete.size(); j++)
-					if (entity2Ptr == entitiesToDelete[j]) shouldAdd = false;
-				if (shouldAdd) entitiesToDelete.push_back(entity2Ptr);
-			}
+		//check if entity 2 is a tree
+		if (TTN_Scene::Has<TTN_Tag>(entity2Ptr) && TTN_Scene::Get<TTN_Tag>(entity2Ptr).getName() == "Tree") {
+			//if it is, delete it
+			DeleteEntity(entity2Ptr);
 		}
 	}
-
-	//when all the collisions have been processed, delete the entites that should be delete
-	for (int i = 0; i < entitiesToDelete.size(); i++) {
-		TTN_Scene::DeleteEntity(entitiesToDelete[i]);
-	}
- 
 
 	//Please don't forget to call the base scene's update at the end of the child class' update
 	TTN_Scene::Update(deltaTime);

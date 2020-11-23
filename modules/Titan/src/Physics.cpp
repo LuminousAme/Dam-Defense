@@ -291,15 +291,14 @@ namespace Titan {
 		//setup mass, static v dynmaic status, and local internia
 		btVector3 localIntertia(0, 0, 0);
 		m_Mass = 1.0f;
-		m_IsStaticBody = false;
-		if (m_IsStaticBody) {
-			m_Mass = 0.0f;
-			m_colShape->calculateLocalInertia(m_Mass, localIntertia);
-		}
+
+		m_bodyType = TTN_PhysicsBodyType::DYNAMIC;
 
 		//create the rigidbody
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(m_Mass, m_MotionState, m_colShape, localIntertia);
 		m_body = new btRigidBody(rbInfo);
+
+		m_body->setActivationState(DISABLE_DEACTIVATION);
 
 		m_hasGravity = true;
 
@@ -308,12 +307,12 @@ namespace Titan {
 		m_entity = static_cast<entt::entity>(-1);
 
 
-		m_body->setUserPointer(&m_entity);
+		m_body->setUserPointer(reinterpret_cast<void*>(static_cast<uint32_t>(m_entity)));
 	
 	}
 
 	//constructor that makes a physics body out of a position, rotation, and scale
-	Titan::TTN_Physics::TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, entt::entity entityNum, bool dynamic, float mass)
+	TTN_Physics::TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, entt::entity entityNum, TTN_PhysicsBodyType bodyType, float mass)
 	{
 		//set up titan transform
 		m_trans = TTN_Transform();
@@ -333,15 +332,27 @@ namespace Titan {
 		//setup mass, static v dynmaic status, and local internia
 		btVector3 localIntertia(0, 0, 0);
 		m_Mass = mass;
-		m_IsStaticBody = (!dynamic);
-		if (m_IsStaticBody) {
-			m_Mass = 0.0f;
-			m_colShape->calculateLocalInertia(m_Mass, localIntertia);
-		}
+		
+		//take the body type 
+		m_bodyType = bodyType;
+
+		//if it's static or kinematic
+		if (m_bodyType == TTN_PhysicsBodyType::STATIC || m_bodyType == TTN_PhysicsBodyType::KINEMATIC)
+			m_Mass = 0;
 
 		//create the rigidbody
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(m_Mass, m_MotionState, m_colShape, localIntertia);
 		m_body = new btRigidBody(rbInfo);
+
+		//if it's kinematic, set the kinematic flag
+		if (m_bodyType == TTN_PhysicsBodyType::KINEMATIC) {
+			m_body->setCollisionFlags(m_body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+		}
+		else if (m_bodyType == TTN_PhysicsBodyType::STATIC) {
+			m_body->setCollisionFlags(m_body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+		}
+
+		m_body->setActivationState(DISABLE_DEACTIVATION);
 
 		m_hasGravity = true;
 
@@ -349,7 +360,7 @@ namespace Titan {
 
 		m_entity = entityNum;
 
-		m_body->setUserPointer(static_cast<void*>(&m_entity));
+		m_body->setUserPointer(reinterpret_cast<void*>(static_cast<uint32_t>(m_entity)));
 	}
 
 	TTN_Physics::~TTN_Physics()
@@ -364,7 +375,6 @@ namespace Titan {
 		//fetch the bullet transform
 		if (m_body->getMotionState() != nullptr) {
 			m_body->getMotionState()->getWorldTransform(m_bulletTrans);
-
 		}
 		else {
 			m_bulletTrans = m_body->getWorldTransform();
@@ -394,15 +404,12 @@ namespace Titan {
 		return glm::vec3((float)velo.getX(), (float)velo.getY(), (float)velo.getZ());
 	}
 
-	void TTN_Physics::SetIsStatic(bool isStatic)
+	glm::vec3 TTN_Physics::GetPos()
 	{
-		m_IsStaticBody = isStatic;
-		if (m_IsStaticBody) {
-			SetMass(0.0f);
-		}
-		else if (!m_IsStaticBody && m_Mass == 0.0f) {
-			SetMass(1.0f);
-		}
+		btTransform trans;
+		m_body->getMotionState()->getWorldTransform(trans);
+		btVector3 position = trans.getOrigin();
+		return glm::vec3((float)position.getX(), (float)position.getY(), (float)position.getZ());
 	}
 
 	//sets the flag for if it's in the physics world or not
@@ -425,13 +432,7 @@ namespace Titan {
 		//update mass
 		m_body->setMassProps(m_Mass, btVector3(0,0,0));
 		//check if the body is still dynamic
-		if (m_Mass == 0.0f) {
-			//if it isn't mark it as static
-			m_IsStaticBody = true;
-		}
-		else {
-			//if it is, mark it as dynamic, and restore the velocities
-			m_IsStaticBody = false;
+		if (m_Mass != 0.0f) {
 			m_body->setLinearVelocity(linearVelo);
 			m_body->setAngularVelocity(angularVelo);
 		}
@@ -445,6 +446,16 @@ namespace Titan {
 	void TTN_Physics::SetAngularVelocity(glm::vec3 velocity)
 	{
 		m_body->setAngularVelocity(btVector3(velocity.x, velocity.y, velocity.z));
+	}
+
+	void TTN_Physics::SetPos(glm::vec3 position)
+	{
+		btVector3 newPos = btVector3(position.x, position.y, position.z);
+		btTransform Trans;
+		m_body->getMotionState()->getWorldTransform(Trans);
+		Trans.setOrigin(newPos);
+		m_body->getMotionState()->setWorldTransform(Trans);
+		m_trans.SetPos(position);
 	}
 
 	void TTN_Physics::SetHasGravity(bool hasGrav)
@@ -471,34 +482,22 @@ namespace Titan {
 		//save the entity in titan
 		m_entity = entity;
 		//save the entity in bullet
-		m_body->setUserPointer(static_cast<void*>(&m_entity));
+		m_body->setUserPointer(reinterpret_cast<void*>(static_cast<uint32_t>(m_entity)));
 	}
 
 	TTN_Collision::TTN_Collision()
 	{
-		b1 = nullptr;
-		b2 = nullptr;
-		norm1 = glm::vec3();
-		norm2 = glm::vec3();
+		b1 = entt::null;
+		b2 = entt::null;
 	}
 
-	void TTN_Collision::SetBody1(const btRigidBody* body)
+	void TTN_Collision::SetBody1(const entt::entity body)
 	{
 		b1 = body;
 	}
 
-	void TTN_Collision::SetBody2(const btRigidBody* body)
+	void TTN_Collision::SetBody2(const entt::entity body)
 	{
 		b2 = body;
-	}
-
-	void TTN_Collision::SetNormal1(btVector3 normal)
-	{
-		norm1 = glm::vec3((float)normal.getX(), (float)normal.getY(), (float)normal.getZ());
-	}
-
-	void TTN_Collision::SetNormal2(btVector3 normal)
-	{
-		norm2 = glm::vec3((float)normal.getX(), (float)normal.getY(), (float)normal.getZ());
 	}
 }

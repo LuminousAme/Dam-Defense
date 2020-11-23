@@ -9,6 +9,7 @@
 
 namespace Titan {
 	TTN_TextureCubeMapData::TTN_TextureCubeMapData(uint32_t size, Texture_Pixel_Format format, Texture_Pixel_Data_Type type, void* sourceData, Texture_Internal_Format recommendedFormat)
+		:_size(size), _format(format), _type(type), _data(nullptr), _recommendedFormat(recommendedFormat)
 	{
 		LOG_ASSERT(size > 0, "Size must be greater than zero! Got {}", size)
 			_faceDataSize = (size_t)_size * _size * GetTexelSize(_format, _type);

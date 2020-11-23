@@ -17,117 +17,20 @@
 #include <btBulletDynamicsCommon.h>
 
 namespace Titan {
+	enum class TTN_PhysicsBodyType {
+		STATIC = 0,
+		DYNAMIC = 1,
+		KINEMATIC = 2
+	};
 
-#pragma region old
-	//class for bullet3 collisions
-	//class TTN_PhysicsB
-	//{
-	//public:
-	//	TTN_PhysicsB();
-	//	~TTN_PhysicsB()=default;
-
-	//	TTN_PhysicsB(glm::vec3 pos, btDiscreteDynamicsWorld* world, btAlignedObjectArray<btCollisionShape*> parray);
-
-	//	void InitCollision(); // initiailizes stuff required to detect and solve collisions
-
-	//	void SetMass(btScalar mass);
-	//	void SetTrans(btVector3 trans);
-
-	//	btTransform GetTrans() { return m_trans; };
-
-	//	//btDiscreteDynamicsWorld* GetWorld() { return m_world; };
-	//	//btBroadphaseInterface* GetBroad() { return m_broadphase; };
-
-	//	//btBroadphaseInterface* m_broadphase;
-	//	/*static btDefaultCollisionConfiguration* m_config;
-	//	static btCollisionDispatcher* m_dispatcher;
-
-	//	static btSequentialImpulseConstraintSolver* m_solver;
-	//	static btDiscreteDynamicsWorld* m_world;
-	//	static btDefaultMotionState* m_MotionState;*/
-
-	//	btTransform m_trans;
-	//	//collision object
-	//	btCollisionObject m_col;
-	//	//mass of object
-	//	btScalar m_mass;
-
-	//};
-
-	//class TTN_Debug : public btIDebugDraw {
-	///*public:
-
-	//	struct Line {
-	//		GLfloat vertices[6];
-	//		
-	//		Line(const btVector3& from, const btVector3& to) {
-	//			vertices[0] = from.x();
-	//			vertices[1] = from.y();
-	//			vertices[2] = from.z();
-
-	//			vertices[3] = to.x();
-	//			vertices[4] = to.y();
-	//			vertices[5] = to.z();}
-	//	};
-
-
-	//	TTN_Debug();
-	//	virtual ~TTN_Debug();
-
-	//	virtual void setDebugMode(int debugmode);
-
-	//	virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color);
-	//	
-	//	virtual void lines(const btVector3& from, const btVector3& to);
-
-	//	virtual void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color);
-
-	//	virtual void reportErrorWarning(const char* warningString);
-
-	//	virtual void draw3dText(const btVector3& location, const char* textString);
-
-	//	virtual int getDebugMode() const;
-
-
-	//	int m_debugMode;*/
-
-	//	int m_debugMode;
-
-	//public:
-
-	//	TTN_Debug();
-	//	virtual ~TTN_Debug();
-
-	//	virtual void	drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor);
-
-	//	virtual void	drawLine(const btVector3& from, const btVector3& to, const btVector3& color);
-
-	//	virtual void	drawSphere(const btVector3& p, btScalar radius, const btVector3& color);
-
-	//	virtual void	drawTriangle(const btVector3& a, const btVector3& b, const btVector3& c, const btVector3& color, btScalar alpha);
-
-	//	virtual void	drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color);
-
-	//	virtual void	reportErrorWarning(const char* warningString);
-
-	//	virtual void	draw3dText(const btVector3& location, const char* textString);
-
-	//	virtual void	setDebugMode(int debugMode);
-
-	//	virtual int		getDebugMode() const { return m_debugMode; }
-
-	//};
-
-#pragma endregion 
 	class TTN_Physics
 	{
 	public:
-
 		//default constructor
 		TTN_Physics();
 
 		//contrustctor with data
-		TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, entt::entity entityNum, bool dynamic = true, float mass = 1.0f);
+		TTN_Physics(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, entt::entity entityNum, TTN_PhysicsBodyType bodyType = TTN_PhysicsBodyType::DYNAMIC, float mass = 1.0f);
 
 		~TTN_Physics();
 
@@ -141,21 +44,33 @@ namespace Titan {
 
 		//getters
 		TTN_Transform GetTrans() { return m_trans; }
-		bool GetIsStatic() { return m_IsStaticBody; }
+		bool GetIsStatic() {
+			if (m_bodyType == TTN_PhysicsBodyType::STATIC) return true;
+			else return false;
+		}
+		bool GetIsDynamic() {
+			if (m_bodyType == TTN_PhysicsBodyType::DYNAMIC) return true;
+			else return false;
+		}
+		bool GetIsKinematic() {
+			if (m_bodyType == TTN_PhysicsBodyType::KINEMATIC) return true;
+			else return false;
+		}
 		float GetMass() { return m_Mass; }
 		btRigidBody* GetRigidBody() { return m_body; }
 		bool GetIsInWorld() { return m_InWorld; }
 		glm::vec3 GetLinearVelocity();
 		glm::vec3 GetAngularVelocity();
+		glm::vec3 GetPos();
 		bool GetHasGravity() { return m_hasGravity; }
 		entt::entity GetEntity() { return m_entity; }
 
 		//setters
-		void SetIsStatic(bool isStatic);
 		void SetIsInWorld(bool inWorld);
 		void SetMass(float mass);
 		void SetLinearVelocity(glm::vec3 velocity);
 		void SetAngularVelocity(glm::vec3 velocity);
+		void SetPos(glm::vec3 position);
 		void SetHasGravity(bool hasGrav);
 
 		//forces
@@ -169,7 +84,7 @@ namespace Titan {
 	protected:
 		TTN_Transform m_trans; //transform with the position, rotation, and scale of the physics body
 
-		bool m_IsStaticBody; //is the body dynamic or static
+		TTN_PhysicsBodyType m_bodyType;
 
 		//bullet data
 		float m_Mass; //mass of the object
@@ -215,24 +130,30 @@ namespace Titan {
 		~TTN_Collision() = default;
 
 		//getters
-		const btRigidBody* GetBody1() { return b1; }
-		const btRigidBody* GetBody2() { return b2; }
-		glm::vec3 GetNormal1() { return norm1; }
-		glm::vec3 GetNormal2() { return norm2; }
+		const entt::entity GetBody1() { return b1; }
+		const entt::entity GetBody2() { return b2; }
 
 		//setters
-		void SetBody1(const btRigidBody* body);
-		void SetBody2(const btRigidBody* body);
-		void SetNormal1(btVector3 normal);
-		void SetNormal2(btVector3 normal);
+		void SetBody1(const entt::entity body);
+		void SetBody2(const entt::entity body);
+
+		//checks if two collisions pointers represent a collision between the same objects
+		static bool same(scolptr collision1, scolptr collision2) {
+			//compare the entity numbers
+			if ((collision1->b1 == collision2->b1 && collision1->b2 == collision2->b2) ||
+				(collision1->b1 == collision2->b2 && collision1->b2 == collision2->b1)) {
+				//if they match across the collisions, then return true
+				return true;
+			}
+			else
+				//otherwise return false
+				return false;
+		}
 
 	protected:
 		//rigidbodies for the colliding objects (which should also contain a reference to the entity)
-		const btRigidBody* b1;
-		const btRigidBody* b2;
-		//normals for the collision
-		glm::vec3 norm1;
-		glm::vec3 norm2;
+		entt::entity b1;
+		entt::entity b2;
 	};
  
 }

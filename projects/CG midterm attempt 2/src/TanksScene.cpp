@@ -93,11 +93,18 @@ void TanksScene::Update(float deltaTime)
 	//iterate through the collisions
 	for (int i = 0; i < collisionsThisFrame.size(); i++) {
 		//get both the rigidbodies
-		const btRigidBody* b1 = collisionsThisFrame[i]->GetBody1();
-		const btRigidBody* b2 = collisionsThisFrame[i]->GetBody2();
+		//const btRigidBody* b1 = collisionsThisFrame[i]->GetBody1();
+		//const btRigidBody* b2 = collisionsThisFrame[i]->GetBody2();
 		//get the entity number from each body
-		entt::entity entity1Ptr = *static_cast<entt::entity*>(b1->getUserPointer());
-		entt::entity entity2Ptr = *static_cast<entt::entity*>(b2->getUserPointer());
+		//entt::entity entity1Ptr = static_cast<entt::entity>(reinterpret_cast<uint32_t>(b1->getUserPointer()));
+		//entt::entity entity2Ptr = static_cast<entt::entity>(reinterpret_cast<uint32_t>(b2->getUserPointer()));
+		//entt::entity entity1Ptr = *static_cast<entt::entity*>(b1->getUserPointer());
+		//entt::entity entity2Ptr = *static_cast<entt::entity*>(b2->getUserPointer());
+		entt::entity entity1Ptr = collisionsThisFrame[i]->GetBody1();
+		entt::entity entity2Ptr = collisionsThisFrame[i]->GetBody2();
+
+		entt::entity tempTankRed = redPlayer;
+		entt::entity tempTankBlue = bluePlayer;
 
 		//check if both entities still exist
 		if (TTN_Scene::GetScene()->valid(entity1Ptr) && TTN_Scene::GetScene()->valid(entity2Ptr)) {
@@ -229,8 +236,8 @@ void TanksScene::Update(float deltaTime)
 	TTN_Scene::Update(deltaTime);
 
 	//match the lights position to the tanks cause parenting isn't working for them for some reason
-	Get<TTN_Transform>(lightRedPlayer).SetPos(Get<TTN_Transform>(redPlayer).GetPos());
-	Get<TTN_Transform>(lightBluePlayer).SetPos(Get<TTN_Transform>(bluePlayer).GetPos());
+	//Get<TTN_Transform>(lightRedPlayer).SetPos(Get<TTN_Transform>(redPlayer).GetPos());
+	//Get<TTN_Transform>(lightBluePlayer).SetPos(Get<TTN_Transform>(bluePlayer).GetPos());
 }
 
 //checks for when a key is pressed down
@@ -605,7 +612,7 @@ void TanksScene::InitEntities()
 
 		Attach<TTN_Physics>(walls[i]);
 		auto& wallPhysBod = Get<TTN_Physics>(walls[i]);
-		wallPhysBod = TTN_Physics(wallTrans.GetPos(), glm::vec3(0.0f), wallTrans.GetScale() + glm::vec3(0.8f), walls[i], false, 0.0f);
+		wallPhysBod = TTN_Physics(wallTrans.GetPos(), glm::vec3(0.0f), wallTrans.GetScale() + glm::vec3(0.8f), walls[i], TTN_PhysicsBodyType::STATIC, 0.0f);
 	}
 
 	//red score
@@ -684,9 +691,9 @@ void TanksScene::InitEntities()
 
 	//not working??
 	//parent the light to the red player so it follows the red player
-	//Get<TTN_Transform>(lightRedPlayer).SetParent(&Get<TTN_Transform>(redPlayer), &redPlayer);
+	Get<TTN_Transform>(lightRedPlayer).SetParent(&Get<TTN_Transform>(redPlayer), &redPlayer);
 	//parent the light to the blue player so it follows the red player
-	//Get<TTN_Transform>(lightBluePlayer).SetParent(&Get<TTN_Transform>(bluePlayer), &bluePlayer);
+	Get<TTN_Transform>(lightBluePlayer).SetParent(&Get<TTN_Transform>(bluePlayer), &bluePlayer);
 }
 
 //sets up other data the scene needs
@@ -818,9 +825,9 @@ void TanksScene::CreateRedPlayer()
 		Get<TTN_Tag>(redPlayer) = TTN_Tag("red tank");
 
 		//setup a physics body for the red player
-		Attach<TTN_Physics>(redPlayer);
-		auto& redPhysBod = Get<TTN_Physics>(redPlayer);
-		redPhysBod = TTN_Physics(redTrans.GetPos(), glm::vec3(0.0f), glm::vec3(0.40f, 0.30f, 0.30f), redPlayer);
+		//Attach<TTN_Physics>(redPlayer);
+		TTN_Physics redPhysBod = TTN_Physics(redTrans.GetPos(), glm::vec3(0.0f), glm::vec3(0.40f, 0.30f, 0.30f), redPlayer);
+		AttachCopy<TTN_Physics>(redPlayer, redPhysBod);
 	}
 }
 
@@ -849,8 +856,7 @@ void TanksScene::CreateBluePlayer()
 		Get<TTN_Tag>(bluePlayer) = TTN_Tag("blue tank");
 
 		//setup a physics body for the blue player
-		Attach<TTN_Physics>(bluePlayer);
-		auto& bluePhysBod = Get<TTN_Physics>(bluePlayer);
-		bluePhysBod = TTN_Physics(blueTrans.GetPos(), glm::vec3(0.0f), glm::vec3(0.40f, 0.30f, 0.30f), bluePlayer);
+		TTN_Physics bluePhysBod = TTN_Physics(blueTrans.GetPos(), glm::vec3(0.0f), glm::vec3(0.40f, 0.30f, 0.30f), bluePlayer);
+		AttachCopy<TTN_Physics>(bluePlayer, bluePhysBod);
 	}
 }

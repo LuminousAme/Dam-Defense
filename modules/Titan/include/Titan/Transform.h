@@ -38,6 +38,7 @@ namespace Titan {
 		//GETTERS
 		//position
 		glm::vec3 GetPos();
+		glm::vec3 GetGlobalPos();
 		//scale 
 		glm::vec3 GetScale();
 		//rotation

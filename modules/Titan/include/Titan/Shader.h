@@ -29,7 +29,10 @@ namespace Titan {
 		VERT_COLOR_HEIGHTMAP = 6,
 		VERT_SKYBOX = 7,
 		FRAG_SKYBOX = 8
+<<<<<<< HEAD
 
+=======
+>>>>>>> Ame
 	};
 
 	//class to wrap around an opengl shader 

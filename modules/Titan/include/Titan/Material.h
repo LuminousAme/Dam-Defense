@@ -4,6 +4,7 @@
 
 //include texture class
 #include "Texture2D.h"
+#include "TextureCubeMap.h"
 
 namespace Titan {
 	//class for materials on 3D objects
@@ -34,15 +35,18 @@ namespace Titan {
 		void SetAlbedo(TTN_Texture2D::st2dptr albedo);
 		void SetShininess(float shininess);
 		void SetSpecularMap(TTN_Texture2D::st2dptr specular);
+		void SetSkybox(TTN_TextureCubeMap::stcmptr Skybox);
 
 		//getters
 		TTN_Texture2D::st2dptr GetAlbedo() { return m_Albedo; }
 		float GetShininess() { return m_Shininess; }
 		TTN_Texture2D::st2dptr GetSpecularMap() { return m_SpecularMap; }
+		TTN_TextureCubeMap::stcmptr GetSkybox() { return m_SkyboxTexture; }
 
 	private:
 		TTN_Texture2D::st2dptr m_Albedo;
 		TTN_Texture2D::st2dptr m_SpecularMap;
 		float m_Shininess;
+		TTN_TextureCubeMap::stcmptr m_SkyboxTexture;
 	};
 }
