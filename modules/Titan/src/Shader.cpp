@@ -159,9 +159,7 @@ namespace Titan {
 			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
 			fragShaderTTNIdentity = (int)shader;
 		}
-<<<<<<< HEAD
-
-=======
+ 
 		else if (shader == TTN_DefaultShaders::VERT_SKYBOX) {
 			filePath = "shaders/tnn_vert_skybox.glsl";
 			result = LoadShaderStageFromFile(filePath, GL_VERTEX_SHADER);
@@ -172,7 +170,7 @@ namespace Titan {
 			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
 			fragShaderTTNIdentity = (int)shader;
 		}
->>>>>>> Ame
+ 
 		else {
 			//if the user tried to load a shader that doesn't,
 			LOG_ERROR("Default shader {} does not exist", shader);

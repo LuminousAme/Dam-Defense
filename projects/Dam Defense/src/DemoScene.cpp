@@ -56,7 +56,8 @@ void DemoScene::InitScene()
 	//plane stuff
 	plane = TTN_ObjLoader::LoadFromFile("Review3/water.obj");
 	plane->SetUpVao();
-	waterText = TTN_Texture2D::LoadFromFile("Review3/water_text.png");
+	waterText = TTN_Texture2D::Create();
+	waterText->LoadFromFile("Review3/water_text.png");
 	waterMat = TTN_Material::Create();
 	waterMat->SetAlbedo(waterText);
 	waterMat->SetShininess(128.0f);
@@ -82,7 +83,7 @@ void DemoScene::InitScene()
 	{
 		//create an entity in the scene for a light
 		light = CreateEntity();
-		SetLightEntity(light);
+		//SetLightEntity(light);
 
 		//set up a trasnform for the light
 		TTN_Transform lightTrans = TTN_Transform();

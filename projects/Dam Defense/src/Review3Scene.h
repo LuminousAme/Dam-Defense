@@ -45,14 +45,9 @@ public:
 	TTN_Mesh::smptr tree1Mesh;
 
 	//textures
-<<<<<<< HEAD
-	TTN_Texture2D::stptr waterText;
-	TTN_Texture2D::stptr cannonText;
-	TTN_Texture2D::stptr heightmap;
-=======
 	TTN_Texture2D::st2dptr waterText;
 	TTN_Texture2D::st2dptr cannonText;
->>>>>>> Ame
+
 
 	//materials
 	TTN_Material::smatptr waterMat;

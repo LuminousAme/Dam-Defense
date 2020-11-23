@@ -42,18 +42,9 @@ void Review3Scene::InitScene()
 	tree1Mesh->SetUpVao();
 
 	//create textrure pointers and load the textures in 
-<<<<<<< HEAD
-	waterText = TTN_Texture2D::Create();
-	waterText->LoadFromFile("Review3/water_text.png");
-	cannonText = TTN_Texture2D::Create();
-	cannonText->LoadFromFile("Review3/Metal_Texture_2.jpg");
-	heightmap = TTN_Texture2D::Create();
-	heightmap->LoadFromFile("Review3/heightmap.bmp");
-=======
 	waterText = TTN_Texture2D::LoadFromFile("Review3/water_text.png");
 	cannonText = TTN_Texture2D::LoadFromFile("Review3/Metal_Texture_2.jpg");
->>>>>>> Ame
-
+ 
 	//create material pointers and set them up
 	waterMat = TTN_Material::Create();
 	waterMat->SetAlbedo(waterText);
@@ -61,9 +52,6 @@ void Review3Scene::InitScene()
 	cannonMat = TTN_Material::Create();
 	cannonMat->SetAlbedo(cannonText);
 	cannonMat->SetShininess(128.0f);
-	heightMat = TTN_Material::Create();
-	heightMat->SetAlbedo(heightmap);
-	heightMat->SetShininess(128.0f);
 
 	ParticleData data;
 	//data.m_max = 100;
@@ -98,7 +86,7 @@ void Review3Scene::InitScene()
 	{
 		//create an entity in the scene for a light
 		light = CreateEntity();
-		SetLightEntity(light);
+		//SetLightEntity(light);
 
 		//set up a trasnform for the light
 		TTN_Transform lightTrans = TTN_Transform();
@@ -164,22 +152,6 @@ void Review3Scene::InitScene()
 		AttachCopy<TTN_Particle>(tree1, treePart);
 	}
 
-	//entity for heightmap
-	{
-		height = CreateEntity();
-
-		//setup a mesh renderer for the heightmap
-		TTN_Renderer heightRender = TTN_Renderer(plane, shaderHeight);
-		heightRender.SetMat(heightMat);
-		//and attach that renderer to the entity
-		AttachCopy<TTN_Renderer>(height, heightRender);
-
-		//setup a transform for the heightmap
-		TTN_Transform heightTrans = TTN_Transform(glm::vec3(0.f, -3.0f, 25.0f), glm::vec3(0.0f), glm::vec3(10.0f, 1.0f, 10.0f));
-		//and attach that transform to the entity
-		//AttachCopy<TTN_Transform>(height, heightTrans);
-	}
-
 	//boat entity
 	{
 		//create an entity in the scene for the boat
@@ -216,7 +188,7 @@ void Review3Scene::InitScene()
 	/////// other /////////
 	rotAmmount = glm::vec2(0.0f, 0.0f);
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
-	Particles = data;
+	
 }
 
 void Review3Scene::Update(float deltaTime)

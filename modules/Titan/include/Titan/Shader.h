@@ -26,12 +26,10 @@ namespace Titan {
 		FRAG_BLINN_PHONG_NO_TEXTURE = 3,
 		FRAG_BLINN_PHONG_ALBEDO_ONLY = 4,
 		FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR = 5,
-<<<<<<< HEAD
-		VERT_COLOR_HEIGHTMAP = 6
-=======
-		VERT_SKYBOX = 6,
-		FRAG_SKYBOX = 7
->>>>>>> Ame
+		VERT_COLOR_HEIGHTMAP = 6,
+		VERT_SKYBOX = 7,
+		FRAG_SKYBOX = 8
+
 	};
 
 	//class to wrap around an opengl shader 
