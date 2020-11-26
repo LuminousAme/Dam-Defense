@@ -31,10 +31,10 @@ void Review3Scene::InitScene()
 	shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::FRAG_SKYBOX);
 	shaderProgramSkybox->Link();
 
-	//create a shader program object for textured objects
+	//create a shader program object for the basic height map objects
 	shaderHeight = TTN_Shader::Create();
 	//load the shaders into the shader program
-	shaderHeight->LoadDefaultShader(TTN_DefaultShaders::VERT_COLOR_HEIGHTMAP);
+	shaderHeight->LoadDefaultShader(TTN_DefaultShaders::VERT_NO_COLOR_HEIGHTMAP);
 	shaderHeight->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
 	shaderHeight->Link();
 
@@ -65,6 +65,8 @@ void Review3Scene::InitScene()
 	skyboxMat->SetSkybox(skyboxText);
 	heightMat = TTN_Material::Create();
 	heightMat->SetAlbedo(heightmap);
+	heightMat->SetHeightMap(heightmap);
+	heightMat->SetHeightInfluence(1.0f);
 	heightMat->SetShininess(128.0f);
 
 	//ParticleData data;

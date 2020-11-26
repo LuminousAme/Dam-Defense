@@ -96,14 +96,6 @@ namespace Titan {
 		bool m_InWorld; //boolean marking if it's been added to the bullet physics world yet, used to make sure that the physics body
 
 		entt::entity m_entity; //the entity number that gets stored as a void pointer in bullet so that it can be used to indentify the objects later
-
-		//data for rendering the physics box
-		static TTN_Shader::sshptr shader;
-		static TTN_Texture2D::st2dptr texture;
-		static TTN_Material::smatptr mat;
-		static TTN_Mesh::smptr mesh;
-		static bool renderingSetUp;
-		static TTN_Renderer renderer;
 	};
 
 	class TTN_Collision {

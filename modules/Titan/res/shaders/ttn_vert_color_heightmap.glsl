@@ -14,6 +14,9 @@ layout(location = 3) out vec3 outColor;
 //texture
 uniform sampler2D Texture;
 
+//influnce the displacement map should have 
+uniform float u_influence;
+
 //model, view, projection matrix
 uniform mat4 MVP;
 //model matrix only
@@ -31,7 +34,8 @@ void main() {
 	outColor = inColor;
 
 	vec3 vert = inPos;
-	vert.y = texture (Texture, inUV).r; 
+	vert = vert + texture(Texture, inUV).r * u_influence * outNormal;
+	//vert.y = texture (Texture, inUV).r; 
 		
 	vec4 newPos = MVP * vec4(vert, 1.0);
 	gl_Position = newPos;
