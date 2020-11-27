@@ -1,4 +1,4 @@
-//Dam Defense by Atlas X Games 
+//Dam Defense by Atlas X Games
 //Review3Scene.h - header for the class that inherits from the scene class to make a scene represneting a demo of our final product for review 3
 #pragma once
 
@@ -31,6 +31,8 @@ public:
 	virtual void MouseButtonUpChecks();
 
 	void CreateCannonball();
+	void BoatPathing(float deltaTime, entt::entity boat, int path);
+	glm::vec3 Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos, float dt);
 
 public:
 	//shader programs
@@ -49,12 +51,9 @@ public:
 	//textures
 	TTN_Texture2D::st2dptr waterText;
 	TTN_Texture2D::st2dptr cannonText;
-<<<<<<< HEAD
 
-=======
 	TTN_TextureCubeMap::stcmptr skyboxText;
 	TTN_Texture2D::st2dptr heightmap;
->>>>>>> Ame
 
 	//materials
 	TTN_Material::smatptr waterMat;
@@ -62,6 +61,11 @@ public:
 	TTN_Material::smatptr skyboxMat;
 	TTN_Material::smatptr heightMat;
 
+	TTN_Mesh::smptr swordMesh;
+	TTN_Texture2D::st2dptr swordText;
+	TTN_Material::smatptr swordMat;
+
+	int ballCount = 0;
 	//TTN_Particle ParticleSystem;
 	//ParticleData Particles;
 
@@ -72,13 +76,23 @@ protected:
 	entt::entity cannon;
 	entt::entity water;
 	entt::entity tree1;
+	entt::entity tree2;
+	entt::entity tree3;
+	entt::entity tree4;
+	entt::entity tree5;
+	
+	
+	entt::entity debug;
+	
 	entt::entity skybox;
 	entt::entity height;
 	entt::entity boat;
-	std::vector<entt::entity> cannonballs;
 
+	entt::entity ball;
+
+	std::vector<entt::entity> cannonballs;
 
 	//others
 	glm::vec2 rotAmmount;
-	glm::vec2 mousePos; 
+	glm::vec2 mousePos;
 };

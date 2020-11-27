@@ -76,11 +76,13 @@ namespace Titan {
 		m_Parent = parent;
 		m_parentEntity = parentEntity;
 
-		if(m_Parent != nullptr)
+		if (m_Parent != nullptr) {
 			//add this object as a child of the new parent
 			m_Parent->AddChild(this);
+			Recompute();
+		}
 
-		Recompute();
+		
 	}
 
 	//returns the position value
@@ -158,16 +160,18 @@ namespace Titan {
 		if (m_Parent != nullptr) {
 			//if it does then use it to caculate the global transformation matrix
 			m_global = m_Parent->GetGlobal() * m_transform;
+
+			//repeat on all the children (this is will do forward kinematics) 
+			for (int i = 0; i < m_Children.size(); i++) {
+				m_Children[i]->Recompute();
+			}
 		}
 		else {
 			//if it doesn't then the global and local transforms must be the same
 			m_global = m_transform;
 		}
 
-		//repeat on all the children (this is will do forward kinematics) 
-		for (int i = 0; i < m_Children.size(); i++) {
-			m_Children[i]->Recompute();
-		}
+		
 	}
 
 	//adds a child to this object
