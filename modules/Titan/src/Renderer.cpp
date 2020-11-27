@@ -79,7 +79,8 @@ namespace Titan {
 		//bind the shader this model uses
 		m_Shader->Bind();
 		//send the uniforms to openGL 
-		if (m_Shader->GetVertexShaderDefaultStatus() != (int)TTN_DefaultShaders::VERT_SKYBOX) {
+		if (m_Shader->GetVertexShaderDefaultStatus() != (int)TTN_DefaultShaders::VERT_SKYBOX && 
+			m_Shader->GetVertexShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
 			m_Shader->SetUniformMatrix("MVP", VP * model);
 			m_Shader->SetUniformMatrix("Model", model);
 			m_Shader->SetUniformMatrix("NormalMat", glm::mat3(glm::transpose(glm::inverse(model))));

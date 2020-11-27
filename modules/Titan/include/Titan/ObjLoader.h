@@ -12,6 +12,8 @@ namespace Titan {
 	public:
 		static TTN_Mesh::smptr LoadFromFile(const std::string& fileName);
 
+		static TTN_Mesh::smptr LoadAnimatedMeshFromFiles(const std::string& fileName, int numOfFiles);
+
 	protected:
 		TTN_ObjLoader() = default;
 		~TTN_ObjLoader() = default;
