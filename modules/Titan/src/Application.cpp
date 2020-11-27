@@ -14,7 +14,11 @@ namespace Titan {
 	float TTN_Application::m_previousFrameTime = 0.0f;
 	std::vector<TTN_Scene*> TTN_Application::scenes = std::vector<TTN_Scene*>();
 	std::unordered_map<TTN_KeyCode, bool> TTN_Application::TTN_Input::KeyWasPressedMap;
+	std::unordered_map<TTN_KeyCode, bool> TTN_Application::TTN_Input::KeyPressed;
+	std::unordered_map<TTN_KeyCode, bool> TTN_Application::TTN_Input::KeyHandled;
 	std::unordered_map<TTN_MouseButton, bool> TTN_Application::TTN_Input::MouseWasPressedMap;
+	std::unordered_map<TTN_MouseButton, bool> TTN_Application::TTN_Input::MousePressed;
+	std::unordered_map<TTN_MouseButton, bool> TTN_Application::TTN_Input::MouseHandled;
 	glm::vec2 TTN_Application::TTN_Input::mousePos = glm::vec2(0.0f);
 	bool TTN_Application::TTN_Input::inFrame = false;
 
@@ -130,6 +134,11 @@ namespace Titan {
 			}
 		}
 
+		//reset the keys so they work properly on the next frame
+		TTN_Application::TTN_Input::ResetKeys();
+		//reset the mouse buttons so they work properly on the next frame
+		TTN_Application::TTN_Input::ResetMouseButtons();
+
 		//now all the scenes that should be rendered (current gameplay scene, ui, etc.) will be rendered
 		//while anything that doesn't need to be rendered (such as a prefabs scene) will not 
 		
@@ -145,6 +154,8 @@ namespace Titan {
 		{
 			//if it doesn't, add it to the map (doing this here means we only add keys to the map if the user acutally wants to use them) 
 			KeyWasPressedMap[key] = false;
+			KeyHandled[key] = false;
+			KeyPressed[key] = false;
 		}
 		//check if the key has been pressed
 		if (glfwGetKey(m_window, static_cast<int>(key)))
@@ -167,17 +178,30 @@ namespace Titan {
 			//if it doesn't, pass it onto the getKey so it can create a place in the map, and check if it is being pressed
 			if (GetKey(key))
 			{
-				//if it returns true that means the key has been pressed this frame
+				//if it sets the flag and return true that means the key has been pressed this frame
+				KeyHandled.at(key) = true;
+				KeyPressed.at(key) = true;
 				return true;
 			}
 		}
-		//if it does exist in the map, check if the value in the map is false and if the key is being pressed
-		else if (!KeyWasPressedMap.at(key) && GetKey(key))
-			//if it is, then this is the first frame where it's being pressed so return true
+		//if it does exist in the map, check if it was already handled this frame
+		else if (KeyHandled.at(key)) {
 			return true;
+		}
+		//if it does exist in the map and was not handled yet this frame, check if the value in the map is false and if the key is being pressed
+		else if (GetKey(key) && !KeyPressed.at(key)) {
+			//if it is, then this is the first frame where it's being pressed so set the flags and return true
+			KeyHandled.at(key) = true;
+			KeyPressed.at(key) = true;
 
-		//if none of those are true, then either the key isn't being pressed, or this isn't the first frame it's being pressed
-		//either way, return false
+			return true;
+		}
+		//if it's not being pressed make sure the flag reflects that
+		else if (!GetKey(key)) {
+			KeyPressed.at(key) = false;
+		}
+
+		//and return false as it's not being pressed
 		return false;
 	}
 
@@ -188,11 +212,24 @@ namespace Titan {
 		if (!GetKey(key) && KeyWasPressedMap.at(key))
 		{
 			//return true to say it's been released
-			KeyWasPressedMap.at(key) = false;
 			return true;
 		}
 		//if not then the key is either still down, or was never put down in the first place, so just return false
 		return false;
+	}
+
+	//call once a frame to make the input system work
+	void TTN_Application::TTN_Input::ResetKeys()
+	{
+		//reset each key
+		for (auto& it : KeyWasPressedMap) {
+			//if it's not currently being pressed, we need to reset the was pressed flag
+			if (!glfwGetKey(m_window, static_cast<int>(it.first)))
+				it.second = false;
+		}
+		for (auto& it : KeyHandled) {
+			it.second = false;
+		}
 	}
 
 	//returns the mouse position in screenspace
@@ -220,6 +257,8 @@ namespace Titan {
 		{
 			//if it doesn't, add it to the map (doing this here means we only add buttons to the map if the user acutally wants to use them) 
 			MouseWasPressedMap[button] = false;
+			MouseHandled[button] = false;
+			MousePressed[button] = false;
 		}
 		//check if the button has been pressed
 		if (glfwGetMouseButton(m_window, static_cast<int>(button)))
@@ -242,17 +281,31 @@ namespace Titan {
 			//if it doesn't, pass it onto the getMouseButton so it can create a place in the map, and check if it is being pressed
 			if (GetMouseButton(button))
 			{
-				//if it returns true that means the button has been pressed this frame
+				//if it sets the flag and return true that means the key has been pressed this frame
+				MouseHandled.at(button) = true;
+				MousePressed.at(button) = true;
 				return true;
 			}
 		}
-		//if it does exist in the map, check if the value in the map is false and if the button is being pressed
-		else if (!MouseWasPressedMap.at(button) && GetMouseButton(button))
-			//if it is, then this is the first frame where it's being pressed so return true
+		//if it does exist in the map, check if it was handleded already this frame
+		else if (MouseHandled.at(button)) {
+			//if it was, then return true
 			return true;
+		}
+		//if it does exist in the map and was not yet handleded in this frame, check if the value in the map is false and if the button is being pressed
+		else if (GetMouseButton(button) && !MousePressed.at(button)) {
+			//if it is, then this is the first frame where it's being pressed so set the flags and return true
+			MouseHandled.at(button) = true;
+			MousePressed.at(button) = true;
 
-		//if none of those are true, then either the button isn't being pressed, or this isn't the first frame it's being pressed
-		//either way, return false
+			return true;
+		}
+		//if it's not being pressed make sure the flag reflects that
+		else if (!GetMouseButton(button)) {
+			MousePressed.at(button) = false;
+		}
+
+		//and return false as it's not being pressed
 		return false;
 	}
 
@@ -263,11 +316,24 @@ namespace Titan {
 		if (!GetMouseButton(button) && MouseWasPressedMap.at(button))
 		{
 			//return true to say it's been released
-			MouseWasPressedMap.at(button) = false;
 			return true;
 		}
 		//if not then the button is either still down, or was never put down in the first place, so just return false
 		return false;
+	}
+
+	//call once a frame to make the input system work
+	void TTN_Application::TTN_Input::ResetMouseButtons()
+	{
+		//reset each mouse button
+		for (auto& it : MouseWasPressedMap) {
+			//if it's not currently being pressed, we need to reset the was pressed flag
+			if (!glfwGetMouseButton(m_window, static_cast<int>(it.first)))
+				it.second = false;
+		}
+		for (auto& it : MouseHandled) {
+			it.second = false;
+		}
 	}
 
 	//sets wheter or not the cursor is visible

@@ -27,8 +27,9 @@ namespace Titan {
 		FRAG_BLINN_PHONG_ALBEDO_ONLY = 4,
 		FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR = 5,
 		VERT_COLOR_HEIGHTMAP = 6,
-		VERT_SKYBOX = 7,
-		FRAG_SKYBOX = 8
+		VERT_NO_COLOR_HEIGHTMAP = 7,
+		VERT_SKYBOX = 8,
+		FRAG_SKYBOX = 9
 	};
 
 	//class to wrap around an opengl shader
@@ -154,7 +155,7 @@ namespace Titan {
 		//fragment shader
 		GLuint _fs;
 
-		//marker if they're using a default shader (and which one), 0 is a custom shader, 1-5 are custom shaders
+		//marker if they're using a default shader (and which one), 0 is a custom shader, the rest are default shaders
 		int vertexShaderTTNIndentity, fragShaderTTNIdentity;
 		bool setDefault;
 

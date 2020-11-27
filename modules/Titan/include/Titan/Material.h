@@ -36,17 +36,28 @@ namespace Titan {
 		void SetShininess(float shininess);
 		void SetSpecularMap(TTN_Texture2D::st2dptr specular);
 		void SetSkybox(TTN_TextureCubeMap::stcmptr Skybox);
+		void SetHeightMap(TTN_Texture2D::st2dptr height);
+		void SetHeightInfluence(float influence);
 
 		//getters
 		TTN_Texture2D::st2dptr GetAlbedo() { return m_Albedo; }
 		float GetShininess() { return m_Shininess; }
 		TTN_Texture2D::st2dptr GetSpecularMap() { return m_SpecularMap; }
 		TTN_TextureCubeMap::stcmptr GetSkybox() { return m_SkyboxTexture; }
+		TTN_Texture2D::st2dptr GetHeightMap() { return m_HeightMap; }
+		float GetHeightInfluence() { return m_HeightInfluence; }
 
 	private:
+		//albedo 
 		TTN_Texture2D::st2dptr m_Albedo;
+		//specular
 		TTN_Texture2D::st2dptr m_SpecularMap;
+		//how shiny the object is
 		float m_Shininess;
+		//skybox cubemap
 		TTN_TextureCubeMap::stcmptr m_SkyboxTexture;
+		//texture for displacement mapping
+		TTN_Texture2D::st2dptr m_HeightMap;
+		float m_HeightInfluence;
 	};
 }

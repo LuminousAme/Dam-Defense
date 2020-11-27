@@ -240,7 +240,7 @@ namespace Titan {
 			//renderer.GetMat()->GetAlbedo()->Bind(0);
 
 			//if it's not the skybox shader, set some uniforms for lighting
-			if (shader->GetFragShaderDefaultStatus() != 8) {
+			if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX) {
 				//sets some uniforms
 				//scene level ambient lighting
 				shader->SetUniform("u_AmbientCol", m_AmbientColor);
@@ -286,30 +286,68 @@ namespace Titan {
 			//if the mesh has a material send data from that
 			if (renderer.GetMat() != nullptr)
 			{
+<<<<<<< HEAD
 				//give openGL the shinniess
 				if (shader->GetFragShaderDefaultStatus() != 8) shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
 				//if they're using a texture
 				if (shader->GetFragShaderDefaultStatus() == 4 || shader->GetFragShaderDefaultStatus() == 5)
+=======
+				//give openGL the shinniess if it's not a skybox being renderered
+				if(shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX) 
+					shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
+
+				//texture slot to dynamically send textures across different types of shaders
+				int textureSlot = 0;
+
+				//if they're using a displacement map 
+				if (shader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_COLOR_HEIGHTMAP
+					|| shader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_NO_COLOR_HEIGHTMAP) 
+				{
+					//bind it to the slot 
+					renderer.GetMat()->GetHeightMap()->Bind(textureSlot);
+					//update the texture slot for future textures to use
+					textureSlot++;
+					//and pass in the influence
+					shader->SetUniform("u_influence", renderer.GetMat()->GetHeightInfluence());
+				}
+						
+
+				//if they're using an albedo texture 
+				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY 
+					|| shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR)
+>>>>>>> Ame
 				{
 					//bind it so openGL can see it
-					renderer.GetMat()->GetAlbedo()->Bind(0);
+					renderer.GetMat()->GetAlbedo()->Bind(textureSlot);
+					//update the texture slot for future textures to use
+					textureSlot++;
 				}
+<<<<<<< HEAD
 				//if they're using a specular map
 				if (shader->GetFragShaderDefaultStatus() == 5)
+=======
+
+				//if they're using a specular map 
+				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR)
+>>>>>>> Ame
 				{
 					//bind it so openGL can see it
-					renderer.GetMat()->GetSpecularMap()->Bind(1);
+					renderer.GetMat()->GetSpecularMap()->Bind(textureSlot);
+					//update the texture slot for future textures to use
+					textureSlot++;
 				}
+
 				//if they're using a skybox
-				if (shader->GetFragShaderDefaultStatus() == 8)
+				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_SKYBOX)
 				{
 					//bind the skybox texture
-					renderer.GetMat()->GetSkybox()->Bind(0);
+					renderer.GetMat()->GetSkybox()->Bind(textureSlot);
 					//set the rotation uniform
 					shader->SetUniformMatrix("u_EnvironmentRotation", glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(1, 0, 0))));
 					//set the skybox matrix uniform
 					shader->SetUniformMatrix("u_SkyboxMatrix", Get<TTN_Camera>(m_Cam).GetProj() * glm::mat4(glm::mat3(viewMat)));
 				}
+
 			}
 			//otherwise send a default shinnies value
 			else {

@@ -207,6 +207,9 @@ namespace Titan {
 			//checks if a key button has been released this frame
 			static bool GetKeyUp(TTN_KeyCode key);
 
+			//reset keys
+			static void ResetKeys();
+
 			//returns the mouse position in screenspace
 			static glm::vec2 GetMousePosition();
 
@@ -219,6 +222,9 @@ namespace Titan {
 			//checks if a mouse button has been released this frame
 			static bool GetMouseButtonUp(TTN_MouseButton button);
 
+			//reset mouse buttons
+			static void ResetMouseButtons();
+
 			//hides or unhides the cursor based on an inputed bool
 			static void SetCursorHidden(bool hidden);
 
@@ -226,10 +232,19 @@ namespace Titan {
 			static void cursorEnterFrameCallback(GLFWwindow *window, int entered);
 
 		protected:
-			//map of the booleans for if a key is being pressed
+			//map of the booleans for if a key has been pressed
 			static std::unordered_map<TTN_KeyCode, bool> KeyWasPressedMap;
-			//map of booleans for if a mouse button is being pressed
+			//map of boolean for if a key is being pressed
+			static std::unordered_map<TTN_KeyCode, bool> KeyPressed;
+			//map of booleans for if a key has been processed
+			static std::unordered_map<TTN_KeyCode, bool> KeyHandled;
+
+			//map of booleans for if a mouse button has been pressed
 			static std::unordered_map<TTN_MouseButton, bool> MouseWasPressedMap;
+			//map of boolean for if a mouse button is being pressed
+			static std::unordered_map<TTN_MouseButton, bool> MousePressed;
+			//map of boolean for if a mouse button has been processed
+			static std::unordered_map<TTN_MouseButton, bool> MouseHandled;
 
 			//position of the mouse
 			static glm::vec2 mousePos;
