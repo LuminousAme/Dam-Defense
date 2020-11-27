@@ -38,8 +38,15 @@ void Review3Scene::InitScene()
 	shaderHeight->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
 	shaderHeight->Link();
 
+	//create a shader program object for textured and animated objects
+	shaderProgramAnimatedTextured = TTN_Shader::Create();
+	//load the shaders into the shader program
+	shaderProgramAnimatedTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR);
+	shaderProgramAnimatedTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
+	shaderProgramAnimatedTextured->Link();
+
 	//create mesh pointers and set up their vaos
-	cannonMesh = TTN_ObjLoader::LoadFromFile("Review3/Cannon.obj");
+	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("Morphtest/cannon", 7);
 	cannonMesh->SetUpVao();
 	plane = TTN_ObjLoader::LoadFromFile("Review3/water.obj");
 	plane->SetUpVao();
@@ -140,10 +147,30 @@ void Review3Scene::InitScene()
 		cannon = CreateEntity();
 
 		//setup a mesh renderer for the cannon
-		TTN_Renderer cannonRenderer = TTN_Renderer(cannonMesh, shaderProgamTextured); 
+		TTN_Renderer cannonRenderer = TTN_Renderer(cannonMesh, shaderProgramAnimatedTextured);
 		cannonRenderer.SetMat(cannonMat);
 		//attach that renderer to the entity
 		AttachCopy<TTN_Renderer>(cannon, cannonRenderer);
+
+		//setup an animator for the cannon
+		TTN_MorphAnimator cannonAnimator = TTN_MorphAnimator();
+		//create an animaton for the cannon
+		std::vector<int> frameIndices = std::vector<int>();
+		std::vector <float> frameLenghts = std::vector<float>();
+		for (int i = 0; i < 7; i++) frameIndices.push_back(i);
+		frameLenghts.push_back(4.0f/24.0f); //0-1 (1-2 in fileName)
+		frameLenghts.push_back(3.0f/24.0f); //1-2 (2-3 in fileName)
+		frameLenghts.push_back(2.0f/24.0f); //2-3 (3-4 in fileName)
+		frameLenghts.push_back(2.0f/24.0f); //3-4 (4-5 in fileName)
+		frameLenghts.push_back(2.0f/24.0f); //4-5 (5-6 in fileName)
+		frameLenghts.push_back(3.0f/24.0f); //5-6 (6-7 in fileName)
+		frameLenghts.push_back(2.0f/24.0f); //6-0 (7-1 in FileName)
+		TTN_MorphAnimation firingAnimation = TTN_MorphAnimation(frameIndices, frameLenghts, true);
+		//add that animation to the animator 
+		cannonAnimator.AddAnim(firingAnimation);
+		cannonAnimator.SetActiveAnim(0);
+		//attach that animator to the entity
+		AttachCopy(cannon, cannonAnimator);
 
 		//setup a transform for the cannon
 		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(0.0f, -0.4f, -0.25f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));

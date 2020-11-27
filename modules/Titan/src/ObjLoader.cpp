@@ -54,6 +54,7 @@ namespace Titan {
 
 		//if it fails to open, throw an error
 		if (!file) {
+			LOG_ERROR("Obj Loader failed to open file.");
 			throw std::runtime_error("Obj Loader failed to open file.");
 		}
 
@@ -171,7 +172,7 @@ namespace Titan {
 	TTN_Mesh::smptr TTN_ObjLoader::LoadAnimatedMeshFromFiles(const std::string& fileName, int numOfFiles)
 	{
 		//start by loading the first mesh, this will handle the first set of vertices and normals along with the uvs
-		TTN_Mesh::smptr newMesh = LoadFromFile(fileName + "_1");
+		TTN_Mesh::smptr newMesh = LoadFromFile(fileName + "_1.obj");
 
 		//from there loop through the next couple of files, loading in vertices and normals and adding them to newMesh
 		for (int i = 2; i <= numOfFiles; i++) {
@@ -183,10 +184,11 @@ namespace Titan {
 
 			//Open the file
 			std::ifstream file;
-			file.open(fileName + "_" + std::to_string(i), std::ios::binary);
+			file.open(fileName + "_" + std::to_string(i) + ".obj", std::ios::binary);
 
 			//if it fails to open, throw an error
 			if (!file) {
+				LOG_ERROR("Obj Loader failed to open file.");
 				throw std::runtime_error("Obj Loader failed to open file.");
 			}
 

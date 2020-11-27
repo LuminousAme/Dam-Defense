@@ -4,6 +4,7 @@
 
 //include the mesh class so we write the data to it 
 #include "Mesh.h"
+#include "Logging.h"
 
 namespace Titan {
 	

@@ -38,6 +38,7 @@ public:
 	TTN_Shader::sshptr shaderProgamTextured;
 	TTN_Shader::sshptr shaderHeight;
 	TTN_Shader::sshptr shaderProgramSkybox;
+	TTN_Shader::sshptr shaderProgramAnimatedTextured;
 
 	//meshes
 	TTN_Mesh::smptr cannonMesh;

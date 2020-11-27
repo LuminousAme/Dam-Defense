@@ -145,9 +145,10 @@ namespace Titan {
 			}
 		}
 
-		//run through all the of entities with an animator in the scene and run it's update
-		auto manimatorView = m_Registry->view<TTN_MorphAnimator>();
-		for (auto entity : manimatorView) {
+		//run through all the of entities with an animator and renderer in the scene and run it's update
+		auto manimatorRendererView = m_Registry->view<TTN_MorphAnimator>();
+		for (auto entity : manimatorRendererView) {
+			//update the active animation
 			Get<TTN_MorphAnimator>(entity).getActiveAnim().Update(deltaTime);
 		}
 	}
@@ -312,6 +313,18 @@ namespace Titan {
 			//otherwise send a default shinnies value
 			else {
 				shader->SetUniform("u_Shininess", 128.0f);
+			}
+
+			//if the entity has an animator
+			if (Has<TTN_MorphAnimator>(entity)) {
+				//set up the vao on the mesh properly
+				renderer.GetMesh()->SetUpVao(Get<TTN_MorphAnimator>(entity).getActiveAnim().getCurrentMeshIndex(),
+					Get<TTN_MorphAnimator>(entity).getActiveAnim().getNextMeshIndex());
+			}
+			//if it doesn't
+			else {
+				//set up the vao with both mesh indices on zero
+				renderer.GetMesh()->SetUpVao();
 			}
 
 			//and finsih by rendering the mesh
