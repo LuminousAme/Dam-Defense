@@ -46,7 +46,6 @@ namespace Titan {
 
 		m_entity = static_cast<entt::entity>(-1);
 
-		
 		m_body->setUserPointer(reinterpret_cast<void*>(static_cast<uint32_t>(m_entity)));
 	
 	}

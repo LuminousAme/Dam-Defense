@@ -32,7 +32,7 @@ public:
 
 	void CreateCannonball();
 	void BoatPathing( entt::entity boat, int path);
-	void Spawner();
+	void Spawner(float deltatime, float SpawnTime);
 	glm::vec3 Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos);
 
 public:
@@ -67,9 +67,8 @@ public:
 	TTN_Texture2D::st2dptr swordText;
 	TTN_Material::smatptr swordMat;
 
-	int ballCount = 0;
-	//TTN_Particle ParticleSystem;
-	//ParticleData Particles;
+	float Timer = 0.F;
+	
 
 protected:
 	//entities
