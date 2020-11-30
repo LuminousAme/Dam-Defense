@@ -8,56 +8,11 @@ namespace Titan {
 	//constructor, creates a mesh
 	TTN_Mesh::TTN_Mesh()
 	{
-		//initliaze the array of VBO pointers
-		for (int i = 0; i < 4; i++)
-			m_vbos[i]->Create();
-
 		//initliaze the vao
 		m_vao->Create();
 
 		//set the mesh to not having vertex colors
 		m_HasVertColors = false;
-	}
-
-	//Constructor, creates a mesh with the data given
-	TTN_Mesh::TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec2>& uvs)
-	{
-		//initliaze the array of VBO pointers
-		for (int i = 0; i < 3; i++)
-			m_vbos[i]->Create();
-
-		//initliaze the vao
-		m_vao->Create();
-
-		//set the vertices
-		setVertices(verts);
-		//set the normals
-		setNormals(norms);
-		//set the uvs
-		setUVs(uvs);
-
-		//set the mesh to not having vertex colors
-		m_HasVertColors = false;
-	}
-
-	//Constructor, creates a mesh with the data given
-	TTN_Mesh::TTN_Mesh(std::vector<glm::vec3>& verts, std::vector<glm::vec3>& norms, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& colors)
-	{
-		//initliaze the array of VBO pointers
-		for (int i = 0; i < 3; i++)
-			m_vbos[i]->Create();
-
-		//initliaze the vao
-		m_vao->Create();
-
-		//set the vertices
-		setVertices(verts);
-		//set the normals
-		setNormals(norms);
-		//set the uvs
-		setUVs(uvs);
-		//set up the colors
-		SetColors(colors);
 	}
 
 	//destructor
@@ -66,60 +21,92 @@ namespace Titan {
 	}
 
 	//sets up the VAO for the mesh so it can acutally be rendered, needs to be called by the user in case they change the mesh
-	void TTN_Mesh::SetUpVao()
+	void TTN_Mesh::SetUpVao(int currentFrame, int nextFrame)
 	{
 		//creates a new vao
 		m_vao = TTN_VertexArrayObject::Create();
 
 		//load the vbos from the mesh into the vao 
-		m_vao->AddVertexBuffer(m_vbos[0], { BufferAttribute(0, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Position) });
-		m_vao->AddVertexBuffer(m_vbos[1], { BufferAttribute(1, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Normal) });
-		m_vao->AddVertexBuffer(m_vbos[2], { BufferAttribute(2, 2, GL_FLOAT, false, sizeof(float) * 2, 0, AttribUsage::Texture) });
-		if (m_HasVertColors) m_vao->AddVertexBuffer(m_vbos[3], { BufferAttribute(3, 3, GL_FLOAT, false, sizeof(float) * 2, 0, AttribUsage::Color) });
+		m_vao->AddVertexBuffer(m_vertVbos[currentFrame], { BufferAttribute(0, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Position) });
+		m_vao->AddVertexBuffer(m_normVbos[currentFrame], { BufferAttribute(1, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Normal) });
+		m_vao->AddVertexBuffer(m_UVsVbo, { BufferAttribute(2, 2, GL_FLOAT, false, sizeof(float) * 2, 0, AttribUsage::Texture) });
+		if (m_HasVertColors) m_vao->AddVertexBuffer(m_ColVbo, { BufferAttribute(3, 3, GL_FLOAT, false, sizeof(float) * 2, 0, AttribUsage::Color) });
+		m_vao->AddVertexBuffer(m_vertVbos[nextFrame], {BufferAttribute(4, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Position) });
+		m_vao->AddVertexBuffer(m_normVbos[nextFrame], { BufferAttribute(5, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Normal) });
 	}
 
-	//sets the vertices and puts them in a position vbo
-	void TTN_Mesh::setVertices(std::vector<glm::vec3>& verts)
+	void TTN_Mesh::SetUVs(std::vector<glm::vec2>& uvs)
 	{
-		//copy the vertices' postion
-		m_Vertices = verts;
-		//send them to a vbo
-		CreateVBO(0, verts.size(), verts);
-	}
+		//create a new vbo for the uvs
+		m_UVsVbo = TTN_VertexBuffer::Create();
 
-	void TTN_Mesh::setNormals(std::vector<glm::vec3>& norms)
-	{
-		//copy the normals
-		m_Normals = norms;
-		//send them to a vbo
-		CreateVBO(1, norms.size(), norms);
-	}
-
-	void TTN_Mesh::setUVs(std::vector<glm::vec2>& uvs)
-	{
-		//copy the uvs
+		//copy the list of uvs
 		m_Uvs = uvs;
-		//send them to a vbo
-		CreateVBO(2, uvs.size(), uvs);
-	}
 
+		//add the uvs to the vbo
+		if (uvs.size() != 0) {
+			m_UVsVbo->LoadData(uvs.data(), uvs.size());
+		}
+	}
 
 	bool TTN_Mesh::SetColors(std::vector<glm::vec3>& colors)
 	{
 		//make sure the correct number of colors was entered
-		if (colors.size() == m_Vertices.size())
+		if (colors.size() == m_Vertices[0].size())
 		{
+			//make the vbo pointer
+			m_ColVbo = TTN_VertexBuffer::Create();
+
 			//copy the colors
 			m_Colors = colors;
 			//set the mesh to have vertex colors (note, they still won't render if the shader is not set to render them)
 			m_HasVertColors = true;
 			//send them to a vbo
-			CreateVBO(3, colors.size(), colors);
+			if (colors.size() != 0) {
+				m_ColVbo->LoadData(colors.data(), colors.size());
+			}
+
 			//return true as the colors were set successfully
 			return true;
 		}
 
 		return false;
+	}
+
+	//adds a list of vertices to the mesh object
+	void TTN_Mesh::AddVertices(std::vector<glm::vec3>& verts)
+	{
+		//create a new vbo pointer for it
+		TTN_VertexBuffer::svbptr newVertVbo = TTN_VertexBuffer::Create();
+
+		//copy the list of verts
+		m_Vertices.push_back(verts);
+
+		//add those verts to the new vbo
+		if (verts.size() != 0) {
+			newVertVbo->LoadData(verts.data(), verts.size());
+		}
+
+		//and add that vbo to the list of vert vbos
+		m_vertVbos.push_back(newVertVbo);
+	}
+	
+	//adds a list of normals to the mesh object
+	void TTN_Mesh::AddNormals(std::vector<glm::vec3>& norms)
+	{
+		//create a new vbo pointer for it
+		TTN_VertexBuffer::svbptr newNormVbo = TTN_VertexBuffer::Create();
+
+		//copy the list of normals
+		m_Normals.push_back(norms);
+
+		//add those normals to the new vbo
+		if (norms.size() != 0) {
+			newNormVbo->LoadData(norms.data(), norms.size());
+		}
+
+		//and add that vbo to the list of vert vbos
+		m_normVbos.push_back(newNormVbo);
 	}
 
 	//gets the pointer to the meshes vao 

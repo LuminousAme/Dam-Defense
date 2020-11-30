@@ -147,6 +147,13 @@ namespace Titan {
 				Get<TTN_Transform>(entity).SetPos(Get<TTN_Physics>(entity).GetTrans().GetPos());
 			}
 		}
+
+		//run through all the of entities with an animator and renderer in the scene and run it's update
+		auto manimatorRendererView = m_Registry->view<TTN_MorphAnimator>();
+		for (auto entity : manimatorRendererView) {
+			//update the active animation
+			Get<TTN_MorphAnimator>(entity).getActiveAnim().Update(deltaTime);
+		}
 	}
 
 	//renders all the messes in our game
@@ -189,7 +196,7 @@ namespace Titan {
 		}
 
 		//go through every entity with a transform and a mesh renderer and render the mesh
-		m_RenderGroup->each([&](entt::entity, TTN_Transform& transform, TTN_Renderer& renderer) {
+		m_RenderGroup->each([&](entt::entity entity, TTN_Transform& transform, TTN_Renderer& renderer) {
 			//get the shader pointer
 			TTN_Shader::sshptr shader = renderer.GetShader();
 
@@ -240,7 +247,8 @@ namespace Titan {
 			//renderer.GetMat()->GetAlbedo()->Bind(0);
 
 			//if it's not the skybox shader, set some uniforms for lighting
-			if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX) {
+			if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX 
+				&& shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
 				//sets some uniforms
 				//scene level ambient lighting
 				shader->SetUniform("u_AmbientCol", m_AmbientColor);
@@ -293,7 +301,8 @@ namespace Titan {
 				if (shader->GetFragShaderDefaultStatus() == 4 || shader->GetFragShaderDefaultStatus() == 5)
 
 				//give openGL the shinniess if it's not a skybox being renderered
-				if(shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX) 
+				if(shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX 
+					&& shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT)
 					shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
 
 				//texture slot to dynamically send textures across different types of shaders
@@ -311,6 +320,16 @@ namespace Titan {
 					shader->SetUniform("u_influence", renderer.GetMat()->GetHeightInfluence());
 				}
 						
+				//if they're using an animator 
+				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR
+					|| shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_COLOR) {
+					//try to get an animator component 
+					if (Has<TTN_MorphAnimator>(entity)) {
+						shader->SetUniform("t", Get<TTN_MorphAnimator>(entity).getActiveAnim().getInterpolationParameter());
+					}
+					else
+						shader->SetUniform("t", 0.0f);
+				}
 
 				//if they're using an albedo texture 
 				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY 
@@ -352,6 +371,18 @@ namespace Titan {
 			//otherwise send a default shinnies value
 			else {
 				shader->SetUniform("u_Shininess", 128.0f);
+			}
+
+			//if the entity has an animator
+			if (Has<TTN_MorphAnimator>(entity)) {
+				//set up the vao on the mesh properly
+				renderer.GetMesh()->SetUpVao(Get<TTN_MorphAnimator>(entity).getActiveAnim().getCurrentMeshIndex(),
+					Get<TTN_MorphAnimator>(entity).getActiveAnim().getNextMeshIndex());
+			}
+			//if it doesn't
+			else {
+				//set up the vao with both mesh indices on zero
+				renderer.GetMesh()->SetUpVao();
 			}
 
 			//and finsih by rendering the mesh

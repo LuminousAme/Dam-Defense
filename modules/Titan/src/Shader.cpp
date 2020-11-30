@@ -175,7 +175,20 @@ namespace Titan {
 			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
 			fragShaderTTNIdentity = (int)shader;
 		}
+<<<<<<< HEAD
 
+=======
+		else if (shader == TTN_DefaultShaders::VERT_MORPH_ANIMATION_COLOR) {
+			filePath = "shaders/ttn_vert_color_morph_animation.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_VERTEX_SHADER);
+			vertexShaderTTNIndentity = (int)shader;
+		}
+		else if (shader == TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR) {
+			filePath = "shaders/ttn_vert_no_color_morph_animation.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_VERTEX_SHADER);
+			vertexShaderTTNIndentity = (int)shader;
+		}
+>>>>>>> Ame
 		else {
 			//if the user tried to load a shader that doesn't,
 			LOG_ERROR("Default shader {} does not exist", shader);

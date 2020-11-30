@@ -21,6 +21,7 @@
 namespace Titan {
 	//enum for the different default shaders titan offers
 	enum TTN_DefaultShaders {
+		NOT_DEFAULT = 0,
 		VERT_NO_COLOR = 1,
 		VERT_COLOR = 2,
 		FRAG_BLINN_PHONG_NO_TEXTURE = 3,
@@ -29,7 +30,9 @@ namespace Titan {
 		VERT_COLOR_HEIGHTMAP = 6,
 		VERT_NO_COLOR_HEIGHTMAP = 7,
 		VERT_SKYBOX = 8,
-		FRAG_SKYBOX = 9
+		FRAG_SKYBOX = 9,
+		VERT_MORPH_ANIMATION_NO_COLOR = 10,
+		VERT_MORPH_ANIMATION_COLOR = 11
 	};
 
 	//class to wrap around an opengl shader

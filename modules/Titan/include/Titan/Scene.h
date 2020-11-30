@@ -9,9 +9,10 @@
 #include "Camera.h"
 #include "Light.h"
 #include "Tag.h"
+#include "Physics.h"
+#include "MAnimator.h"
 //include all the graphics features we need
 #include "Shader.h"
-#include "Physics.h"
 
 namespace Titan {
 	typedef entt::basic_group<entt::entity, entt::exclude_t<>, entt::get_t<>, TTN_Transform, TTN_Renderer> RenderGroupType;
