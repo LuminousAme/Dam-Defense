@@ -411,17 +411,17 @@ void Review3Scene::Update(float deltaTime)
 
 	mousePos = tempMousePos;
 
-	Spawner(deltaTime, 5.0f);//sets the spawner
+	
+	Spawner(deltaTime, 5.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
-	//goes through the boat vector 
+	//goes through the boats vector 
 	for (int i = 0; i < boats.size(); i++) {
-		//std::cout << Get<TTN_Tag>(boats[i]).getName() << "Num: " << i << std::endl;
-		std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl; //gets the boats randomized path num
-		int p = Get<TTN_Tag>(boats[i]).getPath(); 
+		std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl; 
+		int p = Get<TTN_Tag>(boats[i]).getPath(); //gets the boats randomized path num
 		BoatPathing(boats[i], p); //updates the pathing for the boat 
 	}
 
-	BoatPathing(boat2, 6);
+	BoatPathing(boat2, 6);//right side boat
 
 	glm::vec3 movement = glm::vec3(0.0f);
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
@@ -528,6 +528,7 @@ void Review3Scene::CreateCannonball() {
 	AttachCopy<TTN_Physics>(ball, pbody);
 }
 
+//sets the pathing the boat entity should take based on the path integer (1-3 is left side, 4-6 is right side)
 void Review3Scene::BoatPathing(entt::entity boatt, int path)
 {
 	auto& pBoat = Get<TTN_Physics>(boatt);
@@ -621,13 +622,15 @@ void Review3Scene::BoatPathing(entt::entity boatt, int path)
 	}
 }
 
+//note this spawner code only spawns code on the left side of the map (because of the boat pos)
+//to spawn on the right side can make a new function with a few changed values
 void Review3Scene::Spawner(float deltatime, float SpawnTime) {
-	//int  timer + deltatime
+	//increment timer
 	Timer += deltatime;
-	//if int  timer is >= spawn time
+	//if the timer is >= spawn time then it will spawn the boat
 	if (Timer >= SpawnTime) {
 		// timer = 0, boat spawn code
-		Timer = 0.F;
+		Timer = 0.F;//reset timer
 
 		boat = CreateEntity();
 		boats.push_back(boat);
@@ -643,14 +646,15 @@ void Review3Scene::Spawner(float deltatime, float SpawnTime) {
 
 		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boat, TTN_PhysicsBodyType::DYNAMIC, 1.0f);
 		pbody.SetHasGravity(false);
-		pbody.SetLinearVelocity(glm::vec3(-8.0f, 0.f, 0.0f));//-2.0f
+		pbody.SetLinearVelocity(glm::vec3(-11.0f, 0.f, 0.0f));//-2.0f
 		AttachCopy<TTN_Physics>(boat, pbody);
 
 		//add a tag to the boat
 		//TTN_Tag boatTag = TTN_Tag(" Boat "+ boats.size() );
-		int r = rand() % 3 + 1;
-		std::cout << "Num: " << r << std::endl;
-		TTN_Tag boatTag = TTN_Tag(r);
+
+		int r = rand() % 3 + 1; // generates path number between 1-3 (left side paths, right side path nums are 4-6)
+		std::cout << "Num: " << r << std::endl; //random boat path
+		TTN_Tag boatTag = TTN_Tag(r); //sets boat path number to ttn_tag
 		AttachCopy<TTN_Tag>(boat, boatTag);
 	}
 
@@ -663,10 +667,10 @@ glm::vec3 Review3Scene::Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos)
 	//std::cout << glm::to_string(velo) << std::endl;
 	//std::cout << glm::to_string(pos) << std::endl;
 	glm::vec3 maxVelo(-10.0f, 0.f, -10.0f);
-	glm::vec3 desired = pos - target;
+	glm::vec3 desired = pos - target; //gets the desired vector
 
 	desired = glm::normalize(desired) * maxVelo;
-	glm::vec3 steering = desired - velo;
+	//glm::vec3 steering = desired - velo;
 	//steering = glm::normalize(steering);
 	glm::vec3 moveVelo = desired;  //clamp(moveVelo,velo+steering, maxVelo);
 
