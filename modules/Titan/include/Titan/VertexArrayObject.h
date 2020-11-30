@@ -50,10 +50,12 @@ namespace Titan {
 		size_t Offset;
 		//the usage for this attirbute, not sent to OpenGL
 		AttribUsage Usage;
+		//divisor for instanced renders
+		size_t attribDivisor;
 
 		//constructor for the struct 
-		BufferAttribute(uint32_t slot, uint32_t size, GLenum type, bool normalized, GLsizei stride, size_t offset, AttribUsage usage = AttribUsage::Unknown) :
-			Slot(slot), Size(size), Type(type), Normalized(normalized), Stride(stride), Offset(offset), Usage(usage) 
+		BufferAttribute(uint32_t slot, uint32_t size, GLenum type, bool normalized, GLsizei stride, size_t offset, AttribUsage usage = AttribUsage::Unknown, size_t divisor = 0) :
+			Slot(slot), Size(size), Type(type), Normalized(normalized), Stride(stride), Offset(offset), Usage(usage), attribDivisor(divisor)
 			{ }
 	};
 
@@ -85,6 +87,8 @@ namespace Titan {
 		void SetIndexBuffer(const TTN_IndexBuffer::sibptr& ibo);
 		//Adds a VBO to this VAO, with the attributes specified
 		void AddVertexBuffer(const TTN_VertexBuffer::svbptr& vbo, const std::vector<BufferAttribute>& attributes);
+		//Clears all the vertex buffers
+		void ClearVertexBuffers();
 
 		//Bind this VAO so that it is the source of data for draw operations
 		void Bind() const;
@@ -97,6 +101,7 @@ namespace Titan {
 
 		//Renders the VAO
 		void Render() const;
+		void RenderInstanced(size_t numOfObjects, size_t numOfVerts = 0) const;
 
 	private:
 		//structure to store a VBO and it's attributes

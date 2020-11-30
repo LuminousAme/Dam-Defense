@@ -42,6 +42,9 @@ void main() {
 	//sample the textures
 	vec4 textureColor = texture(s_Diffuse, inUV);
 
+	if(textureColor.a < 0.05)
+		discard;
+
 	//combine everything
 	vec3 result = u_AmbientCol * u_AmbientStrength; // global ambient light
 

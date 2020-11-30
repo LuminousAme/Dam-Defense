@@ -59,7 +59,15 @@ namespace Titan {
 		//visible anyways
 		glEnable(GL_CULL_FACE);
 
+		//enable the depth function for skyboxes
 		glDepthFunc(GL_LEQUAL);
+
+		//enable blend function to allow for transparency
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		//set up the shader program for the particle system
+		TTN_ParticleSystem::InitParticleShader();
 
 		//Set the background colour for our scene to the base black
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

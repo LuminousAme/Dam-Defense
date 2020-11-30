@@ -57,6 +57,12 @@ namespace Titan {
 		int GetVertCount() { return m_Vertices[0].size(); }
 		//Gets wheter or not the mesh has vertex colors
 		bool GetHasVertColors() { return m_HasVertColors; }
+		//Gets a list of the vertex position
+		std::vector<glm::vec3> GetVertexPositions() { return m_Vertices[0]; }
+		//Gets a list of the vertex normals
+		std::vector<glm::vec3> GetVertexNormals() { return m_Normals[0]; }
+		//Gets a list of the uvs
+		std::vector<glm::vec2> GetVertexUvs() { return m_Uvs; }
 
 	protected:
 		//a vector containing all the vertices on the mesh 

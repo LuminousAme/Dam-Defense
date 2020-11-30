@@ -8,7 +8,7 @@
 #endif
 
 //include the titan scene class 
-#include "Scene.h"
+#include "Titan/Scene.h"
 //include the required features and libraries 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -20,7 +20,7 @@
 
 namespace Titan {
 	//input enum class, converts titan keyboard input type to glfw keyboard input types
-	enum TTN_KeyCode {
+	enum class TTN_KeyCode {
 		Key_Unknown = GLFW_KEY_UNKNOWN,
 		Space = GLFW_KEY_SPACE,
 		Apostrophe = GLFW_KEY_APOSTROPHE,
@@ -141,7 +141,7 @@ namespace Titan {
 	};
 
 	//input enum class, converts titan mouse button input type to glfw mouse input types
-	enum TTN_MouseButton {
+	enum class TTN_MouseButton {
 		Left = GLFW_MOUSE_BUTTON_1,
 		Right = GLFW_MOUSE_BUTTON_2,
 		Middle = GLFW_MOUSE_BUTTON_3,
@@ -181,20 +181,17 @@ namespace Titan {
 
 	public:
 		//vector for all the scenes in the application
-		static std::vector<TTN_Scene*> scenes;
+		static std::vector<Titan::TTN_Scene*> scenes;
 		static GLFWwindow* m_window;
 
 	protected:
 		//default constructor, just creates an empty aplication project
 		TTN_Application() = default;
 
-		
 		static float m_dt;
 		static float m_previousFrameTime;
 
 	public:
-
-
 		//input helper class
 		class TTN_Input {
 		public:

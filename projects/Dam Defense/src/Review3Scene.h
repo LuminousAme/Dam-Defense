@@ -70,10 +70,11 @@ protected:
 	entt::entity tree1;
 	entt::entity skybox;
 	entt::entity height;
+	entt::entity testParticleSystem;
 	std::vector<entt::entity> cannonballs;
-
 
 	//others
 	glm::vec2 rotAmmount;
 	glm::vec2 mousePos; 
+	TTN_ParticleTemplate testParticle;
 };

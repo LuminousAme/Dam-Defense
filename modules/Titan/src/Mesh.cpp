@@ -23,8 +23,12 @@ namespace Titan {
 	//sets up the VAO for the mesh so it can acutally be rendered, needs to be called by the user in case they change the mesh
 	void TTN_Mesh::SetUpVao(int currentFrame, int nextFrame)
 	{
-		//creates a new vao
-		m_vao = TTN_VertexArrayObject::Create();
+		//if we don't have a vao, creates a new vao
+		if (m_vao == nullptr)
+			m_vao = TTN_VertexArrayObject::Create();
+		//if we do have a vao, clear it's vertex buffers
+		else
+			m_vao->ClearVertexBuffers();
 
 		//load the vbos from the mesh into the vao 
 		m_vao->AddVertexBuffer(m_vertVbos[currentFrame], { BufferAttribute(0, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Position) });

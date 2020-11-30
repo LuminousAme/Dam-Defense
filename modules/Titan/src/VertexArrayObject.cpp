@@ -45,14 +45,23 @@ namespace Titan {
 	//Adds a VBO to this VAO
 	void TTN_VertexArrayObject::AddVertexBuffer(const TTN_VertexBuffer::svbptr& vbo, const std::vector<BufferAttribute>& attributes)
 	{
-		//check if the ammount of vertex data is currently zero
-		if (_vertexCount == 0)
-			//if it is then set it equal to the element count in the vbo
-			_vertexCount = vbo->GetElementCount();
-		//if it's not, check if the vbo's element count is equal to the vertex count, if it isn't throw an error (only vbos of the same size 
-		//can exist in this VAO implementation)
-		else
-			LOG_ASSERT(vbo->GetElementCount() == _vertexCount, "All VBOs bound to a VAO should be of equal size in this implemenation.");
+		const uint32_t stride = attributes[0].Stride;
+		const uint32_t instanceDivisor = attributes[0].attribDivisor;
+
+		for (int ix = 1; ix < attributes.size(); ix++) {
+			LOG_ASSERT(stride == attributes[ix].Stride, "Stride mismatch");
+			LOG_ASSERT(instanceDivisor == attributes[ix].attribDivisor, "InstanceDivisor mismatch");
+		}
+		if (instanceDivisor == 0) {
+			//check if the ammount of vertex data is currently zero
+			if (_vertexCount == 0)
+				//if it is then set it equal to the element count in the vbo
+				_vertexCount = vbo->GetElementCount();
+			//if it's not, check if the vbo's element count is equal to the vertex count, if it isn't throw an error (only vbos of the same size 
+			//can exist in this VAO implementation)
+			else
+				LOG_ASSERT(vbo->GetElementCount() == _vertexCount, "All VBOs bound to a VAO should be of equal size in this implemenation.");
+		}
 
 		//create an object of the struct that can store a vbo and it's attributes
 		VertexBufferBinding binding;
@@ -70,8 +79,32 @@ namespace Titan {
 		for (const BufferAttribute& attrib : attributes) {
 			glEnableVertexArrayAttrib(_handle, attrib.Slot);
 			glVertexAttribPointer(attrib.Slot, attrib.Size, attrib.Type, attrib.Normalized, attrib.Stride, (void*)attrib.Offset);
+			if (attrib.attribDivisor != 0) glVertexAttribDivisor(attrib.Slot, attrib.attribDivisor);
 		}
+		//unbind the vbo
+		vbo->UnBind();
 		//unbind the VAO
+		UnBind();
+	}
+
+	//clears all the vbos from this vao
+	void TTN_VertexArrayObject::ClearVertexBuffers()
+	{
+		//bind the vao
+		Bind();
+
+		//iterate through all the vertex buffers
+		for (size_t i = 0; i < _vbos.size(); i++) {
+			//iterate through the attributes and remove them from opengl
+			for (size_t j = 0; j < _vbos[i].Attributes.size(); j++) {
+				if(_vbos[i].Attributes[j].attribDivisor != 0) glVertexAttribDivisor(_vbos[i].Attributes[j].Slot, 0);
+				glDisableVertexArrayAttrib(_handle, _vbos[i].Attributes[j].Slot);
+			}
+		}
+		//get rid of the base vectors and the stored vbo pointers too
+		_vbos.clear();
+
+		//unbind the vao
 		UnBind();
 	}
 
@@ -99,6 +132,23 @@ namespace Titan {
 		else
 			//otherwise it must only have vbos, so use those vbos to draw the triangles
 			glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
+		//unbind the VAO
+		UnBind();
+	}
+
+	//calls the openGL functions to acutally draw the triangles contained within the VAO, but does so with instancing
+	void TTN_VertexArrayObject::RenderInstanced(size_t numOfObjects, size_t numOfVerts) const
+	{
+		//bind the VAO so we can use it
+		Bind();
+		//check if the VAO has an IBO bound to it 
+		if (_ibo != nullptr)
+			//if it does, then use the ibo to draw the triangles
+			glDrawElementsInstanced(GL_TRIANGLES, _ibo->GetElementCount(), _ibo->GetElementType(), nullptr, numOfObjects);
+		else
+			//otherwise it must only have vbos, so use those vbos to draw the triangles
+			if(numOfVerts == 0) glDrawArraysInstanced(GL_TRIANGLES, 0, _vertexCount, numOfObjects);
+			else glDrawArraysInstanced(GL_TRIANGLES, 0, numOfVerts, numOfObjects);
 		//unbind the VAO
 		UnBind();
 	}

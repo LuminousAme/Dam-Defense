@@ -151,6 +151,13 @@ namespace Titan {
 			//update the active animation
 			Get<TTN_MorphAnimator>(entity).getActiveAnim().Update(deltaTime);
 		}
+
+		//run through all the of the entities with a particle system and run their updates
+		auto psView = m_Registry->view<TTN_ParticeSystemComponent>();
+		for (auto entity : psView) {
+			//update the particle system
+			Get<TTN_ParticeSystemComponent>(entity).GetParticleSystemPointer()->Update(deltaTime);
+		}
 	}
 
 	//renders all the messes in our game
@@ -330,6 +337,14 @@ namespace Titan {
 			//and finsih by rendering the mesh
 			renderer.Render(transform.GetGlobal(), vp);
 		});
+
+		//create a view of all the entities with a particle system and a transform
+		auto psTransView = m_Registry->view<TTN_ParticeSystemComponent, TTN_Transform>();
+		for (auto entity : psTransView) {
+			//render the particle system
+			Get<TTN_ParticeSystemComponent>(entity).GetParticleSystemPointer()->Render(Get<TTN_Transform>(entity).GetGlobalPos(), 
+				viewMat, Get<TTN_Camera>(m_Cam).GetProj());
+		}
 	}
 
 	//sets wheter or not the scene should be rendered

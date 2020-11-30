@@ -76,17 +76,16 @@ void Review3Scene::InitScene()
 	heightMat->SetHeightInfluence(1.0f);
 	heightMat->SetShininess(128.0f);
 
-	//ParticleData data;
-	//data.m_max = 100;
-	//data.m_position = glm::vec3(10.f, -5.0f, 20.0f);
-	//data.m_velocity = glm::vec3(1.0f, 5.0f, 0.0f);
-	//data.ColorBegin = glm::vec4(1.0f, 1.0f, 1.5f, 1.0f);
-	//data.ColorEnd = glm::vec4(0.0f, 0.0f, 1.0f, 0.5f);
-
-	//data.SizeEnd = 1.0f;
-	//data.SizeBegin = 10.0f;
-	//data.LifeTime = 1.0f;	
-	//data.m_angle = glm::tan(glm::radians(25.0f));
+	testParticle = TTN_ParticleTemplate();
+	testParticle.SetMat(waterMat);
+	testParticle.SetMesh(tree1Mesh);
+	testParticle.SetOneEndColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+	testParticle.SetOneEndSize(0.0f);
+	testParticle.SetOneEndSpeed(2.0f);
+	testParticle.SetOneLifetime(1.0f);
+	testParticle.SetOneStartColor(glm::vec4(1.0f));
+	testParticle.SetOneStartSize(0.1f);
+	testParticle.SetOneStartSpeed(1.0f);
 
 	////////// entities /////////////////
 	//entity for the camera
@@ -139,6 +138,25 @@ void Review3Scene::InitScene()
 		TTN_Transform skyboxTrans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		//attach that transform to the entity
 		AttachCopy<TTN_Transform>(skybox, skyboxTrans);
+	}
+
+	
+	//entity for the particle system
+	{
+		testParticleSystem = CreateEntity();
+
+		//setup a transfrom for the particle system
+		TTN_Transform testpsTrans = TTN_Transform(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		//attach that transform to the entity
+		AttachCopy(testParticleSystem, testpsTrans);
+
+		//setup a particle system for the particle system
+		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1000000, 7000, testParticle, 5.0f, true);
+		ps->MakeSphereEmitter();
+		//setup a component particle system
+		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
+		//attach that particle system to the entity
+		AttachCopy(testParticleSystem, psComponent);
 	}
 	
 
@@ -251,7 +269,7 @@ void Review3Scene::Update(float deltaTime)
 	auto& transCannon = Get<TTN_Transform>(cannon);
 	auto& transCamera = Get<TTN_Transform>(camera);
 	
-	transCamera.RotateFixed(glm::vec3(0.0f, 5.0f * deltaTime, 0.0f));
+	//transCamera.RotateFixed(glm::vec3(0.0f, 5.0f * deltaTime, 0.0f));
 	//check if the mouse has moved on the x-axis
 	/*if (tempMousePos.x != mousePos.x) {
 		//if it, get the difference
@@ -269,6 +287,8 @@ void Review3Scene::Update(float deltaTime)
 			Get<TTN_Transform>(camera).RotateFixed(glm::vec3(0.0f, -25.0f * deltaTime, 0.0f));
 		}
 	}*/
+
+	printf("fps: %f\n", 1.0f/deltaTime);
 
 	mousePos = tempMousePos;
 	TTN_Scene::Update(deltaTime);
