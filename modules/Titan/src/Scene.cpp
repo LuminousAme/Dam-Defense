@@ -286,12 +286,12 @@ namespace Titan {
 			//if the mesh has a material send data from that
 			if (renderer.GetMat() != nullptr)
 			{
-<<<<<<< HEAD
+ 
 				//give openGL the shinniess
 				if (shader->GetFragShaderDefaultStatus() != 8) shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
 				//if they're using a texture
 				if (shader->GetFragShaderDefaultStatus() == 4 || shader->GetFragShaderDefaultStatus() == 5)
-=======
+
 				//give openGL the shinniess if it's not a skybox being renderered
 				if(shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX) 
 					shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
@@ -315,21 +315,21 @@ namespace Titan {
 				//if they're using an albedo texture 
 				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY 
 					|| shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR)
->>>>>>> Ame
+ 
 				{
 					//bind it so openGL can see it
 					renderer.GetMat()->GetAlbedo()->Bind(textureSlot);
 					//update the texture slot for future textures to use
 					textureSlot++;
 				}
-<<<<<<< HEAD
+ 
 				//if they're using a specular map
 				if (shader->GetFragShaderDefaultStatus() == 5)
-=======
+
 
 				//if they're using a specular map 
 				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR)
->>>>>>> Ame
+ 
 				{
 					//bind it so openGL can see it
 					renderer.GetMat()->GetSpecularMap()->Bind(textureSlot);

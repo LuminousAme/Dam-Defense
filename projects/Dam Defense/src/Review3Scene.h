@@ -31,8 +31,9 @@ public:
 	virtual void MouseButtonUpChecks();
 
 	void CreateCannonball();
-	void BoatPathing(float deltaTime, entt::entity boat, int path);
-	glm::vec3 Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos, float dt);
+	void BoatPathing( entt::entity boat, int path);
+	void Spawner();
+	glm::vec3 Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos);
 
 public:
 	//shader programs
@@ -82,15 +83,17 @@ protected:
 	entt::entity tree5;
 	
 	
-	entt::entity debug;
+	entt::entity debug;//used to look at positions on the map
+	entt::entity boat;
+	entt::entity boat2;
+
+	entt::entity ball;
+	std::vector<entt::entity> cannonballs;
+	std::vector<entt::entity> boats;
 	
 	entt::entity skybox;
 	entt::entity height;
-	entt::entity boat;
-
-	entt::entity ball;
-
-	std::vector<entt::entity> cannonballs;
+	
 
 	//others
 	glm::vec2 rotAmmount;
