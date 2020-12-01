@@ -54,6 +54,9 @@ namespace Titan {
 		//create the entity
 		auto entity = m_Registry->create();
 
+		//reconstruct scenegraph as entt was shuffled
+		ReconstructScenegraph();
+
 		//return the entity id
 		return entity;
 	}
@@ -71,6 +74,9 @@ namespace Titan {
 
 		//delete the entity from the registry
 		m_Registry->destroy(entity);
+
+		//reconstruct scenegraph as entt was shuffled
+		ReconstructScenegraph();
 	}
 
 	//sets the underlying entt registry of the scene
@@ -98,8 +104,6 @@ namespace Titan {
 			delete PhyObject;
 		}
 
-		//supposed to delete collision shapes acoording to quickstart guide but uses local variables that they don't define so idk what I'm supposed to do lol
-
 		//delete the physics world and it's attributes
 		delete m_physicsWorld;
 		delete solver;
@@ -111,6 +115,21 @@ namespace Titan {
 		if (m_Registry != nullptr) {
 			delete m_Registry;
 			m_Registry = nullptr;
+		}
+	}
+
+	//reconstructs the scenegraph, should be done every time entt shuffles
+	void TTN_Scene::ReconstructScenegraph()
+	{
+		//reconstruct any scenegraph relationships
+		auto transView = m_Registry->view<TTN_Transform>();
+		for (auto entity : transView) {
+			//if it should have a parent
+			if (Get<TTN_Transform>(entity).GetParentEntity() != nullptr) {
+				//then reatach that parent
+				Get<TTN_Transform>(entity).SetParent(&Get<TTN_Transform>(*Get<TTN_Transform>(entity).GetParentEntity()),
+					Get<TTN_Transform>(entity).GetParentEntity());
+			}
 		}
 	}
 
@@ -191,16 +210,7 @@ namespace Titan {
 			if (l.GetMat() > r.GetMat()) return false;
 		});
 
-		//reconstruct any scenegraph relationships
-		auto transView = m_Registry->view<TTN_Transform>();
-		for (auto entity : transView) {
-			//if it should have a parent
-			if (Get<TTN_Transform>(entity).GetParentEntity() != nullptr) {
-				//then reatach that parent
-				Get<TTN_Transform>(entity).SetParent(&Get<TTN_Transform>(*Get<TTN_Transform>(entity).GetParentEntity()),
-					Get<TTN_Transform>(entity).GetParentEntity());
-			}
-		}
+		ReconstructScenegraph();
 
 		//go through every entity with a transform and a mesh renderer and render the mesh
 		m_RenderGroup->each([&](entt::entity entity, TTN_Transform& transform, TTN_Renderer& renderer) {

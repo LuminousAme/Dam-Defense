@@ -69,7 +69,7 @@ namespace Titan {
 
 		//deletes and clears the scene
 		void Unload();
-		
+
 #pragma endregion ECS_functions_dec
 
 		//virtual functions for polymorphism 
@@ -157,6 +157,9 @@ namespace Titan {
 
 		//constructs the TTN_Collision objects
 		void ConstructCollisions();
+
+		//reconstructs the scenegraph, use every time entt reshuffles
+		void ReconstructScenegraph();
 	};
 
 #pragma region ECS_functions_def
@@ -165,6 +168,8 @@ namespace Titan {
 	{
 		//assign the component to the entity
 		m_Registry->emplace<T>(entity);
+		//reconstruct scenegraph as entt was shuffled
+		ReconstructScenegraph();
 	}
 
 	template<typename T>
@@ -172,6 +177,8 @@ namespace Titan {
 	{
 		//assign the component to the entity 
 		m_Registry->emplace_or_replace<T>(entity, copy);
+		//reconstruct scenegraph as entt was shuffled
+		ReconstructScenegraph();
 	}
 
 	template<typename T>
@@ -193,6 +200,8 @@ namespace Titan {
 	{
 		//remove the component from the entity
 		m_Registry->remove<T>(entity);
+		//reconstruct scenegraph as entt was shuffled
+		ReconstructScenegraph();
 	}
 #pragma endregion ECS_functions_def
 

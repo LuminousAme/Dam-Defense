@@ -7,7 +7,8 @@
 //default constructor
 Game::Game()
 	: TTN_Scene()
-{}
+{
+}
 
 //sets up the scene
 void Game::InitScene()
@@ -15,11 +16,11 @@ void Game::InitScene()
 	//load in the scene's assets
 	SetUpAssets();
 
-	//create the entities
-	SetUpEntities();
-
 	//set up the other data
 	SetUpOtherData();
+
+	//create the entities
+	SetUpEntities();
 }
 
 //updates the scene every frame
@@ -30,6 +31,9 @@ void Game::Update(float deltaTime)
 
 	//switch to the cannon's normal static animation if it's firing animation has ended
 	StopFiring();
+
+	//if the player is on shoot cooldown, decrement the time remaining on the cooldown
+	if(playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
 	printf("fps: %f\n", 1.0f/deltaTime);
 	//don't forget to call the base class' update
@@ -60,11 +64,21 @@ void Game::MouseButtonDownChecks()
 void Game::MouseButtonChecks()
 {
 	//if the cannon is not in the middle of firing, fire when the player is pressing the left mouse button
-	if (Get<TTN_MorphAnimator>(cannon).getActiveAnim() == 0 &&
+	if (Get<TTN_MorphAnimator>(cannon).getActiveAnim() == 0 && playerShootCooldownTimer <= 0.0f &&
 		TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left)) {
-		//fire from the cannon
+		//play the firing animation
 		Get<TTN_MorphAnimator>(cannon).SetActiveAnim(1);
 		Get<TTN_MorphAnimator>(cannon).getActiveAnimRef().Restart();
+		//create a new cannonball
+		CreateCannonball();
+		//reset the cooldown
+		playerShootCooldownTimer = playerShootCooldown;
+		//and play the smoke particle effect
+		Get<TTN_Transform>(smokePS).SetPos((Get<TTN_Transform>(cannon).GetGlobalPos() - 
+			0.5f * (Get<TTN_Transform>(cannon).GetGlobalPos() - Get<TTN_Transform>(cannon).GetPos())) + 0.8f * playerDir);
+		Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
+			SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
+		Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(100);
 	}
 }
 
@@ -109,6 +123,7 @@ void Game::SetUpAssets()
 	////MESHES////
 	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
 	skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
+	sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
 
 	///TEXTURES////
 	cannonText = TTN_Texture2D::LoadFromFile("textures/metal.png");
@@ -120,6 +135,8 @@ void Game::SetUpAssets()
 	cannonMat->SetShininess(128.0f);
 	skyboxMat = TTN_Material::Create();
 	skyboxMat->SetSkybox(skyboxText);
+	smokeMat = TTN_Material::Create();
+	smokeMat->SetAlbedo(nullptr); //do this to be sure titan uses it's default white texture for the particle
 }
 
 //create the scene's initial entities
@@ -181,8 +198,7 @@ void Game::SetUpEntities()
 		cannon = CreateEntity();
 
 		//setup a mesh renderer for the cannon
-		TTN_Renderer cannonRenderer = TTN_Renderer(cannonMesh, shaderProgramAnimatedTextured);
-		cannonRenderer.SetMat(cannonMat);
+		TTN_Renderer cannonRenderer = TTN_Renderer(cannonMesh, shaderProgramAnimatedTextured, cannonMat);
 		//attach that renderer to the entity
 		AttachCopy(cannon, cannonRenderer);
 
@@ -217,6 +233,28 @@ void Game::SetUpEntities()
 		AttachCopy(cannon, cannonAnimator);
 	}
 
+	//entity for the smoke particle system (rather than recreating whenever we need it, we'll just make one 
+	//and burst again when we need to)
+	{
+		smokePS = CreateEntity();
+
+		//setup a transfrom for the particle system
+		TTN_Transform smokePSTrans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		//attach that transform to the entity
+		AttachCopy(smokePS, smokePSTrans);
+
+		//setup a particle system for the particle system
+		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(500, 0, smokeParticle, 0.0f, false);
+		ps->MakeCircleEmitter(glm::vec3(0.0f));
+		//setup a particle system component
+		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
+		//attach the particle system component to the entity
+		AttachCopy(smokePS, psComponent);
+	}
+
+	//prepare the vector of cannonballs
+	cannonBalls = std::vector<entt::entity>();
+
 	//set the cannon to be a child of the camera
 	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), &camera);
 }
@@ -224,9 +262,31 @@ void Game::SetUpEntities()
 //sets up any other data the game needs to store
 void Game::SetUpOtherData()
 {
+	//init some scene data
 	rotAmmount = glm::vec2(0.0f);
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
+	cannonBallForce = 1250.0f;
+	playerShootCooldown = 2.0f;
+	playerShootCooldownTimer = playerShootCooldown;
+
+	//make the scene have gravity
+	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.81f, 0.0f));
+
+	//create the particle templates
+	//smoke particle
+	{
+		smokeParticle = TTN_ParticleTemplate();
+		smokeParticle.SetMat(smokeMat);
+		smokeParticle.SetMesh(sphereMesh);
+		smokeParticle.SetOneLifetime(playerShootCooldown);
+		smokeParticle.SetOneStartColor(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
+		smokeParticle.SetOneEndColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+		smokeParticle.SetOneStartSize(0.1f);
+		smokeParticle.SetOneEndSize(0.05f);
+		smokeParticle.SetTwoStartSpeeds(2.0f, 1.5f);
+		smokeParticle.SetOneEndSpeed(0.1f);
+	}
 }
 
 //called by update once a frame, allows the player to rotate
@@ -250,7 +310,9 @@ void Game::PlayerRotate(float deltaTime)
 	Get<TTN_Transform>(camera).RotateFixed(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
 	//clear the direction the player is facing, and rotate it to face the same along
 	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
-	playerDir = glm::vec3(glm::toMat4(glm::quat(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f))) * glm::vec4(playerDir, 1.0f));
+	playerDir = glm::vec3(glm::toMat4(glm::quat(glm::radians(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f)))) 
+			* glm::vec4(playerDir, 1.0f));
+	playerDir = glm::normalize(playerDir);
 
 	//save the next position to rotate properly next frame
 	mousePos = tempMousePos;
@@ -263,4 +325,36 @@ void Game::StopFiring()
 			Get<TTN_MorphAnimator>(cannon).getActiveAnimRef().getIsDone()) {
 		Get<TTN_MorphAnimator>(cannon).SetActiveAnim(0);
 	}
+}
+
+//function to create a cannonball, used when the player fires
+void Game::CreateCannonball()
+{
+	//create the cannonball
+	{
+		//create the entity
+		cannonBalls.push_back(CreateEntity());
+
+		//set up a renderer for the cannonball
+		TTN_Renderer cannonBallRenderer = TTN_Renderer(sphereMesh, shaderProgramTextured, cannonMat);
+		//attach that renderer to the entity
+		AttachCopy(cannonBalls[cannonBalls.size() - 1], cannonBallRenderer);
+
+		//set up a transform for the cannonball
+		TTN_Transform cannonBallTrans = TTN_Transform();
+		cannonBallTrans.SetPos(Get<TTN_Transform>(cannon).GetGlobalPos());
+		cannonBallTrans.SetScale(glm::vec3(0.25f));
+		//attach that transform to the entity
+		AttachCopy(cannonBalls[cannonBalls.size() - 1], cannonBallTrans);
+
+		//set up a physics body for the cannonball
+		TTN_Physics cannonBallPhysBod = TTN_Physics(cannonBallTrans.GetPos(), glm::vec3(0.0f), cannonBallTrans.GetScale(),
+			cannonBalls[cannonBalls.size() - 1]);
+		cannonBallPhysBod.SetHasGravity(true); //be explict about the cannonball being affected by gravity
+		//attach that physics body to the entity
+		AttachCopy(cannonBalls[cannonBalls.size() - 1], cannonBallPhysBod);
+	}
+
+	//after the cannonball has been created, get the physics body and apply a force along the player's direction
+	Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1]).AddForce(cannonBallForce * playerDir);
 }
