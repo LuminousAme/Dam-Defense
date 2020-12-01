@@ -225,8 +225,14 @@ namespace Titan {
 			//hides or unhides the cursor based on an inputed bool
 			static void SetCursorHidden(bool hidden);
 
+			//locks or unlocks the cursor to the wind
+			static void SetCursorLocked(bool locked);
+
 			//gets from glfw wheter or not the mouse is in frame, do not call as user
 			static void cursorEnterFrameCallback(GLFWwindow *window, int entered);
+
+			//gets the window witdth from glfw
+			static glm::ivec2 GetWidth();
 
 		protected:
 			//map of the booleans for if a key has been pressed

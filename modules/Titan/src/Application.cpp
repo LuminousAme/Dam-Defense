@@ -353,10 +353,28 @@ namespace Titan {
 		else  glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 
+	//sets wheter or not the cursor is locked
+	void TTN_Application::TTN_Input::SetCursorLocked(bool locked)
+	{
+		//if they want to lock the cursor, lock it
+		if (locked) glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		else glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
 	//gets from glfw wheter or not the mouse is in the frame, do not call as user
 	void TTN_Application::TTN_Input::cursorEnterFrameCallback(GLFWwindow* window, int entered)
 	{
 		//set wheter or not the mouse is in the frame
 		inFrame = entered;
+	}
+
+	//gets the window width from glfw
+	glm::ivec2 TTN_Application::TTN_Input::GetWidth()
+	{
+		GLFWvidmode query;
+
+		int width, height;
+		glfwGetWindowSize(m_window, &width, &height);
+		return glm::ivec2(width, height);
 	}
 }

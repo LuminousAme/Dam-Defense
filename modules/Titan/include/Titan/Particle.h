@@ -176,7 +176,7 @@ namespace Titan {
 		bool GetShouldLoop() { return m_loop; }
 		TTN_ParticleTemplate GetParticleTemplate() { return m_particle; }
 		float GetEmissionRate() { return m_emissionRate; }
-		glm::vec3 GetEmitterRotation() { return m_rotation; }
+		glm::vec3 GetEmitterRotation() { return glm::degrees(m_rotation); }
 
 		//function pointer setters
 		void VelocityReadGraphCallback(float (*function)(float));

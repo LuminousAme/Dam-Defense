@@ -129,14 +129,14 @@ namespace Titan {
 	void TTN_ParticleSystem::MakeConeEmitter(float angle, glm::vec3 emitterRotation)
 	{
 		m_EmitterAngle = angle;
-		m_rotation = emitterRotation;
+		m_rotation = glm::radians(emitterRotation);
 		m_emitterShape = TTN_ParticleEmitterShape::CONE;
 	}
 
 	//sets up the particle system as a cirlce
 	void TTN_ParticleSystem::MakeCircleEmitter(glm::vec3 emitterRotation)
 	{
-		m_rotation = emitterRotation;
+		m_rotation = glm::radians(emitterRotation);
 		m_emitterShape = TTN_ParticleEmitterShape::CIRCLE;
 	}
 
@@ -150,7 +150,7 @@ namespace Titan {
 	void TTN_ParticleSystem::MakeCubeEmitter(glm::vec3 scale, glm::vec3 emitterRotation)
 	{
 		m_EmitterScale = scale;
-		m_rotation = emitterRotation;
+		m_rotation = glm::radians(emitterRotation);
 		m_emitterShape = TTN_ParticleEmitterShape::CUBE;
 	}
 
@@ -197,7 +197,7 @@ namespace Titan {
 	//set the rotation of the emitter for cone, circle, and cube emitters
 	void TTN_ParticleSystem::SetEmitterRotation(glm::vec3 rotation)
 	{
-		m_rotation = rotation;
+		m_rotation = glm::radians(rotation);
 	}
 
 	//sets the function pointer for the readgraph used in lerping velocity
@@ -400,7 +400,7 @@ namespace Titan {
 				Dir = glm::normalize(Dir);
 
 				//rotate it
-				glm::quat rotQuat = glm::quat(glm::radians(m_rotation));
+				glm::quat rotQuat = glm::quat(m_rotation);
 				glm::mat4 rotMat = glm::toMat4(rotQuat);
 
 				Dir = glm::vec3(rotMat * glm::vec4(Dir, 1.0f));
@@ -410,11 +410,15 @@ namespace Titan {
 				Dir = glm::vec3(0.0f, 1.0f, 0.0f);
 
 				//rotate it by a random factor within give angle
-				glm::vec3 coneRot = glm::vec3(TTN_Random::RandomFloat(-m_EmitterAngle, m_EmitterAngle),
-					0.0f, TTN_Random::RandomFloat(-m_EmitterAngle, m_EmitterAngle));
+				glm::vec3 coneRot = glm::vec3(TTN_Random::RandomFloat(-m_EmitterAngle, m_EmitterAngle), 0.0f, TTN_Random::RandomFloat(-m_EmitterAngle, m_EmitterAngle));
+
+				glm::quat coneRotQuat = glm::quat(glm::radians(coneRot));
+				glm::mat4 coneRotMat = glm::toMat4(coneRotQuat);
+
+				Dir = glm::vec3(coneRotMat * glm::vec4(Dir, 1.0f));
 
 				//rotate it
-				glm::quat rotQuat = glm::quat(glm::radians(m_rotation));
+				glm::quat rotQuat = glm::quat(m_rotation);
 				glm::mat4 rotMat = glm::toMat4(rotQuat);
 
 				Dir = glm::vec3(rotMat * glm::vec4(Dir, 1.0f));
@@ -423,7 +427,7 @@ namespace Titan {
 			else if (m_emitterShape == TTN_ParticleEmitterShape::CUBE) {
 				Dir = glm::vec3(0.0f, 1.0f, 0.0f);
 
-				glm::quat rotQuat = glm::quat(glm::radians(m_rotation));
+				glm::quat rotQuat = glm::quat(m_rotation);
 				glm::mat4 rotMat = glm::toMat4(rotQuat);
 
 				Dir = glm::vec3(rotMat * glm::vec4(Dir, 1.0f));

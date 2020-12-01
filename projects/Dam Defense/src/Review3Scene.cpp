@@ -91,12 +91,14 @@ void Review3Scene::InitScene()
 	testParticle.SetMat(waterMat);
 	testParticle.SetMesh(tree1Mesh);
 	testParticle.SetOneEndColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
-	testParticle.SetOneEndSize(0.0f);
+	testParticle.SetOneEndSize(0.01f);
 	testParticle.SetOneEndSpeed(2.0f);
 	testParticle.SetOneLifetime(1.0f);
 	testParticle.SetOneStartColor(glm::vec4(1.0f));
-	testParticle.SetOneStartSize(0.1f);
+	testParticle.SetOneStartSize(0.01f);
 	testParticle.SetOneStartSpeed(1.0f);
+
+	TTN_Application::TTN_Input::SetCursorLocked(true);
 
 	////////// entities /////////////////
 	//entity for the camera
@@ -155,13 +157,13 @@ void Review3Scene::InitScene()
 		testParticleSystem = CreateEntity();
 
 		//setup a transfrom for the particle system
-		TTN_Transform testpsTrans = TTN_Transform(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		TTN_Transform testpsTrans = TTN_Transform(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		//attach that transform to the entity
 		AttachCopy(testParticleSystem, testpsTrans);
 
 		//setup a particle system for the particle system
-		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1000000, 7000, testParticle, 5.0f, true);
-		ps->MakeSphereEmitter();
+		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1000, 500, testParticle, 5.0f, true);
+		ps->MakeConeEmitter(15.0f, glm::vec3(90.0f, 0.0f, 90.0f));
 		//setup a component particle system
 		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
 		//attach that particle system to the entity
@@ -351,7 +353,7 @@ void Review3Scene::InitScene()
 		AttachCopy<TTN_Tag>(boat2, boatTag);
 	}
 
-	//set the camera to be a child of the cannon
+	//set the cannon to be a child of the camera
 	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), &camera);
 
 	/////// other /////////
@@ -364,78 +366,28 @@ void Review3Scene::Update(float deltaTime)
 	//get the mouse position
 	glm::vec2 tempMousePos = TTN_Application::TTN_Input::GetMousePosition();
 
-	auto& transCannon = Get<TTN_Transform>(cannon);
-	auto& transCamera = Get<TTN_Transform>(camera);
+	//figure out how much the cannon and camera should be rotated
+	rotAmmount += (tempMousePos - mousePos) * 5.0f * deltaTime;
 
-	//transCamera.RotateFixed(glm::vec3(0.0f, 0.0f, 5.0f * deltaTime));
-	//std::cout << glm::to_string (Get<TTN_Transform>(camera).GetRotQuat()) << std::endl;
+	//clamp the rotation to within 85 degrees of the base rotation in all the directions
+	if (rotAmmount.x > 85.0f) rotAmmount.x = 85.0f;
+	else if (rotAmmount.x < -85.0f) rotAmmount.x = -85.0f;
+	if (rotAmmount.y > 85.0f) rotAmmount.y = 85.0f;
+	else if (rotAmmount.y < -85.0f) rotAmmount.y = -85.0f;
 
-	glm::vec3 tempRot = transCamera.GetRotation();
+	//reset the rotation
+	Get<TTN_Transform>(camera).LookAlong(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	//and rotate it by the ammount it should be rotated 
+	Get<TTN_Transform>(camera).RotateFixed(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
 
-	////check if the mouse has moved on the x-axis
-	if (tempMousePos.x != mousePos.x) {
-		//if it is, get the difference
-		float diffx = tempMousePos.x - mousePos.x;
-		//if it's moving in the positive direction
-		if (diffx < 0) {
-			//rotate by 5 degrees a second in that direction
-			rotAmmount.x += diffx * deltaTime;
-			//glm::vec3 rot = glm::rotate(Get<TTN_Transform>(camera).GetRotation(), glm::radians(-1.9f * rotAmmount.x / 18), glm::vec3(0.0f, 1.0f, 0.0f));
-			//Get<TTN_Transform>(camera).RotateFixed(glm::vec3(0.0f, rot.x, 0.0f));
-
-			Get<TTN_Transform>(camera).RotateFixed(glm::vec3(0.0f, glm::normalize(1.5f * rotAmmount.x / 20), 0.0f));
-		}
-		//if it's moving in the negative direction
-		else if (diffx > 0) {
-			//rotate by 5 degrees a second in that direction
-			rotAmmount.x += diffx * deltaTime;
-
-			//glm::vec3 rot = glm::rotate(Get<TTN_Transform>(camera).GetRotation(), -1.9f * rotAmmount.x / 18, glm::vec3(0.0f, 1.0f, 0.0f));
-			//Get<TTN_Transform>(camera).RotateFixed(glm::vec3(0.0f, -rot.x, 0.0f)); //+
-
-			Get<TTN_Transform>(camera).RotateFixed(glm::vec3(0.0f, glm::normalize(-1.5f * rotAmmount.x / 20), 0.0f)); //+
-		}
-		else {
-			rotAmmount.x = 0.f;
-		}
-		tempRot = transCamera.GetRotation();
-		//Get<TTN_Transform>(camera).SetRotationQuat(glm::quat(glm::radians(glm::vec3(tempRot.x, tempRot.y, -0.0f))));
-	}
-
-	//check if mouse moved on y axis
-	//if (tempMousePos.y != mousePos.y) {
-	//	float diffy = tempMousePos.y - mousePos.y;
-	//	if (diffy < 0) {
-	//		rotAmmount.y += diffy * deltaTime;
-
-	//		//glm::vec3 rot = glm::rotate(Get<TTN_Transform>(camera).GetRotation(), -1.9f * rotAmmount.y / 18, glm::vec3(1.0f, 0.0f, 0.0f));
-	//		//Get<TTN_Transform>(camera).RotateFixed(glm::vec3(-rot.y, 0.0f, 0.0f));  //-
-
-	//		Get<TTN_Transform>(camera).RotateFixed(glm::vec3(-1.8f * rotAmmount.y / 18, 0.0f, 0.0f));  //-
-	//	}
-	//	else if (diffy > 0) {
-	//		rotAmmount.y += diffy * deltaTime;
-
-	//		//glm::vec3 rot = glm::rotate(Get<TTN_Transform>(camera).GetRotation(), -1.9f * rotAmmount.y / 18, glm::vec3(1.0f, 0.0f, 0.0f));
-	//		//Get<TTN_Transform>(camera).RotateFixed(glm::vec3(rot.y, 0.0f, 0.0f));  //-
-
-	//		Get<TTN_Transform>(camera).RotateFixed(glm::vec3(1.8f * rotAmmount.y / 18, 0.0f, 0.0f)); //positive x is downwards camera
-	//	}
-	//	else {
-	//		rotAmmount.y = 0;
-	//	}
-	//	tempRot = transCamera.GetRotation();
-	//	//Get<TTN_Transform>(camera).RotateRelative
-	//}
-
+	//save the next position to rotate properly next frame
 	mousePos = tempMousePos;
 
-	
 	Spawner(deltaTime, 5.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
 	//goes through the boats vector 
 	for (int i = 0; i < boats.size(); i++) {
-		std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl; 
+		//std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl; 
 		int p = Get<TTN_Tag>(boats[i]).getPath(); //gets the boats randomized path num
 		BoatPathing(boats[i], p); //updates the pathing for the boat 
 	}
@@ -543,7 +495,7 @@ void Review3Scene::CreateCannonball() {
 	//pbody.SetLinearVelocity(glm::vec3(origin.x * 6.0f, -1.0f, origin.z * 6.0f));
 
 	//std::cout << glm::to_string(ball) << std::endl;
-	std::cout << "Ball: " << cannonballs.size() << std::endl;
+	//std::cout << "Ball: " << cannonballs.size() << std::endl;
 
 	AttachCopy<TTN_Physics>(ball, pbody);
 }
@@ -673,7 +625,7 @@ void Review3Scene::Spawner(float deltatime, float SpawnTime) {
 		//TTN_Tag boatTag = TTN_Tag(" Boat "+ boats.size() );
 
 		int r = rand() % 3 + 1; // generates path number between 1-3 (left side paths, right side path nums are 4-6)
-		std::cout << "Num: " << r << std::endl; //random boat path
+		//std::cout << "Num: " << r << std::endl; //random boat path
 		TTN_Tag boatTag = TTN_Tag(r); //sets boat path number to ttn_tag
 		AttachCopy<TTN_Tag>(boat, boatTag);
 	}
