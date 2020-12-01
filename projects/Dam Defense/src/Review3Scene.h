@@ -34,6 +34,8 @@ public:
 	void BoatPathing( entt::entity boat, int path);
 	void SpawnerLS(float deltatime, float SpawnTime);
 	void SpawnerRS(float deltatime, float SpawnTime);
+	void Waves(int num, float restTime, float waveTime, float deltaTime );
+
 	glm::vec3 Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos);
 
 public:
@@ -70,7 +72,11 @@ public:
 
 	float Timer = 0.F;//timer for boat spawning
 	float Timer2 = 0.F;//timer for boat spawning
-	
+	bool Spawning = true;
+
+	float waveTimer = 0.F;//timer for waves
+	float restTimer = 0.F;//timer for waves
+	int wave = 0; // keep track of wave number
 
 protected:
 	//entities
