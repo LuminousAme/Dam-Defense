@@ -6,7 +6,7 @@ layout(location = 0) in vec3 inVertPos;
 layout(location = 1) in vec3 inVertNorm;
 layout(location = 2) in vec2 inVertUV;
 //instanced vbos
-layout(location = 3) in vec3 inParticleColor;
+layout(location = 3) in vec4 inParticleColor;
 layout(location = 4) in vec3 inInstancePosition;
 layout(location = 5) in float inScale;
 
@@ -14,7 +14,7 @@ layout(location = 5) in float inScale;
 layout(location = 0) out vec3 outPos;
 layout(location = 1) out vec3 outNormal;
 layout(location = 2) out vec2 outUV;
-layout(location = 3) out vec3 outColor;
+layout(location = 3) out vec4 outColor;
 
 uniform mat4 u_model;
 uniform mat4 u_mvp;

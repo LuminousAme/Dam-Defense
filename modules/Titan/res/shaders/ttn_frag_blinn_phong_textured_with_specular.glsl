@@ -44,7 +44,7 @@ void main() {
 	float texSpec = texture(s_Specular, inUV).x;
 	vec4 textureColor = texture(s_Diffuse, inUV);
 
-	if(textureColor.a < 0.05)
+	if(textureColor.a < 0.01)
 		discard;
 
 	//combine everything

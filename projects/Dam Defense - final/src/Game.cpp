@@ -32,6 +32,9 @@ void Game::Update(float deltaTime)
 	//switch to the cannon's normal static animation if it's firing animation has ended
 	StopFiring();
 
+	//delete any cannonballs that're way out of range
+	DeleteCannonballs();
+
 	//if the player is on shoot cooldown, decrement the time remaining on the cooldown
 	if(playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
@@ -74,11 +77,12 @@ void Game::MouseButtonChecks()
 		//reset the cooldown
 		playerShootCooldownTimer = playerShootCooldown;
 		//and play the smoke particle effect
-		Get<TTN_Transform>(smokePS).SetPos((Get<TTN_Transform>(cannon).GetGlobalPos() - 
-			0.5f * (Get<TTN_Transform>(cannon).GetGlobalPos() - Get<TTN_Transform>(cannon).GetPos())) + 0.8f * playerDir);
+		//Get<TTN_Transform>(smokePS).SetPos((Get<TTN_Transform>(cannon).GetGlobalPos() - 
+			//0.5f * (Get<TTN_Transform>(cannon).GetGlobalPos() - Get<TTN_Transform>(cannon).GetPos())) + 0.8f * playerDir);
+		Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.1f, 0.0f) + 0.9f * playerDir);
 		Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
 			SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
-		Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(100);
+		Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
 	}
 }
 
@@ -150,7 +154,7 @@ void Game::SetUpEntities()
 		Attach<TTN_Transform>(camera);
 		Attach<TTN_Camera>(camera);
 		auto& camTrans = Get<TTN_Transform>(camera);
-		camTrans.SetPos(glm::vec3(0.0f, 5.0f, 0.0f));
+		camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f, 100.f);
@@ -244,8 +248,10 @@ void Game::SetUpEntities()
 		AttachCopy(smokePS, smokePSTrans);
 
 		//setup a particle system for the particle system
-		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(500, 0, smokeParticle, 0.0f, false);
+		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(5000, 0, smokeParticle, 0.0f, false);
 		ps->MakeCircleEmitter(glm::vec3(0.0f));
+		ps->VelocityReadGraphCallback(FastStart);
+		ps->ColorReadGraphCallback(SlowStart);
 		//setup a particle system component
 		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
 		//attach the particle system component to the entity
@@ -267,7 +273,7 @@ void Game::SetUpOtherData()
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
 	cannonBallForce = 1250.0f;
-	playerShootCooldown = 2.0f;
+	playerShootCooldown = 1.0f;
 	playerShootCooldownTimer = playerShootCooldown;
 
 	//make the scene have gravity
@@ -279,13 +285,13 @@ void Game::SetUpOtherData()
 		smokeParticle = TTN_ParticleTemplate();
 		smokeParticle.SetMat(smokeMat);
 		smokeParticle.SetMesh(sphereMesh);
-		smokeParticle.SetOneLifetime(playerShootCooldown);
-		smokeParticle.SetOneStartColor(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
-		smokeParticle.SetOneEndColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-		smokeParticle.SetOneStartSize(0.1f);
+		smokeParticle.SetTwoLifetimes((playerShootCooldown - 0.1f), playerShootCooldown);
+		smokeParticle.SetOneStartColor(glm::vec4(0.1f, 0.1f, 0.1f, 0.8f));
+		smokeParticle.SetOneEndColor(glm::vec4(0.5f, 0.5f, 0.5f, 0.1f));
+		smokeParticle.SetOneStartSize(0.05f);
 		smokeParticle.SetOneEndSize(0.05f);
-		smokeParticle.SetTwoStartSpeeds(2.0f, 1.5f);
-		smokeParticle.SetOneEndSpeed(0.1f);
+		smokeParticle.SetTwoStartSpeeds(1.5f, 1.0f);
+		smokeParticle.SetOneEndSpeed(0.05f);
 	}
 }
 
@@ -357,4 +363,17 @@ void Game::CreateCannonball()
 
 	//after the cannonball has been created, get the physics body and apply a force along the player's direction
 	Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1]).AddForce(cannonBallForce * playerDir);
+}
+
+//function that will check the positions of the cannonballs each frame and delete any that're too low
+void Game::DeleteCannonballs()
+{
+	//iterate through the vector of cannonballs, deleting the cannonball if it is at or below y = -50
+	std::vector<entt::entity>::iterator it = cannonBalls.begin();
+	while (it != cannonBalls.end()) {
+		if (Get<TTN_Transform>(*it).GetGlobalPos().y > -50.0f)
+			it++;
+		else
+			it = cannonBalls.erase(it);
+	}
 }

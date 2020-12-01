@@ -482,7 +482,7 @@ namespace Titan {
 		m_vao->AddVertexBuffer(VertexUVVBO, { BufferAttribute(2, 2, GL_FLOAT, false, sizeof(float) * 2, 0, AttribUsage::Texture) });
 
 		//load the instanced vertex buffers
-		m_vao->AddVertexBuffer(ColorInstanceBuffer, { BufferAttribute(3, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Color, 1) });
+		m_vao->AddVertexBuffer(ColorInstanceBuffer, { BufferAttribute(3, 4, GL_FLOAT, false, sizeof(float) * 4, 0, AttribUsage::Color, 1) });
 		m_vao->AddVertexBuffer(PositionInstanceBuffer, { BufferAttribute(4, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::User0, 1) });
 		m_vao->AddVertexBuffer(ScaleInstanceBuffer, { BufferAttribute(5, 1, GL_FLOAT, false, sizeof(float), 0, AttribUsage::User1, 1) });
 	}

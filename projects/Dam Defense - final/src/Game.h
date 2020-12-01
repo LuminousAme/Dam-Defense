@@ -93,8 +93,17 @@ protected:
 //other functions, ussually called in relation to something happening like player input or a collision
 protected:
 	void CreateCannonball();
+	void DeleteCannonballs(); 
 };
 
 inline float SmoothStep(float t) {
 	return (t * t * (3.0f - 2.0f * t));
+}
+
+inline float FastStart(float t) {
+	return std::cbrt(t);
+}
+
+inline float SlowStart(float t) {
+	return (t * t * t);
 }
