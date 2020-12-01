@@ -353,6 +353,7 @@ void Review3Scene::Update(float deltaTime)
 	//save the next position to rotate properly next frame
 	mousePos = tempMousePos;
 
+	//parameters: number of waves, rest time between waves, length of waves, deltatime
 	Waves(3, 10.f, 30.0f, deltaTime); //first waves is shorter because delta time starts incrementing beofre scnee laods in 
 
 	SpawnerLS(deltaTime, 5.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
