@@ -32,4 +32,3 @@ void main() {
 	//set the position of the vertex
 	gl_Position = newPos;
 }
-

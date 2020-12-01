@@ -237,7 +237,7 @@ namespace Titan {
 				char* log = new char[lenght];
 				glGetProgramInfoLog(_handle, lenght, &lenght, log);
 				//save the error in our own logs
-				LOG_ERROR("Sgader failed to link:\n{}", log);
+				LOG_ERROR("Shader failed to link:\n{}", log);
 				delete[] log;
 			}
 			else {
