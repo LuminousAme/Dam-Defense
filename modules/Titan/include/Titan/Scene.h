@@ -11,6 +11,7 @@
 #include "Tag.h"
 #include "Physics.h"
 #include "MAnimator.h"
+#include "Particle.h"
 //include all the graphics features we need
 #include "Shader.h"
 
@@ -71,8 +72,7 @@ namespace Titan {
 		
 #pragma endregion ECS_functions_dec
 
-		//Derivable functions 
-
+		//virtual functions for polymorphism 
 		//updates all the entities in the scene
 		virtual void Update(float deltaTime);
 

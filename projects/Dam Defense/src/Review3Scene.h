@@ -93,9 +93,10 @@ protected:
 	
 	entt::entity skybox;
 	entt::entity height;
-	
+	entt::entity testParticleSystem;
 
 	//others
 	glm::vec2 rotAmmount;
-	glm::vec2 mousePos;
+	glm::vec2 mousePos; 
+	TTN_ParticleTemplate testParticle;
 };
