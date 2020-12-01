@@ -3,6 +3,8 @@
 #include "Titan/Particle.h"
 #include "GLM/gtx/transform.hpp"
 
+//code refernce: https://www.youtube.com/watch?v=GK0jHlv3e3w&t=515s
+
 namespace Titan {
 	//default constructor
 	TTN_ParticleSystem::TTN_ParticleSystem()

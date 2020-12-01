@@ -1,10 +1,10 @@
-//Titan Engine, by Atlas X Games 
-// Scene.cpp - source file for the class that handles ECS, render calls, etc. 
+//Titan Engine, by Atlas X Games
+// Scene.cpp - source file for the class that handles ECS, render calls, etc.
 #include "Titan/Scene.h"
+
 #include <GLM/gtc/matrix_transform.hpp>
 
 namespace Titan {
-	
 	TTN_Scene::TTN_Scene() {
 		m_ShouldRender = true;
 		m_Registry = new entt::registry();
@@ -54,7 +54,7 @@ namespace Titan {
 		//create the entity
 		auto entity = m_Registry->create();
 
-		//return the entity id 
+		//return the entity id
 		return entity;
 	}
 
@@ -94,7 +94,7 @@ namespace Titan {
 			}
 			//remove the object from the physics world
 			m_physicsWorld->removeCollisionObject(PhyObject);
-			//and delete it 
+			//and delete it
 			delete PhyObject;
 		}
 
@@ -128,6 +128,9 @@ namespace Titan {
 				m_physicsWorld->addRigidBody(Get<TTN_Physics>(entity).GetRigidBody());
 				Get<TTN_Physics>(entity).SetIsInWorld(true);
 			}
+
+			//make sure the physics body are active on every frame
+			Get<TTN_Physics>(entity).GetRigidBody()->setActivationState(true);
 
 			//call the physics body's update
 			Get<TTN_Physics>(entity).Update(deltaTime);
@@ -163,7 +166,7 @@ namespace Titan {
 	//renders all the messes in our game
 	void TTN_Scene::Render()
 	{
-		//get the view and projection martix 
+		//get the view and projection martix
 		glm::mat4 vp;
 		//update the camera for the scene
 		//set the camera's position to it's transform
@@ -206,6 +209,49 @@ namespace Titan {
 
 			//bind the shader
 			shader->Bind();
+
+			//sets some uniforms
+			//scene level ambient lighting
+			shader->SetUniform("u_AmbientCol", m_AmbientColor);
+			shader->SetUniform("u_AmbientStrength", m_AmbientStrength);
+
+			//stuff from the light
+			glm::vec3 lightPositions[16];
+			glm::vec3 lightColor[16];
+			float lightAmbientStr[16];
+			float lightSpecStr[16];
+			float lightAttenConst[16];
+			float lightAttenLinear[16];
+			float lightAttenQuadartic[16];
+
+			for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
+				auto& light = Get<TTN_Light>(m_Lights[i]);
+				auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
+				lightPositions[i] = lightTrans.GetPos();
+				lightColor[i] = light.GetColor();
+				lightAmbientStr[i] = light.GetAmbientStrength();
+				lightSpecStr[i] = light.GetSpecularStrength();
+				lightAttenConst[i] = light.GetConstantAttenuation();
+				lightAttenLinear[i] = light.GetConstantAttenuation();
+				lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
+			}
+
+			//send all the data about the lights to glsl
+			shader->SetUniform("u_LightPos", lightPositions[0], 16);
+			shader->SetUniform("u_LightCol", lightColor[0], 16);
+			shader->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
+			shader->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
+			shader->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
+			shader->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
+			shader->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
+
+			//and tell it how many lights there actually are
+			shader->SetUniform("u_NumOfLights", (int)m_Lights.size());
+
+			//stuff from the camera
+			shader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetPos());
+
+			//renderer.GetMat()->GetAlbedo()->Bind(0);
 
 			//if it's not the skybox shader, set some uniforms for lighting
 			if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX 
@@ -251,10 +297,16 @@ namespace Titan {
 				//stuff from the camera
 				shader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetPos());
 			}
-		
+
 			//if the mesh has a material send data from that
 			if (renderer.GetMat() != nullptr)
 			{
+ 
+				//give openGL the shinniess
+				if (shader->GetFragShaderDefaultStatus() != 8) shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
+				//if they're using a texture
+				if (shader->GetFragShaderDefaultStatus() == 4 || shader->GetFragShaderDefaultStatus() == 5)
+
 				//give openGL the shinniess if it's not a skybox being renderered
 				if(shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX 
 					&& shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT)
@@ -289,15 +341,21 @@ namespace Titan {
 				//if they're using an albedo texture 
 				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY 
 					|| shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR)
+ 
 				{
 					//bind it so openGL can see it
 					renderer.GetMat()->GetAlbedo()->Bind(textureSlot);
 					//update the texture slot for future textures to use
 					textureSlot++;
 				}
+ 
+				//if they're using a specular map
+				if (shader->GetFragShaderDefaultStatus() == 5)
+
 
 				//if they're using a specular map 
 				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR)
+ 
 				{
 					//bind it so openGL can see it
 					renderer.GetMat()->GetSpecularMap()->Bind(textureSlot);
@@ -388,40 +446,47 @@ namespace Titan {
 	{
 		btVector3 grav = btVector3(gravity.x, gravity.y, gravity.z);
 		m_physicsWorld->setGravity(grav);
-	}
+	}
+
 	glm::vec3 TTN_Scene::GetGravity()
 	{
 		btVector3 grav = m_physicsWorld->getGravity();
 		return glm::vec3((float)grav.getX(), (float)grav.getY(), (float)grav.getZ());
-	}
+	}
+
 	//makes all the collision objects by going through all the overalapping manifolds in bullet
 	//based on code from https://andysomogyi.github.io/mechanica/bullet.html specfically the first block in the bullet callbacks and triggers section
 	void TTN_Scene::ConstructCollisions()
 	{
 		//clear all the collisions from the previous frame
-		collisions.clear();
+		collisions.clear();
+
 		int numManifolds = m_physicsWorld->getDispatcher()->getNumManifolds();
 		//iterate through all the manifolds
 		for (int i = 0; i < numManifolds; i++) {
 			//get the contact manifolds and both objects
-			btPersistentManifold* contactManifold = m_physicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+			btPersistentManifold* contactManifold = m_physicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+
 			const btCollisionObject* obj0 = contactManifold->getBody0();
-			const btCollisionObject* obj1 = contactManifold->getBody1();
+			const btCollisionObject* obj1 = contactManifold->getBody1();
+
 			//iterate through all the contact points
 			int numOfContacts = contactManifold->getNumContacts();
 			for (int j = 0; j < numOfContacts; j++)
-			{
+			{
 				//get the contact point
 				btManifoldPoint& point = contactManifold->getContactPoint(j);
 				//if it's within the contact point distance
 				if (point.getDistance() < 0.f) {
 					//get the rigid bodies
 					const btRigidBody* b0 = btRigidBody::upcast(obj0);
-					const btRigidBody* b1 = btRigidBody::upcast(obj1);
+					const btRigidBody* b1 = btRigidBody::upcast(obj1);
+
 					//and make a collision object
 					TTN_Collision::scolptr newCollision = TTN_Collision::Create();
 					newCollision->SetBody1(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b0->getUserPointer())));
-					newCollision->SetBody2(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b1->getUserPointer())));
+					newCollision->SetBody2(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b1->getUserPointer())));
+
 					//compare it to all the previous collisions
 					bool shouldAdd = true;
 					for (int k = 0; k < collisions.size(); k++) {
@@ -431,9 +496,9 @@ namespace Titan {
 						}
 					}
 					//if it's a new collision then add to the list of collisions
-					if(shouldAdd) collisions.push_back(newCollision);
-				}
-			}
-		}
+					if (shouldAdd) collisions.push_back(newCollision);
+				}
+			}
+		}
 	}
 }

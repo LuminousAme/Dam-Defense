@@ -46,7 +46,6 @@ namespace Titan {
 
 		m_entity = static_cast<entt::entity>(-1);
 
-
 		m_body->setUserPointer(reinterpret_cast<void*>(static_cast<uint32_t>(m_entity)));
 	
 	}
@@ -105,7 +104,6 @@ namespace Titan {
 
 	TTN_Physics::~TTN_Physics()
 	{}
-
 
 	//updates the position of the physics body based on the velocity and deltaTime
 	void TTN_Physics::Update(float deltaTime)

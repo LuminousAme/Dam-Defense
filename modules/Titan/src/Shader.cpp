@@ -1,12 +1,12 @@
-//Titan Engine, by Atlas X Games 
-// Shader.cpp - source file for the class that wraps around an openGL shader program 
+//Titan Engine, by Atlas X Games
+// Shader.cpp - source file for the class that wraps around an openGL shader program
 #include "Titan/Shader.h"
 #include "Logging.h"
 #include <fstream>
 #include <sstream>
 
 namespace Titan {
-	//default constructor, makes an empty shader program 
+	//default constructor, makes an empty shader program
 	TTN_Shader::TTN_Shader() :
 		_vs(0), _fs(0), _handle(0)
 	{
@@ -16,7 +16,7 @@ namespace Titan {
 		fragShaderTTNIdentity = 0;
 	}
 
-	//destructor, deletes program 
+	//destructor, deletes program
 	TTN_Shader::~TTN_Shader()
 	{
 		//if the program exists within opengl
@@ -27,7 +27,7 @@ namespace Titan {
 		}
 	}
 
-	//Load a shader stage into the pipeline 
+	//Load a shader stage into the pipeline
 	bool TTN_Shader::LoadShaderStage(const char* sourceCode, GLenum shaderType)
 	{
 		//check if it's loading a default shader
@@ -42,7 +42,7 @@ namespace Titan {
 		//Create the new shader steage (vs, fs, etc.)
 		GLuint handle = glCreateShader(shaderType);
 
-		//Load and compile the GLSL sourcecode 
+		//Load and compile the GLSL sourcecode
 		glShaderSource(handle, 1, &sourceCode, nullptr);
 		glCompileShader(handle);
 
@@ -53,45 +53,44 @@ namespace Titan {
 		//check if it compiled correctly
 		if (status == GL_FALSE) {
 			//if it did not, create an error log
-			//get the size of the error for the log 
+			//get the size of the error for the log
 			GLint logSize = 0;
 			glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &logSize);
 
-			//create a new character array buffer for the log to store in 
+			//create a new character array buffer for the log to store in
 			char* log = new char[logSize];
 
 			//get the log
 			glGetShaderInfoLog(handle, logSize, &logSize, log);
 
-			//transfer the error log to our own logging files 
+			//transfer the error log to our own logging files
 			LOG_ERROR("Failed to compile shader stage:\n{}", log);
 
 			//clean up the memory of our log (it's been dumped to an external file so we don't need it here anymore)
-			delete[] log; 
+			delete[] log;
 
-			//Delete the broken shader stage so it doesn't waste memory 
+			//Delete the broken shader stage so it doesn't waste memory
 			glDeleteShader(handle);
 			handle = 0;
 		}
 
-		//set the shader variables to the handle so they can be accessed again later 
+		//set the shader variables to the handle so they can be accessed again later
 		switch (shaderType) {
-			case GL_VERTEX_SHADER: //if it's a vertex shader, set the vertex shader variable
-				_vs = handle; 
-				break;
-			case GL_FRAGMENT_SHADER: //if it's a fragment shader, set the vertex shader variable
-				_fs = handle;
-				break; 
-			default: //if it is anything else, log a warning that that type of shader has not been implemented with this shader program 
-				LOG_WARN("Shader type not implemented"); 
-				break;
+		case GL_VERTEX_SHADER: //if it's a vertex shader, set the vertex shader variable
+			_vs = handle;
+			break;
+		case GL_FRAGMENT_SHADER: //if it's a fragment shader, set the vertex shader variable
+			_fs = handle;
+			break;
+		default: //if it is anything else, log a warning that that type of shader has not been implemented with this shader program
+			LOG_WARN("Shader type not implemented");
+			break;
 		}
-
 
 		return status != GL_FALSE;
 	}
 
-	//Load a shader stage from an external file into the pipeline 
+	//Load a shader stage from an external file into the pipeline
 	bool TTN_Shader::LoadShaderStageFromFile(const char* filePath, GLenum shaderType)
 	{
 		//open the file
@@ -102,14 +101,14 @@ namespace Titan {
 			LOG_ERROR("Shader file not found: {}", filePath);
 			//and throw a runtime error
 			throw std::runtime_error("File not found, see logs");
-		} 
-		//if it did open correctly then make a stream to parse it 
+		}
+		//if it did open correctly then make a stream to parse it
 		std::stringstream stream;
-		//begin parsing it 
+		//begin parsing it
 		stream << file.rdbuf();
-		//use the load function earlier to load the shader from the stream and save if it was sucessful in a boolean 
+		//use the load function earlier to load the shader from the stream and save if it was sucessful in a boolean
 		bool result = LoadShaderStage(stream.str().c_str(), shaderType);
-		//close the file 
+		//close the file
 		file.close();
 
 		//return the result of the earlier load
@@ -165,6 +164,7 @@ namespace Titan {
 			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
 			fragShaderTTNIdentity = (int)shader;
 		}
+
 		else if (shader == TTN_DefaultShaders::VERT_SKYBOX) {
 			filePath = "shaders/ttn_vert_skybox.glsl";
 			result = LoadShaderStageFromFile(filePath, GL_VERTEX_SHADER);
@@ -175,6 +175,7 @@ namespace Titan {
 			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
 			fragShaderTTNIdentity = (int)shader;
 		}
+
 		else if (shader == TTN_DefaultShaders::VERT_MORPH_ANIMATION_COLOR) {
 			filePath = "shaders/ttn_vert_color_morph_animation.glsl";
 			result = LoadShaderStageFromFile(filePath, GL_VERTEX_SHADER);
@@ -185,6 +186,7 @@ namespace Titan {
 			result = LoadShaderStageFromFile(filePath, GL_VERTEX_SHADER);
 			vertexShaderTTNIndentity = (int)shader;
 		}
+
 		else {
 			//if the user tried to load a shader that doesn't,
 			LOG_ERROR("Default shader {} does not exist", shader);
@@ -204,14 +206,14 @@ namespace Titan {
 		//if the program doesn't have both a vertex and a fragment shader log an error
 		LOG_ASSERT(_vs != 0 && _fs != 0, "Both a vertex and fragment shader need to be attached to the shader program.");
 
-		//Attach our shaders 
+		//Attach our shaders
 		glAttachShader(_handle, _vs);
 		glAttachShader(_handle, _fs);
 
 		//Perform linking
 		glLinkProgram(_handle);
 
-		//Remove shader stages to save memory (because the shader program has now been compiled we no longer need them seperatedly) 
+		//Remove shader stages to save memory (because the shader program has now been compiled we no longer need them seperatedly)
 		glDetachShader(_handle, _vs);
 		glDeleteShader(_vs);
 		glDetachShader(_handle, _fs);
@@ -225,13 +227,13 @@ namespace Titan {
 		if (status == GL_FALSE)
 		{
 			//if it did not, create an error log
-			//get the size of the error for the log 
+			//get the size of the error for the log
 			GLint lenght = 0;
 			glGetProgramiv(_handle, GL_INFO_LOG_LENGTH, &lenght);
 
-			//if openGL has made an error log 
+			//if openGL has made an error log
 			if (lenght > 0) {
-				//read it's log 
+				//read it's log
 				char* log = new char[lenght];
 				glGetProgramInfoLog(_handle, lenght, &lenght, log);
 				//save the error in our own logs
@@ -244,11 +246,11 @@ namespace Titan {
 			}
 		}
 
-		//return wheter or not the link was sucessful 
+		//return wheter or not the link was sucessful
 		return status != GL_FALSE;
 	}
 
-	//bind the program so we can use it 
+	//bind the program so we can use it
 	void TTN_Shader::Bind()
 	{
 		glUseProgram(_handle);
@@ -266,8 +268,8 @@ namespace Titan {
 	{
 		glProgramUniformMatrix3fv(_handle, location, count, transposed, glm::value_ptr(*value));
 	}
-	
-	//set a uniform for a 4x4 matrix so it can be recieved by the shaders 
+
+	//set a uniform for a 4x4 matrix so it can be recieved by the shaders
 	void TTN_Shader::SetUniformMatrix(int location, const glm::mat4* value, int count, bool transposed)
 	{
 		glProgramUniformMatrix4fv(_handle, location, count, transposed, glm::value_ptr(*value));
@@ -309,13 +311,13 @@ namespace Titan {
 		glProgramUniform2iv(_handle, location, count, glm::value_ptr(*value));
 	}
 
-	//set a uniform for a 3D integer vector so it can be recieved by the shaders 
+	//set a uniform for a 3D integer vector so it can be recieved by the shaders
 	void TTN_Shader::SetUniform(int location, const glm::ivec3* value, int count)
 	{
 		glProgramUniform3iv(_handle, location, count, glm::value_ptr(*value));
 	}
 
-	//set a uniform for a 4D integer vector so it can be recieved by the shaders 
+	//set a uniform for a 4D integer vector so it can be recieved by the shaders
 	void TTN_Shader::SetUniform(int location, const glm::ivec4* value, int count)
 	{
 		glProgramUniform4iv(_handle, location, count, glm::value_ptr(*value));
@@ -350,7 +352,6 @@ namespace Titan {
 	}
 
 #pragma endregion Uniform_Setters
-
 
 	int TTN_Shader::__GetUniformLocation(const std::string& name)
 	{

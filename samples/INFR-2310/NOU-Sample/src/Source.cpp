@@ -35,21 +35,21 @@ int main()
 
 	//Manually specify data for a single triangle.
 	//This lets us quickly test rendering without relying on a mesh loader.
-	std::vector<glm::vec3> triangleVerts = 
+	std::vector<glm::vec3> triangleVerts =
 	{
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(1.0f, 0.0f, 0.0f),
 		glm::vec3(1.0f, 1.0f, 0.0f)
 	};
 
-	std::vector<glm::vec2> triangleUVs = 
+	std::vector<glm::vec2> triangleUVs =
 	{
 		glm::vec2(0.0f, 0.0f),
 		glm::vec2(1.0f, 0.0f),
 		glm::vec2(1.0f, 1.0f)
 	};
 
-	std::vector<glm::vec3> triangleNormals = 
+	std::vector<glm::vec3> triangleNormals =
 	{
 		glm::vec3(0.0f, 0.0f, 1.0f),
 		glm::vec3(0.0f, 0.0f, 1.0f),
@@ -88,7 +88,7 @@ int main()
 	auto& cam = camEntity.Add<CCamera>(camEntity);
 	cam.Perspective(60.0f, 1.0f, 0.1f, 100.0f);
 	camEntity.transform.m_pos = glm::vec3(0.0f, 0.0f, 2.0f);
-	
+
 	//Set up an entity for each of our models.
 	//Realistically, for a complex scene, you would specify transforms/models/etc. in a file
 	//(e.g., XML) and write a loader to save/load your scenes.
@@ -102,8 +102,8 @@ int main()
 	boxEntity.Add<CMeshRenderer>(boxEntity, boxMesh, boxMat);
 	boxEntity.transform.m_pos = glm::vec3(-0.5f, 0.5f, 0.0f);
 	boxEntity.transform.m_scale = glm::vec3(0.5f, 0.5f, 0.5f);
-	boxEntity.transform.m_rotation = glm::angleAxis(glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * 
-									 glm::angleAxis(glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	boxEntity.transform.m_rotation = glm::angleAxis(glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f)) *
+		glm::angleAxis(glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	Entity duckEntity = Entity::Create();
 	duckEntity.Add<CMeshRenderer>(duckEntity, duckMesh, duckMat);

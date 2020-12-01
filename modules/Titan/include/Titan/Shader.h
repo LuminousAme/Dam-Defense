@@ -1,4 +1,4 @@
-//Titan Engine, by Atlas X Games 
+//Titan Engine, by Atlas X Games
 // Scene.h - header for the class that represents openGL shaders
 #pragma once
 
@@ -9,13 +9,13 @@
 #include <memory>
 //std::string class
 #include <string>
-//std::unordered_map class 
+//std::unordered_map class
 #include <unordered_map>
 //GLM types and basic functions
 #include <GLM/glm.hpp>
-//GLM pointers 
+//GLM pointers
 #include <GLM/gtc/type_ptr.hpp>
-//logging 
+//logging
 #include "Logging.h"
 
 namespace Titan {
@@ -35,13 +35,13 @@ namespace Titan {
 		VERT_MORPH_ANIMATION_COLOR = 11
 	};
 
-	//class to wrap around an opengl shader 
+	//class to wrap around an opengl shader
 	class TTN_Shader final {
 	public:
-		//defines a special easier to use name for shared(smart) pointers to the class 
-		typedef std::shared_ptr<TTN_Shader> sshptr; 
+		//defines a special easier to use name for shared(smart) pointers to the class
+		typedef std::shared_ptr<TTN_Shader> sshptr;
 
-		//creates and returns a shared(smart) pointer to the class 
+		//creates and returns a shared(smart) pointer to the class
 		static inline sshptr Create() {
 			return std::make_shared<TTN_Shader>();
 		}
@@ -60,28 +60,28 @@ namespace Titan {
 		//destructor
 		~TTN_Shader();
 
-		//Loads a single stage on the pipeline (vertix or fragment shader, etc.) 
+		//Loads a single stage on the pipeline (vertix or fragment shader, etc.)
 		//and returns true if successful, false if not
 		bool LoadShaderStage(const char* sourceCode, GLenum shaderType);
 
 		//Loads a single stage on the pipeline (vertex or fragment shader, etc.) from an external file
-		//and returns true if sucessful, false if not 
+		//and returns true if sucessful, false if not
 		bool LoadShaderStageFromFile(const char* filePath, GLenum shaderType);
 
 		//loads a default shader
 		bool LoadDefaultShader(TTN_DefaultShaders shader);
 
 		//Links the stages together creating the pipeline and making the shader program useable
-		//returns true if sucessful, false if not 
+		//returns true if sucessful, false if not
 		bool Link();
 
-		//Binds the shader program so we can acutally use it 
+		//Binds the shader program so we can acutally use it
 		void Bind();
 
-		//Unbinds the shader program so we can use another 
+		//Unbinds the shader program so we can use another
 		static void UnBind();
 
-		//Gets the OpenGL handle that it's wrapping around 
+		//Gets the OpenGL handle that it's wrapping around
 		GLuint GetHandle() const { return _handle; }
 
 		//Gets the default status of the vertex shader
@@ -90,13 +90,13 @@ namespace Titan {
 		int GetFragShaderDefaultStatus() { return fragShaderTTNIdentity; }
 
 	protected:
-		//Set a uniform for a 3x3 matrix 
+		//Set a uniform for a 3x3 matrix
 		void SetUniformMatrix(int location, const glm::mat3* value, int count = 1, bool transposed = false);
-		//Set a unform for  a 4x4 matrix 
+		//Set a unform for  a 4x4 matrix
 		void SetUniformMatrix(int location, const glm::mat4* value, int count = 1, bool transposed = false);
-		//Set a uniform for a float scalar 
+		//Set a uniform for a float scalar
 		void SetUniform(int location, const float* value, int count = 1);
-		//Set a uniform for a 2D float vector 
+		//Set a uniform for a 2D float vector
 		void SetUniform(int location, const glm::vec2* value, int count = 1);
 		//Set a uniform for a 3D float vector
 		void SetUniform(int location, const glm::vec3* value, int count = 1);
@@ -104,15 +104,15 @@ namespace Titan {
 		void SetUniform(int location, const glm::vec4* value, int count = 1);
 		//Set a uniform for an integer scalar
 		void SetUniform(int location, const int* value, int count = 1);
-		//Set a uniform for a 2D integer vector 
+		//Set a uniform for a 2D integer vector
 		void SetUniform(int location, const glm::ivec2* value, int count = 1);
-		//Set a uniform for a 3D integer vector 
+		//Set a uniform for a 3D integer vector
 		void SetUniform(int location, const glm::ivec3* value, int count = 1);
-		//Set a uniform for a 4D integer vector 
+		//Set a uniform for a 4D integer vector
 		void SetUniform(int location, const glm::ivec4* value, int count = 1);
-		//Set a uniform for a boolean 
+		//Set a uniform for a boolean
 		void SetUniform(int location, const bool* value, int count = 1);
-		//Set a uniform for 2 booleans 
+		//Set a uniform for 2 booleans
 		void SetUniform(int location, const glm::bvec2* value, int count = 1);
 		//Set a uniform for 3 booleans
 		void SetUniform(int location, const glm::bvec3* value, int count = 1);
@@ -123,7 +123,7 @@ namespace Titan {
 		//template function for setting a uniform based on just name and data
 		template <typename T>
 		void SetUniform(const std::string& name, const T& value, int count = 1) {
-			//finds the location that the uniform of that name is stored at 
+			//finds the location that the uniform of that name is stored at
 			int location = __GetUniformLocation(name);
 			//check if the location exists
 			if (location != -1) {
@@ -132,14 +132,14 @@ namespace Titan {
 			}
 			else {
 				//if it doesn't log a warning
-				LOG_WARN("Ignoring uniform \"{}\"", name);
+				//LOG_WARN("Ignoring uniform \"{}\"", name);
 			}
 		}
 
 		//template function for setting a uniform matrix based on just name and data
 		template <typename T>
 		void SetUniformMatrix(const std::string& name, const T& value, bool transposed = false) {
-			//finds the location that the uniform of that name is stored at 
+			//finds the location that the uniform of that name is stored at
 			int location = __GetUniformLocation(name);
 			//check if the location exists
 			if (location != -1) {
@@ -155,17 +155,17 @@ namespace Titan {
 	protected:
 		//vertex shader
 		GLuint _vs;
-		//fragment shader 
+		//fragment shader
 		GLuint _fs;
 
 		//marker if they're using a default shader (and which one), 0 is a custom shader, the rest are default shaders
 		int vertexShaderTTNIndentity, fragShaderTTNIdentity;
 		bool setDefault;
 
-		//handle for the shader program 
+		//handle for the shader program
 		GLuint _handle;
 
-		//unordered map to store the locations of all the uniforms 
+		//unordered map to store the locations of all the uniforms
 		std::unordered_map<std::string, int> _uniformLocations;
 
 		//function to get the locations of all the uniforms

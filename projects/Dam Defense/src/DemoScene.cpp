@@ -47,7 +47,6 @@ void DemoScene::InitScene()
 	//data.m_velocity = glm::vec3(1.0f, 5.0f, 0.0f);
 	//data.ColorBegin = glm::vec4(1.0f, 1.0f, 1.5f, 1.0f);
 	//data.ColorEnd = glm::vec4(0.0f, 0.0f, 1.0f, 0.5f);
-
 	//data.SizeEnd = 10.0f;
 	//data.SizeBegin = 20.0f;
 	//data.LifeTime = 15.0f;
@@ -56,7 +55,8 @@ void DemoScene::InitScene()
 	//plane stuff
 	plane = TTN_ObjLoader::LoadFromFile("Review3/water.obj");
 	plane->SetUpVao();
-	waterText = TTN_Texture2D::LoadFromFile("Review3/water_text.png");
+	waterText = TTN_Texture2D::Create();
+	waterText->LoadFromFile("Review3/water_text.png");
 	waterMat = TTN_Material::Create();
 	waterMat->SetAlbedo(waterText);
 	waterMat->SetShininess(128.0f);
@@ -82,8 +82,9 @@ void DemoScene::InitScene()
 	{
 		//create an entity in the scene for a light
 		light = CreateEntity();
+ 
 		m_Lights.push_back(light);
-
+ 
 		//set up a trasnform for the light
 		TTN_Transform lightTrans = TTN_Transform();
 		lightTrans.SetPos(glm::vec3(0.0f, 3.0f, 0.0f));
@@ -249,7 +250,6 @@ void DemoScene::Update(float deltaTime)
 	//		(pboat.GetMin().z <= ptree.GetMax().z && pboat.GetMax().z >= ptree.GetMin().z) << std::endl;
 	//}
 
-	 
 	//get the collisions from the base scene
 	std::vector<TTN_Collision::scolptr> collisionsThisFrame = TTN_Scene::GetCollisions();
 
