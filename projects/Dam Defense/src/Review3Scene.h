@@ -35,6 +35,7 @@ public:
 	void SpawnerLS(float deltatime, float SpawnTime);
 	void SpawnerRS(float deltatime, float SpawnTime);
 	void Waves(int num, float restTime, float waveTime, float deltaTime );
+	void BirdBomb();
 
 	glm::vec3 Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos);
 
@@ -52,9 +53,11 @@ public:
 	TTN_Mesh::smptr plane;
 	TTN_Mesh::smptr tree1Mesh;
 	TTN_Mesh::smptr skyboxMesh;
+	TTN_Mesh::smptr birdMesh;
 
 	//textures
 	TTN_Texture2D::st2dptr waterText;
+	TTN_Texture2D::st2dptr birdText;
 	TTN_Texture2D::st2dptr cannonText;
 
 	TTN_TextureCubeMap::stcmptr skyboxText;
@@ -62,6 +65,8 @@ public:
 
 	//materials
 	TTN_Material::smatptr waterMat;
+	TTN_Material::smatptr birdMat;
+
 	TTN_Material::smatptr cannonMat;
 	TTN_Material::smatptr skyboxMat;
 	TTN_Material::smatptr heightMat;
@@ -70,9 +75,11 @@ public:
 	TTN_Texture2D::st2dptr swordText;
 	TTN_Material::smatptr swordMat;
 
+	glm::vec3 playerDir;
+
 	float Timer = 0.F;//timer for boat spawning
 	float Timer2 = 0.F;//timer for boat spawning
-	bool Spawning = true;
+	bool Spawning = true; //whether or not the spawners should be spawning
 
 	float waveTimer = 0.F;//timer for waves
 	float restTimer = 0.F;//timer for waves
@@ -89,6 +96,8 @@ protected:
 	entt::entity tree3;
 	entt::entity tree4;
 	entt::entity tree5;
+
+	entt::entity bird;
 	
 	
 	entt::entity debug;//used to look at positions on the map
