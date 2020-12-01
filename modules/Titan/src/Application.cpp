@@ -23,7 +23,7 @@ namespace Titan {
 	bool TTN_Application::TTN_Input::inFrame = false;
 
 	//function to initialize a new window 
-	void TTN_Application::Init(const std::string name, int width, int height)
+	void TTN_Application::Init(const std::string name, int width, int height, bool fullScreen)
 	{
 		//init GLFW and check it initliazed properly 
 		if (glfwInit() == GLFW_FALSE)
@@ -37,7 +37,8 @@ namespace Titan {
 		glfwWindowHint(GLFW_RESIZABLE, false);
 
 		//create the window 
-		m_window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
+		if(!fullScreen) m_window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
+		else m_window = glfwCreateWindow(width, height, name.c_str(), glfwGetPrimaryMonitor(), nullptr);
 
 		//set the window we want to draw on to the window that was just created
 		glfwMakeContextCurrent(m_window);

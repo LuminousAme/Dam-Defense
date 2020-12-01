@@ -152,7 +152,7 @@ namespace Titan {
 		auto manimatorRendererView = m_Registry->view<TTN_MorphAnimator>();
 		for (auto entity : manimatorRendererView) {
 			//update the active animation
-			Get<TTN_MorphAnimator>(entity).getActiveAnim().Update(deltaTime);
+			Get<TTN_MorphAnimator>(entity).getActiveAnimRef().Update(deltaTime);
 		}
 
 		//run through all the of the entities with a particle system and run their updates
@@ -332,7 +332,7 @@ namespace Titan {
 					|| shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_COLOR) {
 					//try to get an animator component 
 					if (Has<TTN_MorphAnimator>(entity)) {
-						shader->SetUniform("t", Get<TTN_MorphAnimator>(entity).getActiveAnim().getInterpolationParameter());
+						shader->SetUniform("t", Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getInterpolationParameter());
 					}
 					else
 						shader->SetUniform("t", 0.0f);
@@ -383,8 +383,8 @@ namespace Titan {
 			//if the entity has an animator
 			if (Has<TTN_MorphAnimator>(entity)) {
 				//set up the vao on the mesh properly
-				renderer.GetMesh()->SetUpVao(Get<TTN_MorphAnimator>(entity).getActiveAnim().getCurrentMeshIndex(),
-					Get<TTN_MorphAnimator>(entity).getActiveAnim().getNextMeshIndex());
+				renderer.GetMesh()->SetUpVao(Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getCurrentMeshIndex(),
+					Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getNextMeshIndex());
 			}
 			//if it doesn't
 			else {
