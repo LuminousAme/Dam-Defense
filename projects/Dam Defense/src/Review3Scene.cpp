@@ -353,8 +353,10 @@ void Review3Scene::Update(float deltaTime)
 	//save the next position to rotate properly next frame
 	mousePos = tempMousePos;
 
+	Waves(3, 10.f, 30.0f, deltaTime); //first waves is shorter because delta time starts incrementing beofre scnee laods in 
+
 	SpawnerLS(deltaTime, 5.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
-	SpawnerRS(deltaTime, 2.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerRS(deltaTime, 3.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
 	//goes through the boats vector
 	for (int i = 0; i < boats.size(); i++) {
@@ -362,8 +364,6 @@ void Review3Scene::Update(float deltaTime)
 		int p = Get<TTN_Tag>(boats[i]).getPath(); //gets the boats randomized path num
 		BoatPathing(boats[i], p); //updates the pathing for the boat
 	}
-
-	//BoatPathing(boat2, 6);//right side boat
 
 	//printf("fps: %f\n", 1.0f/deltaTime);
 
@@ -412,28 +412,27 @@ void Review3Scene::CreateCannonball() {
 	TTN_Renderer ballRenderer = TTN_Renderer(boatMesh, shaderProgam);
 	AttachCopy<TTN_Renderer>(ball, ballRenderer);
 
-	auto& cannonTrans = Get<TTN_Transform>(cannon);
+	//auto& cannonTrans = Get<TTN_Transform>(cannon);
 	auto& transCamera = Get<TTN_Transform>(camera);
 
 	TTN_Transform ballTrans = TTN_Transform(glm::vec3(10.f, -5.0f, 20.0f), glm::vec3(0.0f), glm::vec3(0.75f));
-
-	glm::vec3 forward = glm::mat3(glm::inverse(transCamera.GetMatrix())) * glm::vec3(1.0f, 0.0f, 0.0f);
+	glm::vec3 forward = glm::mat3(glm::inverse(transCamera.GetMatrix())) * glm::vec3(0.0f, 0.0f, 1.0f);
 	glm::vec3 origin = forward + transCamera.GetPos();
 	//origin = glm::normalize(origin);
 
-	ballTrans.SetPos(glm::vec3((origin.x + 1.0f, origin.y + 5.0f, origin.z)));
+	ballTrans.SetPos(glm::vec3((origin.x, origin.y + 5.0f, origin.z + 5.0f)));
 
-	//ballTrans.SetPos(glm::vec3(10.f, -5.0f, 20.0f));
-	ballTrans.RotateFixed(glm::vec3(0.0f, 270.0f, 0.0f));
+	ballTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
 	ballTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
 
 	AttachCopy<TTN_Transform>(ball, ballTrans);
-	float power = 8.f;
-	glm::vec3 vel = forward * power;
+	float power = 10.f;
+	//glm::vec3 vel = forward * power;
+	glm::vec3 vel = glm::normalize(transCamera.GetRotation()) * power;
 
-	TTN_Physics pbody = TTN_Physics(ballTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), ball, TTN_PhysicsBodyType::DYNAMIC, 1.0f);
+	TTN_Physics pbody = TTN_Physics(ballTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), ball, TTN_PhysicsBodyType::DYNAMIC, 1.5f);
 	pbody.SetHasGravity(true); //doesn't do anything for now
-	pbody.SetLinearVelocity(glm::vec3(vel.x, vel.y, vel.z));
+	pbody.SetLinearVelocity(glm::vec3(vel.x, -2.f, vel.z));
 	//pbody.SetLinearVelocity(glm::vec3(0.f, -2.0f, 12.0f));
 	//pbody.SetLinearVelocity(glm::vec3(origin.x * 6.0f, -1.0f, origin.z * 6.0f));
 
@@ -542,7 +541,7 @@ void Review3Scene::SpawnerLS(float deltatime, float SpawnTime) {
 	Timer += deltatime;
 
 	//if the timer is >= spawn time then it will spawn the boat
-	if (Timer >= SpawnTime) {
+	if (Timer >= SpawnTime && Spawning) {
 		// timer = 0, boat spawn code
 		Timer = 0.F;//reset timer
 
@@ -577,7 +576,7 @@ void Review3Scene::SpawnerRS(float deltatime, float SpawnTime)
 {
 	Timer2 += deltatime;
 
-	if (Timer2 >= SpawnTime) {
+	if (Timer2 >= SpawnTime && Spawning) {
 		// timer = 0, boat spawn code
 		Timer2 = 0.F;//reset timer
 
@@ -603,6 +602,36 @@ void Review3Scene::SpawnerRS(float deltatime, float SpawnTime)
 
 		TTN_Tag boatTag = TTN_Tag(r); //sets boat path number to ttn_tag
 		AttachCopy<TTN_Tag>(boat2, boatTag);
+	}
+}
+
+void Review3Scene::Waves(int num, float restTime, float waveTime, float deltaTime)
+{
+	//for (int i = 0; i < num; i++) {
+	if (num > wave) {
+		//printf("Wave now!\n");
+		waveTimer += deltaTime;
+
+		if (waveTimer >= waveTime) {
+			Spawning = false;
+			printf("wavetimer over!\n");
+			waveTimer = 0;
+		}
+
+		if (!Spawning) {
+			printf("resting!\n");
+			restTimer += deltaTime;
+			if (restTimer >= restTime) {
+				Spawning = true;
+				restTimer = 0;
+				printf("Spawn now!\n");
+				wave++;
+			}
+		}
+	}
+
+	else {
+		printf("GAME over!\n");
 	}
 }
 
