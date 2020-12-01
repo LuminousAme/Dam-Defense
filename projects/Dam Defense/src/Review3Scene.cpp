@@ -151,7 +151,7 @@ void Review3Scene::InitScene()
 		//attach that transform to the entity
 		AttachCopy<TTN_Transform>(skybox, skyboxTrans);
 	}
-	
+
 	//entity for the particle system
 	{
 		testParticleSystem = CreateEntity();
@@ -169,7 +169,6 @@ void Review3Scene::InitScene()
 		//attach that particle system to the entity
 		AttachCopy(testParticleSystem, psComponent);
 	}
-	
 
 	//entity for the cannon
 	{
@@ -296,62 +295,33 @@ void Review3Scene::InitScene()
 		AttachCopy<TTN_Transform>(debug, treeTrans);
 	}
 
-	//left boat entity
+	//right boat
 	//{
 	//	//create an entity in the scene for the boat
-	//	boat = CreateEntity();
+	//	boat2 = CreateEntity();
 
 	//	//attach a mesh renderer to the boat
-	//	Attach<TTN_Renderer>(boat);
-	//	//grab a referencce to that mesh renderer and set it up
-	//	auto& boatRenderer = Get<TTN_Renderer>(boat);
+	//	Attach<TTN_Renderer>(boat2);
+	//	//grab a reference to that mesh renderer and set it up
+	//	auto& boatRenderer = Get<TTN_Renderer>(boat2);
 	//	boatRenderer = TTN_Renderer(boatMesh, shaderProgam);
 
 	//	//attach a transform to the boat
-	//	Attach<TTN_Transform>(boat);
+	//	Attach<TTN_Transform>(boat2);
 	//	//grab a reference to that transform and set it up
-	//	auto& boatTrans = Get<TTN_Transform>(boat);
-	//	boatTrans.SetPos(glm::vec3(70.0f, -5.0f, 70.0f));
-	//	boatTrans.RotateFixed(glm::vec3(0.0f, 180.0f, 0.0f));
+	//	auto& boatTrans = Get<TTN_Transform>(boat2);
+	//	boatTrans.SetPos(glm::vec3(-70.0f, -5.0f, 70.0f));
+	//	boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
 	//	boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
 
-	//	TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boat);
-	//	pbody.SetLinearVelocity(glm::vec3(-8.0f, 0.f, 0.0f));//-2.0f
-	//	//pbody.SetLinearVelocity(Seek(glm::vec3(30.f, -5.f, 50.f), pbody.GetLinearVelocity(), boatTrans.GetPos(), 0));
-	//	AttachCopy<TTN_Physics>(boat, pbody);
+	//	TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boat2);
+	//	pbody.SetLinearVelocity(glm::vec3(8.0f, 0.f, 0.0f));//-2.0f
+	//	AttachCopy<TTN_Physics>(boat2, pbody);
 
 	//	//add a tag to the boat
 	//	TTN_Tag boatTag = TTN_Tag("Boat");
-	//	AttachCopy<TTN_Tag>(boat, boatTag);
+	//	AttachCopy<TTN_Tag>(boat2, boatTag);
 	//}
-
-	//right boat
-	{
-		//create an entity in the scene for the boat
-		boat2 = CreateEntity();
-
-		//attach a mesh renderer to the boat
-		Attach<TTN_Renderer>(boat2);
-		//grab a reference to that mesh renderer and set it up
-		auto& boatRenderer = Get<TTN_Renderer>(boat2);
-		boatRenderer = TTN_Renderer(boatMesh, shaderProgam);
-
-		//attach a transform to the boat
-		Attach<TTN_Transform>(boat2);
-		//grab a reference to that transform and set it up
-		auto& boatTrans = Get<TTN_Transform>(boat2);
-		boatTrans.SetPos(glm::vec3(-70.0f, -5.0f, 70.0f));
-		boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
-		boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
-
-		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boat2);
-		pbody.SetLinearVelocity(glm::vec3(8.0f, 0.f, 0.0f));//-2.0f
-		AttachCopy<TTN_Physics>(boat2, pbody);
-
-		//add a tag to the boat
-		TTN_Tag boatTag = TTN_Tag("Boat");
-		AttachCopy<TTN_Tag>(boat2, boatTag);
-	}
 
 	//set the cannon to be a child of the camera
 	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), &camera);
@@ -377,49 +347,25 @@ void Review3Scene::Update(float deltaTime)
 
 	//reset the rotation
 	Get<TTN_Transform>(camera).LookAlong(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	//and rotate it by the ammount it should be rotated 
+	//and rotate it by the ammount it should be rotated
 	Get<TTN_Transform>(camera).RotateFixed(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
 
 	//save the next position to rotate properly next frame
 	mousePos = tempMousePos;
 
-	Spawner(deltaTime, 5.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerLS(deltaTime, 5.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerRS(deltaTime, 2.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
-	//goes through the boats vector 
+	//goes through the boats vector
 	for (int i = 0; i < boats.size(); i++) {
-		//std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl; 
+		//std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl;
 		int p = Get<TTN_Tag>(boats[i]).getPath(); //gets the boats randomized path num
-		BoatPathing(boats[i], p); //updates the pathing for the boat 
+		BoatPathing(boats[i], p); //updates the pathing for the boat
 	}
 
-	BoatPathing(boat2, 6);//right side boat
+	//BoatPathing(boat2, 6);//right side boat
 
-	glm::vec3 movement = glm::vec3(0.0f);
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
-		movement.x += -15.0f * deltaTime;
-	}
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
-		movement.x += 15.0f * deltaTime;
-	}
-
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
-		movement.y += 15.0f * deltaTime;
-	}
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
-		movement.y += -15.0f * deltaTime;
-	}
-
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::LeftControl)) {
-		movement.z += -8.0f * deltaTime;
-	}
-	/*if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Space)) {
-		movement.z += 8.0f * deltaTime;
-	}*/
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::LeftShift)) {
-		movement *= 6.0f;
-	}
-
-	printf("fps: %f\n", 1.0f/deltaTime);
+	//printf("fps: %f\n", 1.0f/deltaTime);
 
 	TTN_Scene::Update(deltaTime);
 }
@@ -469,12 +415,9 @@ void Review3Scene::CreateCannonball() {
 	auto& cannonTrans = Get<TTN_Transform>(cannon);
 	auto& transCamera = Get<TTN_Transform>(camera);
 
-	//Attach<TTN_Transform>(ball);
-	//auto& ballTrans = Get<TTN_Transform>(ball);
-
 	TTN_Transform ballTrans = TTN_Transform(glm::vec3(10.f, -5.0f, 20.0f), glm::vec3(0.0f), glm::vec3(0.75f));
 
-	glm::vec3 forward = glm::mat3(glm::inverse(transCamera.GetMatrix())) * glm::vec3(0.0f, 0.0f, 1.0f);
+	glm::vec3 forward = glm::mat3(glm::inverse(transCamera.GetMatrix())) * glm::vec3(1.0f, 0.0f, 0.0f);
 	glm::vec3 origin = forward + transCamera.GetPos();
 	//origin = glm::normalize(origin);
 
@@ -508,7 +451,6 @@ void Review3Scene::BoatPathing(entt::entity boatt, int path)
 
 	//left side middle path
 	if (path == 1) {
-		//glm::all(glm::lessThanEqual(tBoat.GetPos(), glm::vec3(30.f, -5.0f, 70.f)))
 		/*if (tBoat.GetPos().x <= 30.f) {
 			pBoat.SetLinearVelocity(glm::vec3(-4.0f, 0.f, -3.0f));
 			if (tBoat.GetRotation().y <= 45.0f) {
@@ -560,7 +502,6 @@ void Review3Scene::BoatPathing(entt::entity boatt, int path)
 			if (tBoat.GetRotation().y <= 55.0f) {
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.75f, 0.0f));
 			}
-
 			pBoat.SetLinearVelocity(Seek(glm::vec3(0.0f, -5.0f, 5.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
@@ -596,9 +537,10 @@ void Review3Scene::BoatPathing(entt::entity boatt, int path)
 
 //note this spawner code only spawns code on the left side of the map (because of the boat pos)
 //to spawn on the right side can make a new function with a few changed values
-void Review3Scene::Spawner(float deltatime, float SpawnTime) {
+void Review3Scene::SpawnerLS(float deltatime, float SpawnTime) {
 	//increment timer
 	Timer += deltatime;
+
 	//if the timer is >= spawn time then it will spawn the boat
 	if (Timer >= SpawnTime) {
 		// timer = 0, boat spawn code
@@ -618,7 +560,7 @@ void Review3Scene::Spawner(float deltatime, float SpawnTime) {
 
 		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boat, TTN_PhysicsBodyType::DYNAMIC, 1.0f);
 		pbody.SetHasGravity(false);
-		pbody.SetLinearVelocity(glm::vec3(-11.0f, 0.f, 0.0f));//-2.0f
+		pbody.SetLinearVelocity(glm::vec3(-10.0f, 0.f, 0.0f));//-2.0f
 		AttachCopy<TTN_Physics>(boat, pbody);
 
 		//add a tag to the boat
@@ -629,8 +571,39 @@ void Review3Scene::Spawner(float deltatime, float SpawnTime) {
 		TTN_Tag boatTag = TTN_Tag(r); //sets boat path number to ttn_tag
 		AttachCopy<TTN_Tag>(boat, boatTag);
 	}
+}
 
+void Review3Scene::SpawnerRS(float deltatime, float SpawnTime)
+{
+	Timer2 += deltatime;
 
+	if (Timer2 >= SpawnTime) {
+		// timer = 0, boat spawn code
+		Timer2 = 0.F;//reset timer
+
+		boat2 = CreateEntity();
+		boats.push_back(boat2);
+
+		TTN_Renderer boatRenderer = TTN_Renderer(boatMesh, shaderProgam);
+		AttachCopy<TTN_Renderer>(boat2, boatRenderer);
+
+		TTN_Transform boatTrans = TTN_Transform();
+		boatTrans.SetPos(glm::vec3(-70.0f, -5.0f, 70.0f));
+		boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
+		boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
+		AttachCopy<TTN_Transform>(boat2, boatTrans);
+
+		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boat, TTN_PhysicsBodyType::DYNAMIC, 1.0f);
+		pbody.SetHasGravity(false);
+		pbody.SetLinearVelocity(glm::vec3(10.0f, 0.f, 0.0f));//-2.0f
+		AttachCopy<TTN_Physics>(boat2, pbody);
+
+		int r = rand() % 3 + 4; // generates path number between 4-6 (left side paths 1-3, right side path nums are 4-6)
+		//std::cout << "Num: " << r << std::endl; //random boat path
+
+		TTN_Tag boatTag = TTN_Tag(r); //sets boat path number to ttn_tag
+		AttachCopy<TTN_Tag>(boat2, boatTag);
+	}
 }
 
 glm::vec3 Review3Scene::Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos)
@@ -650,3 +623,32 @@ glm::vec3 Review3Scene::Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos)
 
 	return moveVelo;
 }
+
+//left boat entity
+//{
+//	//create an entity in the scene for the boat
+//	boat = CreateEntity();
+
+//	//attach a mesh renderer to the boat
+//	Attach<TTN_Renderer>(boat);
+//	//grab a referencce to that mesh renderer and set it up
+//	auto& boatRenderer = Get<TTN_Renderer>(boat);
+//	boatRenderer = TTN_Renderer(boatMesh, shaderProgam);
+
+//	//attach a transform to the boat
+//	Attach<TTN_Transform>(boat);
+//	//grab a reference to that transform and set it up
+//	auto& boatTrans = Get<TTN_Transform>(boat);
+//	boatTrans.SetPos(glm::vec3(70.0f, -5.0f, 70.0f));
+//	boatTrans.RotateFixed(glm::vec3(0.0f, 180.0f, 0.0f));
+//	boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
+
+//	TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boat);
+//	pbody.SetLinearVelocity(glm::vec3(-8.0f, 0.f, 0.0f));//-2.0f
+//	//pbody.SetLinearVelocity(Seek(glm::vec3(30.f, -5.f, 50.f), pbody.GetLinearVelocity(), boatTrans.GetPos(), 0));
+//	AttachCopy<TTN_Physics>(boat, pbody);
+
+//	//add a tag to the boat
+//	TTN_Tag boatTag = TTN_Tag("Boat");
+//	AttachCopy<TTN_Tag>(boat, boatTag);
+//}
