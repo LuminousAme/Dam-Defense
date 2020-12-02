@@ -1,6 +1,7 @@
 #include "Review3Scene.h"
 #include "Titan/Physics.h"
 #include "glm/ext.hpp"
+#include <vector>
 
 Review3Scene::Review3Scene()
 	: TTN_Scene()
@@ -118,11 +119,11 @@ void Review3Scene::InitScene()
 	fireParticle.SetMat(fireMat);
 	fireParticle.SetMesh(sphereMesh);
 	fireParticle.SetOneEndColor(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-	fireParticle.SetOneEndSize(0.80f);
-	fireParticle.SetOneEndSpeed(4.0f);
-	fireParticle.SetOneLifetime(1.5f);
-	fireParticle.SetOneStartColor(glm::vec4(1.0f, 0.60f, 0.0f, 1.0f));
-	fireParticle.SetOneStartSize(1.0f);
+	fireParticle.SetOneEndSize(4.0f);
+	fireParticle.SetOneEndSpeed(6.0f);
+	fireParticle.SetOneLifetime(2.0f);
+	fireParticle.SetOneStartColor(glm::vec4(1.0f, 0.65f, 0.0f, 1.0f));
+	fireParticle.SetOneStartSize(0.5f);
 	fireParticle.SetOneStartSpeed(8.0f);
 
 	TTN_Application::TTN_Input::SetCursorLocked(true);
@@ -140,6 +141,7 @@ void Review3Scene::InitScene()
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f, 100.f);
+		//Get<TTN_Camera>(camera).CalcOrtho(-800.0f / 100.0f, 800.0f / 100.0f, -800.0f / 100.0f, 800.0f / 100.0f, 0.001f, 100.0f);
 		Get<TTN_Camera>(camera).View();
 	}
 
@@ -317,7 +319,7 @@ void Review3Scene::InitScene()
 		AttachCopy<TTN_Renderer>(debug, treeRenderer);
 
 		//setup a transform for the
-		TTN_Transform treeTrans = TTN_Transform(glm::vec3(-28.0f, -5.0f, 40.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		TTN_Transform treeTrans = TTN_Transform(glm::vec3(-28.0f, -5.0f, 20.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		//and attach that transform to the entity
 		AttachCopy<TTN_Transform>(debug, treeTrans);
 	}
@@ -342,7 +344,7 @@ void Review3Scene::InitScene()
 		boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
 
 		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boat2);
-		pbody.SetLinearVelocity(glm::vec3(8.0f, 0.f, 0.0f));//-2.0f
+		//pbody.SetLinearVelocity(glm::vec3(8.0f, 0.f, 0.0f));//-2.0f
 		AttachCopy<TTN_Physics>(boat2, pbody);
 
 		//add a tag to the boat
@@ -352,6 +354,9 @@ void Review3Scene::InitScene()
 
 	//set the cannon to be a child of the camera
 	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), &camera);
+
+	flames = std::vector<entt::entity>();
+	flamethrowers = std::vector<entt::entity>();
 
 	/////// other /////////
 	rotAmmount = glm::vec2(0.0f, 0.0f);
@@ -383,8 +388,8 @@ void Review3Scene::Update(float deltaTime)
 	//parameters: number of waves, rest time between waves, length of waves, deltatime
 	Waves(3, 10.f, 30.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
 
-	SpawnerLS(deltaTime, 5.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
-	SpawnerRS(deltaTime, 3.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerLS(deltaTime, 1.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	//SpawnerRS(deltaTime, 3.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
 	//BoatPathing(boat2, 4);
 
 	//goes through the boats vector
@@ -394,7 +399,64 @@ void Review3Scene::Update(float deltaTime)
 		BoatPathing(boats[i], p); //updates the pathing for the boat
 	}
 
+	if (FlameTimer <= 0) FlameTimer = 0.0f;
+	else FlameTimer -= deltaTime;
+
+	if (Flaming) {// if the flamethorwers are spewing flame particles
+		FlameAnim += deltaTime;//increment flamethrower anim timer
+
+		if (FlameAnim >= 3.0f) {//flame particles last for 3 seconds
+			DeleteFlamethrowers(); //delete the flamethrowers and particles
+			FlameAnim = 0.0f; //reset timer
+			Flaming = false; //set flaming to false
+		}
+
+		//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 20
+		std::vector<entt::entity>::iterator it = boats.begin();
+		while (it != boats.end()) {
+			if (Get<TTN_Transform>(*it).GetPos().z >= 25.0f) {
+				//std::cout <<"Global Pos:"<< Get<TTN_Transform>(*it).GetGlobalPos().z << std::endl;
+				//std::cout << "Pos:" << Get<TTN_Transform>(*it).GetPos().z << std::endl;
+				it++;
+			}
+			else {
+				DeleteEntity(*it);
+				it = boats.erase(it);
+				std::cout << "ERASED " << std::endl;
+			}
+		}
+
+	}
+
 	//printf("fps: %f\n", 1.0f/deltaTime);
+
+#pragma region camera moving
+	auto& transCamera = Get<TTN_Transform>(camera);
+
+	glm::vec3 movement = transCamera.GetPos();//glm::vec3(0.0f);
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
+		movement.x += -12.0f * deltaTime;
+	}
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
+		movement.x += 12.0f * deltaTime;
+	}
+
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
+		movement.z += 12.0f * deltaTime;
+	}
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
+		movement.z += -12.0f * deltaTime;
+	}
+
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Z)) {
+		movement.y += 12.0f * deltaTime;
+	}
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::X)) {
+		movement.y += -12.0f * deltaTime;
+	}
+
+	transCamera.SetPos(movement);
+#pragma endregion
 
 	TTN_Scene::Update(deltaTime);
 }
@@ -407,8 +469,13 @@ void Review3Scene::KeyDownChecks()
 	}
 
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Two)) {
-		Flamethrower();
+		if (FlameTimer == 0.0f) { //cooldown is zero
+			Flamethrower();
+		}
+
 	}
+
+
 }
 
 void Review3Scene::KeyChecks()
@@ -648,7 +715,7 @@ void Review3Scene::Waves(int num, float restTime, float waveTime, float deltaTim
 		}
 
 		if (!Spawning) {
-			printf("resting!\n");
+			//printf("resting!\n");
 			restTimer += deltaTime;
 			if (restTimer >= restTime) {
 				Spawning = true;
@@ -665,38 +732,111 @@ void Review3Scene::Waves(int num, float restTime, float waveTime, float deltaTim
 }
 
 void Review3Scene::Flamethrower() {
-	flamethrower = CreateEntity();
 
-	//setup a mesh renderer for the cannon
-	TTN_Renderer ftRenderer = TTN_Renderer(flamethrowerMesh, shaderProgamTextured);
-	ftRenderer.SetMat(flamethrowerMat);
-	//attach that renderer to the entity
-	AttachCopy<TTN_Renderer>(flamethrower, ftRenderer);
+	if (FlameTimer == 0.0f) { //cooldown is zero
+		FlameTimer = 6.f;
+		Flaming = true;
 
-	//setup a transform for the cannon
-	TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f, -3.0f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
+		for (int i = 0; i < 6; i++) {
 
-	//attach that transform to the entity
-	AttachCopy<TTN_Transform>(flamethrower, ftTrans);
+			//flamethrower entities
+			{
+				flamethrowers.push_back(CreateEntity());
 
-	{
-		ftParticle = CreateEntity();
+				//setup a mesh renderer for the cannon
+				TTN_Renderer ftRenderer = TTN_Renderer(flamethrowerMesh, shaderProgamTextured);
+				ftRenderer.SetMat(flamethrowerMat);
+				//attach that renderer to the entity
+				AttachCopy<TTN_Renderer>(flamethrowers[i], ftRenderer);
 
-		//setup a transfrom for the particle system
-		TTN_Transform firePSTrans = TTN_Transform(glm::vec3(3.5f, -3.0f, 4.5f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f));
-		//attach that transform to the entity
-		AttachCopy(ftParticle, firePSTrans);
+				//setup a transform for the flamethrower
+				TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f, -4.0f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
+				if (i == 0) {
+					ftTrans.SetPos(glm::vec3(-5.0f, -4.0f, 4.0f));
+				}
+				else if (i == 1) {
+					ftTrans.SetPos(glm::vec3(15.0f, -4.0f, 4.0f));
+				}
+				else if (i == 2) {
+					ftTrans.SetPos(glm::vec3(-15.0f, -4.0f, 4.0f));
+				}
+				else if (i == 3) {
+					ftTrans.SetPos(glm::vec3(25.0f, -4.0f, 4.0f));
+				}
+				else if (i == 4) {
+					ftTrans.SetPos(glm::vec3(-25.0f, -4.0f, 4.0f));
+				}
+				else {}
 
-		//setup a particle system for the particle system
-		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1200, 400, fireParticle, 4.0f, true);
-		ps->MakeConeEmitter(20.0f, glm::vec3(90.0f, 0.0f, 0.0f));
+				//attach that transform to the entity
+				AttachCopy<TTN_Transform>(flamethrowers[i], ftTrans);
+			}
 
-		//setup a particle system component
-		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
-		//attach the particle system component to the entity
-		AttachCopy(ftParticle, psComponent);
+			//fire particle entities
+			{
+				flames.push_back(CreateEntity());
+
+				//setup a transfrom for the particle system
+				TTN_Transform firePSTrans = TTN_Transform(glm::vec3(2.5f, -2.0f, 3.3f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f)); //close left
+				if (i == 0) {
+					firePSTrans.SetPos(glm::vec3(-2.5f, -2.0f, 3.3f));//close right
+				}
+				else if (i == 1) {
+					firePSTrans.SetPos(glm::vec3(12.5f, -2.0f, 3.3f));//far left
+				}
+				else if (i == 2) {
+					firePSTrans.SetPos(glm::vec3(-12.5f, -2.0f, 3.3f));//far right
+				}
+				else if (i == 3) {
+					firePSTrans.SetPos(glm::vec3(7.5f, -2.0f, 3.3f));
+				}
+				else if (i == 4) {
+					firePSTrans.SetPos(glm::vec3(-7.5f, -2.0f, 3.3f));
+				}
+				else {}
+
+				//attach that transform to the entity
+				AttachCopy(flames[i], firePSTrans);
+
+				//setup a particle system for the particle system
+				TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1200, 300, fireParticle, 2.0f, true);
+				ps->MakeConeEmitter(15.0f, glm::vec3(90.0f, 0.0f, 0.0f));
+
+				//setup a particle system component
+				TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
+				//attach the particle system component to the entity
+				AttachCopy(flames[i], psComponent);
+			}
+
+		}
+
+
 	}
-	//Get<TTN_ParticeSystemComponent>(ftParticle).GetParticleSystemPointer()->Burst(450);
+
+	else { //otherwise nothing happens
+		Flaming = false;
+		std::cout << "END CURRENT BOAT " << std::endl;
+	}
+
+
+
+}
+
+void Review3Scene::DeleteFlamethrowers(){
+
+	std::vector<entt::entity>::iterator it = flamethrowers.begin();
+	while (it != flamethrowers.end()) {
+		DeleteEntity(*it);
+		it = flamethrowers.erase(it);
+		//it++;
+	}
+
+	std::vector<entt::entity>::iterator itt = flames.begin();
+	while (itt != flames.end()) {
+		DeleteEntity(*itt);
+		itt = flames.erase(itt);
+	}
+
 
 }
 

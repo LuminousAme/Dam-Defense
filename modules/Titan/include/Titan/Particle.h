@@ -184,7 +184,6 @@ namespace Titan {
 		void RotationReadGraphCallback(float (*function)(float));
 		void ScaleReadGraphCallback(float (*function)(float));
 
-
 		//updates the particle system as a whole, as well as the all the indivual particles 
 		void Update(float deltaTime);
 

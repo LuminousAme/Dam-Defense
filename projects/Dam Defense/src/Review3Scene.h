@@ -34,10 +34,12 @@ public:
 	void SpawnerLS(float deltatime, float SpawnTime);
 	void SpawnerRS(float deltatime, float SpawnTime);
 	void Waves(int num, float restTime, float waveTime, float deltaTime );
-	void Flamethrower();
-	void BirdBomb();
-	void BirdSeek();
 
+	void Flamethrower();
+	void DeleteFlamethrowers();
+
+	void BirdBomb();
+	
 	glm::vec3 Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos);
 
 public:
@@ -83,6 +85,10 @@ public:
 
 	glm::vec3 playerDir;
 
+	bool Flaming = false; //if flamethrowings are active right now
+	float FlameTimer = 0.0f; //flamethrower cooldown
+	float FlameAnim = 0.0f; //flamethrower
+
 	float Timer = 0.F;//timer for boat spawning
 	float Timer2 = 0.F;//timer for boat spawning
 	bool Spawning = true; //whether or not the spawners should be spawning
@@ -104,8 +110,6 @@ protected:
 	entt::entity tree5;
 
 	entt::entity bird;
-	entt::entity flamethrower;
-	
 	
 	entt::entity debug;//used to look at positions on the map
 	entt::entity boat;
@@ -114,11 +118,16 @@ protected:
 	entt::entity ball;
 	std::vector<entt::entity> cannonballs;
 	std::vector<entt::entity> boats;
+
+	entt::entity ftParticle;
+	entt::entity flamethrower;
+	std::vector<entt::entity> flamethrowers;
+	std::vector<entt::entity> flames;
 	
 	entt::entity skybox;
 	entt::entity height;
 	entt::entity testParticleSystem;
-	entt::entity ftParticle;
+
 
 	//others
 	glm::vec2 rotAmmount;
