@@ -44,6 +44,10 @@ public:
 
 	//meshes
 	TTN_Mesh::smptr cannonMesh;
+	TTN_Mesh::smptr boat1Mesh;
+	TTN_Mesh::smptr boat2Mesh;
+	TTN_Mesh::smptr boat3Mesh;
+
 	TTN_Mesh::smptr skyboxMesh;
 	TTN_Mesh::smptr sphereMesh; //used for cannonballs and particles
 	TTN_Mesh::smptr terrainPlain;
@@ -56,8 +60,15 @@ public:
 	TTN_Texture2D::st2dptr rockText;
 	TTN_Texture2D::st2dptr grassText;
 	TTN_Texture2D::st2dptr waterText;
+	TTN_Texture2D::st2dptr boat1Text;
+	TTN_Texture2D::st2dptr boat2Text;
+	TTN_Texture2D::st2dptr boat3Text;
 	
 	//materials
+	TTN_Material::smatptr boat1Mat;
+	TTN_Material::smatptr boat2Mat;
+	TTN_Material::smatptr boat3Mat;
+
 	TTN_Material::smatptr cannonMat;
 	TTN_Material::smatptr skyboxMat;
 	TTN_Material::smatptr smokeMat;
@@ -69,9 +80,11 @@ protected:
 	entt::entity skybox;
 	entt::entity cannon;
 	std::vector<entt::entity> cannonBalls;
+	std::vector<entt::entity> boats;
 	entt::entity smokePS;
 	entt::entity terrain;
 	entt::entity water;
+	entt::entity debug;
 
 //other data
 protected:
@@ -95,6 +108,15 @@ protected:
 	float waveHeightMultiplier;
 	float waveLenghtMultiplier;
 
+	//Stuff for waves and spawning enemies
+	float Timer = 0.F;//timer for boat spawning (left side)
+	float Timer2 = 0.F;//timer for boat spawning (right side)
+	bool Spawning = true; //whether or not the spawners should be spawning
+
+	float waveTimer = 0.F;//timer for waves
+	float restTimer = 0.F;//timer for waves
+	int wave = 0; // keep track of wave number
+
 	//smoke particle
 	TTN_ParticleTemplate smokeParticle;
 
@@ -109,10 +131,17 @@ protected:
 	void PlayerRotate(float deltaTime);
 	void StopFiring();
 
+	void BoatPathing(entt::entity boatt, int path);
+	void SpawnerLS(float deltatime, float SpawnTime);
+	void SpawnerRS(float deltatime, float SpawnTime);
+	void Waves(int num, float restTime, float waveTime, float deltaTime);
+	glm::vec3 Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos);
+
 //other functions, ussually called in relation to something happening like player input or a collision
 protected:
 	void CreateCannonball();
-	void DeleteCannonballs(); 
+	void DeleteCannonballs();
+
 };
 
 inline float SmoothStep(float t) {

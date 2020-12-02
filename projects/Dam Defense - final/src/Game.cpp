@@ -36,19 +36,60 @@ void Game::Update(float deltaTime)
 	DeleteCannonballs();
 
 	//if the player is on shoot cooldown, decrement the time remaining on the cooldown
-	if(playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
+	if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
+
+	Waves(3, 10.f, 30.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
+
+	SpawnerLS(deltaTime, 1.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerRS(deltaTime, 2.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+
+	//goes through the boats vector
+	for (int i = 0; i < boats.size(); i++) {
+		//std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl;
+		int p = Get<TTN_Tag>(boats[i]).getPath(); //gets the boats randomized path num
+		Get<TTN_Physics>(boats[i]).SetHasGravity(false);
+		BoatPathing(boats[i], p); //updates the pathing for the boat
+	}
+
+#pragma region camera moving
+	auto& transCamera = Get<TTN_Transform>(camera);
+
+	glm::vec3 movement = transCamera.GetPos();//glm::vec3(0.0f);
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
+		movement.x += -22.0f * deltaTime;
+	}
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
+		movement.x += 22.0f * deltaTime;
+	}
+
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
+		movement.z += 22.0f * deltaTime;
+	}
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
+		movement.z += -22.0f * deltaTime;
+	}
+
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Z)) {
+		movement.y += 22.0f * deltaTime;
+	}
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::X)) {
+		movement.y += -22.0f * deltaTime;
+	}
+
+	transCamera.SetPos(movement);
+#pragma endregion
 
 	//increase the total time of the scene to make the water animated correctly
 	time += deltaTime;
 
-	printf("fps: %f\n", 1.0f/deltaTime);
+	printf("fps: %f\n", 1.0f / deltaTime);
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
 }
 
-void Game::PostRender() 
+void Game::PostRender()
 {
-	//terrain 
+	//terrain
 	{
 		//bind the shader
 		shaderProgramTerrain->Bind();
@@ -84,8 +125,8 @@ void Game::PostRender()
 		//render the terrain
 		terrainPlain->GetVAOPointer()->Render();
 	}
-	
-	//water 
+
+	//water
 	{
 		//bind the shader
 		shaderProgramWater->Bind();
@@ -125,6 +166,7 @@ void Game::PostRender()
 	TTN_Scene::PostRender();
 }
 
+#pragma region INPUTS
 //function to use to check for when a key is being pressed down for the first frame
 void Game::KeyDownChecks()
 {
@@ -159,7 +201,7 @@ void Game::MouseButtonChecks()
 		//reset the cooldown
 		playerShootCooldownTimer = playerShootCooldown;
 		//and play the smoke particle effect
-		//Get<TTN_Transform>(smokePS).SetPos((Get<TTN_Transform>(cannon).GetGlobalPos() - 
+		//Get<TTN_Transform>(smokePS).SetPos((Get<TTN_Transform>(cannon).GetGlobalPos() -
 			//0.5f * (Get<TTN_Transform>(cannon).GetGlobalPos() - Get<TTN_Transform>(cannon).GetPos())) + 0.8f * playerDir);
 		Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f, 0.0f) + 0.9f * playerDir);
 		Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
@@ -172,6 +214,8 @@ void Game::MouseButtonChecks()
 void Game::MouseButtonUpChecks()
 {
 }
+
+#pragma endregion
 
 //sets up all the assets in the scene
 void Game::SetUpAssets()
@@ -223,6 +267,7 @@ void Game::SetUpAssets()
 	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
 	skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
 	sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
+	boat1Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 1.obj");
 	terrainPlain = TTN_ObjLoader::LoadFromFile("models/terrainPlain.obj");
 	terrainPlain->SetUpVao();
 
@@ -234,11 +279,17 @@ void Game::SetUpAssets()
 	rockText = TTN_Texture2D::LoadFromFile("textures/RockTexture.jpg");
 	grassText = TTN_Texture2D::LoadFromFile("textures/GrassTexture.jpg");
 	waterText = TTN_Texture2D::LoadFromFile("textures/water.png");
+	boat1Text = TTN_Texture2D::LoadFromFile("textures/Boat 1 Texture.png");
 
 	////MATERIALS////
 	cannonMat = TTN_Material::Create();
 	cannonMat->SetAlbedo(cannonText);
 	cannonMat->SetShininess(128.0f);
+
+	boat1Mat = TTN_Material::Create();
+	boat1Mat->SetAlbedo(boat1Text);
+	boat1Mat->SetShininess(128.0f);
+
 	skyboxMat = TTN_Material::Create();
 	skyboxMat->SetSkybox(skyboxText);
 	smokeMat = TTN_Material::Create();
@@ -317,18 +368,18 @@ void Game::SetUpEntities()
 		//setup an animator for the cannon
 		TTN_MorphAnimator cannonAnimator = TTN_MorphAnimator();
 		//create an animation for the cannon when it's not firing
-		TTN_MorphAnimation notFiringAnim = TTN_MorphAnimation({0}, {3.0f/24}, true); //anim 0
+		TTN_MorphAnimation notFiringAnim = TTN_MorphAnimation({ 0 }, { 3.0f / 24 }, true); //anim 0
 		//create an animation for the cannon when it is firing
 		std::vector<int> firingFrameIndices = std::vector<int>();
 		std::vector<float> firingFrameLenghts = std::vector<float>();
 		for (int i = 0; i < 7; i++) firingFrameIndices.push_back(i);
-		firingFrameLenghts.push_back(3.0f/24.0f);
-		firingFrameLenghts.push_back(1.0f/24.0f);
-		firingFrameLenghts.push_back(1.0f/24.0f);
-		firingFrameLenghts.push_back(1.0f/24.0f);
-		firingFrameLenghts.push_back(1.0f/24.0f);
-		firingFrameLenghts.push_back(2.0f/24.0f);
-		firingFrameLenghts.push_back(3.0f/24.0f);
+		firingFrameLenghts.push_back(3.0f / 24.0f);
+		firingFrameLenghts.push_back(1.0f / 24.0f);
+		firingFrameLenghts.push_back(1.0f / 24.0f);
+		firingFrameLenghts.push_back(1.0f / 24.0f);
+		firingFrameLenghts.push_back(1.0f / 24.0f);
+		firingFrameLenghts.push_back(2.0f / 24.0f);
+		firingFrameLenghts.push_back(3.0f / 24.0f);
 		TTN_MorphAnimation firingAnim = TTN_MorphAnimation(firingFrameIndices, firingFrameLenghts, true); //anim 1
 		//add both animatons to the animator
 		cannonAnimator.AddAnim(notFiringAnim);
@@ -339,7 +390,7 @@ void Game::SetUpEntities()
 		AttachCopy(cannon, cannonAnimator);
 	}
 
-	//entity for the smoke particle system (rather than recreating whenever we need it, we'll just make one 
+	//entity for the smoke particle system (rather than recreating whenever we need it, we'll just make one
 	//and burst again when we need to)
 	{
 		smokePS = CreateEntity();
@@ -380,8 +431,25 @@ void Game::SetUpEntities()
 		AttachCopy(water, waterTrans);
 	}
 
+	//debugging entity for positions
+	{
+		debug = CreateEntity();
+
+		//setup a mesh renderer for the tree
+		TTN_Renderer treeRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
+		//and attach that renderer to the entity
+		AttachCopy<TTN_Renderer>(debug, treeRenderer);
+
+		//setup a transform for the
+		TTN_Transform treeTrans = TTN_Transform(glm::vec3((210.0f, 110.0f, 50.0f)), glm::vec3(0.0f), glm::vec3(1.0f));
+		//and attach that transform to the entity
+		AttachCopy<TTN_Transform>(debug, treeTrans);
+	}
+
 	//prepare the vector of cannonballs
 	cannonBalls = std::vector<entt::entity>();
+	//vector of boats
+	boats = std::vector<entt::entity>();
 
 	//set the cannon to be a child of the camera
 	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), &camera);
@@ -405,7 +473,7 @@ void Game::SetUpOtherData()
 	waveLenghtMultiplier = -10.0f;
 
 	//make the scene have gravity
-	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.81f, 0.0f));
+	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));
 
 	//create the particle templates
 	//smoke particle
@@ -440,12 +508,12 @@ void Game::PlayerRotate(float deltaTime)
 
 	//reset the rotation
 	Get<TTN_Transform>(camera).LookAlong(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	//and rotate it by the ammount it should be rotated 
+	//and rotate it by the ammount it should be rotated
 	Get<TTN_Transform>(camera).RotateFixed(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
 	//clear the direction the player is facing, and rotate it to face the same along
 	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
-	playerDir = glm::vec3(glm::toMat4(glm::quat(glm::radians(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f)))) 
-			* glm::vec4(playerDir, 1.0f));
+	playerDir = glm::vec3(glm::toMat4(glm::quat(glm::radians(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f))))
+		* glm::vec4(playerDir, 1.0f));
 	playerDir = glm::normalize(playerDir);
 
 	//save the next position to rotate properly next frame
@@ -455,8 +523,8 @@ void Game::PlayerRotate(float deltaTime)
 //called by update, makes the cannon switch back to it's not firing animation when it's firing animation has ended
 void Game::StopFiring()
 {
-	if (Get<TTN_MorphAnimator>(cannon).getActiveAnim() == 1 && 
-			Get<TTN_MorphAnimator>(cannon).getActiveAnimRef().getIsDone()) {
+	if (Get<TTN_MorphAnimator>(cannon).getActiveAnim() == 1 &&
+		Get<TTN_MorphAnimator>(cannon).getActiveAnimRef().getIsDone()) {
 		Get<TTN_MorphAnimator>(cannon).SetActiveAnim(0);
 	}
 }
@@ -505,6 +573,211 @@ void Game::DeleteCannonballs()
 		else {
 			DeleteEntity(*it);
 			it = cannonBalls.erase(it);
-		}	
+		}
 	}
+}
+
+//sets the pathing the boat entity should take based on the path integer (1-3 is left side, 4-6 is right side)
+void Game::BoatPathing(entt::entity boatt, int path)
+{
+	auto& pBoat = Get<TTN_Physics>(boatt);
+	auto& tBoat = Get<TTN_Transform>(boatt);
+
+	//left side middle path
+	if (path == 1) {
+		if (tBoat.GetPos().x <= 30.f) {
+			if (tBoat.GetRotation().y <= 55.0f) {
+				tBoat.RotateFixed(glm::vec3(0.0f, -0.55f, 0.0f));
+			}
+			//pBoat.SetLinearVelocity(Seek(glm::vec3(0.0f, -5.0f, 5.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(5.0f, -5.0f, 5.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+		}
+		//	//pBoat.SetLinearVelocity(Seek(glm::vec3(30.f, -5.f, 50.f), pBoat.GetLinearVelocity(), tBoat.GetPos(), deltaTime));
+		//	std::cout << glm::to_string(pBoat.GetLinearVelocity()) << std::endl;}
+	}
+
+	//far left path
+	if (path == 2) {
+		if (tBoat.GetPos().x <= 35.f) {
+			if (tBoat.GetRotation().y <= 80.0f) {
+				tBoat.RotateFixed(glm::vec3(0.0f, -0.75f, 0.0f));
+			}
+			//pBoat.SetLinearVelocity(Seek(glm::vec3(20.0f, -5.0f, 3.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(20.0f, -5.0f, 3.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+		}
+	}
+
+	//center left
+	if (path == 3) {
+		if (tBoat.GetPos().x <= 20.f && !(tBoat.GetPos().x <= 3.f)) {
+			if (tBoat.GetRotation().y <= 60.0f) {
+				tBoat.RotateFixed(glm::vec3(0.0f, -0.75f, 0.0f));
+			}
+			//pBoat.SetLinearVelocity(Seek(glm::vec3(2.0f, -5.0f, 40.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(2.0f, -5.0f, 40.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+		}
+		if (tBoat.GetPos().x <= 3.f) {
+			if (tBoat.GetRotation().y <= 89.0f) {
+				tBoat.RotateFixed(glm::vec3(0.0f, -0.95f, 0.0f));
+			}
+			//pBoat.SetLinearVelocity(Seek(glm::vec3(2.0f, -5.0f, 3.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(3.0f, -5.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+		}
+	}
+
+	//right middle path
+	if (path == 4) {
+		if (tBoat.GetPos().x >= -30.F) {
+			if (tBoat.GetRotation().y <= 55.0f) {
+				tBoat.RotateFixed(glm::vec3(0.0f, 0.75f, 0.0f));
+			}
+			//tBoat.LookAlong(glm::vec3(5.0f, -5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			//pBoat.SetLinearVelocity(Seek(glm::vec3(0.0f, -5.0f, 5.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(0.0f, -5.0f, 5.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+		}
+	}
+
+	//far right path
+	if (path == 5) {
+		if (tBoat.GetPos().x >= -35.f) {
+			if (tBoat.GetRotation().y <= 85.0f) {
+				tBoat.RotateFixed(glm::vec3(0.0f, 0.95f, 0.0f));
+			}
+			//pBoat.SetLinearVelocity(Seek(glm::vec3(-20.0f, -5.0f, 3.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(-20.0f, -5.0f, 3.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+		}
+	}
+
+	//right center path
+	if (path == 6) {
+		if (tBoat.GetPos().x >= -20.f && !(tBoat.GetPos().x >= -3.F)) {
+			if (tBoat.GetRotation().y <= 60.0f) {
+				tBoat.RotateFixed(glm::vec3(0.0f, 0.75f, 0.0f));
+			}
+			//pBoat.SetLinearVelocity(Seek(glm::vec3(-2.0f, -5.0f, 40.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(-2.0f, -5.0f, 40.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+		}
+
+		if (tBoat.GetPos().x >= -3.f) {
+			if (tBoat.GetRotation().y <= 89.0f) {
+				tBoat.RotateFixed(glm::vec3(0.0f, 0.95f, 0.0f));
+			}
+			//pBoat.SetLinearVelocity(Seek(glm::vec3(-2.0f, -5.0f, 4.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(-3.0f, -5.0f, 4.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+		}
+	}
+}
+
+void Game::SpawnerLS(float deltatime, float SpawnTime) {
+	//increment timer
+	Timer += deltatime;
+
+	//if the timer is >= spawn time then it will spawn the boat
+	if (Timer >= SpawnTime && Spawning) {
+		// timer = 0, boat spawn code
+		Timer = 0.F;//reset timer
+
+		boats.push_back(CreateEntity());
+
+		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
+		AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
+
+		TTN_Transform boatTrans = TTN_Transform(glm::vec3((210.0f, 110.0f, 50.0f)), glm::vec3(0.0f), glm::vec3(1.0f));
+		boatTrans.SetPos(glm::vec3(90.0f, -8.0f, 115.0f));
+		boatTrans.RotateFixed(glm::vec3(0.0f, 180.0f, 0.0f));
+		boatTrans.SetScale(glm::vec3(0.20f, 0.20f, 0.20f));
+		AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
+
+		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boats[boats.size() - 1], TTN_PhysicsBodyType::DYNAMIC);
+		pbody.SetLinearVelocity(glm::vec3(-20.0f, 0.0f, 0.0f));//-2.0f
+		pbody.SetHasGravity(true);
+		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
+
+		//add a tag to the boat
+		//TTN_Tag boatTag = TTN_Tag(" Boat "+ boats.size() );
+
+		int r = rand() % 3 + 1; // generates path number between 1-3 (left side paths, right side path nums are 4-6)
+		//std::cout << "Num: " << r << std::endl; //random boat path
+		TTN_Tag boatTag = TTN_Tag(r); //sets boat path number to ttn_tag
+		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
+
+		Get<TTN_Physics>(boats[boats.size() - 1]).SetHasGravity(false);
+	}
+}
+
+void Game::SpawnerRS(float deltatime, float SpawnTime)
+{
+	Timer2 += deltatime;
+
+	if (Timer2 >= SpawnTime && Spawning) {
+		// timer = 0, boat spawn code
+		Timer2 = 0.F;//reset timer
+
+		boats.push_back(CreateEntity());
+
+		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
+		AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
+
+		TTN_Transform boatTrans = TTN_Transform();
+		boatTrans.SetPos(glm::vec3(-70.0f, -5.0f, 70.0f));
+		boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
+		boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
+		AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
+
+		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boats[boats.size() - 1]);
+		pbody.SetHasGravity(false);
+		pbody.SetLinearVelocity(glm::vec3(10.0f, 0.f, 0.0f));//-2.0f
+		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
+
+		int r = rand() % 3 + 4; // generates path number between 4-6 (left side paths 1-3, right side path nums are 4-6)
+		//std::cout << "Num: " << r << std::endl; //random boat path
+
+		TTN_Tag boatTag = TTN_Tag(r); //sets boat path number to ttn_tag
+		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
+	}
+}
+
+void Game::Waves(int num, float restTime, float waveTime, float deltaTime)
+{
+	if (num > wave) {
+		//printf("Wave now!\n");
+		waveTimer += deltaTime;
+
+		if (waveTimer >= waveTime) {
+			Spawning = false;
+			printf("wavetimer over!\n");
+			waveTimer = 0;
+		}
+
+		if (!Spawning) {
+			//printf("resting!\n");
+			restTimer += deltaTime;
+			if (restTimer >= restTime) {
+				Spawning = true;
+				restTimer = 0;
+				printf("Spawn now!\n");
+				wave++;
+			}
+		}
+	}
+
+	else {
+		printf("GAME over!\n");
+	}
+}
+
+glm::vec3 Game::Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos)
+{
+	//std::cout << glm::to_string(target) << std::endl;
+	//std::cout << glm::to_string(velo) << std::endl;
+	//std::cout << glm::to_string(pos) << std::endl;
+	glm::vec3 maxVelo(-10.0f, 0.f, -10.0f);
+	glm::vec3 desired = (pos - target); //gets the desired vector
+
+	desired = glm::normalize(desired) * maxVelo;
+	glm::vec3 steering = desired - velo;
+
+	glm::vec3 moveVelo = steering;  //clamp(moveVelo,velo+steering, maxVelo);
+
+	return moveVelo;
 }

@@ -345,7 +345,7 @@ void Review3Scene::InitScene()
 
 		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boat2);
 		//pbody.SetLinearVelocity(glm::vec3(8.0f, 0.f, 0.0f));//-2.0f
-		AttachCopy<TTN_Physics>(boat2, pbody);
+		//AttachCopy<TTN_Physics>(boat2, pbody);
 
 		//add a tag to the boat
 		TTN_Tag boatTag = TTN_Tag("Boat");
@@ -389,7 +389,7 @@ void Review3Scene::Update(float deltaTime)
 	Waves(3, 10.f, 30.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
 
 	SpawnerLS(deltaTime, 1.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
-	//SpawnerRS(deltaTime, 3.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerRS(deltaTime, 5.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
 	//BoatPathing(boat2, 4);
 
 	//goes through the boats vector
@@ -642,22 +642,22 @@ void Review3Scene::SpawnerLS(float deltatime, float SpawnTime) {
 		// timer = 0, boat spawn code
 		Timer = 0.F;//reset timer
 
-		boat = CreateEntity();
-		boats.push_back(boat);
+		//boat = CreateEntity();
+		boats.push_back(CreateEntity());
 
 		TTN_Renderer boatRenderer = TTN_Renderer(boatMesh, shaderProgam);
-		AttachCopy<TTN_Renderer>(boat, boatRenderer);
+		AttachCopy<TTN_Renderer>(boats[boats.size()-1], boatRenderer);
 
 		TTN_Transform boatTrans = TTN_Transform();
 		boatTrans.SetPos(glm::vec3(70.0f, -5.0f, 70.0f));
 		boatTrans.RotateFixed(glm::vec3(0.0f, 180.0f, 0.0f));
 		boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
-		AttachCopy<TTN_Transform>(boat, boatTrans);
+		AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
 
 		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boat, TTN_PhysicsBodyType::DYNAMIC, 1.0f);
 		pbody.SetHasGravity(false);
 		pbody.SetLinearVelocity(glm::vec3(-10.0f, 0.f, 0.0f));//-2.0f
-		AttachCopy<TTN_Physics>(boat, pbody);
+		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
 
 		//add a tag to the boat
 		//TTN_Tag boatTag = TTN_Tag(" Boat "+ boats.size() );
@@ -665,7 +665,7 @@ void Review3Scene::SpawnerLS(float deltatime, float SpawnTime) {
 		int r = rand() % 3 + 1; // generates path number between 1-3 (left side paths, right side path nums are 4-6)
 		//std::cout << "Num: " << r << std::endl; //random boat path
 		TTN_Tag boatTag = TTN_Tag(r); //sets boat path number to ttn_tag
-		AttachCopy<TTN_Tag>(boat, boatTag);
+		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
 	}
 }
 
