@@ -182,6 +182,19 @@ namespace Titan {
 		}
 	}
 
+	void TTN_Scene::PostRender()
+	{
+		glm::mat4 viewMat = glm::inverse(Get<TTN_Transform>(m_Cam).GetGlobal());
+
+		//create a view of all the entities with a particle system and a transform
+		auto psTransView = m_Registry->view<TTN_ParticeSystemComponent, TTN_Transform>();
+		for (auto entity : psTransView) {
+			//render the particle system
+			Get<TTN_ParticeSystemComponent>(entity).GetParticleSystemPointer()->Render(Get<TTN_Transform>(entity).GetGlobalPos(),
+				viewMat, Get<TTN_Camera>(m_Cam).GetProj());
+		}
+	}
+
 	//renders all the messes in our game
 	void TTN_Scene::Render()
 	{
@@ -221,47 +234,47 @@ namespace Titan {
 			shader->Bind();
 
 			//sets some uniforms
-			//scene level ambient lighting
-			shader->SetUniform("u_AmbientCol", m_AmbientColor);
-			shader->SetUniform("u_AmbientStrength", m_AmbientStrength);
+			if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
+				//scene level ambient lighting
+				shader->SetUniform("u_AmbientCol", m_AmbientColor);
+				shader->SetUniform("u_AmbientStrength", m_AmbientStrength);
 
-			//stuff from the light
-			glm::vec3 lightPositions[16];
-			glm::vec3 lightColor[16];
-			float lightAmbientStr[16];
-			float lightSpecStr[16];
-			float lightAttenConst[16];
-			float lightAttenLinear[16];
-			float lightAttenQuadartic[16];
+				//stuff from the light
+				glm::vec3 lightPositions[16];
+				glm::vec3 lightColor[16];
+				float lightAmbientStr[16];
+				float lightSpecStr[16];
+				float lightAttenConst[16];
+				float lightAttenLinear[16];
+				float lightAttenQuadartic[16];
 
-			for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
-				auto& light = Get<TTN_Light>(m_Lights[i]);
-				auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
-				lightPositions[i] = lightTrans.GetPos();
-				lightColor[i] = light.GetColor();
-				lightAmbientStr[i] = light.GetAmbientStrength();
-				lightSpecStr[i] = light.GetSpecularStrength();
-				lightAttenConst[i] = light.GetConstantAttenuation();
-				lightAttenLinear[i] = light.GetConstantAttenuation();
-				lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
+				for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
+					auto& light = Get<TTN_Light>(m_Lights[i]);
+					auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
+					lightPositions[i] = lightTrans.GetPos();
+					lightColor[i] = light.GetColor();
+					lightAmbientStr[i] = light.GetAmbientStrength();
+					lightSpecStr[i] = light.GetSpecularStrength();
+					lightAttenConst[i] = light.GetConstantAttenuation();
+					lightAttenLinear[i] = light.GetConstantAttenuation();
+					lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
+				}
+
+				//send all the data about the lights to glsl
+				shader->SetUniform("u_LightPos", lightPositions[0], 16);
+				shader->SetUniform("u_LightCol", lightColor[0], 16);
+				shader->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
+				shader->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
+				shader->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
+				shader->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
+				shader->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
+
+				//and tell it how many lights there actually are
+				shader->SetUniform("u_NumOfLights", (int)m_Lights.size());
+
+				//stuff from the camera
+				shader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetPos());
 			}
-
-			//send all the data about the lights to glsl
-			shader->SetUniform("u_LightPos", lightPositions[0], 16);
-			shader->SetUniform("u_LightCol", lightColor[0], 16);
-			shader->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
-			shader->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
-			shader->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
-			shader->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
-			shader->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
-
-			//and tell it how many lights there actually are
-			shader->SetUniform("u_NumOfLights", (int)m_Lights.size());
-
-			//stuff from the camera
-			shader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetPos());
-
-			//renderer.GetMat()->GetAlbedo()->Bind(0);
 
 			//if it's not the skybox shader, set some uniforms for lighting
 			if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX 
@@ -386,7 +399,7 @@ namespace Titan {
 
 			}
 			//otherwise send a default shinnies value
-			else {
+			else if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
 				shader->SetUniform("u_Shininess", 128.0f);
 			}
 
@@ -405,14 +418,6 @@ namespace Titan {
 			//and finsih by rendering the mesh
 			renderer.Render(transform.GetGlobal(), vp);
 		});
-
-		//create a view of all the entities with a particle system and a transform
-		auto psTransView = m_Registry->view<TTN_ParticeSystemComponent, TTN_Transform>();
-		for (auto entity : psTransView) {
-			//render the particle system
-			Get<TTN_ParticeSystemComponent>(entity).GetParticleSystemPointer()->Render(Get<TTN_Transform>(entity).GetGlobalPos(), 
-				viewMat, Get<TTN_Camera>(m_Cam).GetProj());
-		}
 	}
 
 	//sets wheter or not the scene should be rendered

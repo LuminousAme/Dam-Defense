@@ -140,6 +140,7 @@ namespace Titan {
 
 				TTN_Application::scenes[i]->Update(m_dt);
 				TTN_Application::scenes[i]->Render();
+				TTN_Application::scenes[i]->PostRender();
 			}
 		}
 

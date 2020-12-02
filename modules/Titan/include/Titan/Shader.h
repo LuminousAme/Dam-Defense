@@ -17,6 +17,8 @@
 #include <GLM/gtc/type_ptr.hpp>
 //logging
 #include "Logging.h"
+//textures
+#include "Texture2D.h"
 
 namespace Titan {
 	//enum for the different default shaders titan offers
@@ -171,4 +173,5 @@ namespace Titan {
 		//function to get the locations of all the uniforms
 		int __GetUniformLocation(const std::string& name);
 	};
+
 }

@@ -19,6 +19,9 @@ public:
 	//update the scene
 	void Update(float deltaTime);
 
+	//late render (terrain, water, etc.)
+	void PostRender();
+
 	//keyboard input
 	void KeyDownChecks();
 	void KeyChecks();
@@ -36,17 +39,23 @@ public:
 	TTN_Shader::sshptr shaderProgramTextured;
 	TTN_Shader::sshptr shaderProgramSkybox;
 	TTN_Shader::sshptr shaderProgramAnimatedTextured;
-	//TTN_Shader::sshptr shaderProgramWater;
-	//TTN_Shader::sshptr shaderProgramTerrain;
+	TTN_Shader::sshptr shaderProgramWater;
+	TTN_Shader::sshptr shaderProgramTerrain;
 
 	//meshes
 	TTN_Mesh::smptr cannonMesh;
 	TTN_Mesh::smptr skyboxMesh;
 	TTN_Mesh::smptr sphereMesh; //used for cannonballs and particles
+	TTN_Mesh::smptr terrainPlain;
 
 	//textures
 	TTN_Texture2D::st2dptr cannonText;
 	TTN_TextureCubeMap::stcmptr skyboxText;
+	TTN_Texture2D::st2dptr terrainMap;
+	TTN_Texture2D::st2dptr sandText;
+	TTN_Texture2D::st2dptr rockText;
+	TTN_Texture2D::st2dptr grassText;
+	TTN_Texture2D::st2dptr waterText;
 	
 	//materials
 	TTN_Material::smatptr cannonMat;
@@ -61,6 +70,8 @@ protected:
 	entt::entity cannon;
 	std::vector<entt::entity> cannonBalls;
 	entt::entity smokePS;
+	entt::entity terrain;
+	entt::entity water;
 
 //other data
 protected:
@@ -75,6 +86,14 @@ protected:
 	//the ammount of time in seconds that the player has to wait between shots
 	float playerShootCooldown;
 	float playerShootCooldownTimer;
+	//the terrain scale
+	float terrainScale;
+	//water animation control
+	float time;
+	float waveSpeed;
+	float waveBaseHeightIncrease;
+	float waveHeightMultiplier;
+	float waveLenghtMultiplier;
 
 	//smoke particle
 	TTN_ParticleTemplate smokeParticle;

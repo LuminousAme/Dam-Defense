@@ -38,9 +38,91 @@ void Game::Update(float deltaTime)
 	//if the player is on shoot cooldown, decrement the time remaining on the cooldown
 	if(playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
+	//increase the total time of the scene to make the water animated correctly
+	time += deltaTime;
+
 	printf("fps: %f\n", 1.0f/deltaTime);
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
+}
+
+void Game::PostRender() 
+{
+	//terrain 
+	{
+		//bind the shader
+		shaderProgramTerrain->Bind();
+
+		//vert shader
+		//bind the height map texture
+		terrainMap->Bind(0);
+
+		//pass the scale uniform
+		shaderProgramTerrain->SetUniform("u_scale", terrainScale);
+		//pass the mvp uniform
+		glm::mat4 mvp = Get<TTN_Camera>(camera).GetProj();
+		glm::mat4 viewMat = glm::inverse(Get<TTN_Transform>(camera).GetGlobal());
+		mvp *= viewMat;
+		mvp *= Get<TTN_Transform>(terrain).GetGlobal();
+		shaderProgramTerrain->SetUniformMatrix("MVP", mvp);
+		//pass the model uniform
+		shaderProgramTerrain->SetUniformMatrix("Model", Get<TTN_Transform>(terrain).GetGlobal());
+		//and pass the normal matrix uniform
+		shaderProgramTerrain->SetUniformMatrix("NormalMat",
+			glm::mat3(glm::inverse(glm::transpose(Get<TTN_Transform>(terrain).GetGlobal()))));
+
+		//frag shader
+		//bind the textures
+		sandText->Bind(1);
+		rockText->Bind(2);
+		grassText->Bind(3);
+
+		//send lighting from the scene
+		shaderProgramTerrain->SetUniform("u_AmbientCol", TTN_Scene::GetSceneAmbientColor());
+		shaderProgramTerrain->SetUniform("u_AmbientStrength", TTN_Scene::GetSceneAmbientLightStrength());
+
+		//render the terrain
+		terrainPlain->GetVAOPointer()->Render();
+	}
+	
+	//water 
+	{
+		//bind the shader
+		shaderProgramWater->Bind();
+
+		//vert shader
+		//pass the mvp uniform
+		glm::mat4 mvp = Get<TTN_Camera>(camera).GetProj();
+		glm::mat4 viewMat = glm::inverse(Get<TTN_Transform>(camera).GetGlobal());
+		mvp *= viewMat;
+		mvp *= Get<TTN_Transform>(water).GetGlobal();
+		shaderProgramWater->SetUniformMatrix("MVP", mvp);
+		//pass the model uniform
+		shaderProgramWater->SetUniformMatrix("Model", Get<TTN_Transform>(water).GetGlobal());
+		//and pass the normal matrix uniform
+		shaderProgramWater->SetUniformMatrix("NormalMat",
+			glm::mat3(glm::inverse(glm::transpose(Get<TTN_Transform>(water).GetGlobal()))));
+
+		//pass in data about the water animation
+		shaderProgramWater->SetUniform("time", time);
+		shaderProgramWater->SetUniform("speed", waveSpeed);
+		shaderProgramWater->SetUniform("baseHeight", waveBaseHeightIncrease);
+		shaderProgramWater->SetUniform("heightMultiplier", waveHeightMultiplier);
+		shaderProgramWater->SetUniform("waveLenghtMultiplier", waveLenghtMultiplier);
+
+		//frag shader
+		//bind the textures
+		waterText->Bind(0);
+
+		//send lighting from the scene
+		shaderProgramWater->SetUniform("u_AmbientCol", TTN_Scene::GetSceneAmbientColor());
+		shaderProgramWater->SetUniform("u_AmbientStrength", TTN_Scene::GetSceneAmbientLightStrength());
+
+		//render the water (just use the same plane as the terrain)
+		terrainPlain->GetVAOPointer()->Render();
+	}
+
+	TTN_Scene::PostRender();
 }
 
 //function to use to check for when a key is being pressed down for the first frame
@@ -79,7 +161,7 @@ void Game::MouseButtonChecks()
 		//and play the smoke particle effect
 		//Get<TTN_Transform>(smokePS).SetPos((Get<TTN_Transform>(cannon).GetGlobalPos() - 
 			//0.5f * (Get<TTN_Transform>(cannon).GetGlobalPos() - Get<TTN_Transform>(cannon).GetPos())) + 0.8f * playerDir);
-		Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.1f, 0.0f) + 0.9f * playerDir);
+		Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f, 0.0f) + 0.9f * playerDir);
 		Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
 			SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
 		Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
@@ -89,7 +171,6 @@ void Game::MouseButtonChecks()
 //function to check for when a mouse button has been released
 void Game::MouseButtonUpChecks()
 {
-
 }
 
 //sets up all the assets in the scene
@@ -124,14 +205,35 @@ void Game::SetUpAssets()
 	shaderProgramAnimatedTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
 	shaderProgramAnimatedTextured->Link();
 
+	//create a shader program for the terrain
+	shaderProgramTerrain = TTN_Shader::Create();
+	//load the shaders into the shader program
+	shaderProgramTerrain->LoadShaderStageFromFile("shaders/terrain_vert.glsl", GL_VERTEX_SHADER);
+	shaderProgramTerrain->LoadShaderStageFromFile("shaders/terrain_frag.glsl", GL_FRAGMENT_SHADER);
+	shaderProgramTerrain->Link();
+
+	//create a shader program for the water
+	shaderProgramWater = TTN_Shader::Create();
+	//load the shaders into the shader program
+	shaderProgramWater->LoadShaderStageFromFile("shaders/water_vert.glsl", GL_VERTEX_SHADER);
+	shaderProgramWater->LoadShaderStageFromFile("shaders/water_frag.glsl", GL_FRAGMENT_SHADER);
+	shaderProgramWater->Link();
+
 	////MESHES////
 	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
 	skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
 	sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
+	terrainPlain = TTN_ObjLoader::LoadFromFile("models/terrainPlain.obj");
+	terrainPlain->SetUpVao();
 
 	///TEXTURES////
 	cannonText = TTN_Texture2D::LoadFromFile("textures/metal.png");
-	skyboxText = TTN_TextureCubeMap::LoadFromImages("textures/skybox/ocean.jpg");
+	skyboxText = TTN_TextureCubeMap::LoadFromImages("textures/skybox/sky.png");
+	terrainMap = TTN_Texture2D::LoadFromFile("textures/Game Map Long.jpg");
+	sandText = TTN_Texture2D::LoadFromFile("textures/SandTexture.jpg");
+	rockText = TTN_Texture2D::LoadFromFile("textures/RockTexture.jpg");
+	grassText = TTN_Texture2D::LoadFromFile("textures/GrassTexture.jpg");
+	waterText = TTN_Texture2D::LoadFromFile("textures/water.png");
 
 	////MATERIALS////
 	cannonMat = TTN_Material::Create();
@@ -157,7 +259,7 @@ void Game::SetUpEntities()
 		camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f, 100.f);
+		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f, 1000.f);
 		Get<TTN_Camera>(camera).View();
 	}
 
@@ -258,6 +360,26 @@ void Game::SetUpEntities()
 		AttachCopy(smokePS, psComponent);
 	}
 
+	//terrain entity
+	{
+		terrain = CreateEntity();
+
+		//setup a transform for the terrain
+		TTN_Transform terrainTrans = TTN_Transform(glm::vec3(0.0f, -10.0f, 35.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(100.0f));
+		//attach that transform to the entity
+		AttachCopy(terrain, terrainTrans);
+	}
+
+	//water
+	{
+		water = CreateEntity();
+
+		//setup a transform for the water
+		TTN_Transform waterTrans = TTN_Transform(glm::vec3(0.0f, -8.0f, 35.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(93.0f));
+		//attach that transform to the entity
+		AttachCopy(water, waterTrans);
+	}
+
 	//prepare the vector of cannonballs
 	cannonBalls = std::vector<entt::entity>();
 
@@ -272,9 +394,15 @@ void Game::SetUpOtherData()
 	rotAmmount = glm::vec2(0.0f);
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
-	cannonBallForce = 1250.0f;
+	cannonBallForce = 1750.0f;
 	playerShootCooldown = 1.0f;
 	playerShootCooldownTimer = playerShootCooldown;
+	terrainScale = 0.1f;
+	time = 0.0f;
+	waveSpeed = -2.5f;
+	waveBaseHeightIncrease = 0.0f;
+	waveHeightMultiplier = 0.005f;
+	waveLenghtMultiplier = -10.0f;
 
 	//make the scene have gravity
 	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.81f, 0.0f));
@@ -305,10 +433,10 @@ void Game::PlayerRotate(float deltaTime)
 	rotAmmount += (tempMousePos - mousePos) * 5.0f * deltaTime;
 
 	//clamp the rotation to within 85 degrees of the base rotation in all the directions
-	if (rotAmmount.x > 85.0f) rotAmmount.x = 85.0f;
-	else if (rotAmmount.x < -85.0f) rotAmmount.x = -85.0f;
-	if (rotAmmount.y > 85.0f) rotAmmount.y = 85.0f;
-	else if (rotAmmount.y < -85.0f) rotAmmount.y = -85.0f;
+	if (rotAmmount.x > 80.0f) rotAmmount.x = 80.0f;
+	else if (rotAmmount.x < -80.0f) rotAmmount.x = -80.0f;
+	if (rotAmmount.y > 80.0f) rotAmmount.y = 80.0f;
+	else if (rotAmmount.y < -80.0f) rotAmmount.y = -80.0f;
 
 	//reset the rotation
 	Get<TTN_Transform>(camera).LookAlong(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -371,9 +499,12 @@ void Game::DeleteCannonballs()
 	//iterate through the vector of cannonballs, deleting the cannonball if it is at or below y = -50
 	std::vector<entt::entity>::iterator it = cannonBalls.begin();
 	while (it != cannonBalls.end()) {
-		if (Get<TTN_Transform>(*it).GetGlobalPos().y > -50.0f)
+		if (Get<TTN_Transform>(*it).GetGlobalPos().y > -50.0f) {
 			it++;
-		else
+		}
+		else {
+			DeleteEntity(*it);
 			it = cannonBalls.erase(it);
+		}	
 	}
 }
