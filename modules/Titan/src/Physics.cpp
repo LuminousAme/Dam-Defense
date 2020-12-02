@@ -126,6 +126,7 @@ namespace Titan {
 		m_trans.SetRotationQuat(glm::quat(rot.getW(), rot.getX(), rot.getY(), rot.getZ()));
 	}
 
+	
 	//reads the velocity out from bullet
 	glm::vec3 TTN_Physics::GetLinearVelocity()
 	{

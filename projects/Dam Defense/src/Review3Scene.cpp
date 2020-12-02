@@ -50,7 +50,10 @@ void Review3Scene::InitScene()
 	tree1Mesh->SetUpVao();
 	skyboxMesh = TTN_ObjLoader::LoadFromFile("SkyboxMesh.obj");
 	skyboxMesh->SetUpVao();
-
+	sphereMesh = TTN_ObjLoader::LoadFromFile("IcoSphere.obj");
+	sphereMesh->SetUpVao();
+	flamethrowerMesh = TTN_ObjLoader::LoadFromFile("Flamethrower/Flamethrower.obj");
+	flamethrowerMesh->SetUpVao();
 	swordMesh = TTN_ObjLoader::LoadFromFile("Sword.obj"); //sword, texture test
 	swordMesh->SetUpVao();
 
@@ -70,6 +73,7 @@ void Review3Scene::InitScene()
 	cannonText = TTN_Texture2D::LoadFromFile("Review3/Metal_Texture_2.jpg");
 	skyboxText = TTN_TextureCubeMap::LoadFromImages("cubemaps/skybox/ocean.jpg");
 	birdText = TTN_Texture2D::LoadFromFile("Bird/BirdTexture.png");
+	flamethrowerText = TTN_Texture2D::LoadFromFile("Flamethrower/FlamethrowerTexture.png");
 	heightmap = TTN_Texture2D::LoadFromFile("Review3/heightmap.bmp");
 
 	//create material pointers and set them up
@@ -79,7 +83,9 @@ void Review3Scene::InitScene()
 	birdMat = TTN_Material::Create();
 	birdMat->SetAlbedo(birdText);
 	birdMat->SetShininess(128.0f);
-
+	flamethrowerMat = TTN_Material::Create();
+	flamethrowerMat->SetAlbedo(flamethrowerText);
+	flamethrowerMat->SetShininess(128.0f);
 	cannonMat = TTN_Material::Create();
 	cannonMat->SetAlbedo(cannonText);
 	cannonMat->SetShininess(128.0f);
@@ -93,9 +99,10 @@ void Review3Scene::InitScene()
 	heightMat->SetShininess(128.0f);
 
 #pragma endregion
+
 	testParticle = TTN_ParticleTemplate();
 	testParticle.SetMat(waterMat);
-	testParticle.SetMesh(tree1Mesh);
+	testParticle.SetMesh(sphereMesh);
 	testParticle.SetOneEndColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
 	testParticle.SetOneEndSize(0.01f);
 	testParticle.SetOneEndSpeed(2.0f);
@@ -103,6 +110,20 @@ void Review3Scene::InitScene()
 	testParticle.SetOneStartColor(glm::vec4(1.0f));
 	testParticle.SetOneStartSize(0.01f);
 	testParticle.SetOneStartSpeed(1.0f);
+
+	fireMat = TTN_Material::Create();
+	fireMat->SetAlbedo(nullptr); //do this to be sure titan uses it's default white texture for the particle
+
+	fireParticle = TTN_ParticleTemplate();
+	fireParticle.SetMat(fireMat);
+	fireParticle.SetMesh(sphereMesh);
+	fireParticle.SetOneEndColor(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+	fireParticle.SetOneEndSize(0.80f);
+	fireParticle.SetOneEndSpeed(4.0f);
+	fireParticle.SetOneLifetime(1.5f);
+	fireParticle.SetOneStartColor(glm::vec4(1.0f, 0.60f, 0.0f, 1.0f));
+	fireParticle.SetOneStartSize(1.0f);
+	fireParticle.SetOneStartSpeed(8.0f);
 
 	TTN_Application::TTN_Input::SetCursorLocked(true);
 
@@ -384,6 +405,10 @@ void Review3Scene::KeyDownChecks()
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Q)) {
 		BirdBomb();
 	}
+
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Two)) {
+		Flamethrower();
+	}
 }
 
 void Review3Scene::KeyChecks()
@@ -463,7 +488,7 @@ void Review3Scene::BoatPathing(entt::entity boatt, int path)
 				tBoat.RotateFixed(glm::vec3(0.0f, -0.55f, 0.0f));
 			}
 			//pBoat.SetLinearVelocity(Seek(glm::vec3(0.0f, -5.0f, 5.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-			pBoat.AddForce(Seek(glm::vec3(0.0f, -5.0f, 5.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(5.0f, -5.0f, 5.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 		//	//pBoat.SetLinearVelocity(Seek(glm::vec3(30.f, -5.f, 50.f), pBoat.GetLinearVelocity(), tBoat.GetPos(), deltaTime));
 		//	std::cout << glm::to_string(pBoat.GetLinearVelocity()) << std::endl;}
@@ -541,8 +566,6 @@ void Review3Scene::BoatPathing(entt::entity boatt, int path)
 	}
 }
 
-//note this spawner code only spawns code on the left side of the map (because of the boat pos)
-//to spawn on the right side can make a new function with a few changed values
 void Review3Scene::SpawnerLS(float deltatime, float SpawnTime) {
 	//increment timer
 	Timer += deltatime;
@@ -641,7 +664,50 @@ void Review3Scene::Waves(int num, float restTime, float waveTime, float deltaTim
 	}
 }
 
+void Review3Scene::Flamethrower() {
+	flamethrower = CreateEntity();
+
+	//setup a mesh renderer for the cannon
+	TTN_Renderer ftRenderer = TTN_Renderer(flamethrowerMesh, shaderProgamTextured);
+	ftRenderer.SetMat(flamethrowerMat);
+	//attach that renderer to the entity
+	AttachCopy<TTN_Renderer>(flamethrower, ftRenderer);
+
+	//setup a transform for the cannon
+	TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f, -3.0f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
+
+	//attach that transform to the entity
+	AttachCopy<TTN_Transform>(flamethrower, ftTrans);
+
+	{
+		ftParticle = CreateEntity();
+
+		//setup a transfrom for the particle system
+		TTN_Transform firePSTrans = TTN_Transform(glm::vec3(3.5f, -3.0f, 4.5f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f));
+		//attach that transform to the entity
+		AttachCopy(ftParticle, firePSTrans);
+
+		//setup a particle system for the particle system
+		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1200, 400, fireParticle, 4.0f, true);
+		ps->MakeConeEmitter(20.0f, glm::vec3(90.0f, 0.0f, 0.0f));
+
+		//setup a particle system component
+		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
+		//attach the particle system component to the entity
+		AttachCopy(ftParticle, psComponent);
+	}
+	//Get<TTN_ParticeSystemComponent>(ftParticle).GetParticleSystemPointer()->Burst(450);
+
+}
+
 void Review3Scene::BirdBomb() {
+	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
+	playerDir = glm::vec3((glm::toMat4(glm::quat(glm::radians(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f))))) * glm::vec4(playerDir, 1.0f));
+
+	playerDir = glm::normalize(playerDir) * (glm::length(playerDir) * 95.f);
+
+	std::cout << glm::to_string(playerDir) << std::endl;
+
 	bird = CreateEntity();
 
 	//setup a mesh renderer for the cannon
@@ -651,20 +717,42 @@ void Review3Scene::BirdBomb() {
 	AttachCopy<TTN_Renderer>(bird, birdRenderer);
 
 	//setup a transform for the cannon
-	TTN_Transform birdTrans = TTN_Transform(glm::vec3(0.0f, -0.4f, -0.25f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
+	TTN_Transform birdTrans = TTN_Transform(glm::vec3(playerDir), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
+	birdTrans.SetPos(playerDir);
 	birdTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
 	//attach that transform to the entity
 	AttachCopy<TTN_Transform>(bird, birdTrans);
 
 	TTN_Physics pbody = TTN_Physics(birdTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), bird, TTN_PhysicsBodyType::DYNAMIC, 1.0f);
 	pbody.SetHasGravity(true); //doesn't do anything for now
-	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
-	playerDir = glm::vec3(glm::toMat4(glm::quat(glm::radians(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f))))
-		* glm::vec4(playerDir, 1.0f));
-	playerDir = glm::normalize(playerDir);
-	glm::vec3 vel = 10.f * playerDir;
-	std::cout << glm::to_string(vel) << std::endl;
-	pbody.SetLinearVelocity(glm::vec3(vel.x, vel.y, vel.z));
+
+	glm::vec3 vel = 20.f * playerDir;
+	//std::cout << glm::to_string(vel) << std::endl;
+	AttachCopy<TTN_Physics>(bird, pbody);
+
+	//glm::vec3 bpos = Get<TTN_Transform>(*it).GetPos();
+	//glm::vec3 cross = glm::cross(bpos, playerDir);
+	//float l = glm::length(cross);
+	//pbody.SetLinearVelocity(glm::normalize(cross) * 10.f * l);
+	entt::entity b;
+	float shortest(1.0f);
+	std::vector<entt::entity>::iterator it = boats.begin();
+	while (it != boats.end()) {
+		if (glm::distance(Get<TTN_Transform>(*it).GetGlobalPos(), playerDir) < shortest) {
+			shortest = glm::distance(Get<TTN_Transform>(*it).GetGlobalPos(), playerDir);
+			b = *it;
+		}
+
+		if (Get<TTN_Transform>(*it).GetGlobalPos() != playerDir) {
+			it++;
+			//pbody.SetLinearVelocity(vel);
+		}
+		else {
+			it++;
+		}
+	}
+
+	//BirdSeek();
 }
 
 glm::vec3 Review3Scene::Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos)

@@ -35,7 +35,9 @@ public:
 	void SpawnerLS(float deltatime, float SpawnTime);
 	void SpawnerRS(float deltatime, float SpawnTime);
 	void Waves(int num, float restTime, float waveTime, float deltaTime );
+	void Flamethrower();
 	void BirdBomb();
+	void BirdSeek();
 
 	glm::vec3 Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos);
 
@@ -51,25 +53,30 @@ public:
 	TTN_Mesh::smptr boatMesh;
 	TTN_Mesh::smptr cannonMesh;
 	TTN_Mesh::smptr plane;
+	TTN_Mesh::smptr sphereMesh;
 	TTN_Mesh::smptr tree1Mesh;
 	TTN_Mesh::smptr skyboxMesh;
 	TTN_Mesh::smptr birdMesh;
+	TTN_Mesh::smptr flamethrowerMesh;
 
 	//textures
 	TTN_Texture2D::st2dptr waterText;
 	TTN_Texture2D::st2dptr birdText;
 	TTN_Texture2D::st2dptr cannonText;
+	TTN_Texture2D::st2dptr flamethrowerText;
 
 	TTN_TextureCubeMap::stcmptr skyboxText;
 	TTN_Texture2D::st2dptr heightmap;
 
 	//materials
 	TTN_Material::smatptr waterMat;
+	TTN_Material::smatptr flamethrowerMat;
 	TTN_Material::smatptr birdMat;
 
 	TTN_Material::smatptr cannonMat;
 	TTN_Material::smatptr skyboxMat;
 	TTN_Material::smatptr heightMat;
+	TTN_Material::smatptr fireMat;
 
 	TTN_Mesh::smptr swordMesh;
 	TTN_Texture2D::st2dptr swordText;
@@ -98,6 +105,7 @@ protected:
 	entt::entity tree5;
 
 	entt::entity bird;
+	entt::entity flamethrower;
 	
 	
 	entt::entity debug;//used to look at positions on the map
@@ -111,9 +119,23 @@ protected:
 	entt::entity skybox;
 	entt::entity height;
 	entt::entity testParticleSystem;
+	entt::entity ftParticle;
 
 	//others
 	glm::vec2 rotAmmount;
 	glm::vec2 mousePos; 
 	TTN_ParticleTemplate testParticle;
+	TTN_ParticleTemplate fireParticle;
 };
+
+inline float SmoothStep(float t) {
+	return (t * t * (3.0f - 2.0f * t));
+}
+
+inline float FastStart(float t) {
+	return std::cbrt(t);
+}
+
+inline float SlowStart(float t) {
+	return (t * t * t);
+}
