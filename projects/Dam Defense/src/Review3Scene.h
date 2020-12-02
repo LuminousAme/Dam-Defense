@@ -2,7 +2,6 @@
 //Review3Scene.h - header for the class that inherits from the scene class to make a scene represneting a demo of our final product for review 3
 #pragma once
 
-//#include "Titan/Particle.h"
 #include "Titan/Application.h"
 #include "Titan/ObjLoader.h"
 #include <iostream>

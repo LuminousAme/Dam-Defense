@@ -25,9 +25,11 @@ namespace Titan {
 		void SetActiveAnim(int index);
 
 		//gets the current animation
-		TTN_MorphAnimation& getActiveAnim() { return m_Anims[m_CurrentAnim]; }
+		TTN_MorphAnimation& getActiveAnimRef() { return m_Anims[m_CurrentAnim]; }
 		//gets the animation at a given index
-		TTN_MorphAnimation& getAnimAtIndex(int index) { return m_Anims[m_CurrentAnim]; }
+		TTN_MorphAnimation& getAnimRefAtIndex(int index) { return m_Anims[m_CurrentAnim]; }
+		//gets the index of the current animation
+		int getActiveAnim() { return m_CurrentAnim; }
 
 	private:
 		std::vector<TTN_MorphAnimation> m_Anims;

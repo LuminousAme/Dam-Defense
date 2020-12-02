@@ -159,7 +159,7 @@ namespace Titan {
 		~TTN_Application() = default;
 
 		//function to initilize the window
-		static void Init(const std::string name, int width, int height);
+		static void Init(const std::string name, int width, int height, bool fullScreen = false);
 
 		//gets wheter or not the application is closing 
 		static bool GetIsClosing();
