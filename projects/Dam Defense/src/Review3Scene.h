@@ -85,7 +85,7 @@ public:
 
 	glm::vec3 playerDir;
 
-	bool Flaming = false; //if flamethrowings are active right now
+	bool Flaming = false; //if flamethrowers are active right now
 	float FlameTimer = 0.0f; //flamethrower cooldown
 	float FlameAnim = 0.0f; //flamethrower
 

@@ -734,8 +734,8 @@ void Review3Scene::Waves(int num, float restTime, float waveTime, float deltaTim
 void Review3Scene::Flamethrower() {
 
 	if (FlameTimer == 0.0f) { //cooldown is zero
-		FlameTimer = 6.f;
-		Flaming = true;
+		FlameTimer = 6.f; // set cooldown
+		Flaming = true;// set flaming to true
 
 		for (int i = 0; i < 6; i++) {
 
