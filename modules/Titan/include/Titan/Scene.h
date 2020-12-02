@@ -75,6 +75,7 @@ namespace Titan {
 		//virtual functions for polymorphism 
 		//updates all the entities in the scene
 		virtual void Update(float deltaTime);
+		virtual void PostRender();
 
 		//input checks
 		//keyboard
