@@ -15,6 +15,7 @@ namespace Titan {
 		TTN_Tag(std::string name) { m_name = name, m_path = 0; }
 		TTN_Tag(int path) { m_path = path, m_name = std::string(); }
 		TTN_Tag(std::string name, int path) { m_path = path, m_name = name; }
+		TTN_Tag(std::string name, int path, int num) { m_path = path, m_name = name, m_num = num; }
 
 		//default destructor
 		~TTN_Tag() = default;
@@ -31,10 +32,12 @@ namespace Titan {
 		//gets the name of the object
 		std::string getName() { return m_name; }
 		int getPath() { return m_path; }
+		int getNum() { return m_num; }
 
 	private:
 		//stores the name of the object
 		std::string m_name;
 		int m_path; //path of the boat entity
+		int m_num; // boat number
 	};
 }
