@@ -351,8 +351,8 @@ namespace Titan {
 				}
 						
 				//if they're using an animator 
-				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR
-					|| shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_COLOR) {
+				if (shader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR
+					|| shader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_COLOR) {
 					//try to get an animator component 
 					if (Has<TTN_MorphAnimator>(entity)) {
 						shader->SetUniform("t", Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getInterpolationParameter());
