@@ -152,6 +152,7 @@ protected:
 	glm::vec3 Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos);
 
 	void Flamethrower();
+	void Collisions();
 
 	void DeleteFlamethrowers();
 

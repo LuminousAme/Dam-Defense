@@ -14,6 +14,8 @@ namespace Titan {
 		//constructor with data
 		TTN_Tag(std::string name) { m_name = name, m_path = 0; }
 		TTN_Tag(int path) { m_path = path, m_name = std::string(); }
+		TTN_Tag(std::string name, int path) { m_path = path, m_name = name; }
+
 		//default destructor
 		~TTN_Tag() = default;
 

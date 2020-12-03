@@ -5,7 +5,6 @@
 #include "Game.h"
 #include "glm/ext.hpp"
 
-
 //default constructor
 Game::Game()
 	: TTN_Scene()
@@ -40,10 +39,10 @@ void Game::Update(float deltaTime)
 	//if the player is on shoot cooldown, decrement the time remaining on the cooldown
 	if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
-	
+	//parameters: number of waves, rest time between waves, length of waves, deltatime
 	Waves(3, 10.f, 30.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
-	SpawnerLS(deltaTime, 1.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
-	SpawnerRS(deltaTime, 1.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerLS(deltaTime, 3.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerRS(deltaTime, 10.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
 	//goes through the boats vector
 	for (int i = 0; i < boats.size(); i++) {
@@ -79,9 +78,9 @@ void Game::Update(float deltaTime)
 				std::cout << "ERASED " << std::endl;
 			}
 		}
-
 	}
 
+	Collisions(); //collision check
 
 	//move camera for debugging
 #pragma region camera moving
@@ -203,44 +202,40 @@ void Game::PostRender()
 //function to use to check for when a key is being pressed down for the first frame
 void Game::KeyDownChecks()
 {
-
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Two)) {
 		if (FlameTimer == 0.0f) { //cooldown is zero
 			Flamethrower();
 		}
-
 	}
-
 
 	auto& transCamera = Get<TTN_Transform>(debug);
 
 	glm::vec3 movement = transCamera.GetPos();//glm::vec3(0.0f);
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::F)) {
-		movement.x += -1.0f ;
+		movement.x += -1.0f;
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::V)) {
-		movement.x += 1.0f ;
+		movement.x += 1.0f;
 	}
 
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::C)) {
-		movement.z += 1.0f ;
+		movement.z += 1.0f;
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::B)) {
-		movement.z += -1.0f ;
+		movement.z += -1.0f;
 	}
 
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::N)) {
-		movement.y += 1.0f ;
+		movement.y += 1.0f;
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::M)) {
-		movement.y += -1.0f ;
+		movement.y += -1.0f;
 	}
 
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::P)) {
 		std::cout << glm::to_string(transCamera.GetPos()) << std::endl;
 	}
 	transCamera.SetPos(movement);
-
 }
 
 //function to cehck for when a key is being pressed
@@ -357,7 +352,6 @@ void Game::SetUpAssets()
 	waterText = TTN_Texture2D::LoadFromFile("textures/water.png");
 	boat1Text = TTN_Texture2D::LoadFromFile("textures/Boat 1 Texture.png");
 	flamethrowerText = TTN_Texture2D::LoadFromFile("textures/FlamethrowerTexture.png");
-
 
 	////MATERIALS////
 	cannonMat = TTN_Material::Create();
@@ -558,7 +552,7 @@ void Game::SetUpOtherData()
 	rotAmmount = glm::vec2(0.0f);
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
-	cannonBallForce = 1750.0f;
+	cannonBallForce = 3500.0f;
 	playerShootCooldown = 1.0f;
 	playerShootCooldownTimer = playerShootCooldown;
 	terrainScale = 0.1f;
@@ -569,7 +563,7 @@ void Game::SetUpOtherData()
 	waveLenghtMultiplier = -10.0f;
 
 	//make the scene have gravity
-	
+
 	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));
 
 	//create the particle templates
@@ -600,7 +594,6 @@ void Game::SetUpOtherData()
 		fireParticle.SetOneStartSize(0.5f);
 		fireParticle.SetOneStartSpeed(8.0f);
 	}
-
 }
 
 //called by update once a frame, allows the player to rotate
@@ -613,10 +606,10 @@ void Game::PlayerRotate(float deltaTime)
 	rotAmmount += (tempMousePos - mousePos) * 5.0f * deltaTime;
 
 	//clamp the rotation to within 85 degrees of the base rotation in all the directions
-	if (rotAmmount.x > 80.0f) rotAmmount.x = 80.0f;
-	else if (rotAmmount.x < -80.0f) rotAmmount.x = -80.0f;
-	if (rotAmmount.y > 80.0f) rotAmmount.y = 80.0f;
-	else if (rotAmmount.y < -80.0f) rotAmmount.y = -80.0f;
+	if (rotAmmount.x > 85.0f) rotAmmount.x = 85.0f;
+	else if (rotAmmount.x < -85.0f) rotAmmount.x = -85.0f;
+	if (rotAmmount.y > 85.0f) rotAmmount.y = 85.0f;
+	else if (rotAmmount.y < -85.0f) rotAmmount.y = -85.0f;
 
 	//reset the rotation
 	Get<TTN_Transform>(camera).LookAlong(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -664,13 +657,16 @@ void Game::CreateCannonball()
 		//set up a physics body for the cannonball
 		TTN_Physics cannonBallPhysBod = TTN_Physics(cannonBallTrans.GetPos(), glm::vec3(0.0f), cannonBallTrans.GetScale(),
 			cannonBalls[cannonBalls.size() - 1]);
-		cannonBallPhysBod.SetHasGravity(true); //be explict about the cannonball being affected by gravity
+		
 		//attach that physics body to the entity
 		AttachCopy(cannonBalls[cannonBalls.size() - 1], cannonBallPhysBod);
+
+		TTN_Tag ballTag = TTN_Tag("Ball"); //sets boat path number to ttn_tag
+		AttachCopy<TTN_Tag>(cannonBalls[cannonBalls.size() - 1], ballTag);
 	}
 
 	//after the cannonball has been created, get the physics body and apply a force along the player's direction
-	Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1]).AddForce((cannonBallForce * playerDir) ); //* glm::vec3 (1.f,-9.81f,1.0f));
+	Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1]).AddForce((cannonBallForce * playerDir));
 }
 
 //function that will check the positions of the cannonballs each frame and delete any that're too low
@@ -679,7 +675,7 @@ void Game::DeleteCannonballs()
 	//iterate through the vector of cannonballs, deleting the cannonball if it is at or below y = -50
 	std::vector<entt::entity>::iterator it = cannonBalls.begin();
 	while (it != cannonBalls.end()) {
-		if (Get<TTN_Transform>(*it).GetGlobalPos().y > -50.0f) {
+		if (Get<TTN_Transform>(*it).GetGlobalPos().y > -40.0f) {
 			it++;
 		}
 		else {
@@ -702,7 +698,7 @@ void Game::BoatPathing(entt::entity boatt, int path)
 				tBoat.RotateFixed(glm::vec3(0.0f, -0.55f, 0.0f));
 			}
 			//pBoat.SetLinearVelocity(Seek(glm::vec3(0.0f, -5.0f, 5.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-			pBoat.AddForce(Seek(glm::vec3(8.0f, -8.0f, 0.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(8.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -713,13 +709,11 @@ void Game::BoatPathing(entt::entity boatt, int path)
 				tBoat.RotateFixed(glm::vec3(0.0f, -0.75f, 0.0f));
 			}
 			//pBoat.SetLinearVelocity(Seek(glm::vec3(20.0f, -5.0f, 3.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-			pBoat.AddForce(Seek(glm::vec3(40.0f, -8.0f, 0.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(40.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 
 		if (tBoat.GetPos().z <= 40.f) {
-
 		}
-
 	}
 
 	//center left
@@ -736,7 +730,7 @@ void Game::BoatPathing(entt::entity boatt, int path)
 				tBoat.RotateFixed(glm::vec3(0.0f, -0.95f, 0.0f));
 			}
 			//pBoat.SetLinearVelocity(Seek(glm::vec3(2.0f, -5.0f, 3.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-			pBoat.AddForce(Seek(glm::vec3(4.0f, -8.0f, 0.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(4.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -747,7 +741,7 @@ void Game::BoatPathing(entt::entity boatt, int path)
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.5f, 0.0f));
 			}
 			//pBoat.SetLinearVelocity(Seek(glm::vec3(0.0f, -5.0f, 5.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-			pBoat.AddForce(Seek(glm::vec3(-8.0f, -8.0f, 0.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(-8.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -758,7 +752,7 @@ void Game::BoatPathing(entt::entity boatt, int path)
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.75f, 0.0f));
 			}
 			//pBoat.SetLinearVelocity(Seek(glm::vec3(-20.0f, -5.0f, 3.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-			pBoat.AddForce(Seek(glm::vec3(-40.0f, -8.0f, 0.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(-40.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -768,7 +762,6 @@ void Game::BoatPathing(entt::entity boatt, int path)
 			if (tBoat.GetRotation().y <= 65.0f) {
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.6f, 0.0f));
 			}
-			//pBoat.SetLinearVelocity(Seek(glm::vec3(-2.0f, -5.0f, 40.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 			pBoat.AddForce(Seek(glm::vec3(-5.0f, -8.0f, 53.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 
@@ -777,11 +770,12 @@ void Game::BoatPathing(entt::entity boatt, int path)
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.95f, 0.0f));
 			}
 			//pBoat.SetLinearVelocity(Seek(glm::vec3(-2.0f, -5.0f, 4.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-			pBoat.AddForce(Seek(glm::vec3(-4.0f, -8.0f, 0.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(-4.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 }
 
+//spawn left side boats
 void Game::SpawnerLS(float deltatime, float SpawnTime) {
 	//increment timer
 	Timer += deltatime;
@@ -802,20 +796,21 @@ void Game::SpawnerLS(float deltatime, float SpawnTime) {
 		boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
 		AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
 
-		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boats[boats.size() - 1],TTN_PhysicsBodyType::DYNAMIC);
+		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(4.5f, 3.5f, 7.5f), boats[boats.size() - 1], TTN_PhysicsBodyType::DYNAMIC);
 		pbody.SetLinearVelocity(glm::vec3(-25.0f, 0.0f, 0.0f));//-2.0f
-		pbody.SetHasGravity(false);
+
 		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
 
 		int r = rand() % 3 + 1; // generates path number between 1-3 (left side paths, right side path nums are 4-6)
 		//std::cout << "Num: " << r << std::endl; //random boat path
-		TTN_Tag boatTag = TTN_Tag(r); //sets boat path number to ttn_tag
+		TTN_Tag boatTag = TTN_Tag("Boat", r); //sets boat path number to ttn_tag
 		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
 
-		//Get<TTN_Physics>(boats[boats.size() - 1]).SetHasGravity(false);
 	}
+
 }
 
+//spawn right side boats
 void Game::SpawnerRS(float deltatime, float SpawnTime)
 {
 	Timer2 += deltatime;
@@ -835,7 +830,7 @@ void Game::SpawnerRS(float deltatime, float SpawnTime)
 		boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
 		AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
 
-		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), boats[boats.size() - 1]);
+		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(4.5f, 3.5f, 7.5f), boats[boats.size() - 1]);
 		pbody.SetHasGravity(false);
 		pbody.SetLinearVelocity(glm::vec3(25.0f, 0.0f, 0.0f));//-2.0f
 		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
@@ -843,11 +838,12 @@ void Game::SpawnerRS(float deltatime, float SpawnTime)
 		int r = rand() % 3 + 4; // generates path number between 4-6 (left side paths 1-3, right side path nums are 4-6)
 		//std::cout << "Num: " << r << std::endl; //random boat path
 
-		TTN_Tag boatTag = TTN_Tag(r); //sets boat path number to ttn_tag
+		TTN_Tag boatTag = TTN_Tag("Boat", r); //sets boat path number to ttn_tag
 		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
 	}
 }
 
+//wave function: parameters: number of waves, rest time between waves, length of waves, deltatime
 void Game::Waves(int num, float restTime, float waveTime, float deltaTime)
 {
 	if (num > wave) {
@@ -895,13 +891,11 @@ glm::vec3 Game::Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos)
 
 //cooldown is set in this function, change flame timer
 void Game::Flamethrower() {
-
 	if (FlameTimer == 0.0f) { //cooldown is zero
-		FlameTimer = 6.f; // set cooldown
+		FlameTimer = 30.f; // set cooldown
 		Flaming = true;// set flaming to true
 
 		for (int i = 0; i < 6; i++) {
-
 			//flamethrower entities
 			{
 				flamethrowers.push_back(CreateEntity());
@@ -970,23 +964,81 @@ void Game::Flamethrower() {
 				//attach the particle system component to the entity
 				AttachCopy(flames[i], psComponent);
 			}
+		}
+	}
 
+	else { //otherwise nothing happens
+		Flaming = false;
+	}
+}
+
+void Game::Collisions()
+{
+	//collision checks
+	//get the collisions from the base scene
+	std::vector<TTN_Collision::scolptr> collisionsThisFrame = TTN_Scene::GetCollisions();
+
+	//iterate through the collisions
+	for (int i = 0; i < collisionsThisFrame.size(); i++) {
+		//get both the rigidbodies
+		//const btRigidBody* b1 = collisionsThisFrame[i]->GetBody1();
+		//const btRigidBody* b2 = collisionsThisFrame[i]->GetBody2();
+		//get the entity number from each body
+		//entt::entity entity1Ptr = static_cast<entt::entity>(reinterpret_cast<uint32_t>(b1->getUserPointer()));
+		//entt::entity entity2Ptr = static_cast<entt::entity>(reinterpret_cast<uint32_t>(b2->getUserPointer()));
+		//entt::entity entity1Ptr = *static_cast<entt::entity*>(b1->getUserPointer());
+		//entt::entity entity2Ptr = *static_cast<entt::entity*>(b2->getUserPointer());
+		entt::entity entity1Ptr = collisionsThisFrame[i]->GetBody1();
+		entt::entity entity2Ptr = collisionsThisFrame[i]->GetBody2();
+
+		//entt::entity tempTankRed = redPlayer;
+		//entt::entity tempTankBlue = bluePlayer;
+
+		//check if both entities still exist
+		if (TTN_Scene::GetScene()->valid(entity1Ptr) && TTN_Scene::GetScene()->valid(entity2Ptr)) {
+			bool cont = true;
+			//if they do, then check they both have tags
+			if (TTN_Scene::Has<TTN_Tag>(entity1Ptr) && TTN_Scene::Has<TTN_Tag>(entity2Ptr)) {
+				//if they do, then do tag comparisons
+
+				//if one is a boat and the other is a cannonball
+				if (cont && ((Get<TTN_Tag>(entity1Ptr).getName() == "Boat" && Get<TTN_Tag>(entity2Ptr).getName() == "Ball") ||
+					(Get<TTN_Tag>(entity1Ptr).getName() == "Ball" && Get<TTN_Tag>(entity2Ptr).getName() == "Boat"))) {
+					
+					std::vector<entt::entity>::iterator it = cannonBalls.begin();
+					while (it != cannonBalls.end()) {
+						if (entity1Ptr == *it || entity2Ptr == *it) {
+							DeleteEntity(*it);
+							it = cannonBalls.erase(it);}
+						else {
+							it++;}
+					}
+
+					std::vector<entt::entity>::iterator itt = boats.begin();
+					while (itt != boats.end()) {
+						if (entity1Ptr == *itt || entity2Ptr == *itt) {
+							DeleteEntity(*itt);
+							itt = boats.erase(itt);
+						}
+						else {
+							itt++;
+						}
+					}
+
+				}
+			}
+		
+			std::cout << "WORKING SO FAR" << std::endl;
 		}
 
 
 	}
 
-	else { //otherwise nothing happens
-		Flaming = false;
-		std::cout << "END CURRENT BOAT " << std::endl;
-	}
-
-
 
 }
 
+//called to delete particle system and flamethrower models
 void Game::DeleteFlamethrowers() {
-
 	std::vector<entt::entity>::iterator it = flamethrowers.begin();
 	while (it != flamethrowers.end()) {
 		DeleteEntity(*it);
@@ -999,6 +1051,4 @@ void Game::DeleteFlamethrowers() {
 		DeleteEntity(*itt);
 		itt = flames.erase(itt);
 	}
-
-
 }
