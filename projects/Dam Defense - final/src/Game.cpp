@@ -40,7 +40,7 @@ void Game::Update(float deltaTime)
 	if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
 	//parameters: number of waves, rest time between waves, length of waves, deltatime
-	Waves(3, 10.f, 30.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
+	Waves(3, 2.f, 40.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
 	SpawnerLS(deltaTime, 3.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
 	SpawnerRS(deltaTime, 10.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
@@ -796,14 +796,14 @@ void Game::SpawnerLS(float deltatime, float SpawnTime) {
 		boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
 		AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
 
-		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(4.5f, 3.5f, 7.5f), boats[boats.size() - 1], TTN_PhysicsBodyType::DYNAMIC);
+		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.0f, 4.0f, 8.95f), boats[boats.size() - 1], TTN_PhysicsBodyType::DYNAMIC);
 		pbody.SetLinearVelocity(glm::vec3(-25.0f, 0.0f, 0.0f));//-2.0f
 
 		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
 
 		int r = rand() % 3 + 1; // generates path number between 1-3 (left side paths, right side path nums are 4-6)
 		//std::cout << "Num: " << r << std::endl; //random boat path
-		TTN_Tag boatTag = TTN_Tag("Boat", r); //sets boat path number to ttn_tag
+		TTN_Tag boatTag = TTN_Tag("Boat", 3); //sets boat path number to ttn_tag
 		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
 
 	}
@@ -830,7 +830,7 @@ void Game::SpawnerRS(float deltatime, float SpawnTime)
 		boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
 		AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
 
-		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(4.5f, 3.5f, 7.5f), boats[boats.size() - 1]);
+		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.0f, 4.0f, 8.95f), boats[boats.size() - 1]);
 		pbody.SetHasGravity(false);
 		pbody.SetLinearVelocity(glm::vec3(25.0f, 0.0f, 0.0f));//-2.0f
 		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
@@ -838,7 +838,7 @@ void Game::SpawnerRS(float deltatime, float SpawnTime)
 		int r = rand() % 3 + 4; // generates path number between 4-6 (left side paths 1-3, right side path nums are 4-6)
 		//std::cout << "Num: " << r << std::endl; //random boat path
 
-		TTN_Tag boatTag = TTN_Tag("Boat", r); //sets boat path number to ttn_tag
+		TTN_Tag boatTag = TTN_Tag("Boat", 6); //sets boat path number to ttn_tag
 		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
 	}
 }
