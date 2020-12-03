@@ -59,7 +59,6 @@ namespace Titan {
 					if (m_timer > m_frameTimes[m_currentIndex]) {
 						//move to the next frame
 						m_currentIndex++;
-						m_nextIndex = m_currentIndex + 1;
 
 						//if it's on the last for current index
 						if (m_currentIndex > m_frameIndices.size() - 1) {
@@ -72,6 +71,8 @@ namespace Titan {
 							else
 								m_currentIndex = m_frameIndices.size() - 1;
 						}
+
+						m_nextIndex = m_currentIndex + 1;
 
 						//if it's on the last for next index
 						if (m_nextIndex > m_frameIndices.size() - 1) {

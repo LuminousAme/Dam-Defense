@@ -83,34 +83,17 @@ void Game::Update(float deltaTime)
 
 	Collisions(); //collision check
 
-	//move camera for debugging
-#pragma region camera moving
-	auto& transCamera = Get<TTN_Transform>(camera);
-
-	glm::vec3 movement = transCamera.GetPos();//glm::vec3(0.0f);
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
-		movement.x += -22.0f * deltaTime;
+	//move the birds
+	birdTimer += deltaTime;
+	birdTimer = fmod(birdTimer, 20);
+	float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
+	for (int i = 0; i < 3; i++) {
+		if (i == 0) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp(birdBase, birdTarget, t));
+		if (i == 1) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
+		(birdBase + glm::vec3(3.0f, -3.0f, 3.0f), birdTarget + glm::vec3(3.0f, -3.0f, 3.0f), t));
+		if (i == 2) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
+		(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f), birdTarget + glm::vec3(-3.0f, -3.0f, -3.0f), t));
 	}
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
-		movement.x += 22.0f * deltaTime;
-	}
-
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
-		movement.z += 22.0f * deltaTime;
-	}
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
-		movement.z += -22.0f * deltaTime;
-	}
-
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Z)) {
-		movement.y += 22.0f * deltaTime;
-	}
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::X)) {
-		movement.y += -22.0f * deltaTime;
-	}
-
-	transCamera.SetPos(movement);
-#pragma endregion
 
 	//increase the total time of the scene to make the water animated correctly
 	time += deltaTime;
@@ -208,35 +191,6 @@ void Game::KeyDownChecks()
 			Flamethrower();
 		}
 	}
-
-	auto& transCamera = Get<TTN_Transform>(debug);
-
-	glm::vec3 movement = transCamera.GetPos();//glm::vec3(0.0f);
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::F)) {
-		movement.x += -1.0f;
-	}
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::V)) {
-		movement.x += 1.0f;
-	}
-
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::C)) {
-		movement.z += 1.0f;
-	}
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::B)) {
-		movement.z += -1.0f;
-	}
-
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::N)) {
-		movement.y += 1.0f;
-	}
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::M)) {
-		movement.y += -1.0f;
-	}
-
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::P)) {
-		std::cout << glm::to_string(transCamera.GetPos()) << std::endl;
-	}
-	transCamera.SetPos(movement);
 }
 
 //function to cehck for when a key is being pressed
@@ -344,6 +298,11 @@ void Game::SetUpAssets()
 	boat3Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 3.obj");
 	terrainPlain = TTN_ObjLoader::LoadFromFile("models/terrainPlain.obj");
 	terrainPlain->SetUpVao();
+	birdMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/bird/bird", 2);
+	treeMesh[0] = TTN_ObjLoader::LoadFromFile("models/Tree.obj");
+	treeMesh[1] = TTN_ObjLoader::LoadFromFile("models/Tree2.obj");
+	treeMesh[2] = TTN_ObjLoader::LoadFromFile("models/Tree3.obj");
+	damMesh = TTN_ObjLoader::LoadFromFile("models/Dam.obj");
 
 	///TEXTURES////
 	cannonText = TTN_Texture2D::LoadFromFile("textures/metal.png");
@@ -357,6 +316,9 @@ void Game::SetUpAssets()
 	boat2Text = TTN_Texture2D::LoadFromFile("textures/Boat 2 Texture.png");
 	boat3Text = TTN_Texture2D::LoadFromFile("textures/Boat 3 Texture.png");
 	flamethrowerText = TTN_Texture2D::LoadFromFile("textures/FlamethrowerTexture.png");
+	birdText = TTN_Texture2D::LoadFromFile("textures/BirdTexture.png");
+	treeText = TTN_Texture2D::LoadFromFile("textures/Trees Texture.png");
+	damText = TTN_Texture2D::LoadFromFile("textures/Dam.png");
 
 	////MATERIALS////
 	cannonMat = TTN_Material::Create();
@@ -384,6 +346,15 @@ void Game::SetUpAssets()
 
 	fireMat = TTN_Material::Create();
 	fireMat->SetAlbedo(nullptr); //do this to be sure titan uses it's default white texture for the particle
+
+	birdMat = TTN_Material::Create();
+	birdMat->SetAlbedo(birdText);
+
+	treeMat = TTN_Material::Create();
+	treeMat->SetAlbedo(treeText);
+
+	damMat = TTN_Material::Create();
+	damMat->SetAlbedo(damText);
 }
 
 //create the scene's initial entities
@@ -480,6 +451,21 @@ void Game::SetUpEntities()
 		AttachCopy(cannon, cannonAnimator);
 	}
 
+	//entity for the dam
+	{
+		dam = CreateEntity();
+
+		//setup a mesh renderer for the dam
+		TTN_Renderer damRenderer = TTN_Renderer(damMesh, shaderProgramTextured, damMat);
+		//attach that renderer to the entity
+		AttachCopy(dam, damRenderer);
+
+		//setup a transform for the dam
+		TTN_Transform damTrans = TTN_Transform(glm::vec3(0.0f, -10.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.7f, 0.7f, 0.3f));
+		//attach that transform to the entity
+		AttachCopy(dam, damTrans);
+	}
+
 	//entity for the smoke particle system (rather than recreating whenever we need it, we'll just make one
 	//and burst again when we need to)
 	{
@@ -521,26 +507,31 @@ void Game::SetUpEntities()
 		AttachCopy(water, waterTrans);
 	}
 
-	//debugging entity for positions
-	{
-		debug = CreateEntity();
-
-		//setup a mesh renderer for the tree
-		TTN_Renderer treeRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
-		//and attach that renderer to the entity
-		AttachCopy<TTN_Renderer>(debug, treeRenderer);
-
-		//setup a transform for the
-		TTN_Transform treeTrans = TTN_Transform(glm::vec3((30.0f, -2.0f, 115.0f)), glm::vec3(90.0f), glm::vec3(0.75f));
-		treeTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
-		treeTrans.SetScale(glm::vec3(0.30f, 0.30f, 0.30f));
-		//and attach that transform to the entity
-		AttachCopy<TTN_Transform>(debug, treeTrans);
-
-		TTN_Physics pbody = TTN_Physics(treeTrans.GetPos(), glm::vec3(0.0f), glm::vec3(1.f, 1.f, 1.f), debug, TTN_PhysicsBodyType::STATIC);
-		AttachCopy<TTN_Physics>(debug, pbody);
-
-		Get<TTN_Physics>(debug).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f)); //sets gravity to 0
+	//birds
+	for (int i = 0; i < 3; i++) {
+		birds[i] = CreateEntity();
+
+		//create a renderer
+		TTN_Renderer birdRenderer = TTN_Renderer(birdMesh, shaderProgramAnimatedTextured, birdMat);
+		//attach that renderer to the entity
+		AttachCopy(birds[i], birdRenderer);
+
+		//create an animator
+		TTN_MorphAnimator birdAnimator = TTN_MorphAnimator();
+		//create an animation for the bird flying
+		TTN_MorphAnimation flyingAnim = TTN_MorphAnimation({ 0, 1 }, { 10.0f / 24.0f, 10.0f / 24.0f }, true); //anim 0
+		birdAnimator.AddAnim(flyingAnim);
+		birdAnimator.SetActiveAnim(0);
+		//attach that animator to the entity
+		AttachCopy(birds[i], birdAnimator);
+
+		//create a transform
+		TTN_Transform birdTrans = TTN_Transform(birdBase, glm::vec3(0.0f), glm::vec3(1.0f));
+		if (i == 1) birdTrans.SetPos(birdBase + glm::vec3(3.0f, -3.0f, 3.0f));
+		if (i == 2) birdTrans.SetPos(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f));
+		birdTrans.RotateFixed(glm::vec3(0.0f, -45.0f + 180.0f, 0.0f));
+		//attach that transform to the entity
+		AttachCopy(birds[i], birdTrans);
 	}
 
 	//prepare the vector of cannonballs
@@ -572,6 +563,9 @@ void Game::SetUpOtherData()
 	waveBaseHeightIncrease = 0.0f;
 	waveHeightMultiplier = 0.005f;
 	waveLenghtMultiplier = -10.0f;
+	birdTimer = 0.0f;
+	birdBase = glm::vec3(100, 10, 135);
+	birdTarget = glm::vec3(-100, 10, -65);
 
 	//make the scene have gravity
 

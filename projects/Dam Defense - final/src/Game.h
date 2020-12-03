@@ -5,6 +5,7 @@
 //include required features from titan
 #include "Titan/Application.h"
 #include "Titan/ObjLoader.h"
+#include "Titan/Interpolation.h"
 
 using namespace Titan;
 
@@ -48,6 +49,10 @@ public:
 	TTN_Mesh::smptr boat2Mesh;
 	TTN_Mesh::smptr boat3Mesh;
 	TTN_Mesh::smptr flamethrowerMesh;
+	TTN_Mesh::smptr birdMesh;
+	TTN_Mesh::smptr treeMesh[3];
+	TTN_Mesh::smptr rockMesh[5];
+	TTN_Mesh::smptr damMesh;
 
 	TTN_Mesh::smptr skyboxMesh;
 	TTN_Mesh::smptr sphereMesh; //used for cannonballs and particles
@@ -65,14 +70,19 @@ public:
 	TTN_Texture2D::st2dptr boat2Text;
 	TTN_Texture2D::st2dptr boat3Text;
 	TTN_Texture2D::st2dptr flamethrowerText;
+	TTN_Texture2D::st2dptr birdText;
+	TTN_Texture2D::st2dptr treeText;
+	TTN_Texture2D::st2dptr damText;
 
-	
 	//materials
 	TTN_Material::smatptr boat1Mat;
 	TTN_Material::smatptr boat2Mat;
 	TTN_Material::smatptr boat3Mat;
 	TTN_Material::smatptr flamethrowerMat;
-
+	TTN_Material::smatptr birdMat;
+	TTN_Material::smatptr treeMat;
+	TTN_Material::smatptr rockMat;
+	TTN_Material::smatptr damMat;
 
 	TTN_Material::smatptr cannonMat;
 	TTN_Material::smatptr skyboxMat;
@@ -90,7 +100,9 @@ protected:
 	entt::entity smokePS;
 	entt::entity terrain;
 	entt::entity water;
-	entt::entity debug;
+	entt::entity birds[3];
+	entt::entity trees[17];
+	entt::entity dam;
 
 	std::vector<entt::entity> flamethrowers;
 	std::vector<entt::entity> flames;
@@ -129,6 +141,10 @@ protected:
 	bool Flaming = false; //if flamethrowers are active right now
 	float FlameTimer = 0.0f; //flamethrower cooldown
 	float FlameAnim = 0.0f; //flamethrower
+
+	//bird control
+	float birdTimer = 0.0f;
+	glm::vec3 birdBase, birdTarget;
 
 	//smoke particle
 	TTN_ParticleTemplate smokeParticle;
