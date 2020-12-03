@@ -145,7 +145,7 @@ protected:
 	void PlayerRotate(float deltaTime);
 	void StopFiring();
 
-	void BoatPathing(entt::entity boatt, int path);
+	void BoatPathing(entt::entity boatt, int path, int boatNum);
 	void SpawnerLS(float deltatime, float SpawnTime);
 	void SpawnerRS(float deltatime, float SpawnTime);
 	void Waves(int num, float restTime, float waveTime, float deltaTime);
