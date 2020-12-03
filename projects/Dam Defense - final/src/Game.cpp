@@ -41,8 +41,8 @@ void Game::Update(float deltaTime)
 
 	//parameters: number of waves, rest time between waves, length of waves, deltatime
 	Waves(6, 10.f, 40.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
-	SpawnerLS(deltaTime, 2.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
-	SpawnerRS(deltaTime, 1.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerLS(deltaTime, 2.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerRS(deltaTime, 2.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
 	//goes through the boats vector
 	for (int i = 0; i < boats.size(); i++) {
@@ -68,7 +68,7 @@ void Game::Update(float deltaTime)
 		//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 20
 		std::vector<entt::entity>::iterator it = boats.begin();
 		while (it != boats.end()) {
-			if (Get<TTN_Transform>(*it).GetPos().z >= 25.0f) {
+			if (Get<TTN_Transform>(*it).GetPos().z >= 27.0f) {
 				//std::cout <<"Global Pos:"<< Get<TTN_Transform>(*it).GetGlobalPos().z << std::endl;
 				//std::cout << "Pos:" << Get<TTN_Transform>(*it).GetPos().z << std::endl;
 				it++;
@@ -84,15 +84,24 @@ void Game::Update(float deltaTime)
 	Collisions(); //collision check
 
 	//move the birds
-	birdTimer += deltaTime;
-	birdTimer = fmod(birdTimer, 20);
-	float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
-	for (int i = 0; i < 3; i++) {
-		if (i == 0) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp(birdBase, birdTarget, t));
-		if (i == 1) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
-		(birdBase + glm::vec3(3.0f, -3.0f, 3.0f), birdTarget + glm::vec3(3.0f, -3.0f, 3.0f), t));
-		if (i == 2) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
-		(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f), birdTarget + glm::vec3(-3.0f, -3.0f, -3.0f), t));
+	birdTimer += deltaTime;
+
+	birdTimer = fmod(birdTimer, 20);
+
+	float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
+
+	for (int i = 0; i < 3; i++) {
+
+		if (i == 0) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp(birdBase, birdTarget, t));
+
+		if (i == 1) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
+
+		(birdBase + glm::vec3(3.0f, -3.0f, 3.0f), birdTarget + glm::vec3(3.0f, -3.0f, 3.0f), t));
+
+		if (i == 2) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
+
+		(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f), birdTarget + glm::vec3(-3.0f, -3.0f, -3.0f), t));
+
 	}
 
 	//increase the total time of the scene to make the water animated correctly
@@ -508,30 +517,54 @@ void Game::SetUpEntities()
 	}
 
 	//birds
-	for (int i = 0; i < 3; i++) {
-		birds[i] = CreateEntity();
-
-		//create a renderer
-		TTN_Renderer birdRenderer = TTN_Renderer(birdMesh, shaderProgramAnimatedTextured, birdMat);
-		//attach that renderer to the entity
-		AttachCopy(birds[i], birdRenderer);
-
-		//create an animator
-		TTN_MorphAnimator birdAnimator = TTN_MorphAnimator();
-		//create an animation for the bird flying
-		TTN_MorphAnimation flyingAnim = TTN_MorphAnimation({ 0, 1 }, { 10.0f / 24.0f, 10.0f / 24.0f }, true); //anim 0
-		birdAnimator.AddAnim(flyingAnim);
-		birdAnimator.SetActiveAnim(0);
-		//attach that animator to the entity
-		AttachCopy(birds[i], birdAnimator);
-
-		//create a transform
-		TTN_Transform birdTrans = TTN_Transform(birdBase, glm::vec3(0.0f), glm::vec3(1.0f));
-		if (i == 1) birdTrans.SetPos(birdBase + glm::vec3(3.0f, -3.0f, 3.0f));
-		if (i == 2) birdTrans.SetPos(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f));
-		birdTrans.RotateFixed(glm::vec3(0.0f, -45.0f + 180.0f, 0.0f));
-		//attach that transform to the entity
-		AttachCopy(birds[i], birdTrans);
+	for (int i = 0; i < 3; i++) {
+
+		birds[i] = CreateEntity();
+
+
+
+		//create a renderer
+
+		TTN_Renderer birdRenderer = TTN_Renderer(birdMesh, shaderProgramAnimatedTextured, birdMat);
+
+		//attach that renderer to the entity
+
+		AttachCopy(birds[i], birdRenderer);
+
+
+
+		//create an animator
+
+		TTN_MorphAnimator birdAnimator = TTN_MorphAnimator();
+
+		//create an animation for the bird flying
+
+		TTN_MorphAnimation flyingAnim = TTN_MorphAnimation({ 0, 1 }, { 10.0f / 24.0f, 10.0f / 24.0f }, true); //anim 0
+
+		birdAnimator.AddAnim(flyingAnim);
+
+		birdAnimator.SetActiveAnim(0);
+
+		//attach that animator to the entity
+
+		AttachCopy(birds[i], birdAnimator);
+
+
+
+		//create a transform
+
+		TTN_Transform birdTrans = TTN_Transform(birdBase, glm::vec3(0.0f), glm::vec3(1.0f));
+
+		if (i == 1) birdTrans.SetPos(birdBase + glm::vec3(3.0f, -3.0f, 3.0f));
+
+		if (i == 2) birdTrans.SetPos(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f));
+
+		birdTrans.RotateFixed(glm::vec3(0.0f, -45.0f + 180.0f, 0.0f));
+
+		//attach that transform to the entity
+
+		AttachCopy(birds[i], birdTrans);
+
 	}
 
 	//prepare the vector of cannonballs
@@ -555,7 +588,7 @@ void Game::SetUpOtherData()
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
 	cannonBallForce = 3600.0f;
-	playerShootCooldown = 0.75f;
+	playerShootCooldown = 0.7f;
 	playerShootCooldownTimer = playerShootCooldown;
 	terrainScale = 0.1f;
 	time = 0.0f;
@@ -563,8 +596,10 @@ void Game::SetUpOtherData()
 	waveBaseHeightIncrease = 0.0f;
 	waveHeightMultiplier = 0.005f;
 	waveLenghtMultiplier = -10.0f;
-	birdTimer = 0.0f;
-	birdBase = glm::vec3(100, 10, 135);
+	birdTimer = 0.0f;
+
+	birdBase = glm::vec3(100, 10, 135);
+
 	birdTarget = glm::vec3(-100, 10, -65);
 
 	//make the scene have gravity
@@ -597,7 +632,7 @@ void Game::SetUpOtherData()
 		fireParticle.SetOneLifetime(2.0f);
 		fireParticle.SetOneStartColor(glm::vec4(1.0f, 0.65f, 0.0f, 1.0f));
 		fireParticle.SetOneStartSize(0.5f);
-		fireParticle.SetOneStartSpeed(8.0f);
+		fireParticle.SetOneStartSpeed(8.5f);
 	}
 }
 
@@ -1009,7 +1044,7 @@ glm::vec3 Game::Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos)
 //cooldown is set in this function, change flame timer
 void Game::Flamethrower() {
 	if (FlameTimer == 0.0f) { //cooldown is zero
-		FlameTimer = 20.f; // set cooldown
+		FlameTimer = 2.f; // set cooldown
 		Flaming = true;// set flaming to true
 
 		for (int i = 0; i < 6; i++) {
@@ -1024,21 +1059,21 @@ void Game::Flamethrower() {
 				AttachCopy<TTN_Renderer>(flamethrowers[i], ftRenderer);
 
 				//setup a transform for the flamethrower
-				TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f, -6.0f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
+				TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f, -6.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
 				if (i == 0) {
-					ftTrans.SetPos(glm::vec3(-5.0f, -6.0f, 4.0f));
+					ftTrans.SetPos(glm::vec3(-5.0f, -6.0f, 2.0f));
 				}
 				else if (i == 1) {
-					ftTrans.SetPos(glm::vec3(15.0f, -6.0f, 4.0f));
+					ftTrans.SetPos(glm::vec3(15.0f, -6.0f, 2.0f));
 				}
 				else if (i == 2) {
-					ftTrans.SetPos(glm::vec3(-15.0f, -6.0f, 4.0f));
+					ftTrans.SetPos(glm::vec3(-15.0f, -6.0f, 2.0f));
 				}
 				else if (i == 3) {
-					ftTrans.SetPos(glm::vec3(40.0f, -6.0f, 4.0f));
+					ftTrans.SetPos(glm::vec3(40.0f, -6.0f, 2.0f));
 				}
 				else if (i == 4) {
-					ftTrans.SetPos(glm::vec3(-40.0f, -6.0f, 4.0f));
+					ftTrans.SetPos(glm::vec3(-40.0f, -6.0f, 2.0f));
 				}
 				else {}
 
@@ -1051,21 +1086,21 @@ void Game::Flamethrower() {
 				flames.push_back(CreateEntity());
 
 				//setup a transfrom for the particle system
-				TTN_Transform firePSTrans = TTN_Transform(glm::vec3(2.5f, -3.0f, 3.3f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f)); //close left
+				TTN_Transform firePSTrans = TTN_Transform(glm::vec3(2.5f, -3.0f, 1.8f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f)); //close left
 				if (i == 0) {
-					firePSTrans.SetPos(glm::vec3(-2.5f, -3.0f, 3.3f));//close right
+					firePSTrans.SetPos(glm::vec3(-2.5f, -3.0f, 1.8f));//close right
 				}
 				else if (i == 1) {
-					firePSTrans.SetPos(glm::vec3(20.f, -3.0f, 3.3f));//far left
+					firePSTrans.SetPos(glm::vec3(20.f, -3.0f, 1.8f));//far left
 				}
 				else if (i == 2) {
-					firePSTrans.SetPos(glm::vec3(-20.0f, -3.0f, 3.3f));//far right
+					firePSTrans.SetPos(glm::vec3(-20.0f, -3.0f, 1.8f));//far right
 				}
 				else if (i == 3) {
-					firePSTrans.SetPos(glm::vec3(7.5f, -3.0f, 3.3f));
+					firePSTrans.SetPos(glm::vec3(7.5f, -3.0f, 1.8f));
 				}
 				else if (i == 4) {
-					firePSTrans.SetPos(glm::vec3(-7.5f, -3.0f, 3.3f));
+					firePSTrans.SetPos(glm::vec3(-7.5f, -3.0f, 1.8f));
 				}
 				else {}
 
