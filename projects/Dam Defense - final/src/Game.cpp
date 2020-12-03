@@ -42,7 +42,7 @@ void Game::Update(float deltaTime)
 	//parameters: number of waves, rest time between waves, length of waves, deltatime
 	Waves(3, 2.f, 40.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
 	SpawnerLS(deltaTime, 3.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
-	SpawnerRS(deltaTime, 10.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerRS(deltaTime, 3.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
 	//goes through the boats vector
 	for (int i = 0; i < boats.size(); i++) {
@@ -339,6 +339,8 @@ void Game::SetUpAssets()
 	flamethrowerMesh = TTN_ObjLoader::LoadFromFile("models/Flamethrower.obj");
 	flamethrowerMesh->SetUpVao();
 	boat1Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 1.obj");
+	boat2Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 2.obj");
+	boat3Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 3.obj");
 	terrainPlain = TTN_ObjLoader::LoadFromFile("models/terrainPlain.obj");
 	terrainPlain->SetUpVao();
 
@@ -351,6 +353,8 @@ void Game::SetUpAssets()
 	grassText = TTN_Texture2D::LoadFromFile("textures/GrassTexture.jpg");
 	waterText = TTN_Texture2D::LoadFromFile("textures/water.png");
 	boat1Text = TTN_Texture2D::LoadFromFile("textures/Boat 1 Texture.png");
+	boat2Text = TTN_Texture2D::LoadFromFile("textures/Boat 2 Texture.png");
+	boat3Text = TTN_Texture2D::LoadFromFile("textures/Boat 3 Texture.png");
 	flamethrowerText = TTN_Texture2D::LoadFromFile("textures/FlamethrowerTexture.png");
 
 	////MATERIALS////
@@ -361,6 +365,12 @@ void Game::SetUpAssets()
 	boat1Mat = TTN_Material::Create();
 	boat1Mat->SetAlbedo(boat1Text);
 	boat1Mat->SetShininess(128.0f);
+	boat2Mat = TTN_Material::Create();
+	boat2Mat->SetAlbedo(boat2Text);
+	boat2Mat->SetShininess(128.0f);
+	boat3Mat = TTN_Material::Create();
+	boat3Mat->SetAlbedo(boat3Text);
+	boat3Mat->SetShininess(128.0f);
 
 	flamethrowerMat = TTN_Material::Create();
 	flamethrowerMat->SetAlbedo(flamethrowerText);
@@ -553,7 +563,7 @@ void Game::SetUpOtherData()
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
 	cannonBallForce = 3500.0f;
-	playerShootCooldown = 1.0f;
+	playerShootCooldown = 0.80f;
 	playerShootCooldownTimer = playerShootCooldown;
 	terrainScale = 0.1f;
 	time = 0.0f;
@@ -657,7 +667,7 @@ void Game::CreateCannonball()
 		//set up a physics body for the cannonball
 		TTN_Physics cannonBallPhysBod = TTN_Physics(cannonBallTrans.GetPos(), glm::vec3(0.0f), cannonBallTrans.GetScale(),
 			cannonBalls[cannonBalls.size() - 1]);
-		
+
 		//attach that physics body to the entity
 		AttachCopy(cannonBalls[cannonBalls.size() - 1], cannonBallPhysBod);
 
@@ -786,14 +796,39 @@ void Game::SpawnerLS(float deltatime, float SpawnTime) {
 		Timer = 0.F;//reset timer
 
 		boats.push_back(CreateEntity());
+		int randomBoat = rand() % 3 + 1; // generates number between 1-3 
 
 		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
+
+		if (randomBoat == 1) {
+			boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);}
+
+		else if (randomBoat == 2) { //large carrier
+			boatRenderer = TTN_Renderer(boat2Mesh, shaderProgramTextured, boat2Mat);}
+
+		else if (randomBoat == 3) { // submarine lookking
+			boatRenderer = TTN_Renderer(boat3Mesh, shaderProgramTextured, boat3Mat);}
+
 		AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
 
 		TTN_Transform boatTrans = TTN_Transform(glm::vec3(21.0f, 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		boatTrans.SetPos(glm::vec3(90.0f, -8.0f, 115.0f));
-		boatTrans.RotateFixed(glm::vec3(0.0f, 180.0f, 0.0f));
-		boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
+
+		if (randomBoat == 1) { //small regular boat
+			boatTrans.RotateFixed(glm::vec3(0.0f, 180.0f, 0.0f));
+			boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
+		}
+
+		else if (randomBoat == 2) { //large carrier
+			boatTrans.RotateFixed(glm::vec3(0.0f, 270.0f, 0.0f));
+			boatTrans.SetScale(glm::vec3(0.05f, 0.05f, 0.05f));
+		}
+
+		else if (randomBoat == 3) { // submarine lookking
+			boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
+			boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
+		}
+				
 		AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
 
 		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.0f, 4.0f, 8.95f), boats[boats.size() - 1], TTN_PhysicsBodyType::DYNAMIC);
@@ -802,12 +837,13 @@ void Game::SpawnerLS(float deltatime, float SpawnTime) {
 		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
 
 		int r = rand() % 3 + 1; // generates path number between 1-3 (left side paths, right side path nums are 4-6)
+
+		if (randomBoat == 2 && r == 3) r = 2; //if it's the carrier, make sure it doesnt go through the center
+
 		//std::cout << "Num: " << r << std::endl; //random boat path
-		TTN_Tag boatTag = TTN_Tag("Boat", 3); //sets boat path number to ttn_tag
+		TTN_Tag boatTag = TTN_Tag("Boat", r); //sets boat path number to ttn_tag
 		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
-
 	}
-
 }
 
 //spawn right side boats
@@ -821,24 +857,48 @@ void Game::SpawnerRS(float deltatime, float SpawnTime)
 
 		boats.push_back(CreateEntity());
 
+		int randomBoat = rand() % 3 + 1; // generates number between 1-3 
+
 		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
+
+		if (randomBoat == 1) {
+			boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);}
+
+		else if (randomBoat == 2) { //large carrier
+			boatRenderer = TTN_Renderer(boat2Mesh, shaderProgramTextured, boat2Mat);}
+
+		else if (randomBoat == 3) { // submarine lookking
+			boatRenderer = TTN_Renderer(boat3Mesh, shaderProgramTextured, boat3Mat);}
+
 		AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
 
 		TTN_Transform boatTrans = TTN_Transform();
 		boatTrans.SetPos(glm::vec3(-90.0f, -8.0f, 115.0f));
-		boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
-		boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
+		if (randomBoat == 1) { //small regular boat
+			boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
+			boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
+		}
+
+		else if (randomBoat == 2) { //large carrier
+			boatTrans.RotateFixed(glm::vec3(0.0f, 270.0f, 0.0f));
+			boatTrans.SetScale(glm::vec3(0.05f, 0.05f, 0.05f));
+		}
+
+		else if (randomBoat == 3) { // submarine lookking
+			boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
+			boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
+		}
 		AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
 
 		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.0f, 4.0f, 8.95f), boats[boats.size() - 1]);
-		pbody.SetHasGravity(false);
+
 		pbody.SetLinearVelocity(glm::vec3(25.0f, 0.0f, 0.0f));//-2.0f
 		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
 
 		int r = rand() % 3 + 4; // generates path number between 4-6 (left side paths 1-3, right side path nums are 4-6)
-		//std::cout << "Num: " << r << std::endl; //random boat path
+		if (randomBoat == 2 && r == 3) r = 2; //if it's the carrier, make sure it doesnt go through the center
 
-		TTN_Tag boatTag = TTN_Tag("Boat", 6); //sets boat path number to ttn_tag
+		TTN_Tag boatTag = TTN_Tag("Boat", r); //sets boat path number to ttn_tag
 		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
 	}
 }
@@ -1004,14 +1064,15 @@ void Game::Collisions()
 				//if one is a boat and the other is a cannonball
 				if (cont && ((Get<TTN_Tag>(entity1Ptr).getName() == "Boat" && Get<TTN_Tag>(entity2Ptr).getName() == "Ball") ||
 					(Get<TTN_Tag>(entity1Ptr).getName() == "Ball" && Get<TTN_Tag>(entity2Ptr).getName() == "Boat"))) {
-					
 					std::vector<entt::entity>::iterator it = cannonBalls.begin();
 					while (it != cannonBalls.end()) {
 						if (entity1Ptr == *it || entity2Ptr == *it) {
 							DeleteEntity(*it);
-							it = cannonBalls.erase(it);}
+							it = cannonBalls.erase(it);
+						}
 						else {
-							it++;}
+							it++;
+						}
 					}
 
 					std::vector<entt::entity>::iterator itt = boats.begin();
@@ -1024,17 +1085,12 @@ void Game::Collisions()
 							itt++;
 						}
 					}
-
 				}
 			}
-		
+
 			std::cout << "WORKING SO FAR" << std::endl;
 		}
-
-
 	}
-
-
 }
 
 //called to delete particle system and flamethrower models
