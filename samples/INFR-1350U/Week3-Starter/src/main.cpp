@@ -177,8 +177,7 @@ int main() {
 
 	// GL states
 	glEnable(GL_DEPTH_TEST);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// Our high-precision timer
 	double lastFrame = glfwGetTime();

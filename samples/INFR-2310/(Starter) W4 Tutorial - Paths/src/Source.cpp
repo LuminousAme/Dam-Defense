@@ -88,7 +88,7 @@ int main()
 
 	//Setting up our utility to draw the given path.
 	PathSampler sampler = PathSampler();
-	
+
 	Entity pathDrawUtility = Entity::Create();
 	pathDrawUtility.Add<CLineRenderer>(pathDrawUtility, sampler, *lineMat);
 
@@ -139,7 +139,7 @@ int main()
 		static size_t pointSelected = 0;
 		static std::string pointLabel = "";
 
-		if(pointSelected >= points.size())
+		if (pointSelected >= points.size())
 			pointSelected = points.size() - 1;
 
 		for (size_t i = 0; i < points.size(); ++i)
@@ -148,11 +148,11 @@ int main()
 
 			if (ImGui::Selectable(pointLabel.c_str(), i == pointSelected))
 			{
-				if(pointSelected < points.size())
+				if (pointSelected < points.size())
 					points[pointSelected]->Get<CMeshRenderer>().SetMaterial(*unselectedMat);
-			
+
 				pointSelected = i;
-			}	
+			}
 		}
 
 		ImGui::End();
