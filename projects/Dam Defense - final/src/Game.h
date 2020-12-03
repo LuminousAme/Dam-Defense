@@ -5,6 +5,7 @@
 //include required features from titan
 #include "Titan/Application.h"
 #include "Titan/ObjLoader.h"
+#include "Titan/Interpolation.h"
 
 using namespace Titan;
 
@@ -48,6 +49,7 @@ public:
 	TTN_Mesh::smptr boat2Mesh;
 	TTN_Mesh::smptr boat3Mesh;
 	TTN_Mesh::smptr flamethrowerMesh;
+	TTN_Mesh::smptr birdMesh;
 
 	TTN_Mesh::smptr skyboxMesh;
 	TTN_Mesh::smptr sphereMesh; //used for cannonballs and particles
@@ -90,7 +92,7 @@ protected:
 	entt::entity smokePS;
 	entt::entity terrain;
 	entt::entity water;
-	entt::entity debug;
+	entt::entity birds[3];
 
 	std::vector<entt::entity> flamethrowers;
 	std::vector<entt::entity> flames;
@@ -129,6 +131,10 @@ protected:
 	bool Flaming = false; //if flamethrowers are active right now
 	float FlameTimer = 0.0f; //flamethrower cooldown
 	float FlameAnim = 0.0f; //flamethrower
+
+	//bird control
+	float birdTimer = 0.0f;
+	glm::vec3 birdBase, birdTarget;
 
 	//smoke particle
 	TTN_ParticleTemplate smokeParticle;
