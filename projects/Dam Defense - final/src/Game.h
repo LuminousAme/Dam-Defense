@@ -101,7 +101,8 @@ protected:
 	entt::entity terrain;
 	entt::entity water;
 	entt::entity birds[3];
-	entt::entity trees[17];
+	entt::entity trees[3];
+	entt::entity rocks[5];
 	entt::entity dam;
 
 	std::vector<entt::entity> flamethrowers;
