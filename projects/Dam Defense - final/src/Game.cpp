@@ -53,6 +53,36 @@ void Game::Update(float deltaTime)
 		BoatPathing(boats[i], p); //updates the pathing for the boat
 	}
 
+	if (FlameTimer <= 0) FlameTimer = 0.0f;
+	else FlameTimer -= deltaTime;
+
+	if (Flaming) {// if the flamethorwers are spewing flame particles
+		FlameAnim += deltaTime;//increment flamethrower anim timer
+
+		if (FlameAnim >= 3.0f) {//flame particles last for 3 seconds
+			DeleteFlamethrowers(); //delete the flamethrowers and particles
+			FlameAnim = 0.0f; //reset timer
+			Flaming = false; //set flaming to false
+		}
+
+		//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 20
+		std::vector<entt::entity>::iterator it = boats.begin();
+		while (it != boats.end()) {
+			if (Get<TTN_Transform>(*it).GetPos().z >= 25.0f) {
+				//std::cout <<"Global Pos:"<< Get<TTN_Transform>(*it).GetGlobalPos().z << std::endl;
+				//std::cout << "Pos:" << Get<TTN_Transform>(*it).GetPos().z << std::endl;
+				it++;
+			}
+			else {
+				DeleteEntity(*it);
+				it = boats.erase(it);
+				std::cout << "ERASED " << std::endl;
+			}
+		}
+
+	}
+
+
 	//move camera for debugging
 #pragma region camera moving
 	auto& transCamera = Get<TTN_Transform>(camera);
@@ -173,6 +203,15 @@ void Game::PostRender()
 //function to use to check for when a key is being pressed down for the first frame
 void Game::KeyDownChecks()
 {
+
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Two)) {
+		if (FlameTimer == 0.0f) { //cooldown is zero
+			Flamethrower();
+		}
+
+	}
+
+
 	auto& transCamera = Get<TTN_Transform>(debug);
 
 	glm::vec3 movement = transCamera.GetPos();//glm::vec3(0.0f);
@@ -253,6 +292,7 @@ void Game::MouseButtonUpChecks()
 void Game::SetUpAssets()
 {
 	//// SHADERS ////
+#pragma region SHADERS
 	//create a shader program object
 	shaderProgramUnTextured = TTN_Shader::Create();
 	//load the shaders into the shader program
@@ -295,10 +335,14 @@ void Game::SetUpAssets()
 	shaderProgramWater->LoadShaderStageFromFile("shaders/water_frag.glsl", GL_FRAGMENT_SHADER);
 	shaderProgramWater->Link();
 
+#pragma endregion
+
 	////MESHES////
 	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
 	skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
 	sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
+	flamethrowerMesh = TTN_ObjLoader::LoadFromFile("models/Flamethrower.obj");
+	flamethrowerMesh->SetUpVao();
 	boat1Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 1.obj");
 	terrainPlain = TTN_ObjLoader::LoadFromFile("models/terrainPlain.obj");
 	terrainPlain->SetUpVao();
@@ -312,6 +356,8 @@ void Game::SetUpAssets()
 	grassText = TTN_Texture2D::LoadFromFile("textures/GrassTexture.jpg");
 	waterText = TTN_Texture2D::LoadFromFile("textures/water.png");
 	boat1Text = TTN_Texture2D::LoadFromFile("textures/Boat 1 Texture.png");
+	flamethrowerText = TTN_Texture2D::LoadFromFile("textures/FlamethrowerTexture.png");
+
 
 	////MATERIALS////
 	cannonMat = TTN_Material::Create();
@@ -322,10 +368,17 @@ void Game::SetUpAssets()
 	boat1Mat->SetAlbedo(boat1Text);
 	boat1Mat->SetShininess(128.0f);
 
+	flamethrowerMat = TTN_Material::Create();
+	flamethrowerMat->SetAlbedo(flamethrowerText);
+	flamethrowerMat->SetShininess(128.0f);
+
 	skyboxMat = TTN_Material::Create();
 	skyboxMat->SetSkybox(skyboxText);
 	smokeMat = TTN_Material::Create();
 	smokeMat->SetAlbedo(nullptr); //do this to be sure titan uses it's default white texture for the particle
+
+	fireMat = TTN_Material::Create();
+	fireMat->SetAlbedo(nullptr); //do this to be sure titan uses it's default white texture for the particle
 }
 
 //create the scene's initial entities
@@ -490,6 +543,10 @@ void Game::SetUpEntities()
 	//vector of boats
 	boats = std::vector<entt::entity>();
 
+	//vector for flamethrower models and flame particles
+	flames = std::vector<entt::entity>();
+	flamethrowers = std::vector<entt::entity>();
+
 	//set the cannon to be a child of the camera
 	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), &camera);
 }
@@ -530,8 +587,19 @@ void Game::SetUpOtherData()
 		smokeParticle.SetOneEndSpeed(0.05f);
 	}
 
-
-
+	//fire particle template
+	{
+		fireParticle = TTN_ParticleTemplate();
+		fireParticle.SetMat(fireMat);
+		fireParticle.SetMesh(sphereMesh);
+		fireParticle.SetOneEndColor(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		fireParticle.SetOneEndSize(4.0f);
+		fireParticle.SetOneEndSpeed(6.0f);
+		fireParticle.SetOneLifetime(2.0f);
+		fireParticle.SetOneStartColor(glm::vec4(1.0f, 0.65f, 0.0f, 1.0f));
+		fireParticle.SetOneStartSize(0.5f);
+		fireParticle.SetOneStartSpeed(8.0f);
+	}
 
 }
 
@@ -823,4 +891,114 @@ glm::vec3 Game::Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos)
 	glm::vec3 moveVelo = steering;  //clamp(moveVelo,velo+steering, maxVelo);
 
 	return moveVelo;
+}
+
+//cooldown is set in this function, change flame timer
+void Game::Flamethrower() {
+
+	if (FlameTimer == 0.0f) { //cooldown is zero
+		FlameTimer = 6.f; // set cooldown
+		Flaming = true;// set flaming to true
+
+		for (int i = 0; i < 6; i++) {
+
+			//flamethrower entities
+			{
+				flamethrowers.push_back(CreateEntity());
+
+				//setup a mesh renderer for the cannon
+				TTN_Renderer ftRenderer = TTN_Renderer(flamethrowerMesh, shaderProgramTextured);
+				ftRenderer.SetMat(flamethrowerMat);
+				//attach that renderer to the entity
+				AttachCopy<TTN_Renderer>(flamethrowers[i], ftRenderer);
+
+				//setup a transform for the flamethrower
+				TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f, -6.0f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
+				if (i == 0) {
+					ftTrans.SetPos(glm::vec3(-5.0f, -6.0f, 4.0f));
+				}
+				else if (i == 1) {
+					ftTrans.SetPos(glm::vec3(15.0f, -6.0f, 4.0f));
+				}
+				else if (i == 2) {
+					ftTrans.SetPos(glm::vec3(-15.0f, -6.0f, 4.0f));
+				}
+				else if (i == 3) {
+					ftTrans.SetPos(glm::vec3(40.0f, -6.0f, 4.0f));
+				}
+				else if (i == 4) {
+					ftTrans.SetPos(glm::vec3(-40.0f, -6.0f, 4.0f));
+				}
+				else {}
+
+				//attach that transform to the entity
+				AttachCopy<TTN_Transform>(flamethrowers[i], ftTrans);
+			}
+
+			//fire particle entities
+			{
+				flames.push_back(CreateEntity());
+
+				//setup a transfrom for the particle system
+				TTN_Transform firePSTrans = TTN_Transform(glm::vec3(2.5f, -3.0f, 3.3f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f)); //close left
+				if (i == 0) {
+					firePSTrans.SetPos(glm::vec3(-2.5f, -3.0f, 3.3f));//close right
+				}
+				else if (i == 1) {
+					firePSTrans.SetPos(glm::vec3(20.f, -3.0f, 3.3f));//far left
+				}
+				else if (i == 2) {
+					firePSTrans.SetPos(glm::vec3(-20.0f, -3.0f, 3.3f));//far right
+				}
+				else if (i == 3) {
+					firePSTrans.SetPos(glm::vec3(7.5f, -3.0f, 3.3f));
+				}
+				else if (i == 4) {
+					firePSTrans.SetPos(glm::vec3(-7.5f, -3.0f, 3.3f));
+				}
+				else {}
+
+				//attach that transform to the entity
+				AttachCopy(flames[i], firePSTrans);
+
+				//setup a particle system for the particle system
+				TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1200, 300, fireParticle, 2.0f, true);
+				ps->MakeConeEmitter(15.0f, glm::vec3(90.0f, 0.0f, 0.0f));
+
+				//setup a particle system component
+				TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
+				//attach the particle system component to the entity
+				AttachCopy(flames[i], psComponent);
+			}
+
+		}
+
+
+	}
+
+	else { //otherwise nothing happens
+		Flaming = false;
+		std::cout << "END CURRENT BOAT " << std::endl;
+	}
+
+
+
+}
+
+void Game::DeleteFlamethrowers() {
+
+	std::vector<entt::entity>::iterator it = flamethrowers.begin();
+	while (it != flamethrowers.end()) {
+		DeleteEntity(*it);
+		it = flamethrowers.erase(it);
+		//it++;
+	}
+
+	std::vector<entt::entity>::iterator itt = flames.begin();
+	while (itt != flames.end()) {
+		DeleteEntity(*itt);
+		itt = flames.erase(itt);
+	}
+
+
 }

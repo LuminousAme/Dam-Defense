@@ -47,6 +47,7 @@ public:
 	TTN_Mesh::smptr boat1Mesh;
 	TTN_Mesh::smptr boat2Mesh;
 	TTN_Mesh::smptr boat3Mesh;
+	TTN_Mesh::smptr flamethrowerMesh;
 
 	TTN_Mesh::smptr skyboxMesh;
 	TTN_Mesh::smptr sphereMesh; //used for cannonballs and particles
@@ -63,15 +64,20 @@ public:
 	TTN_Texture2D::st2dptr boat1Text;
 	TTN_Texture2D::st2dptr boat2Text;
 	TTN_Texture2D::st2dptr boat3Text;
+	TTN_Texture2D::st2dptr flamethrowerText;
+
 	
 	//materials
 	TTN_Material::smatptr boat1Mat;
 	TTN_Material::smatptr boat2Mat;
 	TTN_Material::smatptr boat3Mat;
+	TTN_Material::smatptr flamethrowerMat;
+
 
 	TTN_Material::smatptr cannonMat;
 	TTN_Material::smatptr skyboxMat;
 	TTN_Material::smatptr smokeMat;
+	TTN_Material::smatptr fireMat;
 
 //Entities
 protected:
@@ -85,6 +91,9 @@ protected:
 	entt::entity terrain;
 	entt::entity water;
 	entt::entity debug;
+
+	std::vector<entt::entity> flamethrowers;
+	std::vector<entt::entity> flames;
 
 //other data
 protected:
@@ -117,8 +126,13 @@ protected:
 	float restTimer = 0.F;//timer for waves
 	int wave = 0; // keep track of wave number
 
+	bool Flaming = false; //if flamethrowers are active right now
+	float FlameTimer = 0.0f; //flamethrower cooldown
+	float FlameAnim = 0.0f; //flamethrower
+
 	//smoke particle
 	TTN_ParticleTemplate smokeParticle;
+	TTN_ParticleTemplate fireParticle;
 
 //set up functions, called by InitScene()
 protected:
@@ -136,6 +150,10 @@ protected:
 	void SpawnerRS(float deltatime, float SpawnTime);
 	void Waves(int num, float restTime, float waveTime, float deltaTime);
 	glm::vec3 Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos);
+
+	void Flamethrower();
+
+	void DeleteFlamethrowers();
 
 //other functions, ussually called in relation to something happening like player input or a collision
 protected:
