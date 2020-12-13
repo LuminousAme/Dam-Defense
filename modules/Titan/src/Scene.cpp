@@ -1,8 +1,9 @@
 //Titan Engine, by Atlas X Games
+
+//precompile header, this file uses entt.hpp, and GLM/gtc/matrix_transform.hpp
+#include "Titan/ttn_pch.h"
 // Scene.cpp - source file for the class that handles ECS, render calls, etc.
 #include "Titan/Scene.h"
-
-#include <GLM/gtc/matrix_transform.hpp>
 
 namespace Titan {
 	TTN_Scene::TTN_Scene() {

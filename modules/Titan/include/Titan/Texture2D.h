@@ -2,12 +2,9 @@
 // Texture2D.h - header for the class that represents 2d texture images
 #pragma once
 
-//import required features
-#include <cstdint>
-#include <memory>
-#include <GLM/glm.hpp>
-#include <string>
-
+//precompile header, this file uses cstdint, and string
+#include "ttn_pch.h"
+//include other titan features
 #include "ITexture.h"
 #include "TextureEnums.h"
 

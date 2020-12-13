@@ -2,10 +2,8 @@
 // MAnimation.h - header for the class that representing morph target animations
 #pragma once
 
-//include required features
-#include "GLM/glm.hpp"
-#include <vector>
-#include "Logging.h"
+//precompile header, this file uses GLM/glm.hpp, vector, and Logging.h
+#include "ttn_pch.h"
 
 namespace Titan {
 	class TTN_MorphAnimation {

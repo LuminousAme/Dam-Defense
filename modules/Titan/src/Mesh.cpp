@@ -1,6 +1,8 @@
 //Titan Engine, by Atlas X Games 
 // Mesh.cpp - source file for the class that represents 3D meshes
 
+//precompile header
+#include "Titan/ttn_pch.h"
 //include the header
 #include "Titan/Mesh.h"
 

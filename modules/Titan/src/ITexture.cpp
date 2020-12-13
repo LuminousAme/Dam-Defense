@@ -1,10 +1,10 @@
 //Titan Engine, by Atlas X Games 
 // ITexture.cpp - source file for the base class that different types of textures inherit from
 
+//precompile header, this file uses Logging.h
+#include "Titan/ttn_pch.h"
 //include the header
 #include "Titan/ITexture.h"
-//and any other required features
-#include "Logging.h"
 
 namespace Titan {
 	//init the static variable representing the limits of the current gpu

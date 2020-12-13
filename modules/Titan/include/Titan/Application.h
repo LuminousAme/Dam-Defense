@@ -7,16 +7,14 @@
 #define GLFW_INCLUDE_NONE
 #endif
 
+//import the precompiled headers 
+//glad/glad.h, GLM/glm.hpp, string, vector, and unordered map are used here
+#include "ttn_pch.h"
+
 //include the titan scene class 
 #include "Titan/Scene.h"
-//include the required features and libraries 
-#include <glad/glad.h>
+//include glfw
 #include <GLFW/glfw3.h>
-#include "GLM/glm.hpp"
-#include <string>
-#include <vector>
-#include <unordered_map>
-
 
 namespace Titan {
 	//input enum class, converts titan keyboard input type to glfw keyboard input types

@@ -1,6 +1,8 @@
 //Titan Engine, by Atlas X Games 
 // Light.cpp - source file for the class that represents lights in a scene
 
+//precompile header
+#include "Titan/ttn_pch.h"
 //include the header
 #include "Titan/Light.h"
 

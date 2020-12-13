@@ -2,8 +2,8 @@
 // Lights.h - header for the class that represents lights in a scene
 #pragma once
 
-//import required features
-#include <GLM/glm.hpp>
+//precompile header, this file uses GLM/glm.hpp
+#include "ttn_pch.h"
 
 namespace Titan {
 	//class that contains all the data for a light in a scene

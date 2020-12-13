@@ -1,6 +1,8 @@
 //Titan Engine, by Atlas X Games 
 // MAnimation.cpp - source file for the class that representing morph target animations
 
+//precompile header
+#include "Titan/ttn_pch.h"
 //include the header 
 #include "Titan/MAnimation.h"
 

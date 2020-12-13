@@ -2,11 +2,8 @@
 // ITexture.h - header for the base class that different types of textures inherit from
 #pragma once
 
-//import required features
-#include <cstdint>
-#include <memory>
-#include <glad/glad.h>
-#include <GLM/glm.hpp>
+//precompile header, this file uses cstdint, memory, glad/glad.h, and GLM/glm.hpp
+#include "ttn_pch.h"
 
 namespace Titan {
 	//base class for different texture types

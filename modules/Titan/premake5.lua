@@ -8,6 +8,9 @@ project "Titan"
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
+	pchheader "Titan/ttn_pch.h"
+	pchsource "%{prj.location}/src/ttn_pch.cpp"
+
     files
     {
         "src\\**.cpp",
@@ -25,13 +28,7 @@ project "Titan"
         "imagehlp.lib",
         "%{wks.location}\\dependencies\\fmod\\fmod64.lib",
         "%{wks.location}\\dependencies\\gzip\\zlib.lib",
-        "tinyGLTF",
-		"%{wks.location}\\dependencies\\bullet3\\lib\\Bullet3Common_Debug.lib",
-		"%{wks.location}\\dependencies\\bullet3\\lib\\BulletCollision_Debug.lib",
-		"%{wks.location}\\dependencies\\bullet3\\lib\\BulletDynamics_Debug.lib",
-		"%{wks.location}\\dependencies\\bullet3\\lib\\BulletInverseDynamics_Debug.lib",
-		"%{wks.location}\\dependencies\\bullet3\\lib\\BulletSoftBody_Debug.lib",
-		"%{wks.location}\\dependencies\\bullet3\\lib\\LinearMath_Debug.lib"
+        "tinyGLTF"
     }
 
     includedirs {
@@ -44,12 +41,12 @@ project "Titan"
         "%{wks.location}\\dependencies\\stbs",
         "%{wks.location}\\dependencies\\imgui",
         "%{wks.location}\\modules\\toolkit\\include",
-	"%{wks.location}\\dependencies\\fmod", 
-	"%{wks.location}\\dependencies\\cereal",
-	"%{wks.location}\\dependencies\\gzip",
-	"%{wks.location}\\dependencies\\tinyGLTF",
-	"%{wks.location}\\dependencies\\json",
-	"%{wks.location}\\dependencies\\bullet3\\include",
+		"%{wks.location}\\dependencies\\fmod", 
+		"%{wks.location}\\dependencies\\cereal",
+		"%{wks.location}\\dependencies\\gzip",
+		"%{wks.location}\\dependencies\\tinyGLTF",
+		"%{wks.location}\\dependencies\\json",
+		"%{wks.location}\\dependencies\\bullet3\\include",
     }
 
 	DependenciesDebug = {

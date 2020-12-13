@@ -1,10 +1,10 @@
 //Titan Engine, by Atlas X Games 
 // Application.cpp - source file for the class that runs the program, creating the window, etc.
 
+//include the precompile header, this file uses stdio.h
+#include "Titan/ttn_pch.h"
 //include the header 
 #include "Titan/Application.h"
-//import other required features
-#include <stdio.h>
 
 
 namespace Titan {

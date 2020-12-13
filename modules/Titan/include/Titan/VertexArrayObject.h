@@ -3,11 +3,8 @@
 //and other supporting enums and strcutures
 #pragma once
 
-//include the required features
-#include <glad/glad.h>
-#include <cstdint>
-#include <vector>
-#include <memory>
+//precompile header, this file uses glad/glad.h, cstdint, vector, and memory
+#include "ttn_pch.h"
 
 //include the VBO and IBO classes
 #include "VertexBuffer.h"

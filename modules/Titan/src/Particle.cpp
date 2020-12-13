@@ -1,7 +1,10 @@
 //Titan Engine, by Atlas X Games 
 // Partilce.cpp - source file for the class that represents a particle system
+
+//precompile header, this file uses GLM/gtx/transform.hpp
+#include "Titan/ttn_pch.h"
+//include the header
 #include "Titan/Particle.h"
-#include "GLM/gtx/transform.hpp"
 
 //code refernce: https://www.youtube.com/watch?v=GK0jHlv3e3w&t=515s
 

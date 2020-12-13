@@ -1,15 +1,13 @@
 //Titan Engine, by Atlas X Games 
 // Particle.h - header for the class that represents a particle system
 #pragma once
+
+//precompile header, this file uses GLM/glm.hpp, GLM/gtx/quaternion.hpp, vector, iostream, and algorithm
+#include "ttn_pch.h"
+//include other titan featues
 #include "Titan/ObjLoader.h"
 #include "Titan/Renderer.h"
-#define GLM_ENABLE_EXPERIMENTAL
-#include "GLM/glm.hpp"
-#include "GLM/gtx/quaternion.hpp"
 #include "Titan/Random.h"
-#include <vector>
-#include <iostream>
-#include <algorithm>
 
 namespace Titan {
 	//enum for the particle emitter type

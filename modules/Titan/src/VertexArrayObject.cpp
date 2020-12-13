@@ -1,12 +1,10 @@
 //Titan Engine, by Atlas X Games 
 // VertexArrayObjects.cpp - source file for the class that uses colections of VBOs and IBOs in order to determine how to draw geometry
 
+//precompile header, this file uses Logging.h
+#include "Titan/ttn_pch.h"
 //include the VAO header
 #include "Titan/VertexArrayObject.h"
-//include the other required files
-#include "Titan/IndexBuffer.h"
-#include "Titan/VertexBuffer.h"
-#include "Logging.h"
 
 namespace Titan {
 	//default constructor, makes an empty VAO
