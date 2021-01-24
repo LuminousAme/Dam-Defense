@@ -17,7 +17,6 @@
 #include <vector>
 #include <unordered_map>
 
-
 namespace Titan {
 	//input enum class, converts titan keyboard input type to glfw keyboard input types
 	enum class TTN_KeyCode {
@@ -161,7 +160,7 @@ namespace Titan {
 		//function to initilize the window
 		static void Init(const std::string name, int width, int height, bool fullScreen = false);
 
-		//gets wheter or not the application is closing 
+		//gets whether or not the application is closing 
 		static bool GetIsClosing();
 
 		//function for shutting down things when the application is closing 
@@ -179,10 +178,26 @@ namespace Titan {
 		//function to run through each frame, calling scene renders, etc.
 		static void Update();
 
+		//imgui functions
+		static void InitImgui();
+		static void CleanImgui();
+		static void RenderImgui();
+		static void SetUpImgui();
+
+		static void StartImgui();
+		static void EndImgui();
+
+
+
+		//static void ImguiButton();
+		static void ImguiSlider(const char* name, float a, float min, float max);
+
 	public:
 		//vector for all the scenes in the application
 		static std::vector<Titan::TTN_Scene*> scenes;
 		static GLFWwindow* m_window;
+		//static std::vector<std::function<void()>> imGuiCallbacks;
+
 
 	protected:
 		//default constructor, just creates an empty aplication project
@@ -255,4 +270,5 @@ namespace Titan {
 			static bool inFrame;
 		};
 	};
+
 }

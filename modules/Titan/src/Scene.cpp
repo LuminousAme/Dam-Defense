@@ -1,10 +1,11 @@
 //Titan Engine, by Atlas X Games
 // Scene.cpp - source file for the class that handles ECS, render calls, etc.
 #include "Titan/Scene.h"
-
 #include <GLM/gtc/matrix_transform.hpp>
 
+
 namespace Titan {
+
 	TTN_Scene::TTN_Scene() {
 		m_ShouldRender = true;
 		m_Registry = new entt::registry();

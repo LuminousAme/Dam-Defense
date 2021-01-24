@@ -6,6 +6,13 @@
 //import other required features
 #include <stdio.h>
 
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_glfw.cpp"
+#include "imgui_impl_opengl3.cpp"
+
 
 namespace Titan {
 	//set the base values for the member variables
@@ -21,6 +28,7 @@ namespace Titan {
 	std::unordered_map<TTN_MouseButton, bool> TTN_Application::TTN_Input::MouseHandled;
 	glm::vec2 TTN_Application::TTN_Input::mousePos = glm::vec2(0.0f);
 	bool TTN_Application::TTN_Input::inFrame = false;
+	std::vector<std::function<void()>> imGuiCallbacks;
 
 	//function to initialize a new window 
 	void TTN_Application::Init(const std::string name, int width, int height, bool fullScreen)
@@ -153,8 +161,164 @@ namespace Titan {
 		//while anything that doesn't need to be rendered (such as a prefabs scene) will not 
 		
 		//swap the buffers so all the drawings that the scenes just did are acutally visible 
+		//RenderImgui();
+		EndImgui();
 		glfwSwapBuffers(m_window);
 	}
+
+#pragma region IMGUI STUFF
+	/*
+	//function to put all the contents of the imgui window (buttons, sliders etc.)
+	void TTN_Application::SetUpImgui() {
+//			std::cout << "Hello" << std::endl;
+		imGuiCallbacks.push_back([&]() {
+			if (ImGui::CollapsingHeader("Test"))
+			{
+			//	//auto& canTrans = Get<TTN_Transform>(cannon);
+			//	float a;
+			//	if (ImGui::SliderFloat("Testing", &a, 0.01f, 1.0f)) {
+			//		//canTrans.x = canTrans;
+			//	}
+			}
+		});
+		
+	}
+
+	void TTN_Application::ImguiSlider(const char* name, float a, float min, float max)
+	{
+		/*imGuiCallbacks.push_back([&]() {
+			if (ImGui::CollapsingHeader("Test"))
+			{
+				if (ImGui::SliderFloat(name, &a, min, max)) {
+
+				}
+			
+			}
+		
+		});
+
+	}
+
+	//renders imgui
+	void TTN_Application::RenderImgui() {
+		// Implementation new frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		// ImGui context new frame
+		ImGui::NewFrame();
+
+		if (ImGui::Begin("Debug")) {
+			// Render our GUI stuff
+			for (auto& func : imGuiCallbacks) {
+				func();
+			}
+
+			//ImGui::Button("Hello!");
+			ImGui::End();
+		}
+
+		// Make sure ImGui knows how big our window is
+		ImGuiIO& io = ImGui::GetIO();
+		int width, height;
+		glfwGetWindowSize(m_window, &width, &height);
+		io.DisplaySize = ImVec2(static_cast<float>(width), static_cast<float>(height));
+
+		// Render all of our ImGui elements
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// If we have multiple viewports enabled (can drag into a new window)
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+			// Update the windows that ImGui is using
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			// Restore our gl context
+			glfwMakeContextCurrent(m_window);
+		}
+		//std::cout << "Hello" << std::endl;
+	}
+	*/
+
+	//init's imgui stuff
+	void TTN_Application::InitImgui()
+	{
+		LOG_INFO(glGetString(GL_VERSION));
+		//printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
+		// Creates a new ImGUI context
+		ImGui::CreateContext();
+		// Gets our ImGUI input/output
+		ImGuiIO& io = ImGui::GetIO();
+		// Enable keyboard navigation
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		// Allow docking to our window
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		// Allow multiple viewports (so we can drag ImGui off our window)
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		// Allow our viewports to use transparent backbuffers
+		io.ConfigFlags |= ImGuiConfigFlags_TransparentBackbuffers;
+
+		// Set up the ImGui implementation for OpenGL
+		ImGui_ImplGlfw_InitForOpenGL(m_window, true);
+		ImGui_ImplOpenGL3_Init("#version 420");		
+
+		// Dark mode 
+		ImGui::StyleColorsDark();
+
+		// Get our imgui style
+		ImGuiStyle& style = ImGui::GetStyle();
+		//style.Alpha = 1.0f;
+		style.WindowRounding = 0.0f;
+		style.Colors[ImGuiCol_WindowBg].w = 0.8f;
+
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+			style.WindowRounding = 0.0f;
+			style.Colors[ImGuiCol_WindowBg].w = 0.8f;
+		}
+		//	std::cout << "Hello" << std::endl;
+
+	}
+
+	//start
+	void TTN_Application::StartImgui(){
+		// Implementation new frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		// ImGui context new frame
+		ImGui::NewFrame();
+	}
+
+	void TTN_Application::EndImgui(){
+		// Make sure ImGui knows how big our window is
+		ImGuiIO& io = ImGui::GetIO();
+		int width, height;
+		glfwGetWindowSize(m_window, &width, &height);
+		io.DisplaySize = ImVec2(static_cast<float>(width), static_cast<float>(height));
+
+		// Render all of our ImGui elements
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// If we have multiple viewports enabled (can drag into a new window)
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+			// Update the windows that ImGui is using
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			// Restore our gl context
+			glfwMakeContextCurrent(m_window);
+		}
+	}
+
+	//called after program loop to delete some context window stuff
+	void TTN_Application::CleanImgui() {
+		// Cleanup the ImGui implementation
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		// Destroy our ImGui context
+		ImGui::DestroyContext();
+	}
+
+#pragma endregion
+
 
 	//checks if a key is being pressed
 	bool TTN_Application::TTN_Input::GetKey(TTN_KeyCode key)

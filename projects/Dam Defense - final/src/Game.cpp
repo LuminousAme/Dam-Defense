@@ -3,7 +3,14 @@
 
 //import the class
 #include "Game.h"
+#include "Titan/Application.h"
+
 #include "glm/ext.hpp"
+
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 //default constructor
 Game::Game()
@@ -22,14 +29,114 @@ void Game::InitScene()
 
 	//create the entities
 	SetUpEntities();
+
 }
+
+//#pragma region IMGUI STUFF
+//void Game::SetUpImgui() {
+//	//	std::cout << "Hello" << std::endl;
+//	imGuiCallbacks.push_back([&]() {
+//		if (ImGui::CollapsingHeader("Test"))
+//		{
+//			//auto& canTrans = Get<TTN_Transform>(cannon);
+//			float a;
+//			if (ImGui::SliderFloat("Testing", &a, 0.01f, 1.0f)) {
+//				//canTrans.x = canTrans;
+//			}
+//		}
+//	});
+//
+//}
+//
+//void Game::InitImgui()
+//{
+//	IMGUI_CHECKVERSION();
+//	// Creates a new ImGUI context
+//	ImGui::CreateContext();
+//	// Gets our ImGUI input/output
+//	ImGuiIO& io = ImGui::GetIO();
+//	// Enable keyboard navigation
+//	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+//	// Allow docking to our window
+//	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+//	// Allow multiple viewports (so we can drag ImGui off our window)
+//	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+//	// Allow our viewports to use transparent backbuffers
+//	io.ConfigFlags |= ImGuiConfigFlags_TransparentBackbuffers;
+//
+//	// Set up the ImGui implementation for OpenGL
+//	ImGui_ImplGlfw_InitForOpenGL(TTN_Application::m_window, true);
+//	ImGui_ImplOpenGL3_Init("#version 420");
+//
+//	// Dark mode
+//	ImGui::StyleColorsDark();
+//
+//	// Get our imgui style
+//	ImGuiStyle& style = ImGui::GetStyle();
+//	//style.Alpha = 1.0f;
+//	style.WindowRounding = 0.0f;
+//	style.Colors[ImGuiCol_WindowBg].w = 0.8f;
+//
+//	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+//		style.WindowRounding = 0.0f;
+//		style.Colors[ImGuiCol_WindowBg].w = 0.8f;
+//	}
+//	//	std::cout << "Hello" << std::endl;
+//
+//}
+//
+//void Game::RenderImgui() {
+//	// Implementation new frame
+//	ImGui_ImplOpenGL3_NewFrame();
+//	ImGui_ImplGlfw_NewFrame();
+//	// ImGui context new frame
+//	ImGui::NewFrame();
+//
+//	if (ImGui::Begin("Debug")) {
+//		// Render our GUI stuff
+//		for (auto& func : imGuiCallbacks) {
+//			func();
+//		}
+//		//ImGui::Button("Hello!");
+//		ImGui::End();
+//	}
+//
+//	// Make sure ImGui knows how big our window is
+//	ImGuiIO& io = ImGui::GetIO();
+//	int width, height;
+//	glfwGetWindowSize(TTN_Application::m_window, &width, &height);
+//	io.DisplaySize = ImVec2(static_cast<float>(width), static_cast<float>(height));
+//
+//	// Render all of our ImGui elements
+//	ImGui::Render();
+//	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+//
+//	// If we have multiple viewports enabled (can drag into a new window)
+//	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+//		// Update the windows that ImGui is using
+//		ImGui::UpdatePlatformWindows();
+//		ImGui::RenderPlatformWindowsDefault();
+//		// Restore our gl context
+//		glfwMakeContextCurrent(TTN_Application::m_window);
+//	}
+//
+//}
+//
+//void Game::EndImgui() {
+//	// Cleanup the ImGui implementation
+//	ImGui_ImplOpenGL3_Shutdown();
+//	ImGui_ImplGlfw_Shutdown();
+//	// Destroy our ImGui context
+//	ImGui::DestroyContext();
+//}
+//
+//#pragma endregion
 
 //updates the scene every frame
 void Game::Update(float deltaTime)
 {
 	//allow the player to rotate
 	PlayerRotate(deltaTime);
-
 	//switch to the cannon's normal static animation if it's firing animation has ended
 	StopFiring();
 
@@ -91,7 +198,6 @@ void Game::Update(float deltaTime)
 	float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
 
 	for (int i = 0; i < 3; i++) {
-
 		if (i == 0) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp(birdBase, birdTarget, t));
 
 		if (i == 1) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
@@ -101,12 +207,22 @@ void Game::Update(float deltaTime)
 		if (i == 2) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
 
 		(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f), birdTarget + glm::vec3(-3.0f, -3.0f, -3.0f), t));
-
 	}
+
+#pragma region imgui
+	TTN_Application::StartImgui();
+
+	auto& a = Get<TTN_Transform>(camera);
+	float b = a.GetPos().x;
+	if (ImGui::SliderFloat("Camera Test X-Axis", &b, -100.0f, 100.0f)) {
+		a.SetPos(glm::vec3 (b, a.GetPos().y, a.GetPos().z));
+	}
+
+#pragma endregion
+
 
 	//increase the total time of the scene to make the water animated correctly
 	time += deltaTime;
-
 	//printf("fps: %f\n", 1.0f / deltaTime);
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
@@ -247,6 +363,7 @@ void Game::MouseButtonUpChecks()
 
 #pragma endregion
 
+#pragma region SetUP STUFF
 //sets up all the assets in the scene
 void Game::SetUpAssets()
 {
@@ -518,10 +635,7 @@ void Game::SetUpEntities()
 
 	//birds
 	for (int i = 0; i < 3; i++) {
-
 		birds[i] = CreateEntity();
-
-
 
 		//create a renderer
 
@@ -530,8 +644,6 @@ void Game::SetUpEntities()
 		//attach that renderer to the entity
 
 		AttachCopy(birds[i], birdRenderer);
-
-
 
 		//create an animator
 
@@ -549,8 +661,6 @@ void Game::SetUpEntities()
 
 		AttachCopy(birds[i], birdAnimator);
 
-
-
 		//create a transform
 
 		TTN_Transform birdTrans = TTN_Transform(birdBase, glm::vec3(0.0f), glm::vec3(1.0f));
@@ -564,7 +674,6 @@ void Game::SetUpEntities()
 		//attach that transform to the entity
 
 		AttachCopy(birds[i], birdTrans);
-
 	}
 
 	//prepare the vector of cannonballs
@@ -603,7 +712,6 @@ void Game::SetUpOtherData()
 	birdTarget = glm::vec3(-100, 10, -65);
 
 	//make the scene have gravity
-
 	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));
 
 	//create the particle templates
@@ -635,6 +743,7 @@ void Game::SetUpOtherData()
 		fireParticle.SetOneStartSpeed(8.5f);
 	}
 }
+#pragma endregion
 
 //called by update once a frame, allows the player to rotate
 void Game::PlayerRotate(float deltaTime)
@@ -773,7 +882,8 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 	if (path == 3) {
 		if (tBoat.GetPos().x <= 65.f && !(tBoat.GetPos().x <= 5.f)) {
 			if (tBoat.GetRotation().y <= 65.0f && boatNum == 1) {
-				tBoat.RotateFixed(glm::vec3(0.0f, -0.6f, 0.0f));}
+				tBoat.RotateFixed(glm::vec3(0.0f, -0.6f, 0.0f));
+			}
 
 			else if (tBoat.GetRotation().y <= 15.0f && boatNum == 2) { //carrier rotation
 				tBoat.RotateFixed(glm::vec3(0.0f, -0.15f, 0.0f));
@@ -785,7 +895,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 
 			pBoat.AddForce(Seek(glm::vec3(5.0f, -8.0f, 55.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
-	
+
 		if (tBoat.GetPos().x <= 5.f) {
 			if (tBoat.GetRotation().y <= 89.0f && boatNum == 1) {
 				tBoat.RotateFixed(glm::vec3(0.0f, -0.95f, 0.0f));
@@ -831,7 +941,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 
 			else if (tBoat.GetRotation().y >= 1.0f && boatNum == 2) {
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.7f, 0.0f));
-				std::cout << glm::to_string(tBoat.GetRotation()) << std::endl;
+				//std::cout << glm::to_string(tBoat.GetRotation()) << std::endl;
 			}
 
 			else if (tBoat.GetRotation().y <= -1.0f && boatNum == 3) {
@@ -846,31 +956,36 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 	if (path == 6) {
 		if (tBoat.GetPos().x >= -65.f && !(tBoat.GetPos().x >= -5.F)) {
 			if (tBoat.GetRotation().y <= 65.0f && boatNum == 1) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.6f, 0.0f));}
+				tBoat.RotateFixed(glm::vec3(0.0f, 0.6f, 0.0f));
+			}
 
 			else if (tBoat.GetRotation().y >= 15.0f && boatNum == 2) { //carrier rotation
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.20f, 0.0f));}
+				tBoat.RotateFixed(glm::vec3(0.0f, 0.20f, 0.0f));
+			}
 
 			else if (tBoat.GetRotation().y <= -15.0f && boatNum == 3) { //submarine rotation
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.15f, 0.0f));}
+				tBoat.RotateFixed(glm::vec3(0.0f, 0.15f, 0.0f));
+			}
 
 			pBoat.AddForce(Seek(glm::vec3(-5.0f, -8.0f, 55.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 
 		if (tBoat.GetPos().x >= -5.f) {
 			if (tBoat.GetRotation().y <= 89.0f && boatNum == 1) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.95f, 0.0f));}
+				tBoat.RotateFixed(glm::vec3(0.0f, 0.95f, 0.0f));
+			}
 
 			else if (tBoat.GetRotation().y <= 15.0f && boatNum == 2) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.08f, 0.0f));}
+				tBoat.RotateFixed(glm::vec3(0.0f, 0.08f, 0.0f));
+			}
 
 			else if (tBoat.GetRotation().y <= -1.0f && boatNum == 3) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.08f, 0.0f));}
+				tBoat.RotateFixed(glm::vec3(0.0f, 0.08f, 0.0f));
+			}
 
 			pBoat.AddForce(Seek(glm::vec3(-4.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
-
 }
 
 //spawn left side boats
@@ -1004,7 +1119,7 @@ void Game::Waves(int num, float restTime, float waveTime, float deltaTime)
 
 		if (waveTimer >= waveTime) {
 			Spawning = false;
-			printf("wavetimer over!\n");
+			//printf("wavetimer over!\n");
 			waveTimer = 0;
 		}
 
@@ -1014,7 +1129,7 @@ void Game::Waves(int num, float restTime, float waveTime, float deltaTime)
 			if (restTimer >= restTime) {
 				Spawning = true;
 				restTimer = 0;
-				printf("Spawn now!\n");
+				//printf("Spawn now!\n");
 				wave++;
 			}
 		}

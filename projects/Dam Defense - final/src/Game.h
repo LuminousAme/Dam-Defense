@@ -23,6 +23,7 @@ public:
 	//late render (terrain, water, etc.)
 	void PostRender();
 
+
 	//keyboard input
 	void KeyDownChecks();
 	void KeyChecks();
@@ -33,8 +34,9 @@ public:
 	void MouseButtonChecks();
 	virtual void MouseButtonUpChecks();
 
-//Assets
+	//Assets
 public:
+
 	//shader programs
 	TTN_Shader::sshptr shaderProgramUnTextured;
 	TTN_Shader::sshptr shaderProgramTextured;
@@ -89,7 +91,7 @@ public:
 	TTN_Material::smatptr smokeMat;
 	TTN_Material::smatptr fireMat;
 
-//Entities
+	//Entities
 protected:
 	entt::entity camera;
 	entt::entity light;
@@ -107,16 +109,16 @@ protected:
 	std::vector<entt::entity> flamethrowers;
 	std::vector<entt::entity> flames;
 
-//other data
+	//other data
 protected:
 	//position of the mouse in screenspace
 	glm::vec2 mousePos;
 	//the ammount the main player should be rotated
-	glm::vec2 rotAmmount; 
-	 //the direction the cannon is currently facing
+	glm::vec2 rotAmmount;
+	//the direction the cannon is currently facing
 	glm::vec3 playerDir;
 	//a multiplier for the ammount of force should be applied to a cannonball when it is fired
-	float cannonBallForce; 
+	float cannonBallForce;
 	//the ammount of time in seconds that the player has to wait between shots
 	float playerShootCooldown;
 	float playerShootCooldownTimer;
@@ -150,13 +152,13 @@ protected:
 	TTN_ParticleTemplate smokeParticle;
 	TTN_ParticleTemplate fireParticle;
 
-//set up functions, called by InitScene()
+	//set up functions, called by InitScene()
 protected:
 	void SetUpAssets();
 	void SetUpEntities();
 	void SetUpOtherData();
 
-//update functions, called by Update()
+	//update functions, called by Update()
 protected:
 	void PlayerRotate(float deltaTime);
 	void StopFiring();
@@ -172,11 +174,10 @@ protected:
 
 	void DeleteFlamethrowers();
 
-//other functions, ussually called in relation to something happening like player input or a collision
+	//other functions, ussually called in relation to something happening like player input or a collision
 protected:
 	void CreateCannonball();
 	void DeleteCannonballs();
-
 };
 
 inline float SmoothStep(float t) {
