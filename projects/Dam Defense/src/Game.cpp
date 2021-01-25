@@ -5,6 +5,11 @@
 #include "Game.h"
 #include "glm/ext.hpp"
 
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 //default constructor
 Game::Game()
 	: TTN_Scene()
@@ -22,6 +27,7 @@ void Game::InitScene()
 
 	//create the entities
 	SetUpEntities();
+
 }
 
 //updates the scene every frame
@@ -29,7 +35,6 @@ void Game::Update(float deltaTime)
 {
 	//allow the player to rotate
 	PlayerRotate(deltaTime);
-
 	//switch to the cannon's normal static animation if it's firing animation has ended
 	StopFiring();
 
@@ -91,7 +96,6 @@ void Game::Update(float deltaTime)
 	float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
 
 	for (int i = 0; i < 3; i++) {
-
 		if (i == 0) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp(birdBase, birdTarget, t));
 
 		if (i == 1) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
@@ -101,12 +105,21 @@ void Game::Update(float deltaTime)
 		if (i == 2) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
 
 		(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f), birdTarget + glm::vec3(-3.0f, -3.0f, -3.0f), t));
-
 	}
+
+#pragma region imgui
+	TTN_Application::StartImgui();
+
+	auto& a = Get<TTN_Transform>(camera);
+	float b = a.GetPos().x;
+	if (ImGui::SliderFloat("Camera Test X-Axis", &b, -100.0f, 100.0f)) {
+		a.SetPos(glm::vec3 (b, a.GetPos().y, a.GetPos().z));
+	}
+
+#pragma endregion
 
 	//increase the total time of the scene to make the water animated correctly
 	time += deltaTime;
-
 	//printf("fps: %f\n", 1.0f / deltaTime);
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
@@ -247,6 +260,7 @@ void Game::MouseButtonUpChecks()
 
 #pragma endregion
 
+#pragma region SetUP STUFF
 //sets up all the assets in the scene
 void Game::SetUpAssets()
 {
@@ -312,11 +326,6 @@ void Game::SetUpAssets()
 	treeMesh[1] = TTN_ObjLoader::LoadFromFile("models/Tree2.obj");
 	treeMesh[2] = TTN_ObjLoader::LoadFromFile("models/Tree3.obj");
 	damMesh = TTN_ObjLoader::LoadFromFile("models/Dam.obj");
-	rockMesh[0] = TTN_ObjLoader::LoadFromFile("models/Rock1.obj");
-	rockMesh[1] = TTN_ObjLoader::LoadFromFile("models/Rock2.obj");
-	rockMesh[2] = TTN_ObjLoader::LoadFromFile("models/Rock3.obj");
-	rockMesh[3] = TTN_ObjLoader::LoadFromFile("models/Rock4.obj");
-	rockMesh[4] = TTN_ObjLoader::LoadFromFile("models/Rock5.obj");
 
 	///TEXTURES////
 	cannonText = TTN_Texture2D::LoadFromFile("textures/metal.png");
@@ -369,9 +378,6 @@ void Game::SetUpAssets()
 
 	damMat = TTN_Material::Create();
 	damMat->SetAlbedo(damText);
-
-	rockMat = TTN_Material::Create();
-	rockMat->SetAlbedo(rockText);
 }
 
 //create the scene's initial entities
@@ -529,65 +535,42 @@ void Game::SetUpEntities()
 		birds[i] = CreateEntity();
 
 		//create a renderer
+
 		TTN_Renderer birdRenderer = TTN_Renderer(birdMesh, shaderProgramAnimatedTextured, birdMat);
+
 		//attach that renderer to the entity
+
 		AttachCopy(birds[i], birdRenderer);
 
 		//create an animator
+
 		TTN_MorphAnimator birdAnimator = TTN_MorphAnimator();
+
 		//create an animation for the bird flying
+
 		TTN_MorphAnimation flyingAnim = TTN_MorphAnimation({ 0, 1 }, { 10.0f / 24.0f, 10.0f / 24.0f }, true); //anim 0
+
 		birdAnimator.AddAnim(flyingAnim);
+
 		birdAnimator.SetActiveAnim(0);
+
 		//attach that animator to the entity
+
 		AttachCopy(birds[i], birdAnimator);
 
 		//create a transform
+
 		TTN_Transform birdTrans = TTN_Transform(birdBase, glm::vec3(0.0f), glm::vec3(1.0f));
+
 		if (i == 1) birdTrans.SetPos(birdBase + glm::vec3(3.0f, -3.0f, 3.0f));
+
 		if (i == 2) birdTrans.SetPos(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f));
+
 		birdTrans.RotateFixed(glm::vec3(0.0f, -45.0f + 180.0f, 0.0f));
 
 		//attach that transform to the entity
+
 		AttachCopy(birds[i], birdTrans);
-	}
-
-	//trees
-	for (int i = 0; i < 3; i++) {
-		trees[i] = CreateEntity();
-
-		//create a renderer
-		TTN_Renderer treeRenderer = TTN_Renderer(treeMesh[i], shaderProgramTextured, treeMat);
-		//attach that renderer to the entity
-		AttachCopy(trees[i], treeRenderer);
-
-		//create a transform
-		TTN_Transform treeTrans = TTN_Transform(glm::vec3(22.0f, -10.0f, 26.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-		if (i == 0) treeTrans.RotateFixed(glm::vec3(0.0f, 180.0f, 0.0f));
-		if (i == 1) treeTrans.SetPos(glm::vec3(-22.0f, -8.0f, 26.0f));
-		if (i == 2) treeTrans.SetPos(glm::vec3(-30.0f, -5.0f, 25.0f));
-
-		//attach that transform to the entity
-		AttachCopy(trees[i], treeTrans);
-	}
-
-	//rocks
-	for (int i = 0; i < 5; i++) {
-		rocks[i] = CreateEntity();
-
-		//create a renderer
-		TTN_Renderer rockRenderer = TTN_Renderer(rockMesh[i], shaderProgramTextured, rockMat);
-		//attach that renderer to the entity
-		AttachCopy(rocks[i], rockRenderer);
-
-		//create a transform
-		TTN_Transform rockTrans = TTN_Transform(glm::vec3(-100.0f, 0.5f, 45.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-		if (i == 1) rockTrans.SetPos(glm::vec3(100.0f, 0.5f, 5.0f));
-		if (i == 2) rockTrans.SetPos(glm::vec3(-120.0f, 0.5f, 15.0f));
-		if (i == 3) rockTrans.SetPos(glm::vec3(-120.0f, 0.5f, 25.0f));
-		if (i == 4) rockTrans.SetPos(glm::vec3(105.0f, 0.0f, 35.0f));
-		//attach that transform to the entity
-		AttachCopy(rocks[i], rockTrans);
 	}
 
 	//prepare the vector of cannonballs
@@ -626,7 +609,6 @@ void Game::SetUpOtherData()
 	birdTarget = glm::vec3(-100, 10, -65);
 
 	//make the scene have gravity
-
 	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));
 
 	//create the particle templates
@@ -658,6 +640,8 @@ void Game::SetUpOtherData()
 		fireParticle.SetOneStartSpeed(8.5f);
 	}
 }
+#pragma endregion
+
 
 //called by update once a frame, allows the player to rotate
 void Game::PlayerRotate(float deltaTime)
@@ -769,7 +753,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 				tBoat.RotateFixed(glm::vec3(0.0f, -0.55f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(8.0f, -7.5f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(8.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -788,7 +772,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 				tBoat.RotateFixed(glm::vec3(0.0f, -0.7f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(40.0f, -7.5f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(40.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -807,7 +791,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 				tBoat.RotateFixed(glm::vec3(0.0f, -0.15f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(5.0f, -7.5f, 55.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(5.0f, -8.0f, 55.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 
 		if (tBoat.GetPos().x <= 5.f) {
@@ -823,7 +807,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 				tBoat.RotateFixed(glm::vec3(0.0f, -0.08f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(4.0f, -7.5f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(4.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -842,7 +826,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.55f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(-8.0f, -7.5f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(-8.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -855,14 +839,14 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 
 			else if (tBoat.GetRotation().y >= 1.0f && boatNum == 2) {
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.7f, 0.0f));
-				std::cout << glm::to_string(tBoat.GetRotation()) << std::endl;
+				//std::cout << glm::to_string(tBoat.GetRotation()) << std::endl;
 			}
 
 			else if (tBoat.GetRotation().y <= -1.0f && boatNum == 3) {
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.7f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(-40.0f, -7.5f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(-40.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -881,7 +865,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.15f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(-5.0f, -7.5f, 55.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(-5.0f, -8.0f, 55.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 
 		if (tBoat.GetPos().x >= -5.f) {
@@ -897,10 +881,9 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.08f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(-4.0f, -7.5f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(-4.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
-
 }
 
 //spawn left side boats
@@ -933,7 +916,7 @@ void Game::SpawnerLS(float deltatime, float SpawnTime) {
 		AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
 
 		TTN_Transform boatTrans = TTN_Transform(glm::vec3(21.0f, 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-		boatTrans.SetPos(glm::vec3(90.0f, -7.5f, 115.0f));
+		boatTrans.SetPos(glm::vec3(90.0f, -8.0f, 115.0f));
 
 		if (randomBoat == 1) { //small regular boat
 			boatTrans.RotateFixed(glm::vec3(0.0f, 180.0f, 0.0f));
@@ -995,7 +978,7 @@ void Game::SpawnerRS(float deltatime, float SpawnTime)
 		AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
 
 		TTN_Transform boatTrans = TTN_Transform();
-		boatTrans.SetPos(glm::vec3(-90.0f, -7.5f, 115.0f));
+		boatTrans.SetPos(glm::vec3(-90.0f, -8.0f, 115.0f));
 		if (randomBoat == 1) { //small regular boat
 			boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
 			boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
@@ -1034,7 +1017,7 @@ void Game::Waves(int num, float restTime, float waveTime, float deltaTime)
 
 		if (waveTimer >= waveTime) {
 			Spawning = false;
-			printf("wavetimer over!\n");
+			//printf("wavetimer over!\n");
 			waveTimer = 0;
 		}
 
@@ -1044,7 +1027,7 @@ void Game::Waves(int num, float restTime, float waveTime, float deltaTime)
 			if (restTimer >= restTime) {
 				Spawning = true;
 				restTimer = 0;
-				printf("Spawn now!\n");
+				//printf("Spawn now!\n");
 				wave++;
 			}
 		}
@@ -1227,4 +1210,5 @@ void Game::DeleteFlamethrowers() {
 		DeleteEntity(*itt);
 		itt = flames.erase(itt);
 	}
+
 }

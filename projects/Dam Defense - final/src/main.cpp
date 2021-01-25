@@ -14,16 +14,19 @@ int main() {
 	TTN_Application::Init("Dam Defense", 1920, 1080); //initliaze titan's application
 
 	//lock the cursor while focused in the application window
-	TTN_Application::TTN_Input::SetCursorLocked(true);
+	//TTN_Application::TTN_Input::SetCursorLocked(true);
 
 	//create the scenes
 	TTN_Scene* gameScene = new Game;
 
-	//initliaze them
+	//initialize them
 	gameScene->InitScene();
 
 	//add them to the application
 	TTN_Application::scenes.push_back(gameScene);
+
+	//sets up all the buttons,sliders etc. in the imgui
+	//TTN_Application::SetUpImgui();
 
 	// init's the configs and contexts for imgui
 	TTN_Application::InitImgui();
@@ -31,8 +34,10 @@ int main() {
 	//while the application is running
 	while (!TTN_Application::GetIsClosing()) {
 		//update the scenes and render the screen
-		TTN_Application::Update();
+		TTN_Application::Update();	
 	}
+
+	TTN_Application::CleanImgui();//cleans up imgui stuff after program closes
 	
 	//when the application has ended, exit the program with no errors
 	return 0; 
