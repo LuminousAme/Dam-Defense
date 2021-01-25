@@ -35,7 +35,6 @@ int main() {
 	while (!TTN_Application::GetIsClosing()) {
 		//update the scenes and render the screen
 		TTN_Application::Update();	
-
 	}
 
 	TTN_Application::CleanImgui();//cleans up imgui stuff after program closes
