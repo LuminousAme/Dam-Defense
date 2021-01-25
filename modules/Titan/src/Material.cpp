@@ -1,6 +1,8 @@
 //Titan Engine, by Atlas X Games 
 // Material.cpp - source file for the class that represents materials on 3D objects
 
+//precompile header
+#include "Titan/ttn_pch.h"
 //include the header
 #include "Titan/Material.h"
 

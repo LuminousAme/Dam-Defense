@@ -1,9 +1,10 @@
 //Titan Engine, by Atlas X Games
 // Shader.cpp - source file for the class that wraps around an openGL shader program
+
+//precompile header, this file uses logging, fstream, and sstream
+#include "Titan/ttn_pch.h"
+//include the header
 #include "Titan/Shader.h"
-#include "Logging.h"
-#include <fstream>
-#include <sstream>
 
 namespace Titan {
 	//default constructor, makes an empty shader program

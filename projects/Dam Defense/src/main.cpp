@@ -1,46 +1,36 @@
-#include "Titan/Application.h"
-#include "Titan/Scene.h"
-#include "Titan/ObjLoader.h"
-#include "Titan/Renderer.h"
-#include "Titan/Transform.h"
-#include "Titan/Physics.h"
-#include <iostream>
-#include "glm/ext.hpp"
+//Dam Defense, by Atlas X Games
+//main.cpp, the source file that runs the game
 
-#include "DemoScene.h"
-#include "Review3Scene.h"
+//import required titan features
+#include "Titan/Application.h"
+//include the other headers in dam defense
+#include "Game.h"
 
 using namespace Titan;
 
-int main() {
-	Logger::Init();
-	TTN_Application::Init("Dam Defense", 1920, 1080);
-	//create a new scene
-	TTN_Scene* test = new DemoScene;
-	TTN_Scene* demo = new Review3Scene;
+//main function, runs the program
+int main() { 
+	Logger::Init(); //initliaze otter's base logging system
+	TTN_Application::Init("Dam Defense", 1920, 1080); //initliaze titan's application
 
-	test->InitScene();
-	demo->InitScene();
+	//lock the cursor while focused in the application window
+	TTN_Application::TTN_Input::SetCursorLocked(true);
 
-	test->SetShouldRender(false);
+	//create the scenes
+	TTN_Scene* gameScene = new Game;
 
-	//add the scene to the application
-	TTN_Application::scenes.push_back(test);
-	TTN_Application::scenes.push_back(demo);
-	//set the background to a blue
-	TTN_Application::SetClearColor(glm::vec4(0.0f, 0.88f, 0.99f, 1.0f));
+	//initliaze them
+	gameScene->InitScene();
 
+	//add them to the application
+	TTN_Application::scenes.push_back(gameScene);
+
+	//while the application is running
 	while (!TTN_Application::GetIsClosing()) {
-		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Space)) {
-			printf("check\n");
-			test->SetShouldRender(!test->GetShouldRender());
-			demo->SetShouldRender(!demo->GetShouldRender());
-		}
-
-		TTN_Application::TTN_Input::GetKeyUp(TTN_KeyCode::Space); //just to clear for the keydown
 		//update the scenes and render the screen
 		TTN_Application::Update();
 	}
-
-	return 0;
-}
+	
+	//when the application has ended, exit the program with no errors
+	return 0; 
+} 

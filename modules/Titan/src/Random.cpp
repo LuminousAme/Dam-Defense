@@ -1,6 +1,9 @@
 //Titan Engine, by Atlas X Games 
 // Random.cpp - source file for the class that gives static templates for random number generation
 
+//precompile header, this file uses stdio.h, stdlib.h, and time.h
+#include "Titan/ttn_pch.h"
+//include the header
 #include "Titan/Random.h"
 
 namespace Titan {
@@ -21,7 +24,6 @@ namespace Titan {
 		if (max - min == 0) intInRange = min;
 		//return converted number
 		return intInRange;
-
 	}
 
 	//generates a pseudo-random float between a min and max value

@@ -1,14 +1,12 @@
 //Titan Engine, by Atlas X Games 
 // Physics.cpp - source file for the class that represents physics bodies
 
+//precompile header, this file uses iostream and stdio.h
+#include "Titan/ttn_pch.h"
 //include the header
 #include "Titan/Physics.h"
 //include other required features
 #include "Titan/ObjLoader.h"
-#include <iostream>
-
-#include "..\include\Titan\Physics.h"
-#include <stdio.h> //printf debugging
 
 namespace Titan {
 	//default constructor, constructs a basic 1x1x1 physics body around the origin

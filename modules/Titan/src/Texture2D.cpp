@@ -1,11 +1,10 @@
 //Titan Engine, by Atlas X Games 
 // Texture2D.cpp - source file for the class that represents 2d texture images
 
+//precompile header, this file uses stb_image.h, filesystem, and memory
+#include "Titan/ttn_pch.h"
 //include the header
 #include "Titan/Texture2D.h"
-//include other required features
-#include <stb_image.h>
-#include <filesystem>
 
 namespace Titan {
 	TTN_Texture2DData::TTN_Texture2DData(uint32_t width, uint32_t height, Texture_Pixel_Format format, Texture_Pixel_Data_Type type, void* sourceData, Texture_Internal_Format recommendedFormat) :

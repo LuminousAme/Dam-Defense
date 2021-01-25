@@ -2,9 +2,8 @@
 // Camera.h - header for the class that represents a camera in a 3D scene
 #pragma once
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include "GLM/glm.hpp"
+//precompile header, this file uses GLM/glm.hpp
+#include "ttn_pch.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -19,8 +18,6 @@ namespace Titan {
 
 		void View(); // update the view
 		void LookAt(const glm::vec3& point); // changes the camera direction to this point
-
-		void keyInput(GLFWwindow* window);
 
 		//GETTERS
 		//gets camera's position in the world
@@ -49,10 +46,10 @@ namespace Titan {
 		void SetTarget(const glm::vec3& target);
 
 		// orthographic projection 
-		void CalcOrtho(float left, float right, float bottom, float top, float near, float far);
+		void CalcOrtho(float left, float right, float bottom, float top, float nearClip, float farClip);
 
 		// 3D perspective projection 
-		void CalcPerspective(float fovDegrees, float aspectRatio, float near, float far);
+		void CalcPerspective(float fovDegrees, float aspectRatio, float nearClip, float farClip);
 
 	protected:
 			
@@ -70,4 +67,3 @@ namespace Titan {
 		mutable glm::mat4 m_viewProjection;//mutable, so it can be recalculated using const methods
 	};
 }
-

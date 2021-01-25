@@ -2,12 +2,11 @@
 // Mesh.h - header for the class that represents 3D meshes
 #pragma once
 
+//precompile header, this file uses GLM/glm.hpp and vector
+#include "ttn_pch.h"
 //include the opengl wrap around classes
 #include "VertexArrayObject.h"
-//include glm features
-#include "GLM/glm.hpp"
-//import other required features
-#include <vector>
+
 
 namespace Titan {
 

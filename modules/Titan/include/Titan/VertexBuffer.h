@@ -2,10 +2,10 @@
 // VertexBuffer.h - header for the class that stores the buffer for vertices that we can render
 #pragma once
 
+//precompile header, this file uses memory
+#include "ttn_pch.h"
 //import the buffer base class
 #include "IBuffer.h"
-//import the other features we need
-#include <memory>
 
 namespace Titan {
 

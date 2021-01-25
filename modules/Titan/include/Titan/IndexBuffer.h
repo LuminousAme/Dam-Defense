@@ -2,12 +2,9 @@
 // IndexBuffer.h - header for the class that stores the buffer for indices that we can render
 #pragma once
 
-//import the buffer base class
+//import the buffer base class, which also includes the precompile header, which has the other features we need here
+//including cstdint, stdexcept, and memory
 #include "IBuffer.h"
-//import the other features we need
-#include <cstdint>
-#include <stdexcept>
-#include <memory>
 
 namespace Titan {
 

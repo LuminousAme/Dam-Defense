@@ -39,5 +39,4 @@ void main() {
 		
 	vec4 newPos = MVP * vec4(vert, 1.0);
 	gl_Position = newPos;
-}
-	
+}	

@@ -1,9 +1,9 @@
 //Titan Engine, by Atlas X Games 
 // Camera.cpp - source file for the class that represents a camera in a 3D scene
 
+#include "Titan/ttn_pch.h"
+//include the precompile header, this file uses GLM/gtx/transform.hpp, and iostream
 #include "Titan/Camera.h"
-#include "GLM/gtx/transform.hpp"
-#include <iostream>
 
 namespace Titan {
 		
@@ -28,29 +28,6 @@ namespace Titan {
 		m_forward = -glm::normalize(m_position - point);
 	}
 
-	void TTN_Camera::keyInput(GLFWwindow* window) {
-		const float m_speed = 0.1f; 
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-			//m_target += m_speed * m_forward;
-			m_target += glm::normalize(glm::cross(m_forward, m_above)) * m_speed;
-		}
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-			//m_target -= m_speed * m_forward;
-			m_target -= glm::normalize(glm::cross(m_forward, m_above)) * m_speed;
-		}
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-			m_target -= glm::normalize(glm::cross(m_forward, m_up)) * m_speed;
-		}
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-			m_target += glm::normalize(glm::cross(m_forward, m_up)) * m_speed;
-		}
-
-		SetTarget(m_target);
-		View();
-	
-
-	}
-
 	const glm::mat4& TTN_Camera::GetVP(){
 		m_viewProjection = m_projection * m_view;
 		return m_viewProjection;
@@ -73,12 +50,12 @@ namespace Titan {
 		m_target = target;
 	}
 
-	void TTN_Camera::CalcOrtho(float left, float right, float bottom, float top, float near, float far){
-		m_projection = glm::ortho(left, right, bottom, top, near, far);
+	void TTN_Camera::CalcOrtho(float left, float right, float bottom, float top, float nearClip, float farClip){
+		m_projection = glm::ortho(left, right, bottom, top, nearClip, farClip);
 	}
 
-	void TTN_Camera::CalcPerspective(float fovDegrees, float aspectRatio, float near, float far){
-		m_projection = glm::perspective(glm::radians(fovDegrees), aspectRatio, near, far);
+	void TTN_Camera::CalcPerspective(float fovDegrees, float aspectRatio, float nearClip, float farClip){
+		m_projection = glm::perspective(glm::radians(fovDegrees), aspectRatio, nearClip, farClip);
 	}
 
 }

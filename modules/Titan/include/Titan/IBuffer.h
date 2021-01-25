@@ -2,8 +2,8 @@
 // IBuffer.h - header for the abstract base class for all the OpenGL buffer types
 #pragma once
 
-//import the required opengl features
-#include <glad/glad.h>
+//precompile header, this file uses glad/glad.h
+#include "ttn_pch.h"
 
 namespace Titan {
 

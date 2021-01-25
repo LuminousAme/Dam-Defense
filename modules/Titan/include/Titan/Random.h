@@ -2,11 +2,6 @@
 // Random.h - header for the class that gives static templates for random number generation
 #pragma once
 
-//import required features
-#include <stdio.h>
-#include <stdlib.h> 
-#include <time.h>
-
 namespace Titan {
 	class TTN_Random {
 	public:

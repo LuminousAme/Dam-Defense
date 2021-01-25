@@ -1,9 +1,10 @@
 //Titan Engine, by Atlas X Games 
+
+//precompile header, this file uses GLM/gtx/transform.hpp
+#include "Titan/ttn_pch.h"
+
 // Transform.cpp - source file for the class that defines the transform component 
 #include "Titan/Transform.h"
-
-//include required glm functions 
-#include "GLM/gtx/transform.hpp"
 
 namespace Titan {
 	//default constructor, sets all of the variables to default values 

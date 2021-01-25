@@ -1,14 +1,10 @@
 //Titan Engine, by Atlas X Games
 //ObjLoader.cpp - source file for the class that parses OBJ files into TTN_Models 
 
+//precompile header, this file uses string, sstream, fstream, iostream, algorithm, and Logging.h
+#include "Titan/ttn_pch.h"
 //include the header
 #include "Titan/ObjLoader.h"
-//include other required features
-#include <string>
-#include <sstream>
-#include <fstream>
-#include <iostream>
-#include <algorithm>
 
 namespace Titan {
 

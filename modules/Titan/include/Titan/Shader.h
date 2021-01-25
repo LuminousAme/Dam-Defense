@@ -2,23 +2,9 @@
 // Scene.h - header for the class that represents openGL shaders
 #pragma once
 
-//include required libraries
-//open gl interfacing
-#include <glad/glad.h>
-//memory functions
-#include <memory>
-//std::string class
-#include <string>
-//std::unordered_map class
-#include <unordered_map>
-//GLM types and basic functions
-#include <GLM/glm.hpp>
-//GLM pointers
-#include <GLM/gtc/type_ptr.hpp>
-//logging
-#include "Logging.h"
-//textures
-#include "Texture2D.h"
+//precompile header, this file uses glad/glad.h, memory, string, unordered_map, and GLM/glm.hpp
+#include "ttn_pch.h"
+
 
 namespace Titan {
 	//enum for the different default shaders titan offers

@@ -2,8 +2,8 @@
 // Texture.h - header for the enums that help with texture images
 #pragma once
 
-#include "Logging.h"
-#include "glad/glad.h"
+//precompile header, this file uses glad/glad.h
+#include "ttn_pch.h"
 
 namespace Titan {
 	//enums for texture details

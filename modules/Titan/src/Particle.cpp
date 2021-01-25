@@ -1,7 +1,10 @@
 //Titan Engine, by Atlas X Games 
 // Partilce.cpp - source file for the class that represents a particle system
+
+//precompile header, this file uses GLM/gtx/transform.hpp
+#include "Titan/ttn_pch.h"
+//include the header
 #include "Titan/Particle.h"
-#include "GLM/gtx/transform.hpp"
 
 //code refernce: https://www.youtube.com/watch?v=GK0jHlv3e3w&t=515s
 
@@ -17,6 +20,7 @@ namespace Titan {
 		m_particle = TTN_ParticleTemplate();
 		m_duration = 5.0f;
 		m_loop = true;
+		m_paused = false;
 		m_emissionTimer = 0.0f;
 
 		m_maxParticlesCount = 1000;
@@ -56,6 +60,8 @@ namespace Titan {
 		: m_maxParticlesCount(maxParticles), m_emissionRate(emissionRate), m_particle(particleTemplate),
 		m_duration(duration), m_loop(loop)
 	{
+		m_paused = false;
+
 		//reverse memory space for all the particle data
 		Positions = new glm::vec3[m_maxParticlesCount];
 		StartColors = new glm::vec4[m_maxParticlesCount];
@@ -200,6 +206,12 @@ namespace Titan {
 		m_rotation = glm::radians(rotation);
 	}
 
+	//sets wheter or not the particle system is paused
+	void TTN_ParticleSystem::SetPaused(bool paused)
+	{
+		m_paused = paused;
+	}
+
 	//sets the function pointer for the readgraph used in lerping velocity
 	void TTN_ParticleSystem::VelocityReadGraphCallback(float(*function)(float))
 	{
@@ -226,47 +238,50 @@ namespace Titan {
 	//updates the particle system
 	void TTN_ParticleSystem::Update(float deltaTime)
 	{
-		//only emit new particles if it still has durtation remainig or doesn't but is looping
-		if (m_durationRemaining > 0.0f || (m_durationRemaining <= 0.0f && m_loop))
-		{
-			//emit new particles
-			m_emissionTimer += deltaTime;
+		//only run if the particle system is not paused
+		if (!m_paused) {
+			//only emit new particles if it still has durtation remainig or doesn't but is looping
+			if (m_durationRemaining > 0.0f || (m_durationRemaining <= 0.0f && m_loop))
+			{
+				//emit new particles
+				m_emissionTimer += deltaTime;
 
-			while (m_emissionTimer > 1.0f / m_emissionRate) {
-				Emit();
-				m_emissionTimer -= 1.0f / m_emissionRate;
+				while (m_emissionTimer > 1.0f / m_emissionRate) {
+					Emit();
+					m_emissionTimer -= 1.0f / m_emissionRate;
+				}
+
+				size_t NumOfNewParticles = static_cast<size_t>((double)m_emissionRate * (double)deltaTime);
+				for (size_t i = 0; i < NumOfNewParticles; i++) {
+					Emit();
+				}
+
+				m_durationRemaining -= deltaTime;
+			}
+			//if it doesn't have duration left but should loop then loop it
+			if (m_durationRemaining <= 0.0f && m_loop) {
+				m_durationRemaining = m_duration;
 			}
 
-			size_t NumOfNewParticles = static_cast<size_t>((double)m_emissionRate * (double)deltaTime);
-			for (size_t i = 0; i < NumOfNewParticles; i++) {
-				Emit();
+			//iterate over all the particles
+			for (size_t i = 0; i < m_maxParticlesCount; i++) {
+				//if it's not alive just skip it
+				if (!Active[i])
+					continue;
+				//if it's gone through it's lifetime, deactive it and skip to the next one
+				if (timeAlive[i] >= lifeTimes[i]) {
+					Active[i] = false;
+					continue;
+				}
+
+				//update how long the particle has been alive
+				timeAlive[i] += deltaTime;
+
+				//get a t value for interpolation 
+				float t = std::clamp(timeAlive[i] / lifeTimes[i], 0.0f, 1.0f);
+				//update the position of the particlce based on the interpolation of the velocities
+				Positions[i] += glm::mix(StartVelocities[i], EndVelocities[i], readGraphVelo(t)) * deltaTime;
 			}
-
-			m_durationRemaining -= deltaTime;
-		}
-		//if it doesn't have duration left but should loop then loop it
-		if (m_durationRemaining <= 0.0f && m_loop) {
-			m_durationRemaining = m_duration;
-		}
-
-		//iterate over all the particles
-		for (size_t i = 0; i < m_maxParticlesCount; i++) {
-			//if it's not alive just skip it
-			if (!Active[i])
-				continue;
-			//if it's gone through it's lifetime, deactive it and skip to the next one
-			if (timeAlive[i] >= lifeTimes[i]) {
-				Active[i] = false;
-				continue;
-			}
-
-			//update how long the particle has been alive
-			timeAlive[i] += deltaTime;
-
-			//get a t value for interpolation 
-			float t = std::clamp(timeAlive[i] / lifeTimes[i], 0.0f, 1.0f);
-			//update the position of the particlce based on the interpolation of the positions
-			Positions[i] += glm::mix(StartVelocities[i], EndVelocities[i], readGraphVelo(t)) * deltaTime;
 		}
 	}
 
@@ -291,11 +306,6 @@ namespace Titan {
 			s_defaultWhiteTexture->Bind(0);
 		}
 
-		//create some temp vectors to store the data about the particles that are acutally going to be rendered
-		//std::vector<glm::mat4> particle_mvp = std::vector<glm::mat4>();
-		//std::vector<glm::mat4> particle_model = std::vector<glm::mat4>();
-		//std::vector<glm::vec4> particle_col = std::vector<glm::vec4>();
-		//std::vector<glm::mat3> particle_normalMat = std::vector<glm::mat3>();
 		size_t numOfActiveParticles = 0;
 		//go through all the particles and set up their data for rendering
 		for (size_t i = 0; i < m_maxParticlesCount; i++) {

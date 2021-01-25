@@ -1,15 +1,13 @@
 //Titan Engine, by Atlas X Games 
 // Particle.h - header for the class that represents a particle system
 #pragma once
+
+//precompile header, this file uses GLM/glm.hpp, GLM/gtx/quaternion.hpp, vector, iostream, and algorithm
+#include "ttn_pch.h"
+//include other titan featues
 #include "Titan/ObjLoader.h"
 #include "Titan/Renderer.h"
-#define GLM_ENABLE_EXPERIMENTAL
-#include "GLM/glm.hpp"
-#include "GLM/gtx/quaternion.hpp"
 #include "Titan/Random.h"
-#include <vector>
-#include <iostream>
-#include <algorithm>
 
 namespace Titan {
 	//enum for the particle emitter type
@@ -168,6 +166,7 @@ namespace Titan {
 		void SetParticleTemplate(TTN_ParticleTemplate particleTemplate);
 		void SetEmissionRate(float emissionRate);
 		void SetEmitterRotation(glm::vec3 rotation);
+		void SetPaused(bool paused);
 
 		//getters
 		float GetEmitterAngle() { return m_EmitterAngle; }
@@ -177,6 +176,7 @@ namespace Titan {
 		TTN_ParticleTemplate GetParticleTemplate() { return m_particle; }
 		float GetEmissionRate() { return m_emissionRate; }
 		glm::vec3 GetEmitterRotation() { return glm::degrees(m_rotation); }
+		bool GetPaused() { return m_paused; }
 
 		//function pointer setters
 		void VelocityReadGraphCallback(float (*function)(float));
@@ -228,6 +228,7 @@ namespace Titan {
 		float m_duration;
 		bool m_loop;
 		float m_emissionTimer;
+		bool m_paused;
 
 		//other data
 		size_t m_activeParticleIndex;

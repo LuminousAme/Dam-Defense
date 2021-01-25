@@ -2,11 +2,9 @@
 // Texture2D.h - header for the class that represents cube map texture images
 #pragma once
 
-//import required features
-#include <cstdint>
-#include <memory>
-#include <GLM/glm.hpp>
-#include <string>
+//precompile header, this file uses cstdint, and string
+#include "ttn_pch.h"
+//include other titan features
 #include "TextureEnums.h"
 #include "Texture2D.h"
 

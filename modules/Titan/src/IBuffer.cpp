@@ -1,6 +1,9 @@
 //Titan Engine, by Atlas X Games 
 // Shader.cpp - source file for the abstract base class for all the OpenGL buffer types
 
+//precompile header
+#include "Titan/ttn_pch.h"
+//include the header
 #include "Titan/IBuffer.h"
 
 namespace Titan {

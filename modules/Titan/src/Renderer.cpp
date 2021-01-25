@@ -1,6 +1,8 @@
 //Titan Engine, by Atlas X Games 
-// Renderer.cpp - source file for the class that allows meshes, 2D sprites, etc. be rendered
+// Renderer.cpp - source file for the class that allows meshes to be rendered
 
+//precompile header
+#include "Titan/ttn_pch.h"
 //include the header
 #include "Titan/Renderer.h"
 

@@ -1,11 +1,13 @@
 //Titan Engine, by Atlas X Games 
 // Scene.h - header for the class that handles ECS, render calls, etc. 
 #pragma once
-//include the entity component system header
-#include "entt.hpp"
+
+//precompile header, this file uses entt.hpp
+#include "ttn_pch.h"
 //include all the component class definitions we need
 #include "Transform.h"
 #include "Renderer.h"
+#include "Renderer2D.h"
 #include "Camera.h"
 #include "Light.h"
 #include "Tag.h"
@@ -21,9 +23,10 @@ namespace Titan {
 	class TTN_Scene
 	{
 	public:
-		//constructor 
+		//default constructor 
 		TTN_Scene();
 
+		//constructor with data, using basic scene level lighting information
 		TTN_Scene(glm::vec3 AmbientLightingColor, float AmbientLightingStrength);
 
 		//copy, move, and assingment operators
@@ -123,6 +126,12 @@ namespace Titan {
 		//gets all the collisions for the frame
 		std::vector<TTN_Collision::scolptr> GetCollisions() { return collisions; }
 
+		//set wheter or not the scene is paused
+		void SetPaused(bool paused) { m_Paused = paused; }
+
+		//get wheter or not the scene is paused
+		bool GetPaused() { return m_Paused; }
+
 		//variable to store the entities of the lights
 		std::vector<entt::entity> m_Lights;
 
@@ -135,6 +144,9 @@ namespace Titan {
 
 		//boolean to store wheter or not this scene should currently be rendered
 		bool m_ShouldRender; 
+
+		//boolean to store wheter or not this scene should currently be updating 
+		bool m_Paused;
 
 		//variable to store the entity for the camera
 		entt::entity m_Cam;
@@ -163,6 +175,7 @@ namespace Titan {
 	};
 
 #pragma region ECS_functions_def
+	//function to attach a default object to an entity as a component
 	template<typename T>
 	inline void TTN_Scene::Attach(entt::entity entity)
 	{
@@ -172,6 +185,7 @@ namespace Titan {
 		ReconstructScenegraph();
 	}
 
+	//function to attach a copy of an object to an entity as a component
 	template<typename T>
 	inline void TTN_Scene::AttachCopy(entt::entity entity, const T& copy)
 	{
@@ -181,6 +195,7 @@ namespace Titan {
 		ReconstructScenegraph();
 	}
 
+	//function to get a reference to a given component from an entity
 	template<typename T>
 	inline T& TTN_Scene::Get(entt::entity entity)
 	{
@@ -188,13 +203,14 @@ namespace Titan {
 		return m_Registry->get<T>(entity);
 	}
 
-	//returns true if an entity has the given component, and false otherwise
+	//function to check if an entity has a given component
 	template<typename T>
 	inline bool TTN_Scene::Has(entt::entity entity)
 	{
 		return m_Registry->has<T>(entity);
 	}
 
+	//function to remove a component from an entity
 	template<typename T>
 	inline void TTN_Scene::Remove(entt::entity entity)
 	{
@@ -204,5 +220,4 @@ namespace Titan {
 		ReconstructScenegraph();
 	}
 #pragma endregion ECS_functions_def
-
 }

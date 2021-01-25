@@ -2,13 +2,8 @@
 // Transform.h - header for the class that defines the transform component 
 #pragma once
 
-//include require GLM features 
-#define GLM_ENABLE_EXPERIMENTAL
-#include "GLM/glm.hpp"
-#include "GLM/gtx/quaternion.hpp"
-#include "entt.hpp"
-//include other required features
-#include <vector>
+//precompile header, this file uses GLM/glm.hpp, GLM/gtx/quaternion.hpp, entt.hpp, and vector
+#include "ttn_pch.h"
 
 namespace Titan {
 
