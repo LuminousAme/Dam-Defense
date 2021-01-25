@@ -166,6 +166,7 @@ namespace Titan {
 		void SetParticleTemplate(TTN_ParticleTemplate particleTemplate);
 		void SetEmissionRate(float emissionRate);
 		void SetEmitterRotation(glm::vec3 rotation);
+		void SetPaused(bool paused);
 
 		//getters
 		float GetEmitterAngle() { return m_EmitterAngle; }
@@ -175,6 +176,7 @@ namespace Titan {
 		TTN_ParticleTemplate GetParticleTemplate() { return m_particle; }
 		float GetEmissionRate() { return m_emissionRate; }
 		glm::vec3 GetEmitterRotation() { return glm::degrees(m_rotation); }
+		bool GetPaused() { return m_paused; }
 
 		//function pointer setters
 		void VelocityReadGraphCallback(float (*function)(float));
@@ -226,6 +228,7 @@ namespace Titan {
 		float m_duration;
 		bool m_loop;
 		float m_emissionTimer;
+		bool m_paused;
 
 		//other data
 		size_t m_activeParticleIndex;

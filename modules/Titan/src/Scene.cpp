@@ -6,7 +6,9 @@
 #include "Titan/Scene.h"
 
 namespace Titan {
+	//default constructor
 	TTN_Scene::TTN_Scene() {
+		//setup basic data and systems
 		m_ShouldRender = true;
 		m_Registry = new entt::registry();
 		m_RenderGroup = std::make_unique<RenderGroupType>(m_Registry->group<TTN_Transform, TTN_Renderer>());
@@ -26,9 +28,11 @@ namespace Titan {
 		m_physicsWorld->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 	}
 
+	//construct with lightning data
 	TTN_Scene::TTN_Scene(glm::vec3 AmbientLightingColor, float AmbientLightingStrength)
 		: m_AmbientColor(AmbientLightingColor), m_AmbientStrength(AmbientLightingStrength)
 	{
+		///setup basic data and systems
 		m_ShouldRender = true;
 		m_Registry = new entt::registry();
 		m_RenderGroup = std::make_unique<RenderGroupType>(m_Registry->group<TTN_Transform, TTN_Renderer>());
@@ -46,10 +50,13 @@ namespace Titan {
 		m_physicsWorld->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 	}
 
+	//destructor
 	TTN_Scene::~TTN_Scene() {
+		//unload the scene before it's deleted
 		Unload();
 	}
 
+	//function to create a new entity, returns it's entity number
 	entt::entity TTN_Scene::CreateEntity()
 	{
 		//create the entity
@@ -62,6 +69,7 @@ namespace Titan {
 		return entity;
 	}
 
+	//function to delete an entity
 	void TTN_Scene::DeleteEntity(entt::entity entity)
 	{
 		//if the entity has a bullet physics body, delete it from bullet
@@ -76,7 +84,7 @@ namespace Titan {
 		//delete the entity from the registry
 		m_Registry->destroy(entity);
 
-		//reconstruct scenegraph as entt was shuffled
+		//reconstruct the scenegraph as entt was shuffled
 		ReconstructScenegraph();
 	}
 
@@ -134,57 +142,63 @@ namespace Titan {
 		}
 	}
 
+	//update the scene, running physics simulation, animations, and particle systems
 	void TTN_Scene::Update(float deltaTime)
 	{
-		//call the step simulation for bullet
-		m_physicsWorld->stepSimulation(deltaTime);
+		//only run the updates if the scene is not paused
+		if (!m_Paused) {
+			//call the step simulation for bullet
+			m_physicsWorld->stepSimulation(deltaTime);
 
-		//run through all of the physicsbody in the scene
-		auto physicsBodyView = m_Registry->view<TTN_Physics>();
-		for (auto entity : physicsBodyView) {
-			//if the physics body isn't in the world, add it
-			if (!Get<TTN_Physics>(entity).GetIsInWorld()) {
-				Get<TTN_Physics>(entity).SetEntity(entity);
-				m_physicsWorld->addRigidBody(Get<TTN_Physics>(entity).GetRigidBody());
-				Get<TTN_Physics>(entity).SetIsInWorld(true);
+			//run through all of the physicsbody in the scene
+			auto physicsBodyView = m_Registry->view<TTN_Physics>();
+			for (auto entity : physicsBodyView) {
+				//if the physics body isn't in the world, add it
+				if (!Get<TTN_Physics>(entity).GetIsInWorld()) {
+					Get<TTN_Physics>(entity).SetEntity(entity);
+					m_physicsWorld->addRigidBody(Get<TTN_Physics>(entity).GetRigidBody());
+					Get<TTN_Physics>(entity).SetIsInWorld(true);
+				}
+
+				//make sure the physics body are active on every frame
+				Get<TTN_Physics>(entity).GetRigidBody()->setActivationState(true);
+
+				//call the physics body's update
+				Get<TTN_Physics>(entity).Update(deltaTime);
 			}
 
-			//make sure the physics body are active on every frame
-			Get<TTN_Physics>(entity).GetRigidBody()->setActivationState(true);
+			//construct the collisions for the frame
+			ConstructCollisions();
 
-			//call the physics body's update
-			Get<TTN_Physics>(entity).Update(deltaTime);
-		}
-
-		//construct the collisions for the frame
-		ConstructCollisions();
-
-		//run through all of the entities with both a physics body and a transform in the scene
-		auto transAndPhysicsView = m_Registry->view<TTN_Transform, TTN_Physics>();
-		for (auto entity : transAndPhysicsView) {
-			if (!Get<TTN_Physics>(entity).GetIsStatic()) {
-				//copy the position of the physics body into the position of the transform
-				Get<TTN_Transform>(entity).SetPos(Get<TTN_Physics>(entity).GetTrans().GetPos());
+			//run through all of the entities with both a physics body and a transform in the scene
+			auto transAndPhysicsView = m_Registry->view<TTN_Transform, TTN_Physics>();
+			for (auto entity : transAndPhysicsView) {
+				if (!Get<TTN_Physics>(entity).GetIsStatic()) {
+					//copy the position of the physics body into the position of the transform
+					Get<TTN_Transform>(entity).SetPos(Get<TTN_Physics>(entity).GetTrans().GetPos());
+				}
 			}
-		}
 
-		//run through all the of entities with an animator and renderer in the scene and run it's update
-		auto manimatorRendererView = m_Registry->view<TTN_MorphAnimator>();
-		for (auto entity : manimatorRendererView) {
-			//update the active animation
-			Get<TTN_MorphAnimator>(entity).getActiveAnimRef().Update(deltaTime);
-		}
+			//run through all the of entities with an animator and renderer in the scene and run it's update
+			auto manimatorRendererView = m_Registry->view<TTN_MorphAnimator>();
+			for (auto entity : manimatorRendererView) {
+				//update the active animation
+				Get<TTN_MorphAnimator>(entity).getActiveAnimRef().Update(deltaTime);
+			}
 
-		//run through all the of the entities with a particle system and run their updates
-		auto psView = m_Registry->view<TTN_ParticeSystemComponent>();
-		for (auto entity : psView) {
-			//update the particle system
-			Get<TTN_ParticeSystemComponent>(entity).GetParticleSystemPointer()->Update(deltaTime);
+			//run through all the of the entities with a particle system and run their updates
+			auto psView = m_Registry->view<TTN_ParticeSystemComponent>();
+			for (auto entity : psView) {
+				//update the particle system
+				Get<TTN_ParticeSystemComponent>(entity).GetParticleSystemPointer()->Update(deltaTime);
+			}
 		}
 	}
 
+	//function that executes after the main render 
 	void TTN_Scene::PostRender()
 	{
+		//set up the view matrix 
 		glm::mat4 viewMat = glm::inverse(Get<TTN_Transform>(m_Cam).GetGlobal());
 
 		//create a view of all the entities with a particle system and a transform
@@ -278,7 +292,7 @@ namespace Titan {
 			}
 
 			//if it's not the skybox shader, set some uniforms for lighting
-			if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX 
+			if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX
 				&& shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
 				//sets some uniforms
 				//scene level ambient lighting
@@ -325,23 +339,23 @@ namespace Titan {
 			//if the mesh has a material send data from that
 			if (renderer.GetMat() != nullptr)
 			{
- 
+
 				//give openGL the shinniess
 				if (shader->GetFragShaderDefaultStatus() != 8) shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
 				//if they're using a texture
 				if (shader->GetFragShaderDefaultStatus() == 4 || shader->GetFragShaderDefaultStatus() == 5)
 
-				//give openGL the shinniess if it's not a skybox being renderered
-				if(shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX 
-					&& shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT)
-					shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
+					//give openGL the shinniess if it's not a skybox being renderered
+					if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX
+						&& shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT)
+						shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
 
 				//texture slot to dynamically send textures across different types of shaders
 				int textureSlot = 0;
 
 				//if they're using a displacement map 
 				if (shader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_COLOR_HEIGHTMAP
-					|| shader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_NO_COLOR_HEIGHTMAP) 
+					|| shader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_NO_COLOR_HEIGHTMAP)
 				{
 					//bind it to the slot 
 					renderer.GetMat()->GetHeightMap()->Bind(textureSlot);
@@ -350,7 +364,7 @@ namespace Titan {
 					//and pass in the influence
 					shader->SetUniform("u_influence", renderer.GetMat()->GetHeightInfluence());
 				}
-						
+
 				//if they're using an animator 
 				if (shader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR
 					|| shader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_COLOR) {
@@ -363,29 +377,29 @@ namespace Titan {
 				}
 
 				//if they're using an albedo texture 
-				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY 
+				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY
 					|| shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR)
- 
+
 				{
 					//bind it so openGL can see it
 					renderer.GetMat()->GetAlbedo()->Bind(textureSlot);
 					//update the texture slot for future textures to use
 					textureSlot++;
 				}
- 
+
 				//if they're using a specular map
 				if (shader->GetFragShaderDefaultStatus() == 5)
 
 
-				//if they're using a specular map 
-				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR)
- 
-				{
-					//bind it so openGL can see it
-					renderer.GetMat()->GetSpecularMap()->Bind(textureSlot);
-					//update the texture slot for future textures to use
-					textureSlot++;
-				}
+					//if they're using a specular map 
+					if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR)
+
+					{
+						//bind it so openGL can see it
+						renderer.GetMat()->GetSpecularMap()->Bind(textureSlot);
+						//update the texture slot for future textures to use
+						textureSlot++;
+					}
 
 				//if they're using a skybox
 				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_SKYBOX)
@@ -470,6 +484,7 @@ namespace Titan {
 		m_physicsWorld->setGravity(grav);
 	}
 
+	//gets the vector representing the gravity
 	glm::vec3 TTN_Scene::GetGravity()
 	{
 		btVector3 grav = m_physicsWorld->getGravity();
