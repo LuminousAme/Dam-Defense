@@ -70,6 +70,9 @@ namespace Titan {
 		//set up the shader program for the particle system
 		TTN_ParticleSystem::InitParticleShader();
 
+		//set up the shader and vaos for the sprite rendering system
+		TTN_Renderer2D::InitRenderer2D();
+
 		//Set the background colour for our scene to the base black
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	}

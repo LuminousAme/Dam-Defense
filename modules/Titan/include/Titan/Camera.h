@@ -67,4 +67,3 @@ namespace Titan {
 		mutable glm::mat4 m_viewProjection;//mutable, so it can be recalculated using const methods
 	};
 }
-

@@ -1,23 +1,16 @@
 //Titan Engine, by Atlas X Games 
-// Renderer.h - header for the class that allows meshes, 2D sprites, etc. be rendered 
+// Renderer.h - header for the class that allows meshes to be rendered 
 #pragma once
 
-//include the mesh and shader classes
+//include the mesh, shader, and material classes
 #include "Mesh.h"
 #include "Shader.h"
 #include "Material.h"
 
 namespace Titan {
-
 	//class that acts as a component to allow objects to be rendered in the game 
 	class TTN_Renderer {
 	public:
-		//enum class to be explcit wheter something is a 3D mesh, a 2D sprite, etc.
-		enum class RenderObjectType {
-			SPRITE = 1, 
-			MESH
-		};
-
 		//constructor that sets the mesh
 		TTN_Renderer(TTN_Mesh::smptr mesh);
 		//constructor that sets the mesh and the shader

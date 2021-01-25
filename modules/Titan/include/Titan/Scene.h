@@ -7,6 +7,7 @@
 //include all the component class definitions we need
 #include "Transform.h"
 #include "Renderer.h"
+#include "Renderer2D.h"
 #include "Camera.h"
 #include "Light.h"
 #include "Tag.h"

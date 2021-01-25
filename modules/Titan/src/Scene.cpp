@@ -419,6 +419,12 @@ namespace Titan {
 			//and finsih by rendering the mesh
 			renderer.Render(transform.GetGlobal(), vp);
 		});
+
+		//go through every entity with a transform and a sprite renderer and render the sprite 
+		auto render2DView = m_Registry->view<TTN_Transform, TTN_Renderer2D>();
+		for (auto entity : render2DView) {
+			Get<TTN_Renderer2D>(entity).Render(Get<TTN_Transform>(entity).GetGlobal(), vp);
+		}
 	}
 
 	//sets wheter or not the scene should be rendered
