@@ -29,6 +29,8 @@ namespace Titan {
 
 		//set gravity to default none
 		m_physicsWorld->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+
+		m_Paused = false;
 	}
 
 	//construct with lightning data
@@ -51,6 +53,8 @@ namespace Titan {
 
 		//set gravity to default none
 		m_physicsWorld->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+
+		m_Paused = false;
 	}
 
 	//destructor
