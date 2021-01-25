@@ -25,6 +25,9 @@ int main() {
 	//add them to the application
 	TTN_Application::scenes.push_back(gameScene);
 
+	// init's the configs and contexts for imgui
+	TTN_Application::InitImgui();
+
 	//while the application is running
 	while (!TTN_Application::GetIsClosing()) {
 		//update the scenes and render the screen

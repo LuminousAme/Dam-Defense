@@ -15,14 +15,13 @@
 #include "Titan/Scene.h"
 //include glfw
 #include <GLFW/glfw3.h>
-<<<<<<< HEAD
+ 
 #include "GLM/glm.hpp"
 #include <string>
 #include <vector>
 #include <unordered_map>
-=======
->>>>>>> Ame
-
+ 
+ 
 namespace Titan {
 	//input enum class, converts titan keyboard input type to glfw keyboard input types
 	enum class TTN_KeyCode {
@@ -187,16 +186,9 @@ namespace Titan {
 		//imgui functions
 		static void InitImgui();
 		static void CleanImgui();
-		static void RenderImgui();
-		static void SetUpImgui();
-
 		static void StartImgui();
 		static void EndImgui();
 
-
-
-		//static void ImguiButton();
-		static void ImguiSlider(const char* name, float a, float min, float max);
 
 	public:
 		//vector for all the scenes in the application
@@ -276,9 +268,8 @@ namespace Titan {
 			static bool inFrame;
 		};
 	};
-<<<<<<< HEAD
+ 
 
 }
-=======
-}
->>>>>>> Ame
+ 
+ 

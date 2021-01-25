@@ -105,7 +105,12 @@ namespace Titan {
 	void TTN_MorphAnimation::Restart()
 	{
 		m_currentIndex = 0;
-		m_nextIndex = 1;
+		if (m_frameIndices.size() > 1) {
+			m_nextIndex = 1;
+		}
+		else 
+			m_nextIndex = 0;
+
 		m_interpolationParameter = 0;
 		m_timer = 0;
 		m_isDone = false;

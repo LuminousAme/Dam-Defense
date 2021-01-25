@@ -67,7 +67,7 @@ namespace Titan {
 		s_vertPos = TTN_VertexBuffer::Create();
 		s_vertPos->LoadData(positions, 6);
 		s_Uvs = TTN_VertexBuffer::Create();
-		s_vertPos->LoadData(textCords, 6);
+		s_Uvs->LoadData(textCords, 6);
 
 		//create the vao and load the vertex buffers into it
 		s_vao = TTN_VertexArrayObject::Create();

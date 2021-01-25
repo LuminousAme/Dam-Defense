@@ -4,17 +4,12 @@
 #include "Titan/ttn_pch.h"
 // Scene.cpp - source file for the class that handles ECS, render calls, etc.
 #include "Titan/Scene.h"
-<<<<<<< HEAD
+ 
 #include <GLM/gtc/matrix_transform.hpp>
-
-
-namespace Titan {
-
-=======
 
 namespace Titan {
 	//default constructor
->>>>>>> Ame
+ 
 	TTN_Scene::TTN_Scene() {
 		//setup basic data and systems
 		m_ShouldRender = true;
@@ -428,6 +423,11 @@ namespace Titan {
 
 			//if the entity has an animator
 			if (Has<TTN_MorphAnimator>(entity)) {
+				entt::entity tempA = entity;
+				//int tempNum = Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getCurrentMeshIndex();
+				//int tempNum2 = Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getNextMeshIndex();
+				TTN_MorphAnimation& tempAnim = Get<TTN_MorphAnimator>(entity).getActiveAnimRef();
+
 				//set up the vao on the mesh properly
 				renderer.GetMesh()->SetUpVao(Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getCurrentMeshIndex(),
 					Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getNextMeshIndex());
@@ -438,15 +438,16 @@ namespace Titan {
 				renderer.GetMesh()->SetUpVao();
 			}
 
-			//and finsih by rendering the mesh
+			//and finish by rendering the mesh
 			renderer.Render(transform.GetGlobal(), vp);
 		});
 
 		//go through every entity with a transform and a sprite renderer and render the sprite 
-		auto render2DView = m_Registry->view<TTN_Transform, TTN_Renderer2D>();
+		/*auto render2DView = m_Registry->view<TTN_Transform, TTN_Renderer2D>();
 		for (auto entity : render2DView) {
 			Get<TTN_Renderer2D>(entity).Render(Get<TTN_Transform>(entity).GetGlobal(), vp);
-		}
+		}*/
+
 	}
 
 	//sets wheter or not the scene should be rendered
