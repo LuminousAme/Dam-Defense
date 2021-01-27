@@ -15,7 +15,7 @@ namespace Titan {
 		TTN_Renderer2D();
 
 		//constructor with data
-		TTN_Renderer2D(TTN_Texture2D::st2dptr sprite, int renderOrderLayer = 0);
+		TTN_Renderer2D(TTN_Texture2D::st2dptr sprite, glm::vec4 color = glm::vec4(1.0f), int renderOrderLayer = 0);
 
 		//destructor
 		~TTN_Renderer2D() = default;
@@ -26,11 +26,13 @@ namespace Titan {
 		TTN_Renderer2D& operator=(TTN_Renderer2D&) = default;
 
 		//setters
-		void SetSprite(TTN_Texture2D::st2dptr sprite) { m_sprite = sprite; };
-		void SetRenderOrderLayer(int renderOrderLayer) { m_RenderLayer = renderOrderLayer; };
+		void SetSprite(TTN_Texture2D::st2dptr sprite) { m_sprite = sprite; }
+		void SetColor(glm::vec4 color) { m_color = color; }
+		void SetRenderOrderLayer(int renderOrderLayer) { m_RenderLayer = renderOrderLayer; }
 
 		//getters
-		TTN_Texture2D::st2dptr GetSprite() { return m_sprite; };
+		TTN_Texture2D::st2dptr GetSprite() { return m_sprite; }
+		glm::vec4 GetColor() { return m_color; }
 		int GetRenderOrderLayer() { return m_RenderLayer; }
 
 		//renders the sprite
@@ -47,6 +49,9 @@ namespace Titan {
 	private:
 		//the texture for the sprite being rendered 
 		TTN_Texture2D::st2dptr m_sprite;
+
+		//the color modifier for the sprite 
+		glm::vec4 m_color;
 
 		//the render layer, to help control the order things should render
 		int m_RenderLayer;

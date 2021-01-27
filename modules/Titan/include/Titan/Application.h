@@ -16,11 +16,6 @@
 //include glfw
 #include <GLFW/glfw3.h>
  
-#include "GLM/glm.hpp"
-#include <string>
-#include <vector>
-#include <unordered_map>
- 
  
 namespace Titan {
 	//input enum class, converts titan keyboard input type to glfw keyboard input types
@@ -189,7 +184,6 @@ namespace Titan {
 		static void StartImgui();
 		static void EndImgui();
 
-
 	public:
 		//vector for all the scenes in the application
 		static std::vector<Titan::TTN_Scene*> scenes;
@@ -268,8 +262,4 @@ namespace Titan {
 			static bool inFrame;
 		};
 	};
- 
-
 }
- 
- 

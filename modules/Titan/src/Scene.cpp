@@ -4,8 +4,6 @@
 #include "Titan/ttn_pch.h"
 // Scene.cpp - source file for the class that handles ECS, render calls, etc.
 #include "Titan/Scene.h"
- 
-#include <GLM/gtc/matrix_transform.hpp>
 
 namespace Titan {
 	//default constructor
@@ -442,10 +440,10 @@ namespace Titan {
 		});
 
 		//go through every entity with a transform and a sprite renderer and render the sprite 
-		/*auto render2DView = m_Registry->view<TTN_Transform, TTN_Renderer2D>();
+		auto render2DView = m_Registry->view<TTN_Transform, TTN_Renderer2D>();
 		for (auto entity : render2DView) {
 			Get<TTN_Renderer2D>(entity).Render(Get<TTN_Transform>(entity).GetGlobal(), vp);
-		}*/
+		}
 
 	}
 
