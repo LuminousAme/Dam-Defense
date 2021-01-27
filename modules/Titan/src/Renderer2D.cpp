@@ -11,26 +11,26 @@ namespace Titan {
 	TTN_Renderer2D::TTN_Renderer2D()
 	{
 		m_sprite = nullptr;
+		m_color = glm::vec4(1.0f);
 		m_RenderLayer = 0;
 	}
 
 	//constructor that takes data
-	TTN_Renderer2D::TTN_Renderer2D(TTN_Texture2D::st2dptr sprite, int renderOrderLayer)
-	{
-		m_sprite = sprite;
-		m_RenderLayer = renderOrderLayer;
-	}
+	TTN_Renderer2D::TTN_Renderer2D(TTN_Texture2D::st2dptr sprite, glm::vec4 color, int renderOrderLayer)
+		: m_sprite(sprite), m_color(color), m_RenderLayer(renderOrderLayer)
+	{}
 
 	//renders the sprite
 	void TTN_Renderer2D::Render(glm::mat4 model, glm::mat4 VP)
 	{
 		//make sure there's acutally a sprite to bind and things are set up first 
-		if (m_sprite!= nullptr && s_shader != nullptr) {
+		if (m_sprite != nullptr && s_shader != nullptr) {
 			//bind the sprite shader
 			s_shader->Bind();
 
 			//send the uniforms to openGL 
 			s_shader->SetUniformMatrix("MVP", VP * model);
+			s_shader->SetUniform("u_Color", m_color);
 
 			//bind the texture
 			m_sprite->Bind(0);
