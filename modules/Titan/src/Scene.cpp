@@ -4,8 +4,6 @@
 #include "Titan/ttn_pch.h"
 // Scene.cpp - source file for the class that handles ECS, render calls, etc.
 #include "Titan/Scene.h"
- 
-#include <GLM/gtc/matrix_transform.hpp>
 
 namespace Titan {
 	//default constructor
