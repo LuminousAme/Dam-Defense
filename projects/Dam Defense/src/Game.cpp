@@ -45,9 +45,9 @@ void Game::Update(float deltaTime)
 	if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
 	//parameters: number of waves, rest time between waves, length of waves, deltatime
-	Waves(6, 10.f, 40.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
-	SpawnerLS(deltaTime, 2.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
-	SpawnerRS(deltaTime, 2.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	Waves(3, 5.f, 10.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
+	SpawnerLS(deltaTime, 1.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerRS(deltaTime, 1.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
 	//goes through the boats vector
 	for (int i = 0; i < boats.size(); i++) {
@@ -61,7 +61,7 @@ void Game::Update(float deltaTime)
 	if (FlameTimer <= 0) FlameTimer = 0.0f;
 	else FlameTimer -= deltaTime;
 
-	if (Flaming) {// if the flamethorwers are spewing flame particles
+	if (Flaming) {// if the flamethrowers are spewing flame particles
 		FlameAnim += deltaTime;//increment flamethrower anim timer
 
 		if (FlameAnim >= 3.0f) {//flame particles last for 3 seconds
@@ -90,7 +90,6 @@ void Game::Update(float deltaTime)
 
 	//move the birds
 	birdTimer += deltaTime;
-
 	birdTimer = fmod(birdTimer, 20);
 
 	float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
@@ -115,6 +114,12 @@ void Game::Update(float deltaTime)
 	if (ImGui::SliderFloat("Camera Test X-Axis", &b, -100.0f, 100.0f)) {
 		a.SetPos(glm::vec3 (b, a.GetPos().y, a.GetPos().z));
 	}
+
+	float CamY = a.GetPos().y;
+	if (ImGui::SliderFloat("Camera Test Y-Axis", &CamY, -100.0f, 100.0f)) {
+		a.SetPos(glm::vec3(a.GetPos().x, CamY, a.GetPos().z));
+	}
+
 
 #pragma endregion
 
@@ -642,7 +647,6 @@ void Game::SetUpOtherData()
 }
 #pragma endregion
 
-
 //called by update once a frame, allows the player to rotate
 void Game::PlayerRotate(float deltaTime)
 {
@@ -711,6 +715,7 @@ void Game::CreateCannonball()
 		TTN_Tag ballTag = TTN_Tag("Ball"); //sets boat path number to ttn_tag
 		AttachCopy<TTN_Tag>(cannonBalls[cannonBalls.size() - 1], ballTag);
 	}
+	//TTN_Physics& tt = Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1]);
 
 	//after the cannonball has been created, get the physics body and apply a force along the player's direction
 	Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1]).AddForce((cannonBallForce * playerDir));
@@ -909,7 +914,7 @@ void Game::SpawnerLS(float deltatime, float SpawnTime) {
 			boatRenderer = TTN_Renderer(boat2Mesh, shaderProgramTextured, boat2Mat);
 		}
 
-		else if (randomBoat == 3) { // submarine lookking
+		else if (randomBoat == 3) { // submarine looking
 			boatRenderer = TTN_Renderer(boat3Mesh, shaderProgramTextured, boat3Mat);
 		}
 
@@ -1054,10 +1059,10 @@ glm::vec3 Game::Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos)
 	return moveVelo;
 }
 
-//cooldown is set in this function, change flame timer
+//cooldown of flamethrower is set in this function, change flame timer
 void Game::Flamethrower() {
 	if (FlameTimer == 0.0f) { //cooldown is zero
-		FlameTimer = 2.f; // set cooldown
+		FlameTimer = 10.f; // set cooldown
 		Flaming = true;// set flaming to true
 
 		for (int i = 0; i < 6; i++) {
