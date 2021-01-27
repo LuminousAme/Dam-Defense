@@ -21,13 +21,13 @@ namespace Titan {
 
 		/////////////functions for loading assets/////////////////////
 		//Adds a 2D texture to the list of assets to be loaded
-		static void AddTexture2DToBeLoaded(std::string fileName, int set = 0);
+		static void AddTexture2DToBeLoaded(std::string accessName, std::string fileName, int set = 0);
 		//Adds a Skybox to the list of assets to be loaded
-		static void AddSkyboxToBeLoaded(std::string fileName, int set = 0);
+		static void AddSkyboxToBeLoaded(std::string accessName, std::string fileName, int set = 0);
 		//Adds a mesh to the list of assets to be loaded
-		static void AddMeshToBeLoaded(std::string fileName, int set = 0);
+		static void AddMeshToBeLoaded(std::string accessName, std::string fileName, int set = 0);
 		//Adds a morph animation mesh to the list of assets to be loaded
-		static void AddMorphAnimationMeshesToBeLoaded(std::string fileName, int NumOfFrames, int set = 0);
+		static void AddMorphAnimationMeshesToBeLoaded(std::string accessName, std::string fileName, int NumOfFrames, int set = 0);
 		//Adds a shader to the list of assets to be loaded
 		static void AddShaderToBeLoaded(std::string accessName, std::string VertShaderFileName, std::string FragShaderFileName, int set = 0);
 		//Adds a Titan default shader to be loaded
@@ -78,24 +78,25 @@ namespace Titan {
 		inline static std::vector<int> s_loadQueue = std::vector<int>();
 		//the index of where the loader in it's current set of assets 
 		inline static int s_CurrentAssetType = 0; //0 = 2D textures, 1 = cubemaps, 2 = non animated mesh, 3 = animated mesh, 4 = non-default shader, 5 = default shader
-		inline static int s_CurrentAssetIndex = 0;
+		inline static int s_CurrentAssetIndex = -1;
 		//boolean that says it's finished loading a set on this frame
 		inline static bool s_FinishedLoadingSet = false;
+
 		//the 2 dimensional vector of strings for 2D textures to load
-		inline static std::vector<std::vector<std::string>> s_2DTexturesToLoad = std::vector<std::vector<std::string>>();
+		inline static std::vector<std::vector<std::pair<std::string, std::string>>> s_2DTexturesToLoad = std::vector<std::vector<std::pair<std::string, std::string>>>();
 		//the 2 dimensional vector of strings for cubemaps to load
-		inline static std::vector<std::vector<std::string>> s_CubemapsToLoad = std::vector<std::vector<std::string>>();
+		inline static std::vector<std::vector<std::pair<std::string, std::string>>> s_CubemapsToLoad = std::vector<std::vector<std::pair<std::string, std::string>>>();
 		//the 2 dimensional vector of strings for non-animated meshes to load
-		inline static std::vector<std::vector<std::string>> s_NonAnimatedMeshesToLoad = std::vector<std::vector<std::string>>();
+		inline static std::vector<std::vector<std::pair<std::string, std::string>>> s_NonAnimatedMeshesToLoad = std::vector<std::vector<std::pair<std::string, std::string>>>();
 		//the 2 dimensional vector of strings and ints for animated meshes to load 
-		inline static std::vector<std::vector<std::pair<std::string, int>>> s_AnimatedMeshesToLoad = std::vector<std::vector<std::pair<std::string, int>>>();
+		inline static std::vector<std::vector<std::pair<std::string, std::pair<std::string, int>>>> s_AnimatedMeshesToLoad = 
+			std::vector<std::vector<std::pair<std::string, std::pair<std::string, int>>>>();
 		//the 2 dimension vector of sets of 3 string for non-default shaders to load
 		inline static std::vector<std::vector<std::pair<std::string, std::pair<std::string, std::string>>>> s_ShadersToLoad =
 			std::vector<std::vector<std::pair<std::string, std::pair<std::string, std::string>>>>();
 		//the 2 dimensional vector of strings and sets of 2 defualt shader enums for default shaders to load
 		inline static std::vector<std::vector<std::pair<std::string, std::pair<TTN_DefaultShaders, TTN_DefaultShaders>>>> s_DefaultShadersToLoad =
 			std::vector<std::vector<std::pair<std::string, std::pair<TTN_DefaultShaders, TTN_DefaultShaders>>>>();
-
 
 		//unordered maps to store the assets 
 		//2D textures
