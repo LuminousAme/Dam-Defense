@@ -116,6 +116,8 @@ void Game::Update(float deltaTime)
 		a.SetPos(glm::vec3 (b, a.GetPos().y, a.GetPos().z));
 	}
 
+	TTN_Application::EndImgui();
+
 #pragma endregion
 
 	//increase the total time of the scene to make the water animated correctly
@@ -267,81 +269,114 @@ void Game::SetUpAssets()
 	//// SHADERS ////
 #pragma region SHADERS
 	//create a shader program object
-	shaderProgramUnTextured = TTN_Shader::Create();
+	///////shaderProgramUnTextured = TTN_Shader::Create();
 	//load the shaders into the shader program
-	shaderProgramUnTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_NO_COLOR);
-	shaderProgramUnTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_NO_TEXTURE);
-	shaderProgramUnTextured->Link();
+	////shaderProgramUnTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_NO_COLOR);
+	////shaderProgramUnTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_NO_TEXTURE);
+	////shaderProgramUnTextured->Link();
 
 	//create a shader program object for textured objects
-	shaderProgramTextured = TTN_Shader::Create();
+	///////shaderProgramTextured = TTN_Shader::Create();
 	//load the shaders into the shader program
-	shaderProgramTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_NO_COLOR);
-	shaderProgramTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
-	shaderProgramTextured->Link();
+	////////shaderProgramTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_NO_COLOR);
+	//////shaderProgramTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
+	//////shaderProgramTextured->Link();
 
 	//create a shader program object for the skybox
-	shaderProgramSkybox = TTN_Shader::Create();
+	///////shaderProgramSkybox = TTN_Shader::Create();
 	//load the shaders into the shader program
-	shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::VERT_SKYBOX);
-	shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::FRAG_SKYBOX);
-	shaderProgramSkybox->Link();
+	/////shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::VERT_SKYBOX);
+	////shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::FRAG_SKYBOX);
+	//////shaderProgramSkybox->Link();
 
 	//create a shader program for animationed textured objects
-	shaderProgramAnimatedTextured = TTN_Shader::Create();
+	///shaderProgramAnimatedTextured = TTN_Shader::Create();
 	//load the shaders into the shader program
-	shaderProgramAnimatedTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR);
-	shaderProgramAnimatedTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
-	shaderProgramAnimatedTextured->Link();
+	/////shaderProgramAnimatedTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR);
+	//////shaderProgramAnimatedTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
+	//////shaderProgramAnimatedTextured->Link();
 
 	//create a shader program for the terrain
-	shaderProgramTerrain = TTN_Shader::Create();
+	/////shaderProgramTerrain = TTN_Shader::Create();
 	//load the shaders into the shader program
-	shaderProgramTerrain->LoadShaderStageFromFile("shaders/terrain_vert.glsl", GL_VERTEX_SHADER);
-	shaderProgramTerrain->LoadShaderStageFromFile("shaders/terrain_frag.glsl", GL_FRAGMENT_SHADER);
-	shaderProgramTerrain->Link();
+	//////shaderProgramTerrain->LoadShaderStageFromFile("shaders/terrain_vert.glsl", GL_VERTEX_SHADER);
+	///////shaderProgramTerrain->LoadShaderStageFromFile("shaders/terrain_frag.glsl", GL_FRAGMENT_SHADER);
+	///////shaderProgramTerrain->Link();
 
 	//create a shader program for the water
-	shaderProgramWater = TTN_Shader::Create();
+	//////shaderProgramWater = TTN_Shader::Create();
 	//load the shaders into the shader program
-	shaderProgramWater->LoadShaderStageFromFile("shaders/water_vert.glsl", GL_VERTEX_SHADER);
-	shaderProgramWater->LoadShaderStageFromFile("shaders/water_frag.glsl", GL_FRAGMENT_SHADER);
-	shaderProgramWater->Link();
+	//////////shaderProgramWater->LoadShaderStageFromFile("shaders/water_vert.glsl", GL_VERTEX_SHADER);
+	////////shaderProgramWater->LoadShaderStageFromFile("shaders/water_frag.glsl", GL_FRAGMENT_SHADER);
+	///////shaderProgramWater->Link();
 
+	//grab the shaders
+	shaderProgramTextured = TTN_AssetSystem::GetShader("Basic textured shader");
+	shaderProgramSkybox = TTN_AssetSystem::GetShader("Skybox shader");
+	shaderProgramTerrain = TTN_AssetSystem::GetShader("Terrain shader");
+	shaderProgramWater = TTN_AssetSystem::GetShader("Water shader");
+	shaderProgramAnimatedTextured = TTN_AssetSystem::GetShader("Animated textured shader");
 #pragma endregion
 
 	////MESHES////
-	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
-	skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
-	sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
-	flamethrowerMesh = TTN_ObjLoader::LoadFromFile("models/Flamethrower.obj");
-	flamethrowerMesh->SetUpVao();
-	boat1Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 1.obj");
-	boat2Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 2.obj");
-	boat3Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 3.obj");
-	terrainPlain = TTN_ObjLoader::LoadFromFile("models/terrainPlain.obj");
-	terrainPlain->SetUpVao();
-	birdMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/bird/bird", 2);
-	treeMesh[0] = TTN_ObjLoader::LoadFromFile("models/Tree1.obj");
-	treeMesh[1] = TTN_ObjLoader::LoadFromFile("models/Tree2.obj");
-	treeMesh[2] = TTN_ObjLoader::LoadFromFile("models/Tree3.obj");
-	damMesh = TTN_ObjLoader::LoadFromFile("models/Dam.obj");
+	///////////////////////cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
+	//////////////////////////skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
+	/////////////sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
+	////////////////flamethrowerMesh = TTN_ObjLoader::LoadFromFile("models/Flamethrower.obj");
+	////////////flamethrowerMesh->SetUpVao();
+	////////boat1Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 1.obj");
+	////////boat2Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 2.obj");
+	////////boat3Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 3.obj");
+	//////////////////////terrainPlain = TTN_ObjLoader::LoadFromFile("models/terrainPlain.obj");
+	////////////////////////terrainPlain->SetUpVao();
+	///////////birdMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/bird/bird", 2);
+	//////treeMesh[0] = TTN_ObjLoader::LoadFromFile("models/Tree1.obj");
+	//////treeMesh[1] = TTN_ObjLoader::LoadFromFile("models/Tree2.obj");
+	//////treeMesh[2] = TTN_ObjLoader::LoadFromFile("models/Tree3.obj");
+	///////////////////////damMesh = TTN_ObjLoader::LoadFromFile("models/Dam.obj");
+
+	//grab the meshes
+	cannonMesh = TTN_AssetSystem::GetMesh("Cannon mesh");
+	skyboxMesh = TTN_AssetSystem::GetMesh("Skybox mesh");
+	sphereMesh = TTN_AssetSystem::GetMesh("Sphere");
+	flamethrowerMesh = TTN_AssetSystem::GetMesh("Flamethrower mesh");
+	boat1Mesh = TTN_AssetSystem::GetMesh("Boat 1");
+	boat2Mesh = TTN_AssetSystem::GetMesh("Boat 2");
+	boat3Mesh = TTN_AssetSystem::GetMesh("Boat 3");
+	terrainPlain = TTN_AssetSystem::GetMesh("Terrain plane");
+	birdMesh = TTN_AssetSystem::GetMesh("Bird mesh");
+	damMesh = TTN_AssetSystem::GetMesh("Dam mesh");
 
 	///TEXTURES////
-	cannonText = TTN_Texture2D::LoadFromFile("textures/metal.png");
-	skyboxText = TTN_TextureCubeMap::LoadFromImages("textures/skybox/sky.png");
-	terrainMap = TTN_Texture2D::LoadFromFile("textures/Game Map Long.jpg");
-	sandText = TTN_Texture2D::LoadFromFile("textures/SandTexture.jpg");
-	rockText = TTN_Texture2D::LoadFromFile("textures/RockTexture.jpg");
-	grassText = TTN_Texture2D::LoadFromFile("textures/GrassTexture.jpg");
-	waterText = TTN_Texture2D::LoadFromFile("textures/water.png");
-	boat1Text = TTN_Texture2D::LoadFromFile("textures/Boat 1 Texture.png");
-	boat2Text = TTN_Texture2D::LoadFromFile("textures/Boat 2 Texture.png");
-	boat3Text = TTN_Texture2D::LoadFromFile("textures/Boat 3 Texture.png");
-	flamethrowerText = TTN_Texture2D::LoadFromFile("textures/FlamethrowerTexture.png");
-	birdText = TTN_Texture2D::LoadFromFile("textures/BirdTexture.png");
-	treeText = TTN_Texture2D::LoadFromFile("textures/Trees Texture.png");
-	damText = TTN_Texture2D::LoadFromFile("textures/Dam.png");
+	/////////////////////cannonText = TTN_Texture2D::LoadFromFile("textures/metal.png");
+	///////////////////////skyboxText = TTN_TextureCubeMap::LoadFromImages("textures/skybox/sky.png");
+	//////////////////terrainMap = TTN_Texture2D::LoadFromFile("textures/Game Map Long.jpg");
+	/////////////////sandText = TTN_Texture2D::LoadFromFile("textures/SandTexture.jpg");
+	/////////////rockText = TTN_Texture2D::LoadFromFile("textures/RockTexture.jpg");
+	///////////grassText = TTN_Texture2D::LoadFromFile("textures/GrassTexture.jpg");
+	//////////////waterText = TTN_Texture2D::LoadFromFile("textures/water.png");
+	/////////////boat1Text = TTN_Texture2D::LoadFromFile("textures/Boat 1 Texture.png");
+	//////////boat2Text = TTN_Texture2D::LoadFromFile("textures/Boat 2 Texture.png");
+	//////////boat3Text = TTN_Texture2D::LoadFromFile("textures/Boat 3 Texture.png");
+	////////////////////////flamethrowerText = TTN_Texture2D::LoadFromFile("textures/FlamethrowerTexture.png");
+	///////////birdText = TTN_Texture2D::LoadFromFile("textures/BirdTexture.png");
+	//////////treeText = TTN_Texture2D::LoadFromFile("textures/Trees Texture.png");
+	/////////////////damText = TTN_Texture2D::LoadFromFile("textures/Dam.png");
+
+	//grab textures
+	cannonText = TTN_AssetSystem::GetTexture2D("Cannon texture");
+	skyboxText = TTN_AssetSystem::GetSkybox("Skybox texture");
+	terrainMap = TTN_AssetSystem::GetTexture2D("Terrain height map");
+	sandText = TTN_AssetSystem::GetTexture2D("Sand texture");
+	rockText = TTN_AssetSystem::GetTexture2D("Rock texture");
+	grassText = TTN_AssetSystem::GetTexture2D("Grass texture");
+	waterText = TTN_AssetSystem::GetTexture2D("Water texture");
+	boat1Text = TTN_AssetSystem::GetTexture2D("Boat texture 1");
+	boat2Text = TTN_AssetSystem::GetTexture2D("Boat texture 2");
+	boat3Text = TTN_AssetSystem::GetTexture2D("Boat texture 3");
+	flamethrowerText = TTN_AssetSystem::GetTexture2D("Flamethrower texture");
+	birdText = TTN_AssetSystem::GetTexture2D("Bird texture");
+	damText = TTN_AssetSystem::GetTexture2D("Dam texture");
 
 	////MATERIALS////
 	cannonMat = TTN_Material::Create();
@@ -372,9 +407,6 @@ void Game::SetUpAssets()
 
 	birdMat = TTN_Material::Create();
 	birdMat->SetAlbedo(birdText);
-
-	treeMat = TTN_Material::Create();
-	treeMat->SetAlbedo(treeText);
 
 	damMat = TTN_Material::Create();
 	damMat->SetAlbedo(damText);
@@ -487,6 +519,42 @@ void Game::SetUpEntities()
 		TTN_Transform damTrans = TTN_Transform(glm::vec3(0.0f, -10.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.7f, 0.7f, 0.3f));
 		//attach that transform to the entity
 		AttachCopy(dam, damTrans);
+	}
+
+	//entities for flamethrowers
+	for (int i = 0; i < 6; i++) {
+		//flamethrower entities
+		{
+			flamethrowers.push_back(CreateEntity());
+
+			//setup a mesh renderer for the cannon
+			TTN_Renderer ftRenderer = TTN_Renderer(flamethrowerMesh, shaderProgramTextured);
+			ftRenderer.SetMat(flamethrowerMat);
+			//attach that renderer to the entity
+			AttachCopy<TTN_Renderer>(flamethrowers[i], ftRenderer);
+
+			//setup a transform for the flamethrower
+			TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f, -6.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
+			if (i == 0) {
+				ftTrans.SetPos(glm::vec3(-5.0f, -6.0f, 2.0f));
+			}
+			else if (i == 1) {
+				ftTrans.SetPos(glm::vec3(15.0f, -6.0f, 2.0f));
+			}
+			else if (i == 2) {
+				ftTrans.SetPos(glm::vec3(-15.0f, -6.0f, 2.0f));
+			}
+			else if (i == 3) {
+				ftTrans.SetPos(glm::vec3(40.0f, -6.0f, 2.0f));
+			}
+			else if (i == 4) {
+				ftTrans.SetPos(glm::vec3(-40.0f, -6.0f, 2.0f));
+			}
+			else {}
+
+			//attach that transform to the entity
+			AttachCopy<TTN_Transform>(flamethrowers[i], ftTrans);
+		}
 	}
 
 	//entity for the smoke particle system (rather than recreating whenever we need it, we'll just make one
@@ -1061,39 +1129,6 @@ void Game::Flamethrower() {
 		Flaming = true;// set flaming to true
 
 		for (int i = 0; i < 6; i++) {
-			//flamethrower entities
-			{
-				flamethrowers.push_back(CreateEntity());
-
-				//setup a mesh renderer for the cannon
-				TTN_Renderer ftRenderer = TTN_Renderer(flamethrowerMesh, shaderProgramTextured);
-				ftRenderer.SetMat(flamethrowerMat);
-				//attach that renderer to the entity
-				AttachCopy<TTN_Renderer>(flamethrowers[i], ftRenderer);
-
-				//setup a transform for the flamethrower
-				TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f, -6.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
-				if (i == 0) {
-					ftTrans.SetPos(glm::vec3(-5.0f, -6.0f, 2.0f));
-				}
-				else if (i == 1) {
-					ftTrans.SetPos(glm::vec3(15.0f, -6.0f, 2.0f));
-				}
-				else if (i == 2) {
-					ftTrans.SetPos(glm::vec3(-15.0f, -6.0f, 2.0f));
-				}
-				else if (i == 3) {
-					ftTrans.SetPos(glm::vec3(40.0f, -6.0f, 2.0f));
-				}
-				else if (i == 4) {
-					ftTrans.SetPos(glm::vec3(-40.0f, -6.0f, 2.0f));
-				}
-				else {}
-
-				//attach that transform to the entity
-				AttachCopy<TTN_Transform>(flamethrowers[i], ftTrans);
-			}
-
 			//fire particle entities
 			{
 				flames.push_back(CreateEntity());
@@ -1198,17 +1233,9 @@ void Game::Collisions()
 
 //called to delete particle system and flamethrower models
 void Game::DeleteFlamethrowers() {
-	std::vector<entt::entity>::iterator it = flamethrowers.begin();
-	while (it != flamethrowers.end()) {
-		DeleteEntity(*it);
-		it = flamethrowers.erase(it);
-		//it++;
-	}
-
 	std::vector<entt::entity>::iterator itt = flames.begin();
 	while (itt != flames.end()) {
 		DeleteEntity(*itt);
 		itt = flames.erase(itt);
 	}
-
 }

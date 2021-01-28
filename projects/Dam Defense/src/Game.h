@@ -14,6 +14,9 @@ public:
 	//default constructor
 	Game();
 
+	//default destrcutor 
+	~Game() = default;
+
 	//sets up the scene
 	void InitScene();
 

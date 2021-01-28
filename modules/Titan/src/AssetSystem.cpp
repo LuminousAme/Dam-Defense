@@ -208,6 +208,7 @@ namespace Titan {
 			for (auto it : s_NonAnimatedMeshesToLoad[set]) {
 				//load the mesh into the unordered map
 				s_meshMap[it.first] = TTN_ObjLoader::LoadFromFile(it.second);
+				s_meshMap[it.first]->SetUpVao();
 			}
 		}
 
@@ -217,6 +218,7 @@ namespace Titan {
 			for (auto it : s_AnimatedMeshesToLoad[set]) {
 				//load the animated mesh into the unordered map
 				s_meshMap[it.first] = TTN_ObjLoader::LoadAnimatedMeshFromFiles(it.second.first, it.second.second);
+				s_meshMap[it.first]->SetUpVao();
 			}
 		}
 
@@ -327,6 +329,8 @@ namespace Titan {
 						//load the asset
 						s_meshMap[s_NonAnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first] =
 							TTN_ObjLoader::LoadFromFile(s_NonAnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second);
+
+						s_meshMap[s_NonAnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first]->SetUpVao();
 					}
 					//if it is, then move onto animated meshes
 					else {
@@ -351,6 +355,8 @@ namespace Titan {
 						s_meshMap[s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first] =
 							TTN_ObjLoader::LoadAnimatedMeshFromFiles(s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second.first,
 								s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second.second);
+
+						s_meshMap[s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first]->SetUpVao();
 					}
 					//if it is, then move onto non-default shaders
 					else {

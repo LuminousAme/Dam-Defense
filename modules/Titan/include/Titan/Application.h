@@ -13,6 +13,8 @@
 
 //include the titan scene class 
 #include "Titan/Scene.h"
+//include the asset manager class
+#include "Titan/AssetSystem.h"
 //include glfw
 #include <GLFW/glfw3.h>
  
