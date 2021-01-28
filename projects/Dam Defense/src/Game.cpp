@@ -45,9 +45,9 @@ void Game::Update(float deltaTime)
 	if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
 	//parameters: number of waves, rest time between waves, length of waves, deltatime
-	Waves(3, 5.f, 10.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
-	SpawnerLS(deltaTime, 1.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
-	SpawnerRS(deltaTime, 1.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	Waves(3, 5.f, 20.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
+	SpawnerLS(deltaTime, 2.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerRS(deltaTime, 2.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
 	//goes through the boats vector
 	for (int i = 0; i < boats.size(); i++) {
@@ -58,8 +58,11 @@ void Game::Update(float deltaTime)
 		BoatPathing(boats[i], p, n); //updates the pathing for the boat
 	}
 
-	if (FlameTimer <= 0) FlameTimer = 0.0f;
+	if (FlameTimer <= 0.0f) FlameTimer = 0.0f;
 	else FlameTimer -= deltaTime;
+
+	//if (damageTimer <= 0.0f) damageTimer = 0.0f;
+	//else damageTimer -= deltaTime;
 
 	if (Flaming) {// if the flamethrowers are spewing flame particles
 		FlameAnim += deltaTime;//increment flamethrower anim timer
@@ -87,6 +90,10 @@ void Game::Update(float deltaTime)
 	}
 
 	Collisions(); //collision check
+
+	/*auto& hTrans = Get<TTN_Transform>(healthbar);
+	hTrans.SetPos(glm::vec3(-rotAmmount.x/52, -rotAmmount.y/52, 1.0f));*/
+
 
 	//move the birds
 	birdTimer += deltaTime;
@@ -316,6 +323,7 @@ void Game::SetUpAssets()
 #pragma endregion
 
 	////MESHES////
+	
 	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
 	skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
 	sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
@@ -333,6 +341,8 @@ void Game::SetUpAssets()
 	damMesh = TTN_ObjLoader::LoadFromFile("models/Dam.obj");
 
 	///TEXTURES////
+	healthBar = TTN_Texture2D::LoadFromFile("textures/health.png");
+	
 	cannonText = TTN_Texture2D::LoadFromFile("textures/metal.png");
 	skyboxText = TTN_TextureCubeMap::LoadFromImages("textures/skybox/sky.png");
 	terrainMap = TTN_Texture2D::LoadFromFile("textures/Game Map Long.jpg");
@@ -535,6 +545,20 @@ void Game::SetUpEntities()
 		AttachCopy(water, waterTrans);
 	}
 
+
+	//healthbar test
+	{
+		healthbar = CreateEntity();
+
+		//setup a transform for the water
+		TTN_Transform healthTrans = TTN_Transform(glm::vec3(0.0f, 10.0f, 35.0f), glm::vec3(0.0f), glm::vec3(1.0f, 0.50f, 1.0f));
+		//attach that transform to the entity
+		AttachCopy(healthbar, healthTrans);
+
+		TTN_Renderer2D healthBarRenderer = TTN_Renderer2D(healthBar, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1);
+		AttachCopy(healthbar, healthBarRenderer);
+	}
+	
 	//birds
 	for (int i = 0; i < 3; i++) {
 		birds[i] = CreateEntity();
@@ -589,6 +613,8 @@ void Game::SetUpEntities()
 
 	//set the cannon to be a child of the camera
 	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), &camera);
+	//set the cannon to be a child of the camera
+	//Get<TTN_Transform>(healthbar).SetParent(&Get<TTN_Transform>(camera), &camera);
 }
 
 //sets up any other data the game needs to store
@@ -668,8 +694,7 @@ void Game::PlayerRotate(float deltaTime)
 	Get<TTN_Transform>(camera).RotateFixed(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
 	//clear the direction the player is facing, and rotate it to face the same along
 	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
-	playerDir = glm::vec3(glm::toMat4(glm::quat(glm::radians(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f))))
-		* glm::vec4(playerDir, 1.0f));
+	playerDir = glm::vec3(glm::toMat4(glm::quat(glm::radians(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f)))) * glm::vec4(playerDir, 1.0f));
 	playerDir = glm::normalize(playerDir);
 
 	//save the next position to rotate properly next frame
@@ -1142,6 +1167,7 @@ void Game::Flamethrower() {
 	}
 }
 
+//collision check
 void Game::Collisions()
 {
 	//collision checks
@@ -1199,6 +1225,27 @@ void Game::Collisions()
 			}
 		}
 	}
+}
+
+void Game::Damage(){
+
+	std::vector<entt::entity>::iterator it = boats.begin();
+	while (it != boats.end()) {
+		if (Get<TTN_Transform>(*it).GetPos().z >= 2.0f) {
+			it++;
+			health = health - 0.1f;
+		}
+		else {
+			it++;
+		}
+	}
+
+	if (damageTimer == 0.0f) { //cooldown is zero
+		damageTimer = 10.f; // set cooldown
+
+	}
+
+
 }
 
 //called to delete particle system and flamethrower models

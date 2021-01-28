@@ -91,8 +91,12 @@ public:
 	TTN_Material::smatptr smokeMat;
 	TTN_Material::smatptr fireMat;
 
+	TTN_Texture2D::st2dptr healthBar;
+
 	//Entities
 protected:
+	entt::entity healthbar;
+
 	entt::entity camera;
 	entt::entity light;
 	entt::entity skybox;
@@ -131,6 +135,9 @@ protected:
 	float waveHeightMultiplier;
 	float waveLenghtMultiplier;
 
+	float health = 100.f;
+	float damageTimer = 0.0f;
+
 	//Stuff for waves and spawning enemies
 	float Timer = 0.F;//timer for boat spawning (left side)
 	float Timer2 = 0.F;//timer for boat spawning (right side)
@@ -142,7 +149,7 @@ protected:
 
 	bool Flaming = false; //if flamethrowers are active right now
 	float FlameTimer = 0.0f; //flamethrower cooldown
-	float FlameAnim = 0.0f; //flamethrower
+	float FlameAnim = 0.0f; //flamethrower duration
 
 	//bird control
 	float birdTimer = 0.0f;
@@ -171,6 +178,7 @@ protected:
 
 	void Flamethrower();
 	void Collisions();
+	void Damage();
 
 	void DeleteFlamethrowers();
 
