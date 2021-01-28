@@ -14,7 +14,7 @@ layout(binding=3) uniform sampler2D s_third;
 //scene ambient lighting
 uniform vec3  u_AmbientCol;
 uniform float u_AmbientStrength;
-uniform bool test;
+
 //result
 out vec4 frag_color;
 
