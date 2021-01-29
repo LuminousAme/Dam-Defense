@@ -49,12 +49,12 @@ namespace Titan {
 		glm::vec2 textCords[6];
 
 		//fill the arrays with data
-		positions[0] = glm::vec3(0.0f, 1.0f, 0.0f);
-		positions[1] = glm::vec3(1.0f, 0.0f, 0.0f);
-		positions[2] = glm::vec3(0.0f, 0.0f, 0.0f);
-		positions[3] = glm::vec3(0.0f, 1.0f, 0.0f);
-		positions[4] = glm::vec3(1.0f, 1.0f, 0.0f);
-		positions[5] = glm::vec3(1.0f, 0.0f, 0.0f);
+		positions[0] = glm::vec3(-0.5f, 0.5f, 0.0f); //0.0, 1.0
+		positions[1] = glm::vec3(0.5f, -0.5f, 0.0f); //1.0, 0.0
+		positions[2] = glm::vec3(-0.5f, -0.5f, 0.0f); //0.0, 0.0
+		positions[3] = glm::vec3(-0.5f, 0.5f, 0.0f); //0.0, 1.0
+		positions[4] = glm::vec3(0.5f, 0.5f, 0.0f); //1.0, 1.0
+		positions[5] = glm::vec3(0.5f, -0.5f, 0.0f); //1.0, 0.0
 
 		textCords[0] = glm::vec2(0.0f, 1.0f);
 		textCords[1] = glm::vec2(1.0f, 0.0f);

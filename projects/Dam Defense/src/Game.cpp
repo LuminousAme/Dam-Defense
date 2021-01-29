@@ -33,86 +33,85 @@ void Game::InitScene()
 //updates the scene every frame
 void Game::Update(float deltaTime)
 {
-	//allow the player to rotate
-	PlayerRotate(deltaTime);
-	//switch to the cannon's normal static animation if it's firing animation has ended
-	StopFiring();
+	if (!m_paused) {
+		//allow the player to rotate
+		PlayerRotate(deltaTime);
+		//switch to the cannon's normal static animation if it's firing animation has ended
+		StopFiring();
 
-	//delete any cannonballs that're way out of range
-	DeleteCannonballs();
+		//delete any cannonballs that're way out of range
+		DeleteCannonballs();
 
-	//if the player is on shoot cooldown, decrement the time remaining on the cooldown
-	if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
+		//if the player is on shoot cooldown, decrement the time remaining on the cooldown
+		if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
 	//parameters: number of waves, rest time between waves, length of waves, deltatime
-	Waves(3, 5.f, 20.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
-	SpawnerLS(deltaTime, 2.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
-	SpawnerRS(deltaTime, 2.0f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	Waves(6, 10.f, 40.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
+	SpawnerLS(deltaTime, 2.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
+	SpawnerRS(deltaTime, 2.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
-	//goes through the boats vector
-	for (int i = 0; i < boats.size(); i++) {
-		//std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl;
-		int p = Get<TTN_Tag>(boats[i]).getPath(); //gets the boats randomized path num
-		int n = Get<TTN_Tag>(boats[i]).getNum(); //gets the boats randomized path num
-		Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f)); //sets gravity to 0
-		BoatPathing(boats[i], p, n); //updates the pathing for the boat
-	}
+		//goes through the boats vector
+		for (int i = 0; i < boats.size(); i++) {
+			//std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl;
+			int p = Get<TTN_Tag>(boats[i]).getPath(); //gets the boats randomized path num
+			int n = Get<TTN_Tag>(boats[i]).getNum(); //gets the boats randomized path num
+			Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f)); //sets gravity to 0
+			BoatPathing(boats[i], p, n); //updates the pathing for the boat
+		}
 
-	if (FlameTimer <= 0.0f) FlameTimer = 0.0f;
+	if (FlameTimer <= 0) FlameTimer = 0.0f;
 	else FlameTimer -= deltaTime;
 
-	//if (damageTimer <= 0.0f) damageTimer = 0.0f;
-	//else damageTimer -= deltaTime;
-
-	if (Flaming) {// if the flamethrowers are spewing flame particles
+	if (Flaming) {// if the flamethorwers are spewing flame particles
 		FlameAnim += deltaTime;//increment flamethrower anim timer
 
-		if (FlameAnim >= 3.0f) {//flame particles last for 3 seconds
-			DeleteFlamethrowers(); //delete the flamethrowers and particles
-			FlameAnim = 0.0f; //reset timer
-			Flaming = false; //set flaming to false
+			if (FlameAnim >= 3.0f) {//flame particles last for 3 seconds
+				DeleteFlamethrowers(); //delete the flamethrowers and particles
+				FlameAnim = 0.0f; //reset timer
+				Flaming = false; //set flaming to false
+			}
+
+			//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 20
+			std::vector<entt::entity>::iterator it = boats.begin();
+			while (it != boats.end()) {
+				if (Get<TTN_Transform>(*it).GetPos().z >= 27.0f) {
+					//std::cout <<"Global Pos:"<< Get<TTN_Transform>(*it).GetGlobalPos().z << std::endl;
+					//std::cout << "Pos:" << Get<TTN_Transform>(*it).GetPos().z << std::endl;
+					it++;
+				}
+				else {
+					DeleteEntity(*it);
+					it = boats.erase(it);
+					std::cout << "ERASED " << std::endl;
+				}
+			}
 		}
 
-		//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 20
-		std::vector<entt::entity>::iterator it = boats.begin();
-		while (it != boats.end()) {
-			if (Get<TTN_Transform>(*it).GetPos().z >= 27.0f) {
-				//std::cout <<"Global Pos:"<< Get<TTN_Transform>(*it).GetGlobalPos().z << std::endl;
-				//std::cout << "Pos:" << Get<TTN_Transform>(*it).GetPos().z << std::endl;
-				it++;
-			}
-			else {
-				DeleteEntity(*it);
-				it = boats.erase(it);
-				std::cout << "ERASED " << std::endl;
-			}
-		}
-	}
-
-	Collisions(); //collision check
-
-	/*auto& hTrans = Get<TTN_Transform>(healthbar);
-	hTrans.SetPos(glm::vec3(-rotAmmount.x/52, -rotAmmount.y/52, 1.0f));*/
-
+		Collisions(); //collision check
 
 	//move the birds
 	birdTimer += deltaTime;
+
 	birdTimer = fmod(birdTimer, 20);
 
-	float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
+		float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
 
-	for (int i = 0; i < 3; i++) {
-		if (i == 0) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp(birdBase, birdTarget, t));
+		for (int i = 0; i < 3; i++) {
+			if (i == 0) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp(birdBase, birdTarget, t));
 
-		if (i == 1) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
+			if (i == 1) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
 
-		(birdBase + glm::vec3(3.0f, -3.0f, 3.0f), birdTarget + glm::vec3(3.0f, -3.0f, 3.0f), t));
+			(birdBase + glm::vec3(3.0f, -3.0f, 3.0f), birdTarget + glm::vec3(3.0f, -3.0f, 3.0f), t));
 
-		if (i == 2) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
+			if (i == 2) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
 
-		(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f), birdTarget + glm::vec3(-3.0f, -3.0f, -3.0f), t));
+			(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f), birdTarget + glm::vec3(-3.0f, -3.0f, -3.0f), t));
+		}
+
+		//increase the total time of the scene to make the water animated correctly
+		time += deltaTime;
 	}
-
+	
 #pragma region imgui
 	TTN_Application::StartImgui();
 
@@ -122,17 +121,8 @@ void Game::Update(float deltaTime)
 		a.SetPos(glm::vec3 (b, a.GetPos().y, a.GetPos().z));
 	}
 
-	float CamY = a.GetPos().y;
-	if (ImGui::SliderFloat("Camera Test Y-Axis", &CamY, -100.0f, 100.0f)) {
-		a.SetPos(glm::vec3(a.GetPos().x, CamY, a.GetPos().z));
-	}
-
-
 #pragma endregion
 
-	//increase the total time of the scene to make the water animated correctly
-	time += deltaTime;
-	//printf("fps: %f\n", 1.0f / deltaTime);
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
 }
@@ -220,10 +210,17 @@ void Game::PostRender()
 //function to use to check for when a key is being pressed down for the first frame
 void Game::KeyDownChecks()
 {
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Two)) {
-		if (FlameTimer == 0.0f) { //cooldown is zero
-			Flamethrower();
+	if (!m_paused) {
+		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Two)) {
+			if (FlameTimer == 0.0f) { //cooldown is zero
+				Flamethrower();
+			}
 		}
+	}
+
+	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc)) {
+		m_paused = !m_paused;
+		TTN_Scene::SetPaused(m_paused);
 	}
 }
 
@@ -245,23 +242,25 @@ void Game::MouseButtonDownChecks()
 //function to check for when a mouse button is being pressed
 void Game::MouseButtonChecks()
 {
-	//if the cannon is not in the middle of firing, fire when the player is pressing the left mouse button
-	if (Get<TTN_MorphAnimator>(cannon).getActiveAnim() == 0 && playerShootCooldownTimer <= 0.0f &&
-		TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left)) {
-		//play the firing animation
-		Get<TTN_MorphAnimator>(cannon).SetActiveAnim(1);
-		Get<TTN_MorphAnimator>(cannon).getActiveAnimRef().Restart();
-		//create a new cannonball
-		CreateCannonball();
-		//reset the cooldown
-		playerShootCooldownTimer = playerShootCooldown;
-		//and play the smoke particle effect
-		//Get<TTN_Transform>(smokePS).SetPos((Get<TTN_Transform>(cannon).GetGlobalPos() -
-			//0.5f * (Get<TTN_Transform>(cannon).GetGlobalPos() - Get<TTN_Transform>(cannon).GetPos())) + 0.8f * playerDir);
-		Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f, 0.0f) + 0.9f * playerDir);
-		Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
-			SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
-		Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
+	if (!m_paused) {
+		//if the cannon is not in the middle of firing, fire when the player is pressing the left mouse button
+		if (Get<TTN_MorphAnimator>(cannon).getActiveAnim() == 0 && playerShootCooldownTimer <= 0.0f &&
+			TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left)) {
+			//play the firing animation
+			Get<TTN_MorphAnimator>(cannon).SetActiveAnim(1);
+			Get<TTN_MorphAnimator>(cannon).getActiveAnimRef().Restart();
+			//create a new cannonball
+			CreateCannonball();
+			//reset the cooldown
+			playerShootCooldownTimer = playerShootCooldown;
+			//and play the smoke particle effect
+			//Get<TTN_Transform>(smokePS).SetPos((Get<TTN_Transform>(cannon).GetGlobalPos() -
+				//0.5f * (Get<TTN_Transform>(cannon).GetGlobalPos() - Get<TTN_Transform>(cannon).GetPos())) + 0.8f * playerDir);
+			Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f, 0.0f) + 0.9f * playerDir);
+			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
+				SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
+			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
+		}
 	}
 }
 
@@ -279,51 +278,56 @@ void Game::SetUpAssets()
 	//// SHADERS ////
 #pragma region SHADERS
 	//create a shader program object
-	shaderProgramUnTextured = TTN_Shader::Create();
+	///////shaderProgramUnTextured = TTN_Shader::Create();
 	//load the shaders into the shader program
-	shaderProgramUnTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_NO_COLOR);
-	shaderProgramUnTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_NO_TEXTURE);
-	shaderProgramUnTextured->Link();
+	////shaderProgramUnTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_NO_COLOR);
+	////shaderProgramUnTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_NO_TEXTURE);
+	////shaderProgramUnTextured->Link();
 
 	//create a shader program object for textured objects
-	shaderProgramTextured = TTN_Shader::Create();
+	///////shaderProgramTextured = TTN_Shader::Create();
 	//load the shaders into the shader program
-	shaderProgramTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_NO_COLOR);
-	shaderProgramTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
-	shaderProgramTextured->Link();
+	////////shaderProgramTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_NO_COLOR);
+	//////shaderProgramTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
+	//////shaderProgramTextured->Link();
 
 	//create a shader program object for the skybox
-	shaderProgramSkybox = TTN_Shader::Create();
+	///////shaderProgramSkybox = TTN_Shader::Create();
 	//load the shaders into the shader program
-	shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::VERT_SKYBOX);
-	shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::FRAG_SKYBOX);
-	shaderProgramSkybox->Link();
+	/////shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::VERT_SKYBOX);
+	////shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::FRAG_SKYBOX);
+	//////shaderProgramSkybox->Link();
 
 	//create a shader program for animationed textured objects
-	shaderProgramAnimatedTextured = TTN_Shader::Create();
+	///shaderProgramAnimatedTextured = TTN_Shader::Create();
 	//load the shaders into the shader program
-	shaderProgramAnimatedTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR);
-	shaderProgramAnimatedTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
-	shaderProgramAnimatedTextured->Link();
+	/////shaderProgramAnimatedTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR);
+	//////shaderProgramAnimatedTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
+	//////shaderProgramAnimatedTextured->Link();
 
 	//create a shader program for the terrain
-	shaderProgramTerrain = TTN_Shader::Create();
+	/////shaderProgramTerrain = TTN_Shader::Create();
 	//load the shaders into the shader program
-	shaderProgramTerrain->LoadShaderStageFromFile("shaders/terrain_vert.glsl", GL_VERTEX_SHADER);
-	shaderProgramTerrain->LoadShaderStageFromFile("shaders/terrain_frag.glsl", GL_FRAGMENT_SHADER);
-	shaderProgramTerrain->Link();
+	//////shaderProgramTerrain->LoadShaderStageFromFile("shaders/terrain_vert.glsl", GL_VERTEX_SHADER);
+	///////shaderProgramTerrain->LoadShaderStageFromFile("shaders/terrain_frag.glsl", GL_FRAGMENT_SHADER);
+	///////shaderProgramTerrain->Link();
 
 	//create a shader program for the water
-	shaderProgramWater = TTN_Shader::Create();
+	//////shaderProgramWater = TTN_Shader::Create();
 	//load the shaders into the shader program
-	shaderProgramWater->LoadShaderStageFromFile("shaders/water_vert.glsl", GL_VERTEX_SHADER);
-	shaderProgramWater->LoadShaderStageFromFile("shaders/water_frag.glsl", GL_FRAGMENT_SHADER);
-	shaderProgramWater->Link();
+	//////////shaderProgramWater->LoadShaderStageFromFile("shaders/water_vert.glsl", GL_VERTEX_SHADER);
+	////////shaderProgramWater->LoadShaderStageFromFile("shaders/water_frag.glsl", GL_FRAGMENT_SHADER);
+	///////shaderProgramWater->Link();
 
+	//grab the shaders
+	shaderProgramTextured = TTN_AssetSystem::GetShader("Basic textured shader");
+	shaderProgramSkybox = TTN_AssetSystem::GetShader("Skybox shader");
+	shaderProgramTerrain = TTN_AssetSystem::GetShader("Terrain shader");
+	shaderProgramWater = TTN_AssetSystem::GetShader("Water shader");
+	shaderProgramAnimatedTextured = TTN_AssetSystem::GetShader("Animated textured shader");
 #pragma endregion
 
 	////MESHES////
-	
 	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
 	skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
 	sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
@@ -340,9 +344,19 @@ void Game::SetUpAssets()
 	treeMesh[2] = TTN_ObjLoader::LoadFromFile("models/Tree3.obj");
 	damMesh = TTN_ObjLoader::LoadFromFile("models/Dam.obj");
 
+	//grab the meshes
+	cannonMesh = TTN_AssetSystem::GetMesh("Cannon mesh");
+	skyboxMesh = TTN_AssetSystem::GetMesh("Skybox mesh");
+	sphereMesh = TTN_AssetSystem::GetMesh("Sphere");
+	flamethrowerMesh = TTN_AssetSystem::GetMesh("Flamethrower mesh");
+	boat1Mesh = TTN_AssetSystem::GetMesh("Boat 1");
+	boat2Mesh = TTN_AssetSystem::GetMesh("Boat 2");
+	boat3Mesh = TTN_AssetSystem::GetMesh("Boat 3");
+	terrainPlain = TTN_AssetSystem::GetMesh("Terrain plane");
+	birdMesh = TTN_AssetSystem::GetMesh("Bird mesh");
+	damMesh = TTN_AssetSystem::GetMesh("Dam mesh");
+
 	///TEXTURES////
-	healthBar = TTN_Texture2D::LoadFromFile("textures/health.png");
-	
 	cannonText = TTN_Texture2D::LoadFromFile("textures/metal.png");
 	skyboxText = TTN_TextureCubeMap::LoadFromImages("textures/skybox/sky.png");
 	terrainMap = TTN_Texture2D::LoadFromFile("textures/Game Map Long.jpg");
@@ -357,6 +371,21 @@ void Game::SetUpAssets()
 	birdText = TTN_Texture2D::LoadFromFile("textures/BirdTexture.png");
 	treeText = TTN_Texture2D::LoadFromFile("textures/Trees Texture.png");
 	damText = TTN_Texture2D::LoadFromFile("textures/Dam.png");
+
+	//grab textures
+	cannonText = TTN_AssetSystem::GetTexture2D("Cannon texture");
+	skyboxText = TTN_AssetSystem::GetSkybox("Skybox texture");
+	terrainMap = TTN_AssetSystem::GetTexture2D("Terrain height map");
+	sandText = TTN_AssetSystem::GetTexture2D("Sand texture");
+	rockText = TTN_AssetSystem::GetTexture2D("Rock texture");
+	grassText = TTN_AssetSystem::GetTexture2D("Grass texture");
+	waterText = TTN_AssetSystem::GetTexture2D("Water texture");
+	boat1Text = TTN_AssetSystem::GetTexture2D("Boat texture 1");
+	boat2Text = TTN_AssetSystem::GetTexture2D("Boat texture 2");
+	boat3Text = TTN_AssetSystem::GetTexture2D("Boat texture 3");
+	flamethrowerText = TTN_AssetSystem::GetTexture2D("Flamethrower texture");
+	birdText = TTN_AssetSystem::GetTexture2D("Bird texture");
+	damText = TTN_AssetSystem::GetTexture2D("Dam texture");
 
 	////MATERIALS////
 	cannonMat = TTN_Material::Create();
@@ -387,9 +416,6 @@ void Game::SetUpAssets()
 
 	birdMat = TTN_Material::Create();
 	birdMat->SetAlbedo(birdText);
-
-	treeMat = TTN_Material::Create();
-	treeMat->SetAlbedo(treeText);
 
 	damMat = TTN_Material::Create();
 	damMat->SetAlbedo(damText);
@@ -502,6 +528,42 @@ void Game::SetUpEntities()
 		TTN_Transform damTrans = TTN_Transform(glm::vec3(0.0f, -10.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.7f, 0.7f, 0.3f));
 		//attach that transform to the entity
 		AttachCopy(dam, damTrans);
+	}
+
+	//entities for flamethrowers
+	for (int i = 0; i < 6; i++) {
+		//flamethrower entities
+		{
+			flamethrowers.push_back(CreateEntity());
+
+			//setup a mesh renderer for the cannon
+			TTN_Renderer ftRenderer = TTN_Renderer(flamethrowerMesh, shaderProgramTextured);
+			ftRenderer.SetMat(flamethrowerMat);
+			//attach that renderer to the entity
+			AttachCopy<TTN_Renderer>(flamethrowers[i], ftRenderer);
+
+			//setup a transform for the flamethrower
+			TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f, -6.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
+			if (i == 0) {
+				ftTrans.SetPos(glm::vec3(-5.0f, -6.0f, 2.0f));
+			}
+			else if (i == 1) {
+				ftTrans.SetPos(glm::vec3(15.0f, -6.0f, 2.0f));
+			}
+			else if (i == 2) {
+				ftTrans.SetPos(glm::vec3(-15.0f, -6.0f, 2.0f));
+			}
+			else if (i == 3) {
+				ftTrans.SetPos(glm::vec3(40.0f, -6.0f, 2.0f));
+			}
+			else if (i == 4) {
+				ftTrans.SetPos(glm::vec3(-40.0f, -6.0f, 2.0f));
+			}
+			else {}
+
+			//attach that transform to the entity
+			AttachCopy<TTN_Transform>(flamethrowers[i], ftTrans);
+		}
 	}
 
 	//entity for the smoke particle system (rather than recreating whenever we need it, we'll just make one
@@ -621,6 +683,7 @@ void Game::SetUpEntities()
 void Game::SetUpOtherData()
 {
 	//init some scene data
+	m_paused = false;
 	rotAmmount = glm::vec2(0.0f);
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -1091,39 +1154,6 @@ void Game::Flamethrower() {
 		Flaming = true;// set flaming to true
 
 		for (int i = 0; i < 6; i++) {
-			//flamethrower entities
-			{
-				flamethrowers.push_back(CreateEntity());
-
-				//setup a mesh renderer for the cannon
-				TTN_Renderer ftRenderer = TTN_Renderer(flamethrowerMesh, shaderProgramTextured);
-				ftRenderer.SetMat(flamethrowerMat);
-				//attach that renderer to the entity
-				AttachCopy<TTN_Renderer>(flamethrowers[i], ftRenderer);
-
-				//setup a transform for the flamethrower
-				TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f, -6.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
-				if (i == 0) {
-					ftTrans.SetPos(glm::vec3(-5.0f, -6.0f, 2.0f));
-				}
-				else if (i == 1) {
-					ftTrans.SetPos(glm::vec3(15.0f, -6.0f, 2.0f));
-				}
-				else if (i == 2) {
-					ftTrans.SetPos(glm::vec3(-15.0f, -6.0f, 2.0f));
-				}
-				else if (i == 3) {
-					ftTrans.SetPos(glm::vec3(40.0f, -6.0f, 2.0f));
-				}
-				else if (i == 4) {
-					ftTrans.SetPos(glm::vec3(-40.0f, -6.0f, 2.0f));
-				}
-				else {}
-
-				//attach that transform to the entity
-				AttachCopy<TTN_Transform>(flamethrowers[i], ftTrans);
-			}
-
 			//fire particle entities
 			{
 				flames.push_back(CreateEntity());
@@ -1250,17 +1280,9 @@ void Game::Damage(){
 
 //called to delete particle system and flamethrower models
 void Game::DeleteFlamethrowers() {
-	std::vector<entt::entity>::iterator it = flamethrowers.begin();
-	while (it != flamethrowers.end()) {
-		DeleteEntity(*it);
-		it = flamethrowers.erase(it);
-		//it++;
-	}
-
 	std::vector<entt::entity>::iterator itt = flames.begin();
 	while (itt != flames.end()) {
 		DeleteEntity(*itt);
 		itt = flames.erase(itt);
 	}
-
 }

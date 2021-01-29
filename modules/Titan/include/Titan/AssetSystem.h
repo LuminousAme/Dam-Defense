@@ -71,11 +71,13 @@ namespace Titan {
 		//gets the number for the current set being loaded, or the set that has finished loading on the frame it was called, returns -1 if no set is being loaded
 		static int GetCurrentSet();
 		//gets whether the system finished loading a set this frame
-		static bool GetFinishedLoadingSetThisFrame() { return s_FinishedLoadingSet; }
+		static bool GetSetLoaded(int set) { return s_setsLoaded[set]; }
 
 	private:
 		//the current loading queue
 		inline static std::vector<int> s_loadQueue = std::vector<int>();
+		//sets that have been loaded
+		inline static  std::vector<bool> s_setsLoaded = std::vector<bool>();
 		//the index of where the loader in it's current set of assets 
 		inline static int s_CurrentAssetType = 0; //0 = 2D textures, 1 = cubemaps, 2 = non animated mesh, 3 = animated mesh, 4 = non-default shader, 5 = default shader
 		inline static int s_CurrentAssetIndex = -1;

@@ -19,6 +19,12 @@ namespace Titan {
 
 		//then add the file and access name to the list of textures to be loaded in that set
 		s_2DTexturesToLoad[set].push_back(std::pair(accessName, fileName));
+
+		if (s_setsLoaded.size() <= set) {
+			s_setsLoaded.resize(set + 1);
+		}
+
+		s_setsLoaded[set] = false;
 	}
 
 	//adds a cubemap to the list of assets to be loaded
@@ -34,6 +40,12 @@ namespace Titan {
 
 		//then add the file and access name to the list of textures to be loaded in that set
 		s_CubemapsToLoad[set].push_back(std::pair(accessName, fileName));
+
+		if (s_setsLoaded.size() <= set) {
+			s_setsLoaded.resize(set + 1);
+		}
+
+		s_setsLoaded[set] = false;
 	}
 
 	//adds a non-animated mesh to the list of assets to be loaded
@@ -64,6 +76,12 @@ namespace Titan {
 
 		//then add the file and access name to the list of animated meshes to be loaded in that set
 		s_AnimatedMeshesToLoad[set].push_back(std::pair(accessName, std::pair(fileName, NumOfFrames)));
+
+		if (s_setsLoaded.size() <= set) {
+			s_setsLoaded.resize(set + 1);
+		}
+
+		s_setsLoaded[set] = false;
 	}
 
 	//adds a non-default shader to the list of assets to be loeaded
@@ -79,6 +97,12 @@ namespace Titan {
 
 		//then add the file and access name to the list of non default shaders to be loaded in that set
 		s_ShadersToLoad[set].push_back(std::pair(accessName, std::pair(VertShaderFileName, FragShaderFileName)));
+
+		if (s_setsLoaded.size() <= set) {
+			s_setsLoaded.resize(set + 1);
+		}
+
+		s_setsLoaded[set] = false;
 	}
 
 	//adds a default shader to the list of assets to be loaded
@@ -94,6 +118,12 @@ namespace Titan {
 
 		//then add the file and access name to the list of non default shaders to be loaded in that set
 		s_DefaultShadersToLoad[set].push_back(std::pair(accessName, std::pair(VertShader, FragShader)));
+
+		if (s_setsLoaded.size() <= set) {
+			s_setsLoaded.resize(set + 1);
+		}
+
+		s_setsLoaded[set] = false;
 	}
 
 	//creates a new material pointer in the asset system
@@ -208,6 +238,7 @@ namespace Titan {
 			for (auto it : s_NonAnimatedMeshesToLoad[set]) {
 				//load the mesh into the unordered map
 				s_meshMap[it.first] = TTN_ObjLoader::LoadFromFile(it.second);
+				s_meshMap[it.first]->SetUpVao();
 			}
 		}
 
@@ -217,6 +248,7 @@ namespace Titan {
 			for (auto it : s_AnimatedMeshesToLoad[set]) {
 				//load the animated mesh into the unordered map
 				s_meshMap[it.first] = TTN_ObjLoader::LoadAnimatedMeshFromFiles(it.second.first, it.second.second);
+				s_meshMap[it.first]->SetUpVao();
 			}
 		}
 
@@ -247,6 +279,8 @@ namespace Titan {
 				s_shaderMap[it.first] = temp;
 			}
 		}
+
+		s_setsLoaded[set] = true;
 	}
 
 	//load a set of assets in the background, loading 1 asset per frame as the program does other things
@@ -327,6 +361,8 @@ namespace Titan {
 						//load the asset
 						s_meshMap[s_NonAnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first] =
 							TTN_ObjLoader::LoadFromFile(s_NonAnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second);
+
+						s_meshMap[s_NonAnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first]->SetUpVao();
 					}
 					//if it is, then move onto animated meshes
 					else {
@@ -342,7 +378,7 @@ namespace Titan {
 			}
 
 			//if we're currently loading animated meshes
-			else if (s_CurrentAssetIndex == 3) {
+			else if (s_CurrentAssetType == 3) {
 				//first confirm there are meshes in the set
 				if (s_AnimatedMeshesToLoad.size() > s_loadQueue[0]) {
 					//check the index is not out of bounds
@@ -351,6 +387,8 @@ namespace Titan {
 						s_meshMap[s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first] =
 							TTN_ObjLoader::LoadAnimatedMeshFromFiles(s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second.first,
 								s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second.second);
+
+						s_meshMap[s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first]->SetUpVao();
 					}
 					//if it is, then move onto non-default shaders
 					else {
@@ -411,6 +449,7 @@ namespace Titan {
 						s_CurrentAssetType = 0;
 						s_CurrentAssetIndex = -1;
 						s_FinishedLoadingSet = true;
+						s_setsLoaded[s_loadQueue[0]] = true;
 					}
 				}
 				//if there aren't, move onto non-default shaders
@@ -418,6 +457,7 @@ namespace Titan {
 					s_CurrentAssetType = 0;
 					s_CurrentAssetIndex = -1;
 					s_FinishedLoadingSet = true;
+					s_setsLoaded[s_loadQueue[0]] = true;
 				}
 			}
 

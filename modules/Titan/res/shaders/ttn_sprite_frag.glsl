@@ -11,6 +11,8 @@ uniform sampler2D s_Diffuse;
 out vec4 frag_color;
 
 void main() {
+	vec4 New_Color = texture(s_Diffuse, inUv) * u_Color;
+
 	//set the fragment color from the texture 
-	frag_color = texture(s_Diffuse, inUv) * u_Color;
+	frag_color = New_Color;
 }
