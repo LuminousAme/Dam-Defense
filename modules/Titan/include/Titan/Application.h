@@ -180,6 +180,9 @@ namespace Titan {
 		//function to run through each frame, calling scene renders, etc.
 		static void Update();
 
+		//function to close the applicate
+		static void Quit();
+
 		//imgui functions
 		static void InitImgui();
 		static void CleanImgui();

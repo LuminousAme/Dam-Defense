@@ -35,7 +35,10 @@ public:
 	//mouse input
 	void MouseButtonDownChecks();
 	void MouseButtonChecks();
-	virtual void MouseButtonUpChecks();
+	void MouseButtonUpChecks();
+
+	bool GetGameIsPaused() { return m_paused; }
+	void SetGameIsPaused(bool paused) { m_paused = paused; }
 
 	//Assets
 public:
@@ -154,6 +157,9 @@ protected:
 	//smoke particle
 	TTN_ParticleTemplate smokeParticle;
 	TTN_ParticleTemplate fireParticle;
+
+	//wheter or not the scene is paused
+	bool m_paused;
 
 	//set up functions, called by InitScene()
 protected:

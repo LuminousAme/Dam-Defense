@@ -33,80 +33,85 @@ void Game::InitScene()
 //updates the scene every frame
 void Game::Update(float deltaTime)
 {
-	//allow the player to rotate
-	PlayerRotate(deltaTime);
-	//switch to the cannon's normal static animation if it's firing animation has ended
-	StopFiring();
+	if (!m_paused) {
+		//allow the player to rotate
+		PlayerRotate(deltaTime);
+		//switch to the cannon's normal static animation if it's firing animation has ended
+		StopFiring();
 
-	//delete any cannonballs that're way out of range
-	DeleteCannonballs();
+		//delete any cannonballs that're way out of range
+		DeleteCannonballs();
 
-	//if the player is on shoot cooldown, decrement the time remaining on the cooldown
-	if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
+		//if the player is on shoot cooldown, decrement the time remaining on the cooldown
+		if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
-	//parameters: number of waves, rest time between waves, length of waves, deltatime
-	Waves(6, 10.f, 40.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
-	SpawnerLS(deltaTime, 2.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
-	SpawnerRS(deltaTime, 2.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
+		//parameters: number of waves, rest time between waves, length of waves, deltatime
+		Waves(6, 10.f, 40.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
+		SpawnerLS(deltaTime, 2.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
+		SpawnerRS(deltaTime, 2.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
-	//goes through the boats vector
-	for (int i = 0; i < boats.size(); i++) {
-		//std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl;
-		int p = Get<TTN_Tag>(boats[i]).getPath(); //gets the boats randomized path num
-		int n = Get<TTN_Tag>(boats[i]).getNum(); //gets the boats randomized path num
-		Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f)); //sets gravity to 0
-		BoatPathing(boats[i], p, n); //updates the pathing for the boat
-	}
-
-	if (FlameTimer <= 0) FlameTimer = 0.0f;
-	else FlameTimer -= deltaTime;
-
-	if (Flaming) {// if the flamethorwers are spewing flame particles
-		FlameAnim += deltaTime;//increment flamethrower anim timer
-
-		if (FlameAnim >= 3.0f) {//flame particles last for 3 seconds
-			DeleteFlamethrowers(); //delete the flamethrowers and particles
-			FlameAnim = 0.0f; //reset timer
-			Flaming = false; //set flaming to false
+		//goes through the boats vector
+		for (int i = 0; i < boats.size(); i++) {
+			//std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl;
+			int p = Get<TTN_Tag>(boats[i]).getPath(); //gets the boats randomized path num
+			int n = Get<TTN_Tag>(boats[i]).getNum(); //gets the boats randomized path num
+			Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f)); //sets gravity to 0
+			BoatPathing(boats[i], p, n); //updates the pathing for the boat
 		}
 
-		//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 20
-		std::vector<entt::entity>::iterator it = boats.begin();
-		while (it != boats.end()) {
-			if (Get<TTN_Transform>(*it).GetPos().z >= 27.0f) {
-				//std::cout <<"Global Pos:"<< Get<TTN_Transform>(*it).GetGlobalPos().z << std::endl;
-				//std::cout << "Pos:" << Get<TTN_Transform>(*it).GetPos().z << std::endl;
-				it++;
+		if (FlameTimer <= 0) FlameTimer = 0.0f;
+		else FlameTimer -= deltaTime;
+
+		if (Flaming) {// if the flamethorwers are spewing flame particles
+			FlameAnim += deltaTime;//increment flamethrower anim timer
+
+			if (FlameAnim >= 3.0f) {//flame particles last for 3 seconds
+				DeleteFlamethrowers(); //delete the flamethrowers and particles
+				FlameAnim = 0.0f; //reset timer
+				Flaming = false; //set flaming to false
 			}
-			else {
-				DeleteEntity(*it);
-				it = boats.erase(it);
-				std::cout << "ERASED " << std::endl;
+
+			//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 20
+			std::vector<entt::entity>::iterator it = boats.begin();
+			while (it != boats.end()) {
+				if (Get<TTN_Transform>(*it).GetPos().z >= 27.0f) {
+					//std::cout <<"Global Pos:"<< Get<TTN_Transform>(*it).GetGlobalPos().z << std::endl;
+					//std::cout << "Pos:" << Get<TTN_Transform>(*it).GetPos().z << std::endl;
+					it++;
+				}
+				else {
+					DeleteEntity(*it);
+					it = boats.erase(it);
+					std::cout << "ERASED " << std::endl;
+				}
 			}
 		}
+
+		Collisions(); //collision check
+
+		//move the birds
+		birdTimer += deltaTime;
+
+		birdTimer = fmod(birdTimer, 20);
+
+		float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
+
+		for (int i = 0; i < 3; i++) {
+			if (i == 0) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp(birdBase, birdTarget, t));
+
+			if (i == 1) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
+
+			(birdBase + glm::vec3(3.0f, -3.0f, 3.0f), birdTarget + glm::vec3(3.0f, -3.0f, 3.0f), t));
+
+			if (i == 2) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
+
+			(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f), birdTarget + glm::vec3(-3.0f, -3.0f, -3.0f), t));
+		}
+
+		//increase the total time of the scene to make the water animated correctly
+		time += deltaTime;
 	}
-
-	Collisions(); //collision check
-
-	//move the birds
-	birdTimer += deltaTime;
-
-	birdTimer = fmod(birdTimer, 20);
-
-	float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
-
-	for (int i = 0; i < 3; i++) {
-		if (i == 0) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp(birdBase, birdTarget, t));
-
-		if (i == 1) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
-
-		(birdBase + glm::vec3(3.0f, -3.0f, 3.0f), birdTarget + glm::vec3(3.0f, -3.0f, 3.0f), t));
-
-		if (i == 2) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
-
-		(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f), birdTarget + glm::vec3(-3.0f, -3.0f, -3.0f), t));
-	}
-
+	
 #pragma region imgui
 	TTN_Application::StartImgui();
 
@@ -120,9 +125,6 @@ void Game::Update(float deltaTime)
 
 #pragma endregion
 
-	//increase the total time of the scene to make the water animated correctly
-	time += deltaTime;
-	//printf("fps: %f\n", 1.0f / deltaTime);
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
 }
@@ -210,10 +212,17 @@ void Game::PostRender()
 //function to use to check for when a key is being pressed down for the first frame
 void Game::KeyDownChecks()
 {
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Two)) {
-		if (FlameTimer == 0.0f) { //cooldown is zero
-			Flamethrower();
+	if (!m_paused) {
+		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Two)) {
+			if (FlameTimer == 0.0f) { //cooldown is zero
+				Flamethrower();
+			}
 		}
+	}
+
+	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc)) {
+		m_paused = !m_paused;
+		TTN_Scene::SetPaused(m_paused);
 	}
 }
 
@@ -235,23 +244,25 @@ void Game::MouseButtonDownChecks()
 //function to check for when a mouse button is being pressed
 void Game::MouseButtonChecks()
 {
-	//if the cannon is not in the middle of firing, fire when the player is pressing the left mouse button
-	if (Get<TTN_MorphAnimator>(cannon).getActiveAnim() == 0 && playerShootCooldownTimer <= 0.0f &&
-		TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left)) {
-		//play the firing animation
-		Get<TTN_MorphAnimator>(cannon).SetActiveAnim(1);
-		Get<TTN_MorphAnimator>(cannon).getActiveAnimRef().Restart();
-		//create a new cannonball
-		CreateCannonball();
-		//reset the cooldown
-		playerShootCooldownTimer = playerShootCooldown;
-		//and play the smoke particle effect
-		//Get<TTN_Transform>(smokePS).SetPos((Get<TTN_Transform>(cannon).GetGlobalPos() -
-			//0.5f * (Get<TTN_Transform>(cannon).GetGlobalPos() - Get<TTN_Transform>(cannon).GetPos())) + 0.8f * playerDir);
-		Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f, 0.0f) + 0.9f * playerDir);
-		Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
-			SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
-		Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
+	if (!m_paused) {
+		//if the cannon is not in the middle of firing, fire when the player is pressing the left mouse button
+		if (Get<TTN_MorphAnimator>(cannon).getActiveAnim() == 0 && playerShootCooldownTimer <= 0.0f &&
+			TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left)) {
+			//play the firing animation
+			Get<TTN_MorphAnimator>(cannon).SetActiveAnim(1);
+			Get<TTN_MorphAnimator>(cannon).getActiveAnimRef().Restart();
+			//create a new cannonball
+			CreateCannonball();
+			//reset the cooldown
+			playerShootCooldownTimer = playerShootCooldown;
+			//and play the smoke particle effect
+			//Get<TTN_Transform>(smokePS).SetPos((Get<TTN_Transform>(cannon).GetGlobalPos() -
+				//0.5f * (Get<TTN_Transform>(cannon).GetGlobalPos() - Get<TTN_Transform>(cannon).GetPos())) + 0.8f * playerDir);
+			Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f, 0.0f) + 0.9f * playerDir);
+			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
+				SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
+			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
+		}
 	}
 }
 
@@ -658,6 +669,7 @@ void Game::SetUpEntities()
 void Game::SetUpOtherData()
 {
 	//init some scene data
+	m_paused = false;
 	rotAmmount = glm::vec2(0.0f);
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);

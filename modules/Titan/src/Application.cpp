@@ -64,7 +64,7 @@ namespace Titan {
 
 		//enable cull faces so only the front faces are rendered, this will improve performance and model back faces shouldn't be
 		//visible anyways
-		glEnable(GL_CULL_FACE);
+		//glEnable(GL_CULL_FACE);
 
 		//enable the depth function for skyboxes
 		glDepthFunc(GL_LEQUAL);
@@ -97,6 +97,9 @@ namespace Titan {
 		glfwDestroyWindow(m_window);
 		//close glfw
 		glfwTerminate();
+		//delete scene pointers
+		for (auto x : scenes)
+			delete x;
 	}
 
 	void TTN_Application::NewFrameStart()
@@ -134,6 +137,9 @@ namespace Titan {
 		//check for events from glfw 
 		glfwPollEvents();
 
+		//update the asset system
+		TTN_AssetSystem::Update();
+
 		//go through each scene 
 		for (int i = 0; i < TTN_Application::scenes.size(); i++) {
 			//and check if they should be rendered
@@ -163,6 +169,12 @@ namespace Titan {
 		
 		//swap the buffers so all the drawings that the scenes just did are acutally visible 
 		glfwSwapBuffers(m_window);
+	}
+
+	//quits the application
+	void TTN_Application::Quit()
+	{
+		Closing();
 	}
 
 #pragma region IMGUI STUFF

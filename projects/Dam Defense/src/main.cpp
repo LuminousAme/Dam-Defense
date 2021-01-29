@@ -7,6 +7,8 @@
 #include "Game.h"
 #include "SplashCard.h"
 #include "LoadingScene.h"
+#include "MainMenu.h"
+#include "PauseMenu.h"
 
 using namespace Titan;
 
@@ -18,41 +20,119 @@ int main() {
 	Logger::Init(); //initliaze otter's base logging system
 	TTN_Application::Init("Dam Defense", 1920, 1080); //initliaze titan's application
 
+	//data to track loading progress
+	bool set1Loaded = false;
+	bool set2Loaded = false;
+
 	//lock the cursor while focused in the application window
-	TTN_Application::TTN_Input::SetCursorLocked(true);
+	TTN_Application::TTN_Input::SetCursorLocked(false);
 
 	//prepare the assets
 	PrepareAssetLoading();
 
 	//load set 0 assets
 	TTN_AssetSystem::LoadSetNow(0);
-	//TTN_AssetSystem::LoadSetNow(1);
-	//TTN_AssetSystem::LoadSetNow(2);
-	//TTN_AssetSystem::LoadSetNow(3);
-	//and start up the queue to load the main menu assets in
-	TTN_AssetSystem::LoadSetInBackground(1);
-	TTN_AssetSystem::LoadSetInBackground(2);
-	TTN_AssetSystem::LoadSetInBackground(3);
+
 
 	//create the scenes
 	SplashCard* splash = new SplashCard;
-	//LoadingScene* loadingScreen = new LoadingScene;
-
-	//Game* gameScene = new Game;
+	LoadingScene* loadingScreen = new LoadingScene;
+	Game* gameScene = new Game;
+	MainMenu* titleScreen = new MainMenu;
+	MainMenuUI* titleScreenUI = new MainMenuUI;
+	PauseMenu* paused = new PauseMenu;
 
 	//initliaze them
 	//gameScene->InitScene();
 	splash->InitScene();
+	loadingScreen->InitScene();
+	loadingScreen->SetShouldRender(false);
+	gameScene->SetShouldRender(false);
+	titleScreen->SetShouldRender(false);
+	titleScreenUI->SetShouldRender(false);
+	paused->SetShouldRender(false);
 
 	//add them to the application
-	//TTN_Application::scenes.push_back(gameScene);
 	TTN_Application::scenes.push_back(splash);
+	TTN_Application::scenes.push_back(loadingScreen);
+	TTN_Application::scenes.push_back(gameScene);
+	TTN_Application::scenes.push_back(paused);
+	TTN_Application::scenes.push_back(titleScreen);
+	TTN_Application::scenes.push_back(titleScreenUI);
 
 	// init's the configs and contexts for imgui
 	TTN_Application::InitImgui();
 
 	//while the application is running
 	while (!TTN_Application::GetIsClosing()) {
+		
+		//check if the splash card is done playing
+		if (splash->GetShouldRender() && splash->GetTotalSceneTime() > 4.0f) {
+			//if it is move to the loading screen
+			splash->SetShouldRender(false);
+			loadingScreen->SetShouldRender(true);
+			//and start up the queue to load the main menu assets in
+			TTN_AssetSystem::LoadSetInBackground(1);
+			TTN_AssetSystem::LoadSetInBackground(2);
+			TTN_AssetSystem::LoadSetInBackground(3);
+		}
+
+
+		//check if the loading is done
+		if (loadingScreen->GetShouldRender() && set1Loaded) {
+			//if it is, go to the main menu
+			loadingScreen->SetShouldRender(false);
+			titleScreen->InitScene();
+			titleScreen->SetShouldRender(true);
+			titleScreenUI->InitScene();
+			titleScreenUI->SetShouldRender(true);
+		}
+
+		//check if the loading is done and the menu should be going to the game
+		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldPlay() && set2Loaded) {
+			//if it is, go to the main menu
+			titleScreen->SetShouldRender(false);
+			titleScreenUI->SetShouldRender(false);
+			TTN_Application::TTN_Input::SetCursorLocked(true);
+			gameScene->InitScene();
+			gameScene->SetShouldRender(true);
+			paused->InitScene();
+		}
+
+		//check if the game should quit
+		if (titleScreenUI->GetShouldQuit() || paused->GetShouldQuit()) {
+			TTN_Application::Quit();
+			break;
+		}
+
+		//pause menu rendering
+		//if the player has paused but the menu hasn't appeared yet
+		if (gameScene->GetShouldRender() && !paused->GetShouldRender() && gameScene->GetPaused()) {
+			TTN_Application::TTN_Input::SetCursorLocked(false);
+			paused->SetShouldResume(false);
+			paused->SetShouldRender(true);
+		}
+		//if the menu has appeared but the player has unpaused with the esc key
+		else if (gameScene->GetShouldRender() && paused->GetShouldRender() && !gameScene->GetPaused()) {
+			TTN_Application::TTN_Input::SetCursorLocked(true);
+			paused->SetShouldResume(false);
+			paused->SetShouldRender(false);
+		}
+		//if the menu has appeared and the player has unpaused from the menu button
+		else if (gameScene->GetShouldRender() && paused->GetShouldRender() && paused->GetShouldResume()) {
+			TTN_Application::TTN_Input::SetCursorLocked(true);
+			gameScene->SetGameIsPaused(false);
+			gameScene->SetPaused(false);
+			paused->SetShouldResume(false);
+			paused->SetShouldRender(false);
+		}
+
+		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)
+			set1Loaded = true;
+		if (!set2Loaded && TTN_AssetSystem::GetSetLoaded(2) && TTN_AssetSystem::GetCurrentSet() == 2)
+			set2Loaded = true;
+		
+
 		//update the scenes and render the screen
 		TTN_Application::Update();
 	}
