@@ -27,7 +27,6 @@ void Game::InitScene()
 
 	//create the entities
 	SetUpEntities();
-
 }
 
 //updates the scene every frame
@@ -50,7 +49,7 @@ void Game::Update(float deltaTime)
 		SpawnerLS(deltaTime, 12.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
 		SpawnerRS(deltaTime, 12.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
-			//goes through the boats vector
+		//goes through the boats vector
 		for (int i = 0; i < boats.size(); i++) {
 			//std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl;
 			int p = Get<TTN_Tag>(boats[i]).getPath(); //gets the boats randomized path num
@@ -89,7 +88,8 @@ void Game::Update(float deltaTime)
 
 		Collisions(); //collision check
 		Damage(deltaTime); //damage function, contains cooldoown
-	//move the birds
+
+		//move the birds
 		birdTimer += deltaTime;
 
 		birdTimer = fmod(birdTimer, 20);
@@ -117,6 +117,16 @@ void Game::Update(float deltaTime)
 		printf("GAME OVER");
 	}
 
+	AudioEvent& music = engine.GetEvent("music");
+
+	//get ref to bus
+	AudioBus& musicBus = engine.GetBus("MusicBus");
+
+	//get ref to listener
+	AudioListener& listener = engine.GetListener();
+	engine.Update();
+
+
 #pragma region imgui
 	TTN_Application::StartImgui();
 
@@ -125,6 +135,12 @@ void Game::Update(float deltaTime)
 	if (ImGui::SliderFloat("Camera Test X-Axis", &b, -100.0f, 100.0f)) {
 		a.SetPos(glm::vec3(b, a.GetPos().y, a.GetPos().z));
 	}
+
+	float c = a.GetPos().y;
+	if (ImGui::SliderFloat("Camera Test Y-Axis", &c, -100.0f, 100.0f)) {
+		a.SetPos(glm::vec3(a.GetPos().x, c, a.GetPos().z));
+	}
+
 #pragma endregion
 
 	//don't forget to call the base class' update
@@ -226,6 +242,15 @@ void Game::KeyDownChecks()
 		m_paused = !m_paused;
 		TTN_Scene::SetPaused(m_paused);
 	}
+
+	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::P)) {
+		TTN_Application::TTN_Input::SetCursorLocked(true);
+	}
+
+	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::O)) {
+		TTN_Application::TTN_Input::SetCursorLocked(false);
+	}
+
 }
 
 //function to cehck for when a key is being pressed
@@ -279,6 +304,18 @@ void Game::MouseButtonUpChecks()
 //sets up all the assets in the scene
 void Game::SetUpAssets()
 {
+	//// SOUNDS ////
+	//engine.Instance();
+	engine.Init();
+
+	engine.LoadBank("Master");
+	engine.LoadBus("MusicBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}");
+
+	AudioEvent& music = engine.CreateEvent("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
+	music.Play();
+
+
+
 	//// SHADERS ////
 #pragma region SHADERS
 	//create a shader program object
@@ -376,7 +413,7 @@ void Game::SetUpAssets()
 	treeText = TTN_Texture2D::LoadFromFile("textures/Trees Texture.png");
 	damText = TTN_Texture2D::LoadFromFile("textures/Dam.png");
 
-	healthBar= TTN_Texture2D::LoadFromFile("textures/health.png");
+	healthBar = TTN_Texture2D::LoadFromFile("textures/health.png");
 	//grab textures
 	cannonText = TTN_AssetSystem::GetTexture2D("Cannon texture");
 	skyboxText = TTN_AssetSystem::GetSkybox("Skybox texture");
@@ -638,7 +675,7 @@ void Game::SetUpEntities()
 
 	//	TTN_Renderer2D healthBarRenderer = TTN_Renderer2D(healthBar, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1);
 	//	AttachCopy(healthbar, healthBarRenderer);
-	//}	
+	//}
 	//Get<TTN_Camera>(UIcam).CalcPerspective(60.0f, 1.78f, 0.01f, 1000.f);
 	//Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f, 1000.f);
 
@@ -696,7 +733,6 @@ void Game::SetUpEntities()
 
 	//set the cannon to be a child of the camera
 	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), &camera);
-	
 
 	//set the cannon to be a child of the camera
 	//Get<TTN_Transform>(healthbar).SetParent(&Get<TTN_Transform>(camera), &camera);
@@ -870,7 +906,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 				tBoat.RotateFixed(glm::vec3(0.0f, -0.55f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(8.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(8.0f, -8.0f, 2.5f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -889,7 +925,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 				tBoat.RotateFixed(glm::vec3(0.0f, -0.7f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(40.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(40.0f, -8.0f, 2.5f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -924,7 +960,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 				tBoat.RotateFixed(glm::vec3(0.0f, -0.08f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(4.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(4.0f, -8.0f, 2.5f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -943,7 +979,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.55f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(-8.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(-8.0f, -8.0f, 2.5f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -963,7 +999,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.7f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(-40.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(-40.0f, -8.0f, 2.5f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 
@@ -998,7 +1034,7 @@ void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 				tBoat.RotateFixed(glm::vec3(0.0f, 0.08f, 0.0f));
 			}
 
-			pBoat.AddForce(Seek(glm::vec3(-4.0f, -8.0f, 1.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
+			pBoat.AddForce(Seek(glm::vec3(-4.0f, -8.0f, 2.5f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 		}
 	}
 }
@@ -1286,11 +1322,9 @@ void Game::Collisions()
 
 //damage cooldown and stuff
 void Game::Damage(float deltaTime) {
-
 	std::vector<entt::entity>::iterator it = boats.begin();
 	while (it != boats.end()) {
 		if (Get<TTN_Transform>(*it).GetPos().z <= 5.0f) {
-
 			if (Get<TTN_Tag>(*it).getCooldown() <= 0.f) {
 				Get<TTN_Tag>(*it).SetDamageCD(3.0f);
 				health = health - 1.0f;
@@ -1298,7 +1332,7 @@ void Game::Damage(float deltaTime) {
 			}
 
 			else {
-				Get<TTN_Tag>(*it).SetDamageCD(Get<TTN_Tag>(*it).getCooldown()-deltaTime);
+				Get<TTN_Tag>(*it).SetDamageCD(Get<TTN_Tag>(*it).getCooldown() - deltaTime);
 			}
 
 			it++;
@@ -1310,8 +1344,6 @@ void Game::Damage(float deltaTime) {
 			it++;
 		}
 	}
-
-
 }
 
 //called to delete particle system and flamethrower models

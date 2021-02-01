@@ -6,6 +6,7 @@
 #include "Titan/Application.h"
 #include "Titan/ObjLoader.h"
 #include "Titan/Interpolation.h"
+#include "Titan/Sound.h"
 
 using namespace Titan;
 
@@ -100,6 +101,9 @@ public:
 
 	TTN_Texture2D::st2dptr healthBar;
 #pragma endregion
+
+	AudioEngine& engine = AudioEngine::Instance();
+
 
 	//Entities
 protected:
