@@ -33,7 +33,6 @@ int main() {
 	//load set 0 assets
 	TTN_AssetSystem::LoadSetNow(0);
 
-
 	//create the scenes
 	SplashCard* splash = new SplashCard;
 	LoadingScene* loadingScreen = new LoadingScene;
@@ -132,7 +131,6 @@ int main() {
 		if (!set2Loaded && TTN_AssetSystem::GetSetLoaded(2) && TTN_AssetSystem::GetCurrentSet() == 2)
 			set2Loaded = true;
 		
-
 		//update the scenes and render the screen
 		TTN_Application::Update();
 	}

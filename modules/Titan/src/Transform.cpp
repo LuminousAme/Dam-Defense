@@ -83,7 +83,6 @@ namespace Titan {
 			Recompute();
 		}
 
-		
 	}
 
 	//returns the position value
@@ -171,8 +170,6 @@ namespace Titan {
 			//if it doesn't then the global and local transforms must be the same
 			m_global = m_transform;
 		}
-
-		
 	}
 
 	//adds a child to this object
