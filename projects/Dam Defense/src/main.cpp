@@ -129,6 +129,7 @@ int main() {
 			set1Loaded = true;
 		if (!set2Loaded && TTN_AssetSystem::GetSetLoaded(2) && TTN_AssetSystem::GetCurrentSet() == 2)
 			set2Loaded = true;
+		
 
 		//update the scenes and render the screen
 		TTN_Application::Update();

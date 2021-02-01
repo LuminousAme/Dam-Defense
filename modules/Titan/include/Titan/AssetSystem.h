@@ -74,31 +74,80 @@ namespace Titan {
 		static bool GetSetLoaded(int set) { return s_setsLoaded[set]; }
 
 	private:
+		//structures for storing asset loading data
+		struct AccessAndFileName {
+			std::string m_AccessName;
+			std::string m_FileName;
+
+			AccessAndFileName(std::string accessName, std::string fileName)
+			{
+				m_AccessName = accessName;
+				m_FileName = fileName;
+			}
+		};
+
+		struct AccessNameFileNameAndNumber {
+			std::string m_AccessName;
+			std::string m_FileName;
+			int m_number;
+
+			AccessNameFileNameAndNumber(std::string accessName, std::string fileName, int number)
+			{
+				m_AccessName = accessName;
+				m_FileName = fileName;
+				m_number = number;
+			}
+		};
+
+		struct AccessNameAndTwoShaderFiles {
+			std::string m_AccessName;
+			std::string m_vertShader;
+			std::string m_fragShader;
+
+			AccessNameAndTwoShaderFiles(std::string accessName, std::string vertex_shader, std::string fragmentShader)
+			{
+				m_AccessName = accessName;
+				m_vertShader = vertex_shader;
+				m_fragShader = fragmentShader;
+			}
+		};
+
+		struct AccessNameAndTwoDefaultShaders {
+			std::string m_AccessName;
+			TTN_DefaultShaders m_vertShader;
+			TTN_DefaultShaders m_fragShader;
+
+			AccessNameAndTwoDefaultShaders(std::string accessName, TTN_DefaultShaders vertex_shader, TTN_DefaultShaders fragmentShader)
+			{
+				m_AccessName = accessName;
+				m_vertShader = vertex_shader;
+				m_fragShader = fragmentShader;
+			}
+		};
+
+	private:
 		//the current loading queue
 		inline static std::vector<int> s_loadQueue = std::vector<int>();
 		//sets that have been loaded
-		inline static  std::vector<bool> s_setsLoaded = std::vector<bool>();
+		inline static std::unordered_map<int, bool> s_setsLoaded = std::unordered_map<int, bool>();
 		//the index of where the loader in it's current set of assets 
 		inline static int s_CurrentAssetType = 0; //0 = 2D textures, 1 = cubemaps, 2 = non animated mesh, 3 = animated mesh, 4 = non-default shader, 5 = default shader
 		inline static int s_CurrentAssetIndex = -1;
 		//boolean that says it's finished loading a set on this frame
 		inline static bool s_FinishedLoadingSet = false;
 
-		//the 2 dimensional vector of strings for 2D textures to load
-		inline static std::vector<std::vector<std::pair<std::string, std::string>>> s_2DTexturesToLoad = std::vector<std::vector<std::pair<std::string, std::string>>>();
-		//the 2 dimensional vector of strings for cubemaps to load
-		inline static std::vector<std::vector<std::pair<std::string, std::string>>> s_CubemapsToLoad = std::vector<std::vector<std::pair<std::string, std::string>>>();
-		//the 2 dimensional vector of strings for non-animated meshes to load
-		inline static std::vector<std::vector<std::pair<std::string, std::string>>> s_NonAnimatedMeshesToLoad = std::vector<std::vector<std::pair<std::string, std::string>>>();
-		//the 2 dimensional vector of strings and ints for animated meshes to load 
-		inline static std::vector<std::vector<std::pair<std::string, std::pair<std::string, int>>>> s_AnimatedMeshesToLoad = 
-			std::vector<std::vector<std::pair<std::string, std::pair<std::string, int>>>>();
-		//the 2 dimension vector of sets of 3 string for non-default shaders to load
-		inline static std::vector<std::vector<std::pair<std::string, std::pair<std::string, std::string>>>> s_ShadersToLoad =
-			std::vector<std::vector<std::pair<std::string, std::pair<std::string, std::string>>>>();
-		//the 2 dimensional vector of strings and sets of 2 defualt shader enums for default shaders to load
-		inline static std::vector<std::vector<std::pair<std::string, std::pair<TTN_DefaultShaders, TTN_DefaultShaders>>>> s_DefaultShadersToLoad =
-			std::vector<std::vector<std::pair<std::string, std::pair<TTN_DefaultShaders, TTN_DefaultShaders>>>>();
+		//the map of vector of strings for 2D textures to load
+		inline static std::unordered_map<int, std::vector<AccessAndFileName>> s_2DTexturesToLoad = std::unordered_map<int, std::vector<AccessAndFileName>>();
+		//the map of vector of strings  for cubemaps to load
+		inline static std::unordered_map<int, std::vector<AccessAndFileName>> s_CubemapsToLoad = std::unordered_map<int, std::vector<AccessAndFileName>>();
+		//the map of vector of strings for non-animated meshes to load
+		inline static std::unordered_map<int, std::vector<AccessAndFileName>> s_NonAnimatedMeshesToLoad = std::unordered_map<int, std::vector<AccessAndFileName>>();
+		//the map of strings and ints for animated meshes to load 
+		inline static std::unordered_map<int, std::vector<AccessNameFileNameAndNumber>> s_AnimatedMeshesToLoad = std::unordered_map<int, std::vector<AccessNameFileNameAndNumber>>();
+		//the map of sets of 3 string for non-default shaders to load
+		inline static std::unordered_map<int, std::vector<AccessNameAndTwoShaderFiles>> s_ShadersToLoad = std::unordered_map<int, std::vector<AccessNameAndTwoShaderFiles>>();
+		//the map of strings and sets of 2 defualt shader enums for default shaders to load
+		inline static std::unordered_map<int, std::vector<AccessNameAndTwoDefaultShaders>> s_DefaultShadersToLoad = std::unordered_map<int, std::vector<AccessNameAndTwoDefaultShaders>>();
 
 		//unordered maps to store the assets 
 		//2D textures

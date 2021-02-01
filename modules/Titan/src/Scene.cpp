@@ -439,12 +439,21 @@ namespace Titan {
 			renderer.Render(transform.GetGlobal(), vp);
 		});
 
-		//go through every entity with a transform and a sprite renderer and render the sprite 
+		//2D sprite rendering
+		//make a vector to store all the entities to render
+		std::vector<entt::entity> tempSpriteEntitiesToRender = std::vector<entt::entity>();
+		//go through every entity with a 2d renderer and a transform, addding them to the list of entities to render
 		auto render2DView = m_Registry->view<TTN_Transform, TTN_Renderer2D>();
-		for (auto entity : render2DView) {
-			Get<TTN_Renderer2D>(entity).Render(Get<TTN_Transform>(entity).GetGlobal(), vp);
+		for (entt::entity entity : render2DView) {
+			tempSpriteEntitiesToRender.push_back(entity);
 		}
 
+		//sort the entities by their z positions
+		mergeSortEntitiesZ(tempSpriteEntitiesToRender, 0, tempSpriteEntitiesToRender.size() - 1);
+
+		//and loop through, rendering them in reverse order
+		for (int i = tempSpriteEntitiesToRender.size() - 1; i >= 0; i--) 
+			Get<TTN_Renderer2D>(tempSpriteEntitiesToRender[i]).Render(Get<TTN_Transform>(tempSpriteEntitiesToRender[i]).GetGlobal(), vp);
 	}
 
 	//sets wheter or not the scene should be rendered

@@ -12,17 +12,8 @@ namespace Titan {
 		if (set < 0)
 			LOG_ERROR("Asset Sets cannot be a number below 0");
 
-		//first ensure that set acutally exists in memory
-		if (s_2DTexturesToLoad.size() <= set)
-			//if it doesn't create it
-			s_2DTexturesToLoad.resize(set + 1);
-
-		//then add the file and access name to the list of textures to be loaded in that set
-		s_2DTexturesToLoad[set].push_back(std::pair(accessName, fileName));
-
-		if (s_setsLoaded.size() <= set) {
-			s_setsLoaded.resize(set + 1);
-		}
+		//push the asset back in the approriate set
+		s_2DTexturesToLoad[set].push_back(AccessAndFileName(accessName, fileName));
 
 		s_setsLoaded[set] = false;
 	}
@@ -33,17 +24,7 @@ namespace Titan {
 		if (set < 0)
 			LOG_ERROR("Asset Sets cannot be a number below 0");
 
-		//first ensure that set acutally exists in memory
-		if (s_CubemapsToLoad.size() <= set)
-			//if it doesn't create it
-			s_CubemapsToLoad.resize(set + 1);
-
-		//then add the file and access name to the list of textures to be loaded in that set
-		s_CubemapsToLoad[set].push_back(std::pair(accessName, fileName));
-
-		if (s_setsLoaded.size() <= set) {
-			s_setsLoaded.resize(set + 1);
-		}
+		s_CubemapsToLoad[set].push_back(AccessAndFileName(accessName, fileName));
 
 		s_setsLoaded[set] = false;
 	}
@@ -54,13 +35,9 @@ namespace Titan {
 		if (set < 0)
 			LOG_ERROR("Asset Sets cannot be a number below 0");
 
-		//first ensure that set acutally exists in memory
-		if (s_NonAnimatedMeshesToLoad.size() <= set)
-			//if it doesn't create it
-			s_NonAnimatedMeshesToLoad.resize(set + 1);
+		s_NonAnimatedMeshesToLoad[set].push_back(AccessAndFileName(accessName, fileName));
 
-		//then add the file and access name to the list of non-animated meshes to be loaded in that set
-		s_NonAnimatedMeshesToLoad[set].push_back(std::pair(accessName, fileName));
+		s_setsLoaded[set] = false;
 	}
 
 	//adds an animated mesh to the list of assets to be loaded
@@ -69,17 +46,7 @@ namespace Titan {
 		if (set < 0)
 			LOG_ERROR("Asset Sets cannot be a number below 0");
 
-		//first ensure that set acutally exists in memory
-		if (s_AnimatedMeshesToLoad.size() <= set)
-			//if it doesn't create it
-			s_AnimatedMeshesToLoad.resize(set + 1);
-
-		//then add the file and access name to the list of animated meshes to be loaded in that set
-		s_AnimatedMeshesToLoad[set].push_back(std::pair(accessName, std::pair(fileName, NumOfFrames)));
-
-		if (s_setsLoaded.size() <= set) {
-			s_setsLoaded.resize(set + 1);
-		}
+		s_AnimatedMeshesToLoad[set].push_back(AccessNameFileNameAndNumber(accessName, fileName, NumOfFrames));
 
 		s_setsLoaded[set] = false;
 	}
@@ -90,17 +57,7 @@ namespace Titan {
 		if (set < 0)
 			LOG_ERROR("Asset Sets cannot be a number below 0");
 
-		//first ensure that set acutally exists in memory
-		if (s_ShadersToLoad.size() <= set)
-			//if it doesn't create it
-			s_ShadersToLoad.resize(set + 1);
-
-		//then add the file and access name to the list of non default shaders to be loaded in that set
-		s_ShadersToLoad[set].push_back(std::pair(accessName, std::pair(VertShaderFileName, FragShaderFileName)));
-
-		if (s_setsLoaded.size() <= set) {
-			s_setsLoaded.resize(set + 1);
-		}
+		s_ShadersToLoad[set].push_back(AccessNameAndTwoShaderFiles(accessName, VertShaderFileName, FragShaderFileName));
 
 		s_setsLoaded[set] = false;
 	}
@@ -111,17 +68,7 @@ namespace Titan {
 		if (set < 0)
 			LOG_ERROR("Asset Sets cannot be a number below 0");
 
-		//first ensure that set acutally exists in memory
-		if (s_DefaultShadersToLoad.size() <= set)
-			//if it doesn't create it
-			s_DefaultShadersToLoad.resize(set + 1);
-
-		//then add the file and access name to the list of non default shaders to be loaded in that set
-		s_DefaultShadersToLoad[set].push_back(std::pair(accessName, std::pair(VertShader, FragShader)));
-
-		if (s_setsLoaded.size() <= set) {
-			s_setsLoaded.resize(set + 1);
-		}
+		s_DefaultShadersToLoad[set].push_back(AccessNameAndTwoDefaultShaders(accessName, VertShader, FragShader));
 
 		s_setsLoaded[set] = false;
 	}
@@ -219,7 +166,7 @@ namespace Titan {
 			//iterate through all the 2D textures in the set first
 			for (auto it : s_2DTexturesToLoad[set]) {
 				//load the texture into the unordered map
-				s_texture2DMap[it.first] = TTN_Texture2D::LoadFromFile(it.second);
+				s_texture2DMap[it.m_AccessName] = TTN_Texture2D::LoadFromFile(it.m_FileName);
 			}
 		}
 
@@ -228,7 +175,7 @@ namespace Titan {
 			//iterate through all the cubemap textures in the set next
 			for (auto it : s_CubemapsToLoad[set]) {
 				//load the cubemap into the unordered map
-				s_cubemapMap[it.first] = TTN_TextureCubeMap::LoadFromImages(it.second);
+				s_cubemapMap[it.m_AccessName] = TTN_TextureCubeMap::LoadFromImages(it.m_FileName);
 			}
 		}
 
@@ -237,8 +184,8 @@ namespace Titan {
 			//iterate through all the non-animated meshes in the set 
 			for (auto it : s_NonAnimatedMeshesToLoad[set]) {
 				//load the mesh into the unordered map
-				s_meshMap[it.first] = TTN_ObjLoader::LoadFromFile(it.second);
-				s_meshMap[it.first]->SetUpVao();
+				s_meshMap[it.m_AccessName] = TTN_ObjLoader::LoadFromFile(it.m_FileName);
+				s_meshMap[it.m_AccessName]->SetUpVao();
 			}
 		}
 
@@ -247,8 +194,8 @@ namespace Titan {
 			//iterate through all the animated meshes in the set 
 			for (auto it : s_AnimatedMeshesToLoad[set]) {
 				//load the animated mesh into the unordered map
-				s_meshMap[it.first] = TTN_ObjLoader::LoadAnimatedMeshFromFiles(it.second.first, it.second.second);
-				s_meshMap[it.first]->SetUpVao();
+				s_meshMap[it.m_AccessName] = TTN_ObjLoader::LoadAnimatedMeshFromFiles(it.m_FileName, it.m_number);
+				s_meshMap[it.m_AccessName]->SetUpVao();
 			}
 		}
 
@@ -258,11 +205,11 @@ namespace Titan {
 			for (auto it : s_ShadersToLoad[set]) {
 				//create and load the shader
 				TTN_Shader::sshptr temp = TTN_Shader::Create();
-				temp->LoadShaderStageFromFile(it.second.first.c_str(), GL_VERTEX_SHADER);
-				temp->LoadShaderStageFromFile(it.second.second.c_str(), GL_FRAGMENT_SHADER);
+				temp->LoadShaderStageFromFile(it.m_vertShader.c_str(), GL_VERTEX_SHADER);
+				temp->LoadShaderStageFromFile(it.m_fragShader.c_str(), GL_FRAGMENT_SHADER);
 				temp->Link();
 				//and store it in the unordered map
-				s_shaderMap[it.first] = temp;
+				s_shaderMap[it.m_AccessName] = temp;
 			}
 		}
 
@@ -272,11 +219,11 @@ namespace Titan {
 			for (auto it : s_DefaultShadersToLoad[set]) {
 				//create and load the shader
 				TTN_Shader::sshptr temp = TTN_Shader::Create();
-				temp->LoadDefaultShader(it.second.first);
-				temp->LoadDefaultShader(it.second.second);
+				temp->LoadDefaultShader(it.m_vertShader);
+				temp->LoadDefaultShader(it.m_fragShader);
 				temp->Link();
 				//and store it in the unordered map
-				s_shaderMap[it.first] = temp;
+				s_shaderMap[it.m_AccessName] = temp;
 			}
 		}
 
@@ -313,8 +260,8 @@ namespace Titan {
 					//check the index is not out of bounds
 					if (s_CurrentAssetIndex < s_2DTexturesToLoad[s_loadQueue[0]].size()) {
 						//load the asset
-						s_texture2DMap[s_2DTexturesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first] =
-							TTN_Texture2D::LoadFromFile(s_2DTexturesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second);
+						s_texture2DMap[s_2DTexturesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_AccessName] =
+							TTN_Texture2D::LoadFromFile(s_2DTexturesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_FileName);
 					}
 					//if it is, then move onto cubemaps
 					else {
@@ -336,8 +283,8 @@ namespace Titan {
 					//check the index is not out of bounds
 					if (s_CurrentAssetIndex < s_CubemapsToLoad[s_loadQueue[0]].size()) {
 						//load the asset
-						s_cubemapMap[s_CubemapsToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first] =
-							TTN_TextureCubeMap::LoadFromImages(s_CubemapsToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second);
+						s_cubemapMap[s_CubemapsToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_AccessName] =
+							TTN_TextureCubeMap::LoadFromImages(s_CubemapsToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_FileName);
 					}
 					//if it is, then move onto non animated meshes
 					else {
@@ -359,10 +306,10 @@ namespace Titan {
 					//check the index is not out of bounds
 					if (s_CurrentAssetIndex < s_NonAnimatedMeshesToLoad[s_loadQueue[0]].size()) {
 						//load the asset
-						s_meshMap[s_NonAnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first] =
-							TTN_ObjLoader::LoadFromFile(s_NonAnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second);
+						s_meshMap[s_NonAnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_AccessName] =
+							TTN_ObjLoader::LoadFromFile(s_NonAnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_FileName);
 
-						s_meshMap[s_NonAnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first]->SetUpVao();
+						s_meshMap[s_NonAnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_AccessName]->SetUpVao();
 					}
 					//if it is, then move onto animated meshes
 					else {
@@ -384,11 +331,11 @@ namespace Titan {
 					//check the index is not out of bounds
 					if (s_CurrentAssetIndex < s_AnimatedMeshesToLoad[s_loadQueue[0]].size()) {
 						//load the asset
-						s_meshMap[s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first] =
-							TTN_ObjLoader::LoadAnimatedMeshFromFiles(s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second.first,
-								s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second.second);
+						s_meshMap[s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_AccessName] =
+							TTN_ObjLoader::LoadAnimatedMeshFromFiles(s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_FileName,
+								s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_number);
 
-						s_meshMap[s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first]->SetUpVao();
+						s_meshMap[s_AnimatedMeshesToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_AccessName]->SetUpVao();
 					}
 					//if it is, then move onto non-default shaders
 					else {
@@ -411,11 +358,11 @@ namespace Titan {
 					if (s_CurrentAssetIndex < s_ShadersToLoad[s_loadQueue[0]].size()) {
 						//load the asset
 						TTN_Shader::sshptr temp = TTN_Shader::Create();
-						temp->LoadShaderStageFromFile(s_ShadersToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second.first.c_str(), GL_VERTEX_SHADER);
-						temp->LoadShaderStageFromFile(s_ShadersToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second.second.c_str(), GL_FRAGMENT_SHADER);
+						temp->LoadShaderStageFromFile(s_ShadersToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_vertShader.c_str(), GL_VERTEX_SHADER);
+						temp->LoadShaderStageFromFile(s_ShadersToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_fragShader.c_str(), GL_FRAGMENT_SHADER);
 						temp->Link();
 						//and store it in the unordered map
-						s_shaderMap[s_ShadersToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first] = temp;
+						s_shaderMap[s_ShadersToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_AccessName] = temp;
 					}
 					//if it is, then move onto non-default shaders
 					else {
@@ -438,11 +385,11 @@ namespace Titan {
 					if (s_CurrentAssetIndex < s_DefaultShadersToLoad[s_loadQueue[0]].size()) {
 						//load the asset
 						TTN_Shader::sshptr temp = TTN_Shader::Create();
-						temp->LoadDefaultShader(s_DefaultShadersToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second.first);
-						temp->LoadDefaultShader(s_DefaultShadersToLoad[s_loadQueue[0]][s_CurrentAssetIndex].second.second);
+						temp->LoadDefaultShader(s_DefaultShadersToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_vertShader);
+						temp->LoadDefaultShader(s_DefaultShadersToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_fragShader);
 						temp->Link();
 						//and store it in the unordered map
-						s_shaderMap[s_DefaultShadersToLoad[s_loadQueue[0]][s_CurrentAssetIndex].first] = temp;
+						s_shaderMap[s_DefaultShadersToLoad[s_loadQueue[0]][s_CurrentAssetIndex].m_AccessName] = temp;
 					}
 					//if it is, then move onto non-default shaders
 					else {

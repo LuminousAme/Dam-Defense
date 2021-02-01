@@ -172,6 +172,79 @@ namespace Titan {
 
 		//reconstructs the scenegraph, use every time entt reshuffles
 		void ReconstructScenegraph();
+
+#pragma region Sorts
+		//functions to perform a merge sort on a vector of entities based on their z positions 
+		//slightly modified from code from GeeksForGeeks: https://www.geeksforgeeks.org/merge-sort/
+
+		//merge function
+		void mergeEntitiesZ(std::vector<entt::entity>& list, int left, int middle, int right) {
+			//calculate the lenghts of 2 temprorary vectors
+			int lenght1 = middle - left + 1;
+			int lenght2 = right - middle;
+
+			//create the temporary vectors
+			std::vector<entt::entity> tempLeftList = std::vector<entt::entity>(lenght1);
+			std::vector<entt::entity> tempRightList = std::vector<entt::entity>(lenght2);
+
+			//copy data over to the temp vectors
+			for (int i = 0; i < lenght1; i++)
+				tempLeftList[i] = list[left + i];
+			for (int i = 0; i < lenght2; i++)
+				tempRightList[i] = list[middle + 1 + i];
+
+			//set inital indexes for each vector
+			int leftIndex = 0; //left temp
+			int rightIndex = 0; //right temp
+			int mergedIndex = left; //merged subvector
+
+			//merge the temp vectors back into list
+
+			//loop through comparing both sides
+			while (leftIndex < lenght1 && rightIndex < lenght2) {
+				//if the left has a smaller or equal z value, add it back to the merged vector 
+				if (Get<TTN_Transform>(tempLeftList[leftIndex]).GetGlobalPos().z <= Get<TTN_Transform>(tempRightList[rightIndex]).GetGlobalPos().z) {
+					list[mergedIndex] = tempLeftList[leftIndex];
+					leftIndex++;
+				}
+				//otherwise add the right back to the merged vector
+				else {
+					list[mergedIndex] = tempRightList[rightIndex];
+					rightIndex++;
+				}
+				//either way increment the merged index
+				mergedIndex++;
+			}
+
+			//when one side has completed, add any remaining elements from either side
+			while (leftIndex < lenght1) {
+				list[mergedIndex] = tempLeftList[leftIndex];
+				leftIndex++;
+				mergedIndex++;
+			}
+			while (rightIndex < lenght2) {
+				list[mergedIndex] = tempRightList[rightIndex];
+				rightIndex++;
+				mergedIndex++;
+			}
+		}
+
+		//merge sort function
+		void mergeSortEntitiesZ(std::vector<entt::entity>& list, int left, int right) {
+			//base case, returns recursively 
+			if (left >= right) {
+				return;
+			}
+			//calculate a middle value
+			int middle = (left + right - 1) / 2;
+			//call mergesort on both sides
+			mergeSortEntitiesZ(list, left, middle);
+			mergeSortEntitiesZ(list, middle + 1, right);
+			//merge the two sides
+			mergeEntitiesZ(list, left, middle, right);
+		}
+
+#pragma endregion Sorts
 	};
 
 #pragma region ECS_functions_def
