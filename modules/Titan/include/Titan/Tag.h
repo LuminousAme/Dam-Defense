@@ -9,13 +9,13 @@ namespace Titan {
 	class TTN_Tag {
 	public:
 		//default constructor
-		TTN_Tag() { m_name = std::string(), m_path = 0; }
+		TTN_Tag() { m_name = std::string(), m_path = 0, m_damageCD=3.0f; }
 
 		//constructor with data
-		TTN_Tag(std::string name) { m_name = name, m_path = 0; }
-		TTN_Tag(int path) { m_path = path, m_name = std::string(); }
-		TTN_Tag(std::string name, int path) { m_path = path, m_name = name; }
-		TTN_Tag(std::string name, int path, int num) { m_path = path, m_name = name, m_num = num; }
+		TTN_Tag(std::string name) { m_name = name, m_path = 0, m_damageCD = 3.0f; }
+		TTN_Tag(int path) { m_path = path, m_name = std::string(), m_damageCD = 3.0f; }
+		TTN_Tag(std::string name, int path) { m_path = path, m_name = name, m_damageCD = 3.0f; }
+		TTN_Tag(std::string name, int path, int num) { m_path = path, m_name = name, m_num = num, m_damageCD = 3.0f; }
 
 		//default destructor
 		~TTN_Tag() = default;
@@ -28,16 +28,20 @@ namespace Titan {
 		//sets the name of the object
 		void SetName(std::string name) { m_name = name; }
 		void SetPath(int path) { m_path = path; }
+		void SetDamageCD(float cooldown) { m_damageCD = cooldown; }
 
 		//gets the name of the object
 		std::string getName() { return m_name; }
 		int getPath() { return m_path; }
 		int getNum() { return m_num; }
+		float getCooldown() { return m_damageCD; }
+
 
 	private:
 		//stores the name of the object
 		std::string m_name;
 		int m_path; //path of the boat entity
 		int m_num; // boat number
+		float m_damageCD; //damage cooldown in seconds
 	};
 }

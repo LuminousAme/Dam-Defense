@@ -42,7 +42,8 @@ public:
 
 	//Assets
 public:
-
+	 
+#pragma region assets
 	//shader programs
 	TTN_Shader::sshptr shaderProgramUnTextured;
 	TTN_Shader::sshptr shaderProgramTextured;
@@ -98,12 +99,15 @@ public:
 	TTN_Material::smatptr fireMat;
 
 	TTN_Texture2D::st2dptr healthBar;
+#pragma endregion
 
 	//Entities
 protected:
 	entt::entity healthbar;
 
 	entt::entity camera;
+	entt::entity UIcam;
+
 	entt::entity light;
 	entt::entity skybox;
 	entt::entity cannon;
@@ -168,12 +172,15 @@ protected:
 	//wheter or not the scene is paused
 	bool m_paused;
 
+	//gameover bool
+	bool m_gameOver;
+
 	//set up functions, called by InitScene()
 protected:
 	void SetUpAssets();
 	void SetUpEntities();
 	void SetUpOtherData();
-
+	
 	//update functions, called by Update()
 protected:
 	void PlayerRotate(float deltaTime);
@@ -187,7 +194,7 @@ protected:
 
 	void Flamethrower();
 	void Collisions();
-	void Damage();
+	void Damage(float deltaTime);
 
 	void DeleteFlamethrowers();
 

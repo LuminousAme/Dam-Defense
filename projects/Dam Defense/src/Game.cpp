@@ -45,25 +45,25 @@ void Game::Update(float deltaTime)
 		//if the player is on shoot cooldown, decrement the time remaining on the cooldown
 		if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
-	//parameters: number of waves, rest time between waves, length of waves, deltatime
-	Waves(6, 10.f, 40.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
-	SpawnerLS(deltaTime, 2.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
-	SpawnerRS(deltaTime, 2.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
+		//parameters: number of waves, rest time between waves, length of waves, deltatime
+		Waves(6, 10.f, 40.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
+		SpawnerLS(deltaTime, 12.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
+		SpawnerRS(deltaTime, 12.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
 
-		//goes through the boats vector
+			//goes through the boats vector
 		for (int i = 0; i < boats.size(); i++) {
 			//std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl;
 			int p = Get<TTN_Tag>(boats[i]).getPath(); //gets the boats randomized path num
-			int n = Get<TTN_Tag>(boats[i]).getNum(); //gets the boats randomized path num
+			int n = Get<TTN_Tag>(boats[i]).getNum(); //gets the boats randomized type num
 			Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f)); //sets gravity to 0
 			BoatPathing(boats[i], p, n); //updates the pathing for the boat
 		}
 
-	if (FlameTimer <= 0) FlameTimer = 0.0f;
-	else FlameTimer -= deltaTime;
+		if (FlameTimer <= 0) FlameTimer = 0.0f;
+		else FlameTimer -= deltaTime;
 
-	if (Flaming) {// if the flamethorwers are spewing flame particles
-		FlameAnim += deltaTime;//increment flamethrower anim timer
+		if (Flaming) {// if the flamethorwers are spewing flame particles
+			FlameAnim += deltaTime;//increment flamethrower anim timer
 
 			if (FlameAnim >= 3.0f) {//flame particles last for 3 seconds
 				DeleteFlamethrowers(); //delete the flamethrowers and particles
@@ -88,11 +88,11 @@ void Game::Update(float deltaTime)
 		}
 
 		Collisions(); //collision check
-
+		Damage(deltaTime); //damage function, contains cooldoown
 	//move the birds
-	birdTimer += deltaTime;
+		birdTimer += deltaTime;
 
-	birdTimer = fmod(birdTimer, 20);
+		birdTimer = fmod(birdTimer, 20);
 
 		float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
 
@@ -111,16 +111,20 @@ void Game::Update(float deltaTime)
 		//increase the total time of the scene to make the water animated correctly
 		time += deltaTime;
 	}
-	
+	//game over stuff
+	if (health <= 0.0f) {
+		m_gameOver = true;
+		printf("GAME OVER");
+	}
+
 #pragma region imgui
 	TTN_Application::StartImgui();
 
 	auto& a = Get<TTN_Transform>(camera);
 	float b = a.GetPos().x;
 	if (ImGui::SliderFloat("Camera Test X-Axis", &b, -100.0f, 100.0f)) {
-		a.SetPos(glm::vec3 (b, a.GetPos().y, a.GetPos().z));
+		a.SetPos(glm::vec3(b, a.GetPos().y, a.GetPos().z));
 	}
-
 #pragma endregion
 
 	//don't forget to call the base class' update
@@ -372,6 +376,7 @@ void Game::SetUpAssets()
 	treeText = TTN_Texture2D::LoadFromFile("textures/Trees Texture.png");
 	damText = TTN_Texture2D::LoadFromFile("textures/Dam.png");
 
+	healthBar= TTN_Texture2D::LoadFromFile("textures/health.png");
 	//grab textures
 	cannonText = TTN_AssetSystem::GetTexture2D("Cannon texture");
 	skyboxText = TTN_AssetSystem::GetSkybox("Skybox texture");
@@ -607,20 +612,36 @@ void Game::SetUpEntities()
 		AttachCopy(water, waterTrans);
 	}
 
+	//{
+	//	//create an entity in the scene for the camera
+	//	UIcam = CreateEntity();
+	//	SetCamEntity(UIcam);
+	//	Attach<TTN_Transform>(UIcam);
+	//	Attach<TTN_Camera>(UIcam);
+	//	auto& camTrans = Get<TTN_Transform>(UIcam);
+	//	camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
+	//	camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+	//	camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	//	Get<TTN_Camera>(UIcam).CalcOrtho(-960.0f, 960.0f, -540.0f, 540.0f, 0.0f, 10.0f);
+	//	//Get<TTN_Camera>(UIcam).CalcPerspective(60.0f, 1.78f, 0.01f, 1000.f);
+	//	Get<TTN_Camera>(UIcam).View();
+	//}
 
-	//healthbar test
-	{
-		healthbar = CreateEntity();
+	////healthbar test
+	//{
+	//	healthbar = CreateEntity();
 
-		//setup a transform for the water
-		TTN_Transform healthTrans = TTN_Transform(glm::vec3(0.0f, 10.0f, 35.0f), glm::vec3(0.0f), glm::vec3(1.0f, 0.50f, 1.0f));
-		//attach that transform to the entity
-		AttachCopy(healthbar, healthTrans);
+	//	//setup a transform for the water
+	//	TTN_Transform healthTrans = TTN_Transform(glm::vec3(0.0f, 10.0f, 35.0f), glm::vec3(0.0f), glm::vec3(1.0f, 0.50f, 1.0f));
+	//	//attach that transform to the entity
+	//	AttachCopy(healthbar, healthTrans);
 
-		TTN_Renderer2D healthBarRenderer = TTN_Renderer2D(healthBar, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1);
-		AttachCopy(healthbar, healthBarRenderer);
-	}
-	
+	//	TTN_Renderer2D healthBarRenderer = TTN_Renderer2D(healthBar, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1);
+	//	AttachCopy(healthbar, healthBarRenderer);
+	//}	
+	//Get<TTN_Camera>(UIcam).CalcPerspective(60.0f, 1.78f, 0.01f, 1000.f);
+	//Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f, 1000.f);
+
 	//birds
 	for (int i = 0; i < 3; i++) {
 		birds[i] = CreateEntity();
@@ -675,6 +696,8 @@ void Game::SetUpEntities()
 
 	//set the cannon to be a child of the camera
 	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), &camera);
+	
+
 	//set the cannon to be a child of the camera
 	//Get<TTN_Transform>(healthbar).SetParent(&Get<TTN_Transform>(camera), &camera);
 }
@@ -734,6 +757,7 @@ void Game::SetUpOtherData()
 		fireParticle.SetOneStartSpeed(8.5f);
 	}
 }
+
 #pragma endregion
 
 //called by update once a frame, allows the player to rotate
@@ -825,7 +849,7 @@ void Game::DeleteCannonballs()
 	}
 }
 
-//sets the pathing the boat entity should take based on the path integer (1-3 is left side, 4-6 is right side)
+//sets the pathing the boat entity should take based on the path integer (1-3 is left side, 4-6 is right side), boat num changes rotation
 void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
 {
 	auto& pBoat = Get<TTN_Physics>(boatt);
@@ -1036,6 +1060,7 @@ void Game::SpawnerLS(float deltatime, float SpawnTime) {
 
 		//if (randomBoat == 2 && r == 3) r = 2; //if it's the carrier, make sure it doesnt go through the center
 		TTN_Tag boatTag = TTN_Tag("Boat", r, randomBoat); //sets boat path number to ttn_tag
+		boatTag.SetDamageCD(0.0f);
 		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
 	}
 }
@@ -1097,6 +1122,8 @@ void Game::SpawnerRS(float deltatime, float SpawnTime)
 		int r = rand() % 3 + 4; // generates path number between 4-6 (left side paths 1-3, right side path nums are 4-6)
 
 		TTN_Tag boatTag = TTN_Tag("Boat", r, randomBoat); //sets boat path number to ttn_tag
+		boatTag.SetDamageCD(0.0f);
+
 		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
 	}
 }
@@ -1136,7 +1163,7 @@ glm::vec3 Game::Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos)
 	//std::cout << glm::to_string(target) << std::endl;
 	//std::cout << glm::to_string(velo) << std::endl;
 	//std::cout << glm::to_string(pos) << std::endl;
-	glm::vec3 maxVelo(-10.0f, 9.81f, -10.0f);
+	glm::vec3 maxVelo(-10.0f, 0.0f, -10.0f);
 	glm::vec3 desired = (pos - target); //gets the desired vector
 
 	desired = glm::normalize(desired) * maxVelo;
@@ -1257,22 +1284,31 @@ void Game::Collisions()
 	}
 }
 
-void Game::Damage(){
+//damage cooldown and stuff
+void Game::Damage(float deltaTime) {
 
 	std::vector<entt::entity>::iterator it = boats.begin();
 	while (it != boats.end()) {
-		if (Get<TTN_Transform>(*it).GetPos().z >= 2.0f) {
+		if (Get<TTN_Transform>(*it).GetPos().z <= 5.0f) {
+
+			if (Get<TTN_Tag>(*it).getCooldown() <= 0.f) {
+				Get<TTN_Tag>(*it).SetDamageCD(3.0f);
+				health = health - 1.0f;
+				std::cout << health << std::endl;
+			}
+
+			else {
+				Get<TTN_Tag>(*it).SetDamageCD(Get<TTN_Tag>(*it).getCooldown()-deltaTime);
+			}
+
 			it++;
-			health = health - 0.1f;
+
+			//float p = Get<TTN_Tag>(*it).getCooldown();
+			//Get<TTN_Tag>(*it).SetDamageCD(3.0f);
 		}
 		else {
 			it++;
 		}
-	}
-
-	if (damageTimer == 0.0f) { //cooldown is zero
-		damageTimer = 10.f; // set cooldown
-
 	}
 
 
