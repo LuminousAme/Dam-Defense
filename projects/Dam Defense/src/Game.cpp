@@ -113,7 +113,7 @@ void Game::Update(float deltaTime)
 	}
 	
 #pragma region imgui
-	TTN_Application::StartImgui();
+	ImGui::Begin("Camera Controller");
 
 	auto& a = Get<TTN_Transform>(camera);
 	float b = a.GetPos().x;
@@ -121,7 +121,7 @@ void Game::Update(float deltaTime)
 		a.SetPos(glm::vec3 (b, a.GetPos().y, a.GetPos().z));
 	}
 
-	TTN_Application::EndImgui();
+	ImGui::End();
 
 #pragma endregion
 
