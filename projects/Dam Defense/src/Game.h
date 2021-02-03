@@ -6,6 +6,7 @@
 #include "Titan/Application.h"
 #include "Titan/ObjLoader.h"
 #include "Titan/Interpolation.h"
+#include "Titan/Sound.h"
 
 using namespace Titan;
 
@@ -42,7 +43,8 @@ public:
 
 	//Assets
 public:
-
+	 
+#pragma region assets
 	//shader programs
 	TTN_Shader::sshptr shaderProgramUnTextured;
 	TTN_Shader::sshptr shaderProgramTextured;
@@ -97,9 +99,18 @@ public:
 	TTN_Material::smatptr smokeMat;
 	TTN_Material::smatptr fireMat;
 
+	TTN_Texture2D::st2dptr healthBar;
+#pragma endregion
+
+	AudioEngine& engine = AudioEngine::Instance();
+
 	//Entities
 protected:
+	entt::entity healthbar;
+
 	entt::entity camera;
+	entt::entity UIcam;
+
 	entt::entity light;
 	entt::entity skybox;
 	entt::entity cannon;
@@ -137,6 +148,10 @@ protected:
 	float waveHeightMultiplier;
 	float waveLenghtMultiplier;
 
+	float health = 100.f;
+	//int boatCount;
+
+
 	//Stuff for waves and spawning enemies
 	float Timer = 0.F;//timer for boat spawning (left side)
 	float Timer2 = 0.F;//timer for boat spawning (right side)
@@ -145,10 +160,11 @@ protected:
 	float waveTimer = 0.F;//timer for waves
 	float restTimer = 0.F;//timer for waves
 	int wave = 0; // keep track of wave number
+	int waveEnd = 7;
 
 	bool Flaming = false; //if flamethrowers are active right now
 	float FlameTimer = 0.0f; //flamethrower cooldown
-	float FlameAnim = 0.0f; //flamethrower
+	float FlameAnim = 0.0f; //flamethrower duration
 
 	//bird control
 	float birdTimer = 0.0f;
@@ -161,12 +177,17 @@ protected:
 	//wheter or not the scene is paused
 	bool m_paused;
 
+	//gameover bool
+	bool m_gameOver;
+	//victory bool
+	bool gameWin = false;
+
 	//set up functions, called by InitScene()
 protected:
 	void SetUpAssets();
 	void SetUpEntities();
 	void SetUpOtherData();
-
+	
 	//update functions, called by Update()
 protected:
 	void PlayerRotate(float deltaTime);
@@ -180,6 +201,7 @@ protected:
 
 	void Flamethrower();
 	void Collisions();
+	void Damage(float deltaTime);
 
 	void DeleteFlamethrowers();
 

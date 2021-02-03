@@ -5,7 +5,6 @@
 #include "PauseMenu.h"
 #include "glm/ext.hpp"
 
-
 PauseMenu::PauseMenu()
 	: TTN_Scene()
 {

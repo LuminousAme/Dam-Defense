@@ -80,4 +80,5 @@ namespace Titan {
 		s_shader->LoadShaderStageFromFile("shaders/ttn_sprite_frag.glsl", GL_FRAGMENT_SHADER);
 		s_shader->Link();
 	}
+
 }

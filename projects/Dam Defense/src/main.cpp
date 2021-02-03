@@ -76,7 +76,6 @@ int main() {
 			TTN_AssetSystem::LoadSetInBackground(3);
 		}
 
-
 		//check if the loading is done
 		if (loadingScreen->GetShouldRender() && set1Loaded) {
 			//if it is, go to the main menu
@@ -131,10 +130,12 @@ int main() {
 		if (!set2Loaded && TTN_AssetSystem::GetSetLoaded(2) && TTN_AssetSystem::GetCurrentSet() == 2)
 			set2Loaded = true;
 		
+
 		//update the scenes and render the screen
 		TTN_Application::Update();
 	}
-	
+	TTN_Application::CleanImgui();
+
 	//when the application has ended, exit the program with no errors
 	return 0; 
 } 

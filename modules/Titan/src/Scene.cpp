@@ -425,11 +425,6 @@ namespace Titan {
 
 			//if the entity has an animator
 			if (Has<TTN_MorphAnimator>(entity)) {
-				entt::entity tempA = entity;
-				//int tempNum = Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getCurrentMeshIndex();
-				//int tempNum2 = Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getNextMeshIndex();
-				TTN_MorphAnimation& tempAnim = Get<TTN_MorphAnimator>(entity).getActiveAnimRef();
-
 				//set up the vao on the mesh properly
 				renderer.GetMesh()->SetUpVao(Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getCurrentMeshIndex(),
 					Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getNextMeshIndex());

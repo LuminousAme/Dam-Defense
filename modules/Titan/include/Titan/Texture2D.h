@@ -26,10 +26,8 @@ namespace Titan {
 		TTN_Texture2DData(uint32_t width, uint32_t height, Texture_Pixel_Format format, Texture_Pixel_Data_Type type, void* sourceData, Texture_Internal_Format recommendedFormat = Texture_Internal_Format::Interal_Format_Unknown);
 		~TTN_Texture2DData();
 
-
 		/// Loads image data from an external file
 		static TTN_Texture2DData::st2ddptr LoadFromFile(const std::string& file, bool flipped = true, bool forceRgba = false);
-
 		
 		/// Gets the width of the texture data, in pixels
 		uint32_t GetWidth() const { return _width; }
@@ -49,7 +47,6 @@ namespace Titan {
 
 		/// Get the total size of the underlying data (size of individual pixel * width * height)
 		size_t  GetDataSize() const { return _dataSize; }
-
 		
 		/// Gets a readonly copy of the underlying data in this image for upload
 		const void* GetDataPtr() const { return _data; }

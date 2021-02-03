@@ -221,7 +221,6 @@ namespace Titan {
 			style.Colors[ImGuiCol_WindowBg].w = 0.8f;
 		}
 		//	std::cout << "Hello" << std::endl;
-
 	}
 
 	//start
@@ -264,7 +263,6 @@ namespace Titan {
 	}
 
 #pragma endregion
-
 
 	//checks if a key is being pressed
 	bool TTN_Application::TTN_Input::GetKey(TTN_KeyCode key)
