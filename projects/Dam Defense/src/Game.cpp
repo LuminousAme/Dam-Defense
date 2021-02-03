@@ -132,7 +132,7 @@ void Game::Update(float deltaTime)
 
 
 #pragma region imgui
-	TTN_Application::StartImgui();
+	ImGui::Begin("Camera Controller");
 
 	auto& a = Get<TTN_Transform>(camera);
 	float b = a.GetPos().x;
@@ -144,6 +144,7 @@ void Game::Update(float deltaTime)
 	if (ImGui::SliderFloat("Camera Test Y-Axis", &c, -100.0f, 100.0f)) {
 		a.SetPos(glm::vec3(a.GetPos().x, c, a.GetPos().z));
 	}
+	ImGui::End();
 
 #pragma endregion
 

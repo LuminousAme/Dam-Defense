@@ -134,6 +134,9 @@ namespace Titan {
 		//start a new frame 
 		TTN_Application::NewFrameStart();
 
+		//start ImGui
+		StartImgui();
+
 		//check for events from glfw 
 		glfwPollEvents();
 
@@ -167,13 +170,7 @@ namespace Titan {
 		//now all the scenes that should be rendered (current gameplay scene, ui, etc.) will be rendered
 		//while anything that doesn't need to be rendered (such as a prefabs scene) will not 
 		
-	//check for gamescene and render imgui
-		for (int i = 0; i < TTN_Application::scenes.size(); i++) {
-			if (i == 2 && TTN_Application::scenes[i]->GetShouldRender()) {
-				EndImgui();
-			}
-
-		}
+		EndImgui();
 		//swap the buffers so all the drawings that the scenes just did are acutally visible 
 		glfwSwapBuffers(m_window);
 	}
