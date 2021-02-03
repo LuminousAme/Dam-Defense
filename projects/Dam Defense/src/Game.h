@@ -104,7 +104,6 @@ public:
 
 	AudioEngine& engine = AudioEngine::Instance();
 
-
 	//Entities
 protected:
 	entt::entity healthbar;
@@ -150,7 +149,8 @@ protected:
 	float waveLenghtMultiplier;
 
 	float health = 100.f;
-	float damageTimer = 0.0f;
+	//int boatCount;
+
 
 	//Stuff for waves and spawning enemies
 	float Timer = 0.F;//timer for boat spawning (left side)
@@ -160,6 +160,7 @@ protected:
 	float waveTimer = 0.F;//timer for waves
 	float restTimer = 0.F;//timer for waves
 	int wave = 0; // keep track of wave number
+	int waveEnd = 7;
 
 	bool Flaming = false; //if flamethrowers are active right now
 	float FlameTimer = 0.0f; //flamethrower cooldown
@@ -178,6 +179,8 @@ protected:
 
 	//gameover bool
 	bool m_gameOver;
+	//victory bool
+	bool gameWin = false;
 
 	//set up functions, called by InitScene()
 protected:

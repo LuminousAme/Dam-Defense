@@ -58,6 +58,10 @@ void Game::Update(float deltaTime)
 			BoatPathing(boats[i], p, n); //updates the pathing for the boat
 		}
 
+		if (wave <= 6 && boats.size() == 0) {
+			gameWin = true;
+		}
+
 		if (FlameTimer <= 0) FlameTimer = 0.0f;
 		else FlameTimer -= deltaTime;
 
@@ -313,7 +317,6 @@ void Game::SetUpAssets()
 
 	AudioEvent& music = engine.CreateEvent("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
 	music.Play();
-
 
 
 	//// SHADERS ////
@@ -796,6 +799,7 @@ void Game::SetUpOtherData()
 
 #pragma endregion
 
+#pragma region Player and CANNON Stuff
 //called by update once a frame, allows the player to rotate
 void Game::PlayerRotate(float deltaTime)
 {
@@ -884,6 +888,7 @@ void Game::DeleteCannonballs()
 		}
 	}
 }
+#pragma endregion
 
 //sets the pathing the boat entity should take based on the path integer (1-3 is left side, 4-6 is right side), boat num changes rotation
 void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
