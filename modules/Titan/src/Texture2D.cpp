@@ -91,7 +91,6 @@ namespace Titan {
 	TTN_Texture2D::TTN_Texture2D()
 		: TTN_ITexture()
 	{
-		m_data = TTN_Texture2DDesc();
 	}
 
 	//constructor that takes in a descpiriton for the texture

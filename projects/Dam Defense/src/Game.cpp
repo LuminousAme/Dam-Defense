@@ -121,13 +121,13 @@ void Game::Update(float deltaTime)
 		printf("GAME OVER");
 	}
 
-	AudioEvent& music = engine.GetEvent("music");
+	TTN_AudioEvent& music = engine.GetEvent("music");
 
 	//get ref to bus
-	AudioBus& musicBus = engine.GetBus("MusicBus");
+	TTN_AudioBus& musicBus = engine.GetBus("MusicBus");
 
 	//get ref to listener
-	AudioListener& listener = engine.GetListener();
+	TTN_AudioListener& listener = engine.GetListener();
 	engine.Update();
 
 
@@ -316,54 +316,12 @@ void Game::SetUpAssets()
 	engine.LoadBank("Master");
 	engine.LoadBus("MusicBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}");
 
-	AudioEvent& music = engine.CreateEvent("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
+	TTN_AudioEvent& music = engine.CreateEvent("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
 	music.Play();
 
 
 	//// SHADERS ////
 #pragma region SHADERS
-	//create a shader program object
-	///////shaderProgramUnTextured = TTN_Shader::Create();
-	//load the shaders into the shader program
-	////shaderProgramUnTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_NO_COLOR);
-	////shaderProgramUnTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_NO_TEXTURE);
-	////shaderProgramUnTextured->Link();
-
-	//create a shader program object for textured objects
-	///////shaderProgramTextured = TTN_Shader::Create();
-	//load the shaders into the shader program
-	////////shaderProgramTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_NO_COLOR);
-	//////shaderProgramTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
-	//////shaderProgramTextured->Link();
-
-	//create a shader program object for the skybox
-	///////shaderProgramSkybox = TTN_Shader::Create();
-	//load the shaders into the shader program
-	/////shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::VERT_SKYBOX);
-	////shaderProgramSkybox->LoadDefaultShader(TTN_DefaultShaders::FRAG_SKYBOX);
-	//////shaderProgramSkybox->Link();
-
-	//create a shader program for animationed textured objects
-	///shaderProgramAnimatedTextured = TTN_Shader::Create();
-	//load the shaders into the shader program
-	/////shaderProgramAnimatedTextured->LoadDefaultShader(TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR);
-	//////shaderProgramAnimatedTextured->LoadDefaultShader(TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY);
-	//////shaderProgramAnimatedTextured->Link();
-
-	//create a shader program for the terrain
-	/////shaderProgramTerrain = TTN_Shader::Create();
-	//load the shaders into the shader program
-	//////shaderProgramTerrain->LoadShaderStageFromFile("shaders/terrain_vert.glsl", GL_VERTEX_SHADER);
-	///////shaderProgramTerrain->LoadShaderStageFromFile("shaders/terrain_frag.glsl", GL_FRAGMENT_SHADER);
-	///////shaderProgramTerrain->Link();
-
-	//create a shader program for the water
-	//////shaderProgramWater = TTN_Shader::Create();
-	//load the shaders into the shader program
-	//////////shaderProgramWater->LoadShaderStageFromFile("shaders/water_vert.glsl", GL_VERTEX_SHADER);
-	////////shaderProgramWater->LoadShaderStageFromFile("shaders/water_frag.glsl", GL_FRAGMENT_SHADER);
-	///////shaderProgramWater->Link();
-
 	//grab the shaders
 	shaderProgramTextured = TTN_AssetSystem::GetShader("Basic textured shader");
 	shaderProgramSkybox = TTN_AssetSystem::GetShader("Skybox shader");
@@ -653,36 +611,6 @@ void Game::SetUpEntities()
 		AttachCopy(water, waterTrans);
 	}
 
-	//{
-	//	//create an entity in the scene for the camera
-	//	UIcam = CreateEntity();
-	//	SetCamEntity(UIcam);
-	//	Attach<TTN_Transform>(UIcam);
-	//	Attach<TTN_Camera>(UIcam);
-	//	auto& camTrans = Get<TTN_Transform>(UIcam);
-	//	camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
-	//	camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
-	//	camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	//	Get<TTN_Camera>(UIcam).CalcOrtho(-960.0f, 960.0f, -540.0f, 540.0f, 0.0f, 10.0f);
-	//	//Get<TTN_Camera>(UIcam).CalcPerspective(60.0f, 1.78f, 0.01f, 1000.f);
-	//	Get<TTN_Camera>(UIcam).View();
-	//}
-
-	////healthbar test
-	//{
-	//	healthbar = CreateEntity();
-
-	//	//setup a transform for the water
-	//	TTN_Transform healthTrans = TTN_Transform(glm::vec3(0.0f, 10.0f, 35.0f), glm::vec3(0.0f), glm::vec3(1.0f, 0.50f, 1.0f));
-	//	//attach that transform to the entity
-	//	AttachCopy(healthbar, healthTrans);
-
-	//	TTN_Renderer2D healthBarRenderer = TTN_Renderer2D(healthBar, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1);
-	//	AttachCopy(healthbar, healthBarRenderer);
-	//}
-	//Get<TTN_Camera>(UIcam).CalcPerspective(60.0f, 1.78f, 0.01f, 1000.f);
-	//Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f, 1000.f);
-
 	//birds
 	for (int i = 0; i < 3; i++) {
 		birds[i] = CreateEntity();
@@ -737,9 +665,6 @@ void Game::SetUpEntities()
 
 	//set the cannon to be a child of the camera
 	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), &camera);
-
-	//set the cannon to be a child of the camera
-	//Get<TTN_Transform>(healthbar).SetParent(&Get<TTN_Transform>(camera), &camera);
 }
 
 //sets up any other data the game needs to store

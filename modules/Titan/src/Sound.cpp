@@ -1,3 +1,6 @@
+//Titan Engine, by Atlas X Games 
+// Application.cpp - source file fpr the classes that allow for audio in applications
+
 #include "Titan/ttn_pch.h"
 
 #include "Titan/Sound.h"
@@ -6,7 +9,7 @@
 //			 AudioObject		  //
 ////////////////////////////////////
 
-FMOD_VECTOR AudioObject::VectorToFmod(const glm::vec3& vec)
+FMOD_VECTOR TTN_AudioObject::VectorToFmod(const glm::vec3& vec)
 {
 	FMOD_VECTOR fVec;
 	fVec.x = vec.x;
@@ -15,7 +18,7 @@ FMOD_VECTOR AudioObject::VectorToFmod(const glm::vec3& vec)
 	return fVec;
 }
 
-glm::vec3 AudioObject::FmodToVector(const FMOD_VECTOR& vec)
+glm::vec3 TTN_AudioObject::FmodToVector(const FMOD_VECTOR& vec)
 {
 	glm::vec3 gVec;
 	gVec.x = vec.x;
@@ -25,18 +28,18 @@ glm::vec3 AudioObject::FmodToVector(const FMOD_VECTOR& vec)
 }
 
 
-float AudioObject::dbToVolume(float db)
+float TTN_AudioObject::dbToVolume(float db)
 {
 	return powf(10.0f, 0.05f * db);
 }
 
-float AudioObject::VolumeTodb(float volume)
+float TTN_AudioObject::VolumeTodb(float volume)
 {
 	return 20.0f * log10f(volume);
 }
 
 
-int AudioObject::ErrorCheck(FMOD_RESULT result)
+int TTN_AudioObject::ErrorCheck(FMOD_RESULT result)
 {
 
 	// Outputs FMOD error message
@@ -57,47 +60,48 @@ int AudioObject::ErrorCheck(FMOD_RESULT result)
 //			 AudioBus   		  //
 ////////////////////////////////////
 
-AudioBus::AudioBus(FMOD::Studio::Bus* bus)
+TTN_AudioBus::TTN_AudioBus(FMOD::Studio::Bus* bus)
 	: m_Bus(bus)
 {
 }
 
-bool AudioBus::CheckPaused()
+bool TTN_AudioBus::CheckPaused()
 {
 	bool paused;
 	ErrorCheck(m_Bus->getPaused(&paused));
 	return paused;
 }
 
-void AudioBus::SetPaused(const bool& pause)
+void TTN_AudioBus::SetPaused(const bool& pause)
 {
 	ErrorCheck(m_Bus->setPaused(pause));
 }
 
-float AudioBus::GetVolume()
+float TTN_AudioBus::GetVolume()
 {
 	float volume;
 	ErrorCheck(m_Bus->getVolume(&volume));
 	return volume;
 }
-void AudioBus::SetVolume(const float& newVolume)
+
+void TTN_AudioBus::SetVolume(const float& newVolume)
 {
 	ErrorCheck(m_Bus->setVolume(newVolume));
 }
 
-bool AudioBus::CheckMuted()
+bool TTN_AudioBus::CheckMuted()
 {
 	bool muted;
 	ErrorCheck(m_Bus->getMute(&muted));
 	return muted;
 }
 
-void AudioBus::SetMute(const bool& mute)
+void TTN_AudioBus::SetMute(const bool& mute)
 {
 	ErrorCheck(m_Bus->setMute(mute));
 }
 
-void AudioBus::StopAllEvent(const bool& fade)
+void TTN_AudioBus::StopAllEvent(const bool& fade)
 {
 	if (fade)
 	{
@@ -116,7 +120,7 @@ void AudioBus::StopAllEvent(const bool& fade)
 //			 AudioListener		  //
 ////////////////////////////////////
 
-void AudioListener::SetPosition(const glm::vec3& pos)
+void TTN_AudioListener::SetPosition(const glm::vec3& pos)
 {
 
 	// Convert glm vec to fmod vec
@@ -137,12 +141,12 @@ void AudioListener::SetPosition(const glm::vec3& pos)
 
 }
 
-glm::vec3 AudioListener::GetPosition()
+glm::vec3 TTN_AudioListener::GetPosition()
 {
 	return FmodToVector(m_Attributes.position);
 }
 
-void AudioListener::SetVelocity(const glm::vec3& vel)
+void TTN_AudioListener::SetVelocity(const glm::vec3& vel)
 {
 
 	// Convert glm vec to fmod vec
@@ -159,12 +163,12 @@ void AudioListener::SetVelocity(const glm::vec3& vel)
 			&m_AttenuationPosition));
 }
 
-glm::vec3 AudioListener::GetVelocity()
+glm::vec3 TTN_AudioListener::GetVelocity()
 {
 	return FmodToVector(m_Attributes.velocity);
 }
 
-void AudioListener::SetForward(const glm::vec3& forward)
+void TTN_AudioListener::SetForward(const glm::vec3& forward)
 {
 
 	// Convert glm vec to fmod vec
@@ -181,12 +185,12 @@ void AudioListener::SetForward(const glm::vec3& forward)
 			&m_AttenuationPosition));
 }
 
-glm::vec3 AudioListener::GetForward()
+glm::vec3 TTN_AudioListener::GetForward()
 {
 	return FmodToVector(m_Attributes.forward);
 }
 
-void AudioListener::SetUp(const glm::vec3& up)
+void TTN_AudioListener::SetUp(const glm::vec3& up)
 {
 
 	// Convert glm vec to fmod vec
@@ -203,14 +207,14 @@ void AudioListener::SetUp(const glm::vec3& up)
 			&m_AttenuationPosition));
 }
 
-glm::vec3 AudioListener::GetUp() // no
+glm::vec3 TTN_AudioListener::GetUp() // no
 {
 	return FmodToVector(m_Attributes.up);
 }
 
 
 
-void AudioListener::SetID(const int& id)
+void TTN_AudioListener::SetID(const int& id)
 {
 	m_ID = id;
 }
@@ -220,16 +224,16 @@ void AudioListener::SetID(const int& id)
 //			 AudioEvent			  //
 ////////////////////////////////////
 
-AudioEvent::AudioEvent(FMOD::Studio::EventInstance* eventInstance)
+TTN_AudioEvent::TTN_AudioEvent(FMOD::Studio::EventInstance* eventInstance)
 	: m_EventInstance(eventInstance)
 {
 }
 
-AudioEvent::~AudioEvent()
+TTN_AudioEvent::~TTN_AudioEvent()
 {
 }
 
-void AudioEvent::Play()
+void TTN_AudioEvent::Play()
 {
 
 	// Check if already playing
@@ -245,13 +249,13 @@ void AudioEvent::Play()
 }
 
 
-void AudioEvent::Restart()
+void TTN_AudioEvent::Restart()
 {
 	// Start the event
 	m_EventInstance->start();
 }
 
-void AudioEvent::Stop()
+void TTN_AudioEvent::Stop()
 {
 	// Check if already playing
 	FMOD_STUDIO_PLAYBACK_STATE* state = NULL;
@@ -262,7 +266,7 @@ void AudioEvent::Stop()
 	}
 }
 
-void AudioEvent::StopImmediately()
+void TTN_AudioEvent::StopImmediately()
 {
 	// Check if already playing
 	FMOD_STUDIO_PLAYBACK_STATE* state = NULL;
@@ -273,7 +277,7 @@ void AudioEvent::StopImmediately()
 	}
 }
 
-bool AudioEvent::isPlaying()
+bool TTN_AudioEvent::isPlaying()
 {
 	// Check if already playing
 	FMOD_STUDIO_PLAYBACK_STATE* state = NULL;
@@ -285,12 +289,12 @@ bool AudioEvent::isPlaying()
 	return false;
 }
 
-void AudioEvent::SetParameter(const char* name, const float& value, const bool& ignoreSeekSpeed)
+void TTN_AudioEvent::SetParameter(const char* name, const float& value, const bool& ignoreSeekSpeed)
 {
 	ErrorCheck(m_EventInstance->setParameterByName(name, value, ignoreSeekSpeed));
 }
 
-float AudioEvent::GetParameterValue(const char* name)
+float TTN_AudioEvent::GetParameterValue(const char* name)
 {
 	// Make float for output
 	float value;
@@ -302,7 +306,7 @@ float AudioEvent::GetParameterValue(const char* name)
 	return value;
 }
 
-void AudioEvent::SetPosition(const glm::vec3& pos)
+void TTN_AudioEvent::SetPosition(const glm::vec3& pos)
 {
 	// Update our attributes
 	m_Attributes.position = VectorToFmod(pos);
@@ -311,7 +315,7 @@ void AudioEvent::SetPosition(const glm::vec3& pos)
 	ErrorCheck(m_EventInstance->set3DAttributes(&m_Attributes));
 }
 
-glm::vec3 AudioEvent::GetPosition()
+glm::vec3 TTN_AudioEvent::GetPosition()
 {
 	return FmodToVector(m_Attributes.position);
 }
@@ -320,14 +324,14 @@ glm::vec3 AudioEvent::GetPosition()
 //			 Audio Engine		  //
 ////////////////////////////////////
 
-AudioEngine& AudioEngine::Instance()
+TTN_AudioEngine& TTN_AudioEngine::Instance()
 {
-	static AudioEngine instance;
+	static TTN_AudioEngine instance;
 
 	return instance;
 }
 
-void AudioEngine::Init()
+void TTN_AudioEngine::Init()
 {
 	// Initilizs the audio systems in FMOD
 	ErrorCheck(FMOD::Studio::System::create(&m_StudioSystem));
@@ -349,14 +353,14 @@ void AudioEngine::Init()
 
 }
 
-void AudioEngine::Update()
+void TTN_AudioEngine::Update()
 {
 	// Update FMOD system
 	ErrorCheck(m_StudioSystem->update());
 
 }
 
-void AudioEngine::Shutdown()
+void TTN_AudioEngine::Shutdown()
 {
 	// Delete events
 	for (auto event : m_EventMap)
@@ -372,11 +376,11 @@ void AudioEngine::Shutdown()
 	}
 	m_BusMap.clear();
 
-	AudioEngine::ErrorCheck(m_StudioSystem->unloadAll());
-	AudioEngine::ErrorCheck(m_StudioSystem->release());
+	TTN_AudioEngine::ErrorCheck(m_StudioSystem->unloadAll());
+	TTN_AudioEngine::ErrorCheck(m_StudioSystem->release());
 }
 
-void AudioEngine::LoadBank(const std::string& bankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags)
+void TTN_AudioEngine::LoadBank(const std::string& bankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags)
 {
 
 	// Make sure bank isn't already loaded
@@ -398,12 +402,12 @@ void AudioEngine::LoadBank(const std::string& bankName, FMOD_STUDIO_LOAD_BANK_FL
 	}
 }
 
-AudioListener& AudioEngine::GetListener()
+TTN_AudioListener& TTN_AudioEngine::GetListener()
 {
 	return m_Listener;
 }
 
-AudioEvent& AudioEngine::CreateEvent(const std::string& eventName, const std::string& GUID)
+TTN_AudioEvent& TTN_AudioEngine::CreateEvent(const std::string& eventName, const std::string& GUID)
 {
 	// Get find event in file
 	FMOD::Studio::EventDescription* eventDescription = NULL;
@@ -417,7 +421,7 @@ AudioEvent& AudioEngine::CreateEvent(const std::string& eventName, const std::st
 		ErrorCheck(eventDescription->createInstance(&newFMODEvent));
 
 		// Create an audio event
-		AudioEvent* newAudioEvent = new AudioEvent(newFMODEvent);
+		TTN_AudioEvent* newAudioEvent = new TTN_AudioEvent(newFMODEvent);
 
 		// Make sure multiple events with the same name aren't created
 		if (m_EventMap.find(eventName) != m_EventMap.end())
@@ -433,7 +437,7 @@ AudioEvent& AudioEngine::CreateEvent(const std::string& eventName, const std::st
 
 }
 
-AudioEvent& AudioEngine::GetEvent(const std::string& strEventName)
+TTN_AudioEvent& TTN_AudioEngine::GetEvent(const std::string& strEventName)
 {
 	// If the event exists
 	if (m_EventMap.find(strEventName) != m_EventMap.end())
@@ -448,7 +452,7 @@ AudioEvent& AudioEngine::GetEvent(const std::string& strEventName)
 	}
 }
 
-void AudioEngine::LoadBus(const std::string& strBusName, const std::string& GUID)
+void TTN_AudioEngine::LoadBus(const std::string& strBusName, const std::string& GUID)
 {
 	// Find the bus in fmod
 	FMOD::Studio::Bus* fmodBus = nullptr;
@@ -461,7 +465,7 @@ void AudioEngine::LoadBus(const std::string& strBusName, const std::string& GUID
 	}
 
 	// Create an audio event
-	AudioBus* newBus = new AudioBus(fmodBus);
+	TTN_AudioBus* newBus = new TTN_AudioBus(fmodBus);
 
 	// Add the bus to our map
 	m_BusMap[strBusName] = newBus;
@@ -469,7 +473,7 @@ void AudioEngine::LoadBus(const std::string& strBusName, const std::string& GUID
 	// Close your eyes for a bit, you deserve it
 }
 
-AudioBus& AudioEngine::GetBus(const std::string& strBusName)
+TTN_AudioBus& TTN_AudioEngine::GetBus(const std::string& strBusName)
 {
 	// If the bus exists
 	if (m_BusMap.find(strBusName) != m_BusMap.end())
@@ -486,12 +490,12 @@ AudioBus& AudioEngine::GetBus(const std::string& strBusName)
 
 /////// Global Parameters //////////
 
-void AudioEngine::SetGlobalParameter(const char* name, const float& value, const bool& ignoreSeekSpeed)
+void TTN_AudioEngine::SetGlobalParameter(const char* name, const float& value, const bool& ignoreSeekSpeed)
 {
 	ErrorCheck(m_StudioSystem->setParameterByName(name, value, ignoreSeekSpeed));
 }
 
-float AudioEngine::GetGlobalParameterValue(const char* name)
+float TTN_AudioEngine::GetGlobalParameterValue(const char* name)
 {
 	// Make float for output
 	float value;
@@ -502,8 +506,3 @@ float AudioEngine::GetGlobalParameterValue(const char* name)
 	// Return float
 	return value;
 }
-
-
-
-
-

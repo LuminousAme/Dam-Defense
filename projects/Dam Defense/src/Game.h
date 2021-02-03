@@ -102,7 +102,7 @@ public:
 	TTN_Texture2D::st2dptr healthBar;
 #pragma endregion
 
-	AudioEngine& engine = AudioEngine::Instance();
+	TTN_AudioEngine& engine = TTN_AudioEngine::Instance();
 
 	//Entities
 protected:

@@ -16,6 +16,8 @@
 #include "Particle.h"
 //include all the graphics features we need
 #include "Shader.h"
+#include "Framebuffer.h"
+
 namespace Titan {
 	typedef entt::basic_group<entt::entity, entt::exclude_t<>, entt::get_t<>, TTN_Transform, TTN_Renderer> RenderGroupType;
 

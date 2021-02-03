@@ -14,10 +14,6 @@ namespace Titan {
 	class TTN_Texture2DData final
 	{
 	public:
-		TTN_Texture2DData(const TTN_Texture2DData& other) = delete;
-		TTN_Texture2DData(TTN_Texture2DData&& other) = delete;
-		TTN_Texture2DData& operator=(const TTN_Texture2DData& other) = delete;
-		TTN_Texture2DData& operator=(TTN_Texture2DData&& other) = delete;
 		typedef std::shared_ptr<TTN_Texture2DData> st2ddptr;
 
 		std::string DebugName;
@@ -92,6 +88,11 @@ namespace Titan {
 
 		//creates and returns a shared(smart) pointer to the class 
 		static inline st2dptr Create() {
+			return std::make_shared<TTN_Texture2D>(TTN_Texture2DDesc());
+		}
+
+		//Creates a new empty texture pointer, this is used by the framebuffer class 
+		static inline st2dptr CreateEmpty() {
 			return std::make_shared<TTN_Texture2D>();
 		}
 
