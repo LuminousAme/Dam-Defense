@@ -266,9 +266,11 @@ namespace Titan {
 		s_particleShaderProgram->Bind();
 
 		//set uniforms
-		glm::mat4 temp_model = glm::translate(glm::mat4(1.0f), ParentGlobalPos);
+		glm::mat4 temp_model = glm::translate(ParentGlobalPos) * glm::toMat4(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f))) * glm::scale(glm::vec3(1.0f));
+		glm::mat4 tempMVP = projection;
+		tempMVP *= view;
 		s_particleShaderProgram->SetUniformMatrix("u_model", temp_model);
-		s_particleShaderProgram->SetUniformMatrix("u_mvp", projection * view * temp_model);
+		s_particleShaderProgram->SetUniformMatrix("u_mvp", tempMVP * temp_model);
 		s_particleShaderProgram->SetUniformMatrix("u_normalMat", glm::mat3(glm::transpose(glm::inverse(temp_model))));
 
 		//bind the albedo texture from the mat
@@ -295,7 +297,7 @@ namespace Titan {
 			//interpolate the scale
 			float temp_scale = glm::mix(StartScales[i], EndScales[i], readGraphScale(t));
 			//get the global position of the particle
-			glm::vec3 temp_pos = ParentGlobalPos + Positions[i];
+			glm::vec3 temp_pos = Positions[i];
 
 			
 			//save the color

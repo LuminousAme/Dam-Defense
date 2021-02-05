@@ -31,5 +31,5 @@ void main() {
 	outColor = inParticleColor;
 
 	//set the position of the vertex
-	gl_Position = u_mvp * vec4(ParticlePos, 1.0);
+	gl_Position = (u_mvp * vec4(ParticlePos, 1.0));
 }

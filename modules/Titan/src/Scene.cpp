@@ -292,7 +292,7 @@ namespace Titan {
 
 			//bind the shader
 			shader->Bind();
-
+			
 			//sets some uniforms
 			if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
 				//scene level ambient lighting
