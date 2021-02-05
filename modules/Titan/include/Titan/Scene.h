@@ -17,6 +17,11 @@
 //include all the graphics features we need
 #include "Shader.h"
 #include "Framebuffer.h"
+//include ImGui stuff
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 namespace Titan {
 	typedef entt::basic_group<entt::entity, entt::exclude_t<>, entt::get_t<>, TTN_Transform, TTN_Renderer> RenderGroupType;
@@ -26,10 +31,10 @@ namespace Titan {
 	{
 	public:
 		//default constructor 
-		TTN_Scene();
+		TTN_Scene(std::string name = std::string());
 
 		//constructor with data, using basic scene level lighting information
-		TTN_Scene(glm::vec3 AmbientLightingColor, float AmbientLightingStrength);
+		TTN_Scene(glm::vec3 AmbientLightingColor, float AmbientLightingStrength, std::string name = std::string());
 
 		//copy, move, and assingment operators
 		TTN_Scene(const TTN_Scene& oldScene) = default;
@@ -41,7 +46,9 @@ namespace Titan {
 
 #pragma region ECS_functions_dec
 		//creates a new entity 
-		entt::entity CreateEntity();
+		entt::entity CreateEntity(std::string name = "");
+		//creates a new entity with a limit lifetime
+		entt::entity CreateEntity(float lifeTime, std::string name = "");
 
 		//deletes an entity
 		void DeleteEntity(entt::entity entity);
@@ -138,6 +145,9 @@ namespace Titan {
 		std::vector<entt::entity> m_Lights;
 
 	private:
+		//name of the scene
+		std::string m_sceneName;
+
 		//context that contains all our entities, their ids, and components 
 		entt::registry* m_Registry = nullptr;
 

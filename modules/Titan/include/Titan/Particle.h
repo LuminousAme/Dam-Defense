@@ -251,6 +251,7 @@ namespace Titan {
 		float (*readGraphScale)(float);
 
 		void SetUpRenderingStuff();
+		void SetUpData();
 	};
 
 	//class for a particle system compomenet

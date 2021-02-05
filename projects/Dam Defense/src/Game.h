@@ -7,6 +7,7 @@
 #include "Titan/ObjLoader.h"
 #include "Titan/Interpolation.h"
 #include "Titan/Sound.h"
+#include "EnemyComponent.h"
 
 using namespace Titan;
 
@@ -40,10 +41,12 @@ public:
 
 	bool GetGameIsPaused() { return m_paused; }
 	void SetGameIsPaused(bool paused) { m_paused = paused; }
+	int GetDamHealth() { return Dam_health; }
+
+	//function to restart the game reseting all the data
 
 	//Assets
-public:
-	 
+public: 
 #pragma region assets
 	//shader programs
 	TTN_Shader::sshptr shaderProgramUnTextured;
@@ -106,11 +109,7 @@ public:
 
 	//Entities
 protected:
-	entt::entity healthbar;
-
 	entt::entity camera;
-	entt::entity UIcam;
-
 	entt::entity light;
 	entt::entity skybox;
 	entt::entity cannon;
@@ -120,90 +119,100 @@ protected:
 	entt::entity terrain;
 	entt::entity water;
 	entt::entity birds[3];
-	entt::entity trees[17];
 	entt::entity dam;
 
 	std::vector<entt::entity> flamethrowers;
 	std::vector<entt::entity> flames;
 
-	//other data
+	/////// OTHER DATA ///////////
+	#pragma region Data
 protected:
-	//position of the mouse in screenspace
-	glm::vec2 mousePos;
-	//the ammount the main player should be rotated
-	glm::vec2 rotAmmount;
-	//the direction the cannon is currently facing
-	glm::vec3 playerDir;
-	//a multiplier for the ammount of force should be applied to a cannonball when it is fired
-	float cannonBallForce;
-	//the ammount of time in seconds that the player has to wait between shots
-	float playerShootCooldown;
-	float playerShootCooldownTimer;
-	//the terrain scale
-	float terrainScale;
-	//water animation control
-	float time;
-	float waveSpeed;
-	float waveBaseHeightIncrease;
-	float waveHeightMultiplier;
-	float waveLenghtMultiplier;
+	/////// Player control data/////////
+	float cannonBallForce = 3600.0f;;//a multiplier for the ammount of force should be applied to a cannonball when it is fired
+	float playerShootCooldown = 0.7f;//the ammount of time in seconds that the player has to wait between shots
 
-	float health = 100.f;
-	//int boatCount;
+	glm::vec2 mousePos;//position of the mouse in screenspace
+	glm::vec2 rotAmmount;//the ammount the main player should be rotated
+	glm::vec3 playerDir;//the direction the cannon is currently facing
+	float playerShootCooldownTimer;//how much time until the player can shoot again
 
 
-	//Stuff for waves and spawning enemies
-	float Timer = 0.F;//timer for boat spawning (left side)
-	float Timer2 = 0.F;//timer for boat spawning (right side)
-	bool Spawning = true; //whether or not the spawners should be spawning
+	/////// Terrain and water control data ////////
+	float terrainScale = 0.1f;	//the terrain scale
 
-	float waveTimer = 0.F;//timer for waves
-	float restTimer = 0.F;//timer for waves
-	int wave = 0; // keep track of wave number
-	int waveEnd = 7;
+	float water_time; //the current time for the water, used in it's sin wave
+	float water_waveSpeed;//the speed of the waves
+	float water_waveBaseHeightIncrease;//the base height of the waves
+	float water_waveHeightMultiplier;//how much the waves should grow
+	float water_waveLenghtMultiplier;//how long the waves should be
 
-	bool Flaming = false; //if flamethrowers are active right now
-	float FlameTimer = 0.0f; //flamethrower cooldown
-	float FlameAnim = 0.0f; //flamethrower duration
+	//////// DAM AND FLAMETHROWER CONTROL DATA ///////
+	float FlameThrowerCoolDown = 10.0f; //how long the player has to wait between flamethrower uses
+	float FlameActiceTime = 3.0f; //how long the flamethrower lasts
+	int Dam_MaxHealth = 100; //the maximum health of the dam
 
-	//bird control
-	float birdTimer = 0.0f;
-	glm::vec3 birdBase, birdTarget;
+	bool Flaming; //if flamethrowers are active right now
+	float FlameTimer; //flamethrower cooldown
+	float FlameAnim; //flamethrower duration
+	int Dam_health;//the current health on the dam
 
-	//smoke particle
-	TTN_ParticleTemplate smokeParticle;
-	TTN_ParticleTemplate fireParticle;
 
-	//wheter or not the scene is paused
-	bool m_paused;
+	//////// BIRD CONTROL DATA ///////////////
+	glm::vec3 birdBase = glm::vec3(100, 10, 135); //starting position
+	glm::vec3 birdTarget = glm::vec3(-100, 10, -65); //lerps to this position
 
-	//gameover bool
-	bool m_gameOver;
-	//victory bool
-	bool gameWin = false;
+	float birdTimer;//timer to track how far through the lerp they are
+
+
+	///////////SCENE CONTROL DATA///////////
+	bool m_paused; //wheter or not the scene is paused
+	bool m_gameOver; //wheter or not the player has yet gameover
+	bool gameWin;//wheter or not the player has won
+
+
+	/////////////ENEMY AND WAVE CONTROLS//////////////////
+	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
+	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
+	int m_enemiesPerWave = 5; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
+
+	int m_currentWave = 1; //the current wave
+	float m_timeTilNextWave; //the timer until the next wave starts, used after a wave has ended
+	float m_timeUntilNextSpawn; //the timer until the next boat spawns
+	int m_boatsRemainingThisWave; //the number of boats that need to be destoryed before the wave starts again
+	int m_boatsStillNeedingToSpawnThisWave; //the number of boats that still need to be spawned before the wave can end
+	bool m_rightSideSpawn = true; //wheter or not it should be using the right (true) or left (false) spawner
+#pragma endregion
+
+	///////PARTICLE TEMPLATES//////////
+	TTN_ParticleTemplate smokeParticle;//smoke burst particles
+	TTN_ParticleTemplate fireParticle;//fire particles
 
 	//set up functions, called by InitScene()
 protected:
 	void SetUpAssets();
 	void SetUpEntities();
 	void SetUpOtherData();
+	void RestartData();
 	
 	//update functions, called by Update()
 protected:
 	void PlayerRotate(float deltaTime);
 	void StopFiring();
 
-	void BoatPathing(entt::entity boatt, int path, int boatNum);
-	void SpawnerLS(float deltatime, float SpawnTime);
-	void SpawnerRS(float deltatime, float SpawnTime);
-	void Waves(int num, float restTime, float waveTime, float deltaTime);
-	glm::vec3 Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos);
+	//functions for spawning enemies
+	void SpawnBoatLeft();
+	void SpawnBoatRight();
+	void WaveUpdate(float deltaTime);
 
+	//flamethrowers, collisions, and damages
 	void Flamethrower();
+	void FlamethrowerUpdate(float deltaTime);
 	void Collisions();
 	void Damage(float deltaTime);
 
-	void DeleteFlamethrowers();
+	//misc
+	void BirdUpate(float deltaTime);
+	void ImGui();
 
 	//other functions, ussually called in relation to something happening like player input or a collision
 protected:

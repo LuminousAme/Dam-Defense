@@ -5,11 +5,6 @@
 #include "Game.h"
 #include "glm/ext.hpp"
 
-#define IMGUI_IMPL_OPENGL_LOADER_GLAD
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-
 //default constructor
 Game::Game()
 	: TTN_Scene()
@@ -35,6 +30,7 @@ void Game::Update(float deltaTime)
 	if (!m_paused) {
 		//allow the player to rotate
 		PlayerRotate(deltaTime);
+
 		//switch to the cannon's normal static animation if it's firing animation has ended
 		StopFiring();
 
@@ -44,79 +40,31 @@ void Game::Update(float deltaTime)
 		//if the player is on shoot cooldown, decrement the time remaining on the cooldown
 		if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
-		//parameters: number of waves, rest time between waves, length of waves, deltatime
-		Waves(6, 10.f, 40.0f, deltaTime); //first wave is shorter because delta time starts incrementing before scene loads in
-		SpawnerLS(deltaTime, 12.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
-		SpawnerRS(deltaTime, 12.5f);//sets the spawner and gives the interval of time the spawner should spawn boats
+		//update the enemy wave spawning
+		WaveUpdate(deltaTime);
 
 		//goes through the boats vector
 		for (int i = 0; i < boats.size(); i++) {
-			//std::cout << "Path: " << Get<TTN_Tag>(boats[i]).getPath() << std::endl;
-			int p = Get<TTN_Tag>(boats[i]).getPath(); //gets the boats randomized path num
-			int n = Get<TTN_Tag>(boats[i]).getNum(); //gets the boats randomized type num
-			Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f)); //sets gravity to 0
-			BoatPathing(boats[i], p, n); //updates the pathing for the boat
+			//sets gravity to 0
+			Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f)); 
+			//and runs their update
+			Get<EnemyComponent>(boats[i]).Update(deltaTime);
 		}
 
-		if (wave <= 6 && boats.size() == 0) {
-			gameWin = true;
-		}
-
-		if (FlameTimer <= 0) FlameTimer = 0.0f;
-		else FlameTimer -= deltaTime;
-
-		if (Flaming) {// if the flamethorwers are spewing flame particles
-			FlameAnim += deltaTime;//increment flamethrower anim timer
-
-			if (FlameAnim >= 3.0f) {//flame particles last for 3 seconds
-				DeleteFlamethrowers(); //delete the flamethrowers and particles
-				FlameAnim = 0.0f; //reset timer
-				Flaming = false; //set flaming to false
-			}
-
-			//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 20
-			std::vector<entt::entity>::iterator it = boats.begin();
-			while (it != boats.end()) {
-				if (Get<TTN_Transform>(*it).GetPos().z >= 27.0f) {
-					//std::cout <<"Global Pos:"<< Get<TTN_Transform>(*it).GetGlobalPos().z << std::endl;
-					//std::cout << "Pos:" << Get<TTN_Transform>(*it).GetPos().z << std::endl;
-					it++;
-				}
-				else {
-					DeleteEntity(*it);
-					it = boats.erase(it);
-					std::cout << "ERASED " << std::endl;
-				}
-			}
-		}
+		//updates the flamethrower logic
+		FlamethrowerUpdate(deltaTime);
 
 		Collisions(); //collision check
 		Damage(deltaTime); //damage function, contains cooldoown
 
-		//move the birds
-		birdTimer += deltaTime;
-
-		birdTimer = fmod(birdTimer, 20);
-
-		float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
-
-		for (int i = 0; i < 3; i++) {
-			if (i == 0) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp(birdBase, birdTarget, t));
-
-			if (i == 1) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
-
-			(birdBase + glm::vec3(3.0f, -3.0f, 3.0f), birdTarget + glm::vec3(3.0f, -3.0f, 3.0f), t));
-
-			if (i == 2) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
-
-			(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f), birdTarget + glm::vec3(-3.0f, -3.0f, -3.0f), t));
-		}
+		BirdUpate(deltaTime);
 
 		//increase the total time of the scene to make the water animated correctly
-		time += deltaTime;
+		water_time += deltaTime;
 	}
+
 	//game over stuff
-	if (health <= 0.0f) {
+	if (Dam_health <= 0.0f) {
 		m_gameOver = true;
 		printf("GAME OVER");
 	}
@@ -130,28 +78,14 @@ void Game::Update(float deltaTime)
 	TTN_AudioListener& listener = engine.GetListener();
 	engine.Update();
 
-
-#pragma region imgui
-	ImGui::Begin("Camera Controller");
-
-	auto& a = Get<TTN_Transform>(camera);
-	float b = a.GetPos().x;
-	if (ImGui::SliderFloat("Camera Test X-Axis", &b, -100.0f, 100.0f)) {
-		a.SetPos(glm::vec3(b, a.GetPos().y, a.GetPos().z));
-	}
-
-	float c = a.GetPos().y;
-	if (ImGui::SliderFloat("Camera Test Y-Axis", &c, -100.0f, 100.0f)) {
-		a.SetPos(glm::vec3(a.GetPos().x, c, a.GetPos().z));
-	}
-	ImGui::End();
-
-#pragma endregion
+	//call the update on ImGui
+	ImGui();
 
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
 }
 
+//render the terrain and water
 void Game::PostRender()
 {
 	//terrain
@@ -210,11 +144,11 @@ void Game::PostRender()
 			glm::mat3(glm::inverse(glm::transpose(Get<TTN_Transform>(water).GetGlobal()))));
 
 		//pass in data about the water animation
-		shaderProgramWater->SetUniform("time", time);
-		shaderProgramWater->SetUniform("speed", waveSpeed);
-		shaderProgramWater->SetUniform("baseHeight", waveBaseHeightIncrease);
-		shaderProgramWater->SetUniform("heightMultiplier", waveHeightMultiplier);
-		shaderProgramWater->SetUniform("waveLenghtMultiplier", waveLenghtMultiplier);
+		shaderProgramWater->SetUniform("time", water_time);
+		shaderProgramWater->SetUniform("speed", water_waveSpeed);
+		shaderProgramWater->SetUniform("baseHeight", water_waveBaseHeightIncrease);
+		shaderProgramWater->SetUniform("heightMultiplier", water_waveHeightMultiplier);
+		shaderProgramWater->SetUniform("waveLenghtMultiplier", water_waveLenghtMultiplier);
 
 		//frag shader
 		//bind the textures
@@ -235,19 +169,21 @@ void Game::PostRender()
 //function to use to check for when a key is being pressed down for the first frame
 void Game::KeyDownChecks()
 {
+	//if the game is not paused
 	if (!m_paused) {
+		//and they press the 2 key, try to activate the flamethrower
 		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Two)) {
-			if (FlameTimer == 0.0f) { //cooldown is zero
-				Flamethrower();
-			}
+			Flamethrower();
 		}
 	}
 
+	//if they try to press the escape key, pause or unpause the game
 	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc)) {
 		m_paused = !m_paused;
 		TTN_Scene::SetPaused(m_paused);
 	}
 
+	//just some temp controls to let us access the mouse for ImGUI, remeber to remove these in the final game
 	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::P)) {
 		TTN_Application::TTN_Input::SetCursorLocked(true);
 	}
@@ -255,7 +191,6 @@ void Game::KeyDownChecks()
 	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::O)) {
 		TTN_Application::TTN_Input::SetCursorLocked(false);
 	}
-
 }
 
 //function to cehck for when a key is being pressed
@@ -276,6 +211,7 @@ void Game::MouseButtonDownChecks()
 //function to check for when a mouse button is being pressed
 void Game::MouseButtonChecks()
 {
+	//if the game is not paused
 	if (!m_paused) {
 		//if the cannon is not in the middle of firing, fire when the player is pressing the left mouse button
 		if (Get<TTN_MorphAnimator>(cannon).getActiveAnim() == 0 && playerShootCooldownTimer <= 0.0f &&
@@ -302,7 +238,6 @@ void Game::MouseButtonChecks()
 void Game::MouseButtonUpChecks()
 {
 }
-
 #pragma endregion
 
 #pragma region SetUP STUFF
@@ -628,11 +563,8 @@ void Game::SetUpEntities()
 		TTN_MorphAnimator birdAnimator = TTN_MorphAnimator();
 
 		//create an animation for the bird flying
-
 		TTN_MorphAnimation flyingAnim = TTN_MorphAnimation({ 0, 1 }, { 10.0f / 24.0f, 10.0f / 24.0f }, true); //anim 0
-
 		birdAnimator.AddAnim(flyingAnim);
-
 		birdAnimator.SetActiveAnim(0);
 
 		//attach that animator to the entity
@@ -640,17 +572,12 @@ void Game::SetUpEntities()
 		AttachCopy(birds[i], birdAnimator);
 
 		//create a transform
-
 		TTN_Transform birdTrans = TTN_Transform(birdBase, glm::vec3(0.0f), glm::vec3(1.0f));
-
 		if (i == 1) birdTrans.SetPos(birdBase + glm::vec3(3.0f, -3.0f, 3.0f));
-
 		if (i == 2) birdTrans.SetPos(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f));
-
 		birdTrans.RotateFixed(glm::vec3(0.0f, -45.0f + 180.0f, 0.0f));
 
 		//attach that transform to the entity
-
 		AttachCopy(birds[i], birdTrans);
 	}
 
@@ -670,28 +597,8 @@ void Game::SetUpEntities()
 //sets up any other data the game needs to store
 void Game::SetUpOtherData()
 {
-	//init some scene data
-	m_paused = false;
-	rotAmmount = glm::vec2(0.0f);
-	mousePos = TTN_Application::TTN_Input::GetMousePosition();
-	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
-	cannonBallForce = 3600.0f;
-	playerShootCooldown = 0.7f;
-	playerShootCooldownTimer = playerShootCooldown;
-	terrainScale = 0.1f;
-	time = 0.0f;
-	waveSpeed = -2.5f;
-	waveBaseHeightIncrease = 0.0f;
-	waveHeightMultiplier = 0.005f;
-	waveLenghtMultiplier = -10.0f;
-	birdTimer = 0.0f;
-
-	birdBase = glm::vec3(100, 10, 135);
-
-	birdTarget = glm::vec3(-100, 10, -65);
-
-	//make the scene have gravity
-	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));
+	//call the restart data function
+	RestartData();
 
 	//create the particle templates
 	//smoke particle
@@ -721,6 +628,46 @@ void Game::SetUpOtherData()
 		fireParticle.SetOneStartSize(0.5f);
 		fireParticle.SetOneStartSpeed(8.5f);
 	}
+}
+
+//restarts the game
+void Game::RestartData()
+{
+	//player data
+	rotAmmount = glm::vec2(0.0f);
+	mousePos = TTN_Application::TTN_Input::GetMousePosition();
+	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
+	playerShootCooldownTimer = playerShootCooldown;
+
+	//water and terrain data setup
+	water_time = 0.0f;
+	water_waveSpeed = -2.5f;
+	water_waveBaseHeightIncrease = 0.0f;
+	water_waveHeightMultiplier = 0.005f;
+	water_waveLenghtMultiplier = -10.0f;
+
+	//dam and flamethrower data setup
+	Flaming = false;
+	FlameTimer = 0.0f;
+	FlameAnim = 0.0f;
+	Dam_health = Dam_MaxHealth;
+
+	//bird data setup 
+	birdTimer = 0.0f;
+
+	//scene data steup
+	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));
+	m_paused = false;
+	m_gameOver = false;
+	gameWin = false;
+
+	//enemy and wave data setup
+	m_currentWave = 1;
+	m_timeTilNextWave = m_timeBetweenEnemyWaves;
+	m_timeUntilNextSpawn = m_timeBetweenEnemySpawns;
+	m_boatsRemainingThisWave = m_enemiesPerWave;
+	m_boatsStillNeedingToSpawnThisWave = m_boatsRemainingThisWave;
+	m_rightSideSpawn = (bool)(rand() % 2);
 }
 
 #pragma endregion
@@ -814,343 +761,20 @@ void Game::DeleteCannonballs()
 		}
 	}
 }
-#pragma endregion
 
-//sets the pathing the boat entity should take based on the path integer (1-3 is left side, 4-6 is right side), boat num changes rotation
-void Game::BoatPathing(entt::entity boatt, int path, int boatNum)
-{
-	auto& pBoat = Get<TTN_Physics>(boatt);
-	auto& tBoat = Get<TTN_Transform>(boatt);
-
-	//left side middle path
-	if (path == 1) {
-		if (tBoat.GetPos().x <= 65.f) {
-			if (tBoat.GetRotation().y <= 75.0f && boatNum == 1) {
-				tBoat.RotateFixed(glm::vec3(0.0f, -0.55f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y <= -20.0f && boatNum == 2) {
-				tBoat.RotateFixed(glm::vec3(0.0f, -0.55f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y >= 20.0f && boatNum == 3) {
-				tBoat.RotateFixed(glm::vec3(0.0f, -0.55f, 0.0f));
-			}
-
-			pBoat.AddForce(Seek(glm::vec3(8.0f, -8.0f, 2.5f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-		}
-	}
-
-	//far left path
-	if (path == 2) {
-		if (tBoat.GetPos().x <= 75.f) {
-			if (tBoat.GetRotation().y <= 83.0f && boatNum == 1) {
-				tBoat.RotateFixed(glm::vec3(0.0f, -0.75f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y <= -1.0f && boatNum == 2) {
-				tBoat.RotateFixed(glm::vec3(0.0f, -0.7f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y >= 1.0f && boatNum == 3) {
-				tBoat.RotateFixed(glm::vec3(0.0f, -0.7f, 0.0f));
-			}
-
-			pBoat.AddForce(Seek(glm::vec3(40.0f, -8.0f, 2.5f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-		}
-	}
-
-	//center left
-	if (path == 3) {
-		if (tBoat.GetPos().x <= 65.f && !(tBoat.GetPos().x <= 5.f)) {
-			if (tBoat.GetRotation().y <= 65.0f && boatNum == 1) {
-				tBoat.RotateFixed(glm::vec3(0.0f, -0.6f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y <= 15.0f && boatNum == 2) { //carrier rotation
-				tBoat.RotateFixed(glm::vec3(0.0f, -0.15f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y >= 15.0f && boatNum == 3) { //submarine rotation
-				tBoat.RotateFixed(glm::vec3(0.0f, -0.15f, 0.0f));
-			}
-
-			pBoat.AddForce(Seek(glm::vec3(5.0f, -8.0f, 55.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-		}
-
-		if (tBoat.GetPos().x <= 5.f) {
-			if (tBoat.GetRotation().y <= 89.0f && boatNum == 1) {
-				tBoat.RotateFixed(glm::vec3(0.0f, -0.95f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y <= 15.0f && boatNum == 2) {
-				tBoat.RotateFixed(glm::vec3(0.0f, -0.08f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y >= 1.0f && boatNum == 3) {
-				tBoat.RotateFixed(glm::vec3(0.0f, -0.08f, 0.0f));
-			}
-
-			pBoat.AddForce(Seek(glm::vec3(4.0f, -8.0f, 2.5f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-		}
-	}
-
-	//right middle path
-	if (path == 4) {
-		if (tBoat.GetPos().x >= -65.F) {
-			if (tBoat.GetRotation().y <= 69.0f && boatNum == 1) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.5f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y >= 20.0f && boatNum == 2) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.55f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y <= -20.0f && boatNum == 3) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.55f, 0.0f));
-			}
-
-			pBoat.AddForce(Seek(glm::vec3(-8.0f, -8.0f, 2.5f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-		}
-	}
-
-	//far right path
-	if (path == 5) {
-		if (tBoat.GetPos().x >= -75.f) {
-			if (tBoat.GetRotation().y <= 83.0f && boatNum == 1) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.75f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y >= 1.0f && boatNum == 2) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.7f, 0.0f));
-				//std::cout << glm::to_string(tBoat.GetRotation()) << std::endl;
-			}
-
-			else if (tBoat.GetRotation().y <= -1.0f && boatNum == 3) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.7f, 0.0f));
-			}
-
-			pBoat.AddForce(Seek(glm::vec3(-40.0f, -8.0f, 2.5f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-		}
-	}
-
-	//right center path
-	if (path == 6) {
-		if (tBoat.GetPos().x >= -65.f && !(tBoat.GetPos().x >= -5.F)) {
-			if (tBoat.GetRotation().y <= 65.0f && boatNum == 1) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.6f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y >= 15.0f && boatNum == 2) { //carrier rotation
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.20f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y <= -15.0f && boatNum == 3) { //submarine rotation
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.15f, 0.0f));
-			}
-
-			pBoat.AddForce(Seek(glm::vec3(-5.0f, -8.0f, 55.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-		}
-
-		if (tBoat.GetPos().x >= -5.f) {
-			if (tBoat.GetRotation().y <= 89.0f && boatNum == 1) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.95f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y <= 15.0f && boatNum == 2) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.08f, 0.0f));
-			}
-
-			else if (tBoat.GetRotation().y <= -1.0f && boatNum == 3) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.08f, 0.0f));
-			}
-
-			pBoat.AddForce(Seek(glm::vec3(-4.0f, -8.0f, 2.5f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
-		}
-	}
-}
-
-//spawn left side boats
-void Game::SpawnerLS(float deltatime, float SpawnTime) {
-	//increment timer
-	Timer += deltatime;
-
-	//if the timer is >= spawn time then it will spawn the boat
-	if (Timer >= SpawnTime && Spawning) {
-		// timer = 0, boat spawn code
-		Timer = 0.F;//reset timer
-
-		boats.push_back(CreateEntity());
-		int randomBoat = rand() % 3 + 1; // generates number between 1-3
-		//randomBoat = 3;
-
-		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
-		if (randomBoat == 1) {
-			boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
-		}
-
-		else if (randomBoat == 2) { //large carrier
-			boatRenderer = TTN_Renderer(boat2Mesh, shaderProgramTextured, boat2Mat);
-		}
-
-		else if (randomBoat == 3) { // submarine looking
-			boatRenderer = TTN_Renderer(boat3Mesh, shaderProgramTextured, boat3Mat);
-		}
-
-		AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
-
-		TTN_Transform boatTrans = TTN_Transform(glm::vec3(21.0f, 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-		boatTrans.SetPos(glm::vec3(90.0f, -8.0f, 115.0f));
-
-		if (randomBoat == 1) { //small regular boat
-			boatTrans.RotateFixed(glm::vec3(0.0f, 180.0f, 0.0f));
-			boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
-		}
-
-		else if (randomBoat == 2) { //large carrier
-			boatTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
-			boatTrans.SetScale(glm::vec3(0.05f, 0.05f, 0.05f));
-		}
-
-		else if (randomBoat == 3) { // submarine lookking
-			boatTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
-			boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
-		}
-
-		AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
-
-		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.0f, 4.0f, 8.95f), boats[boats.size() - 1], TTN_PhysicsBodyType::DYNAMIC);
-		pbody.SetLinearVelocity(glm::vec3(-25.0f, 0.0f, 0.0f));//-2.0f
-		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
-
-		int r = rand() % 3 + 1; // generates path number between 1-3 (left side paths, right side path nums are 4-6)
-
-		//if (randomBoat == 2 && r == 3) r = 2; //if it's the carrier, make sure it doesnt go through the center
-		TTN_Tag boatTag = TTN_Tag("Boat", r, randomBoat); //sets boat path number to ttn_tag
-		boatTag.SetDamageCD(0.0f);
-		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
-	}
-}
-
-//spawn right side boats
-void Game::SpawnerRS(float deltatime, float SpawnTime)
-{
-	Timer2 += deltatime;
-
-	if (Timer2 >= SpawnTime && Spawning) {
-		// timer = 0, boat spawn code
-		Timer2 = 0.F;//reset timer
-
-		boats.push_back(CreateEntity());
-
-		int randomBoat = rand() % 3 + 1; // generates number between 1-3
-	//	randomBoat = 3;
-
-		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
-
-		if (randomBoat == 1) {
-			boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
-		}
-
-		else if (randomBoat == 2) { //large carrier
-			boatRenderer = TTN_Renderer(boat2Mesh, shaderProgramTextured, boat2Mat);
-		}
-
-		else if (randomBoat == 3) { // submarine lookking
-			boatRenderer = TTN_Renderer(boat3Mesh, shaderProgramTextured, boat3Mat);
-		}
-
-		AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
-
-		TTN_Transform boatTrans = TTN_Transform();
-		boatTrans.SetPos(glm::vec3(-90.0f, -8.0f, 115.0f));
-		if (randomBoat == 1) { //small regular boat
-			boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
-			boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
-		}
-
-		else if (randomBoat == 2) { //large carrier
-			boatTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
-			boatTrans.SetScale(glm::vec3(0.05f, 0.05f, 0.05f));
-		}
-
-		else if (randomBoat == 3) { // submarine lookking
-			boatTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
-			boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
-		}
-
-		AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
-
-		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.0f, 4.0f, 8.95f), boats[boats.size() - 1]);
-
-		pbody.SetLinearVelocity(glm::vec3(25.0f, 0.0f, 0.0f));//-2.0f
-		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
-
-		int r = rand() % 3 + 4; // generates path number between 4-6 (left side paths 1-3, right side path nums are 4-6)
-
-		TTN_Tag boatTag = TTN_Tag("Boat", r, randomBoat); //sets boat path number to ttn_tag
-		boatTag.SetDamageCD(0.0f);
-
-		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
-	}
-}
-
-//wave function: parameters: number of waves, rest time between waves, length of waves, deltatime
-void Game::Waves(int num, float restTime, float waveTime, float deltaTime)
-{
-	if (num > wave) {
-		//printf("Wave now!\n");
-		waveTimer += deltaTime;
-
-		if (waveTimer >= waveTime) {
-			Spawning = false;
-			//printf("wavetimer over!\n");
-			waveTimer = 0;
-		}
-
-		if (!Spawning) {
-			//printf("resting!\n");
-			restTimer += deltaTime;
-			if (restTimer >= restTime) {
-				Spawning = true;
-				restTimer = 0;
-				//printf("Spawn now!\n");
-				wave++;
-			}
-		}
-	}
-
-	else {
-		printf("GAME over!\n");
-	}
-}
-
-glm::vec3 Game::Seek(glm::vec3 target, glm::vec3 velo, glm::vec3 pos)
-{
-	//std::cout << glm::to_string(target) << std::endl;
-	//std::cout << glm::to_string(velo) << std::endl;
-	//std::cout << glm::to_string(pos) << std::endl;
-	glm::vec3 maxVelo(-10.0f, 0.0f, -10.0f);
-	glm::vec3 desired = (pos - target); //gets the desired vector
-
-	desired = glm::normalize(desired) * maxVelo;
-	glm::vec3 steering = desired - velo;
-
-	glm::vec3 moveVelo = steering;  //clamp(moveVelo,velo+steering, maxVelo);
-
-	return moveVelo;
-}
-
-//cooldown of flamethrower is set in this function, change flame timer
+//creates the flames for the flamethrower
 void Game::Flamethrower() {
-	if (FlameTimer == 0.0f) { //cooldown is zero
-		FlameTimer = 10.f; // set cooldown
-		Flaming = true;// set flaming to true
-
+	//if the cooldown has ended
+	if (FlameTimer <= 0.0f) { 
+		//reset cooldown
+		FlameTimer = FlameThrowerCoolDown; 
+		//set the active flag to true
+		Flaming = true;
+		//and through and create the fire particle systems
 		for (int i = 0; i < 6; i++) {
 			//fire particle entities
 			{
-				flames.push_back(CreateEntity());
+				flames.push_back(CreateEntity(3.0f));
 
 				//setup a transfrom for the particle system
 				TTN_Transform firePSTrans = TTN_Transform(glm::vec3(2.5f, -3.0f, 1.8f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f)); //close left
@@ -1169,7 +793,6 @@ void Game::Flamethrower() {
 				else if (i == 4) {
 					firePSTrans.SetPos(glm::vec3(-7.5f, -3.0f, 1.8f));
 				}
-				else {}
 
 				//attach that transform to the entity
 				AttachCopy(flames[i], firePSTrans);
@@ -1185,12 +808,208 @@ void Game::Flamethrower() {
 			}
 		}
 	}
-
-	else { //otherwise nothing happens
+	//otherwise nothing happens
+	else { 
 		Flaming = false;
 	}
 }
 
+//function to update the flamethrower logic
+void Game::FlamethrowerUpdate(float deltaTime)
+{
+	//reduce the cooldown timer on the flamethrower
+	FlameTimer -= deltaTime;
+
+	//if the flamethrowers are active
+	if (Flaming) {
+		//increment flamethrower anim timer
+		FlameAnim += deltaTime;
+
+		//if it's reached the end of the animation
+		if (FlameAnim >= FlameActiceTime) {
+			//get rid of all the flames, reset the timer and set the active flag to false
+			flames.clear();
+			FlameAnim = 0.0f;
+			Flaming = false;
+		}
+
+		//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 20
+		std::vector<entt::entity>::iterator it = boats.begin();
+		while (it != boats.end()) {
+			if (Get<TTN_Transform>(*it).GetPos().z >= 27.0f) {
+				it++;
+			}
+			else {
+				DeleteEntity(*it);
+				it = boats.erase(it);
+			}
+		}
+	}
+}
+#pragma endregion
+
+#pragma region Enemy spawning and wave stuff
+//spawn a boat on the left side of the map
+void Game::SpawnBoatLeft()
+{
+	//create the entity
+	boats.push_back(CreateEntity());
+	int randomBoat = rand() % 3;
+
+	//create a renderer
+	TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
+	//setup renderer for green boat
+	if (randomBoat == 0) {
+		boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
+	}
+	//setup renderer for red boat
+	else if (randomBoat == 1) {
+		boatRenderer = TTN_Renderer(boat2Mesh, shaderProgramTextured, boat2Mat);
+	}
+	//set up renderer for yellow boat
+	else if (randomBoat == 2) {
+		boatRenderer = TTN_Renderer(boat3Mesh, shaderProgramTextured, boat3Mat);
+	}
+	//attach the renderer to the boat
+	AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
+
+	//create a transform for the boat
+	TTN_Transform boatTrans = TTN_Transform(glm::vec3(21.0f, 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+	//set up the transform for the green boat
+	if (randomBoat == 0) { 
+		boatTrans.RotateFixed(glm::vec3(0.0f, 180.0f, 0.0f));
+		boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
+		boatTrans.SetPos(glm::vec3(90.0f, -8.5f, 115.0f));
+	}
+	//setup transform for the red boat
+	else if (randomBoat == 1) { 
+		boatTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
+		boatTrans.SetScale(glm::vec3(0.05f, 0.05f, 0.05f));
+		boatTrans.SetPos(glm::vec3(90.0f, -8.0f, 115.0f));
+	}
+	//set up transform for the yellow boat
+	else if (randomBoat == 2) { 
+		boatTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
+		boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
+		boatTrans.SetPos(glm::vec3(90.0f, -7.5f, 115.0f));
+	}
+	//attach the transform
+	AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
+
+	//create an attach a transform
+	TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.0f, 4.0f, 8.95f), boats[boats.size() - 1], TTN_PhysicsBodyType::DYNAMIC);
+	pbody.SetLinearVelocity(glm::vec3(-25.0f, 0.0f, 0.0f));//-2.0f
+	AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
+	
+	//creates and attaches a tag to the boat
+	TTN_Tag boatTag = TTN_Tag("Boat"); 
+	AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
+
+	//create and attach the enemy component to the boat
+	int randPath = rand() % 3; // generates path number between 0-2 (left side paths, right side path nums are 3-5)
+	EnemyComponent en = EnemyComponent(boats[boats.size()-1], this, randomBoat, randPath, 0.0f);
+	AttachCopy(boats[boats.size() - 1], en);
+}
+
+//spawn a boat on the right side of the map
+void Game::SpawnBoatRight()
+{
+	boats.push_back(CreateEntity());
+
+	//gets the type of boat
+	int randomBoat = rand() % 3;
+
+	//create a renderer
+	TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
+	//set up renderer for green boat
+	if (randomBoat == 0) {
+		boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
+	}
+	//set up renderer for red boat
+	else if (randomBoat == 1) {
+		boatRenderer = TTN_Renderer(boat2Mesh, shaderProgramTextured, boat2Mat);
+	}
+	//set up renderer for yellow boat
+	else if (randomBoat == 2) {
+		boatRenderer = TTN_Renderer(boat3Mesh, shaderProgramTextured, boat3Mat);
+	}
+	//attach the renderer to the entity
+	AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
+
+	//create a transform for the boat
+	TTN_Transform boatTrans = TTN_Transform();
+	//set up the transform for the green boat
+	if (randomBoat == 0) {
+		boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
+		boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
+		boatTrans.SetPos(glm::vec3(-90.0f, -8.5f, 115.0f));
+	}
+	//set up the transform for the red boat
+	else if (randomBoat == 1) { 
+		boatTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
+		boatTrans.SetScale(glm::vec3(0.05f, 0.05f, 0.05f));
+		boatTrans.SetPos(glm::vec3(-90.0f, -8.0f, 115.0f));
+	}
+	//set up the transform the yellow boat
+	else if (randomBoat == 2) {
+		boatTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
+		boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
+		boatTrans.SetPos(glm::vec3(-90.0f, -7.5f, 115.0f));
+	}
+	//attach the transform
+	AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
+
+	//create and attach a physics body to the boats
+	TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.0f, 4.0f, 8.95f), boats[boats.size() - 1]);
+	pbody.SetLinearVelocity(glm::vec3(25.0f, 0.0f, 0.0f));//-2.0f
+	AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
+
+	//creates and attaches a tag to the boat
+	TTN_Tag boatTag = TTN_Tag("Boat");
+	AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
+
+	//create and attach the enemy component to the boat
+	int randPath = rand() % 3 + 3; // generates path number between 3-5 (right side paths, left side path nums are 0-2)
+	EnemyComponent en = EnemyComponent(boats[boats.size() - 1], this, randomBoat, randPath, 0.0f);
+	AttachCopy(boats[boats.size() - 1], en);
+}
+
+//updates the waves
+void Game::WaveUpdate(float deltaTime)
+{
+	//if there are no more boats in this wave, begin the countdown to the next wave
+	if (m_boatsRemainingThisWave == 0 && m_timeTilNextWave <= 0.0f) {
+		m_timeTilNextWave = m_timeBetweenEnemyWaves;
+		m_currentWave++;
+		m_boatsRemainingThisWave = m_enemiesPerWave * m_currentWave;
+		m_boatsStillNeedingToSpawnThisWave = m_boatsRemainingThisWave;
+		m_timeUntilNextSpawn = m_timeBetweenEnemySpawns;
+	}
+	
+	//if it is in the cooldown between waves, reduce the cooldown by deltaTime
+	if (m_timeTilNextWave >= 0.0f) {
+		m_timeTilNextWave -= deltaTime;
+	}
+	//otherwise, check if it should spawn
+	else {
+		m_timeUntilNextSpawn -= deltaTime;
+		//if it's time for the next enemy spawn
+		if (m_timeUntilNextSpawn <= 0.0f && m_boatsStillNeedingToSpawnThisWave > 0) {
+			//then spawn a new enemy and reset the timer
+			if (m_rightSideSpawn)
+				SpawnBoatRight();
+			else
+				SpawnBoatLeft();
+
+			m_rightSideSpawn = !m_rightSideSpawn;
+			m_timeUntilNextSpawn = m_timeBetweenEnemySpawns;
+			m_boatsStillNeedingToSpawnThisWave--;
+		}
+	}
+}
+#pragma endregion
+
+#pragma region Collisions and Damage Stuff
 //collision check
 void Game::Collisions()
 {
@@ -1200,19 +1019,9 @@ void Game::Collisions()
 
 	//iterate through the collisions
 	for (int i = 0; i < collisionsThisFrame.size(); i++) {
-		//get both the rigidbodies
-		//const btRigidBody* b1 = collisionsThisFrame[i]->GetBody1();
-		//const btRigidBody* b2 = collisionsThisFrame[i]->GetBody2();
-		//get the entity number from each body
-		//entt::entity entity1Ptr = static_cast<entt::entity>(reinterpret_cast<uint32_t>(b1->getUserPointer()));
-		//entt::entity entity2Ptr = static_cast<entt::entity>(reinterpret_cast<uint32_t>(b2->getUserPointer()));
-		//entt::entity entity1Ptr = *static_cast<entt::entity*>(b1->getUserPointer());
-		//entt::entity entity2Ptr = *static_cast<entt::entity*>(b2->getUserPointer());
+		//grab the entity numbers of the colliding entities
 		entt::entity entity1Ptr = collisionsThisFrame[i]->GetBody1();
 		entt::entity entity2Ptr = collisionsThisFrame[i]->GetBody2();
-
-		//entt::entity tempTankRed = redPlayer;
-		//entt::entity tempTankBlue = bluePlayer;
 
 		//check if both entities still exist
 		if (TTN_Scene::GetScene()->valid(entity1Ptr) && TTN_Scene::GetScene()->valid(entity2Ptr)) {
@@ -1222,11 +1031,13 @@ void Game::Collisions()
 				//if they do, then do tag comparisons
 
 				//if one is a boat and the other is a cannonball
-				if (cont && ((Get<TTN_Tag>(entity1Ptr).getName() == "Boat" && Get<TTN_Tag>(entity2Ptr).getName() == "Ball") ||
-					(Get<TTN_Tag>(entity1Ptr).getName() == "Ball" && Get<TTN_Tag>(entity2Ptr).getName() == "Boat"))) {
+				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Boat" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball") ||
+					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Boat"))) {
+					//then iterate through the list of cannonballs until you find the one that's collided
 					std::vector<entt::entity>::iterator it = cannonBalls.begin();
 					while (it != cannonBalls.end()) {
 						if (entity1Ptr == *it || entity2Ptr == *it) {
+							//and delete it
 							DeleteEntity(*it);
 							it = cannonBalls.erase(it);
 						}
@@ -1235,11 +1046,13 @@ void Game::Collisions()
 						}
 					}
 
+					//and do the same with the boats, iteratoring through all of them until you find matching entity numbers and then delete them
 					std::vector<entt::entity>::iterator itt = boats.begin();
 					while (itt != boats.end()) {
 						if (entity1Ptr == *itt || entity2Ptr == *itt) {
 							DeleteEntity(*itt);
 							itt = boats.erase(itt);
+							m_boatsRemainingThisWave--;
 						}
 						else {
 							itt++;
@@ -1253,35 +1066,66 @@ void Game::Collisions()
 
 //damage cooldown and stuff
 void Game::Damage(float deltaTime) {
+	//iterator through all the boats
 	std::vector<entt::entity>::iterator it = boats.begin();
 	while (it != boats.end()) {
-		if (Get<TTN_Transform>(*it).GetPos().z <= 5.0f) {
-			if (Get<TTN_Tag>(*it).getCooldown() <= 0.f) {
-				Get<TTN_Tag>(*it).SetDamageCD(3.0f);
-				health = health - 1.0f;
-				std::cout << health << std::endl;
+		//check if the boat is close enough to the dam to damage it 
+		if (Get<TTN_Transform>(*it).GetPos().z <= EnemyComponent::GetZTarget() + 2.0f * EnemyComponent::GetZTargetDistance()) {
+			//if they are check if they're through the cooldown
+			if (Get<EnemyComponent>(*it).GetCooldown() <= 0.f) {
+				//if they are do damage
+				Get<EnemyComponent>(*it).SetCooldown(3.0f);
+				Dam_health--;
+				std::cout << Dam_health << std::endl;
 			}
-
+			//otherwise lower the remaining damage cooldown
 			else {
-				Get<TTN_Tag>(*it).SetDamageCD(Get<TTN_Tag>(*it).getCooldown() - deltaTime);
+				Get<EnemyComponent>(*it).SetCooldown(Get<EnemyComponent>(*it).GetCooldown() - deltaTime);
 			}
-
+			//and move to the next boat
 			it++;
-
-			//float p = Get<TTN_Tag>(*it).getCooldown();
-			//Get<TTN_Tag>(*it).SetDamageCD(3.0f);
 		}
+		//otherwise just move to the next boat
 		else {
 			it++;
 		}
 	}
 }
+#pragma endregion
 
-//called to delete particle system and flamethrower models
-void Game::DeleteFlamethrowers() {
-	std::vector<entt::entity>::iterator itt = flames.begin();
-	while (itt != flames.end()) {
-		DeleteEntity(*itt);
-		itt = flames.erase(itt);
+void Game::BirdUpate(float deltaTime)
+{
+	//move the birds
+	birdTimer += deltaTime;
+	birdTimer = fmod(birdTimer, 20);
+	float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
+	for (int i = 0; i < 3; i++) {
+		if (i == 0) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp(birdBase, birdTarget, t));
+
+		if (i == 1) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
+		(birdBase + glm::vec3(3.0f, -3.0f, 3.0f), birdTarget + glm::vec3(3.0f, -3.0f, 3.0f), t));
+
+		if (i == 2) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
+		(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f), birdTarget + glm::vec3(-3.0f, -3.0f, -3.0f), t));
 	}
+}
+
+void Game::ImGui()
+{
+	//ImGui controller for the camera
+	ImGui::Begin("Camera Controller");
+
+	//control the x axis position
+	auto& a = Get<TTN_Transform>(camera);
+	float b = a.GetPos().x;
+	if (ImGui::SliderFloat("Camera Test X-Axis", &b, -100.0f, 100.0f)) {
+		a.SetPos(glm::vec3(b, a.GetPos().y, a.GetPos().z));
+	}
+
+	//control the y axis position
+	float c = a.GetPos().y;
+	if (ImGui::SliderFloat("Camera Test Y-Axis", &c, -100.0f, 100.0f)) {
+		a.SetPos(glm::vec3(a.GetPos().x, c, a.GetPos().z));
+	}
+	ImGui::End();
 }
