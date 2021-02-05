@@ -47,8 +47,13 @@ void Game::Update(float deltaTime)
 		for (int i = 0; i < boats.size(); i++) {
 			//sets gravity to 0
 			Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f)); 
-			//and runs their update
-			Get<EnemyComponent>(boats[i]).Update(deltaTime);
+		}
+
+		//go through all the entities with enemy compontents
+		auto enemyView = GetScene()->view<EnemyComponent>();
+		for (auto entity : enemyView) {
+			//and run their update
+			Get<EnemyComponent>(entity).Update(deltaTime);
 		}
 
 		//updates the flamethrower logic
@@ -532,7 +537,7 @@ void Game::SetUpEntities()
 		terrain = CreateEntity();
 
 		//setup a transform for the terrain
-		TTN_Transform terrainTrans = TTN_Transform(glm::vec3(0.0f, -10.0f, 35.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(100.0f));
+		TTN_Transform terrainTrans = TTN_Transform(glm::vec3(0.0f, -15.0f, 35.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(100.0f));
 		//attach that transform to the entity
 		AttachCopy(terrain, terrainTrans);
 	}
@@ -1065,9 +1070,6 @@ void Game::Collisions()
 		//grab the entity numbers of the colliding entities
 		entt::entity entity1Ptr = collisionsThisFrame[i]->GetBody1();
 		entt::entity entity2Ptr = collisionsThisFrame[i]->GetBody2();
-		glm::vec3 loc = collisionsThisFrame[i]->GetCollisionPoint();
-
-
 
 		//check if both entities still exist
 		if (TTN_Scene::GetScene()->valid(entity1Ptr) && TTN_Scene::GetScene()->valid(entity2Ptr)) {
@@ -1080,14 +1082,16 @@ void Game::Collisions()
 				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Boat" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball") ||
 					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Boat"))) {
 
-					//play an expolsion at it's location
-					CreateExpolsion(glm::vec3(loc.x, -4.0f, loc.z));
-					std::cout << "collision - x: " << loc.x << " y: " << loc.y << " z: " << loc.z << std::endl;
+
 
 					//then iterate through the list of cannonballs until you find the one that's collided
 					std::vector<entt::entity>::iterator it = cannonBalls.begin();
 					while (it != cannonBalls.end()) {
 						if (entity1Ptr == *it || entity2Ptr == *it) {
+							//play an expolsion at it's location
+							glm::vec3 loc = Get<TTN_Transform>(*it).GetGlobalPos();
+							CreateExpolsion(glm::vec3(loc.x, -4.0f, loc.z));
+							std::cout << "collision - x: " << loc.x << " y: " << loc.y << " z: " << loc.z << std::endl;
 							//and delete it
 							DeleteEntity(*it);
 							it = cannonBalls.erase(it);
@@ -1097,11 +1101,19 @@ void Game::Collisions()
 						}
 					}
 
-					//and do the same with the boats, iteratoring through all of them until you find matching entity numbers and then delete them
+					//and do the same with the boats, iteratoring through all of them until you find matching entity numbers
 					std::vector<entt::entity>::iterator itt = boats.begin();
 					while (itt != boats.end()) {
 						if (entity1Ptr == *itt || entity2Ptr == *itt) {
-							DeleteEntity(*itt);
+							//remove the physics from it
+							Remove<TTN_Physics>(*itt);
+							//add a countdown until it deletes
+							TTN_DeleteCountDown countdown = TTN_DeleteCountDown(2.5f);
+							AttachCopy(*itt, countdown);
+							//mark it as dead
+							Get<EnemyComponent>(*itt).SetAlive(false);
+
+							//and remove it from the list of boats as it will be deleted soon
 							itt = boats.erase(itt);
 							m_boatsRemainingThisWave--;
 						}

@@ -304,7 +304,7 @@ void MainMenu::SetUpEntities()
 		terrain = CreateEntity();
 
 		//setup a transform for the terrain
-		TTN_Transform terrainTrans = TTN_Transform(glm::vec3(0.0f, -10.0f, 35.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(100.0f));
+		TTN_Transform terrainTrans = TTN_Transform(glm::vec3(0.0f, -15.0f, 35.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(100.0f));
 		//attach that transform to the entity
 		AttachCopy(terrain, terrainTrans);
 	}
@@ -323,7 +323,7 @@ void MainMenu::SetUpEntities()
 void MainMenu::SetUpOtherData()
 {
 	//init some scene data
-	terrainScale = 0.1f;
+	terrainScale = 0.15f;
 	time = 0.0f;
 	waveSpeed = -2.5f;
 	waveBaseHeightIncrease = 0.0f;
