@@ -141,7 +141,7 @@ protected:
 
 
 	/////// Terrain and water control data ////////
-	float terrainScale = 0.1f;	//the terrain scale
+	float terrainScale = 0.15f;//the terrain scale
 
 	float water_time; //the current time for the water, used in it's sin wave
 	float water_waveSpeed;//the speed of the waves
@@ -161,8 +161,8 @@ protected:
 
 
 	//////// BIRD CONTROL DATA ///////////////
-	glm::vec3 birdBase = glm::vec3(100, 10, 135); //starting position
-	glm::vec3 birdTarget = glm::vec3(-100, 10, -65); //lerps to this position
+	glm::vec3 birdBase = glm::vec3(100, 15, 135); //starting position
+	glm::vec3 birdTarget = glm::vec3(-100, 15, -65); //lerps to this position
 
 	float birdTimer;//timer to track how far through the lerp they are
 

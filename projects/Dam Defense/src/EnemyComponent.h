@@ -22,10 +22,12 @@ public:
 	void SetBoatType(int type) { m_boatType = type; }
 	void SetPath(int path) { m_path = path; }
 	void SetCooldown(float cooldown) { m_damageCooldown = cooldown; }
+	void SetAlive(bool alive) { m_alive = alive; }
 	//getters
 	int GetBoatType() { return m_boatType; }
 	int GetPath() { return m_path; }
 	float GetCooldown() { return m_damageCooldown; }
+	bool GetAlive() { return m_alive; }
 	static float GetZTarget() { return m_ztarget; }
 	static float GetZTargetDistance() { return m_targetDistance; }
 
@@ -44,6 +46,8 @@ protected:
 	float m_damageCooldown; //cooldown between the shots from the enemy ships
 
 	float m_ypos; //the y position of the boat, determined by the boat type
-	inline static float m_ztarget = 10.0f;
-	inline static float m_targetDistance = 5.0f; 
+	inline static float m_ztarget = 10.0f; //the target z position near the dam that the enemy ship seeks
+	inline static float m_targetDistance = 5.0f; //how close it's allowed to get to that point
+
+	bool m_alive; //wheter or not a ship is alive
 };

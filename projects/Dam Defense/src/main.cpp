@@ -157,7 +157,7 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddMeshToBeLoaded("Flamethrower mesh", "models/Flamethrower.obj", 1); //mesh for the flamethrowers
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Flamethrower texture", "textures/FlamethrowerTexture.png", 1); //texture for the flamethrower
 	TTN_AssetSystem::AddMeshToBeLoaded("Terrain plane", "models/terrainPlain.obj", 1); //large plane with lots of subdivisions for the terrain and water
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Terrain height map", "textures/Game Map Long.jpg", 1); //height map for the terrain
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Terrain height map", "textures/Game Map Long 2.jpg", 1); //height map for the terrain
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Sand texture", "textures/SandTexture.jpg", 1); //sand texture
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Rock texture", "textures/RockTexture.jpg", 1); //rock texture
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Grass texture", "textures/GrassTexture.jpg", 1); //grass texture

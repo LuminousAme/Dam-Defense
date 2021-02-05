@@ -47,8 +47,13 @@ void Game::Update(float deltaTime)
 		for (int i = 0; i < boats.size(); i++) {
 			//sets gravity to 0
 			Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f)); 
-			//and runs their update
-			Get<EnemyComponent>(boats[i]).Update(deltaTime);
+		}
+
+		//go through all the entities with enemy compontents
+		auto enemyView = GetScene()->view<EnemyComponent>();
+		for (auto entity : enemyView) {
+			//and run their update
+			Get<EnemyComponent>(entity).Update(deltaTime);
 		}
 
 		FlamethrowerUpdate(deltaTime);
@@ -221,9 +226,7 @@ void Game::MouseButtonChecks()
 			//reset the cooldown
 			playerShootCooldownTimer = playerShootCooldown;
 			//and play the smoke particle effect
-			//Get<TTN_Transform>(smokePS).SetPos((Get<TTN_Transform>(cannon).GetGlobalPos() -
-				//0.5f * (Get<TTN_Transform>(cannon).GetGlobalPos() - Get<TTN_Transform>(cannon).GetPos())) + 0.8f * playerDir);
-			Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f, 0.0f) + 0.9f * playerDir);
+			Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f, 0.0f) + 1.5f * playerDir);
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
 				SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
@@ -538,7 +541,7 @@ void Game::SetUpEntities()
 		terrain = CreateEntity();
 
 		//setup a transform for the terrain
-		TTN_Transform terrainTrans = TTN_Transform(glm::vec3(0.0f, -10.0f, 35.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(100.0f));
+		TTN_Transform terrainTrans = TTN_Transform(glm::vec3(0.0f, -15.0f, 35.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(100.0f));
 		//attach that transform to the entity
 		AttachCopy(terrain, terrainTrans);
 	}
@@ -793,7 +796,6 @@ void Game::CreateExpolsion(glm::vec3 location)
 	//attach that transform to the entity
 	AttachCopy(newExpolsion, PSTrans);
 	glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
-	std::cout << "expolsion - x: " << tempLoc.x << " y: " << tempLoc.y << " z: " << tempLoc.z << std::endl;
 
 	//setup a particle system for the particle system
 	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(500, 0, expolsionParticle, 0.0f, false);
@@ -825,22 +827,7 @@ void Game::Flamethrower() {
 				flames.push_back(CreateEntity(3.0f));
 
 				//setup a transfrom for the particle system
-				TTN_Transform firePSTrans = TTN_Transform(glm::vec3(2.5f, -3.0f, 1.8f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f)); //close left
-				if (i == 0) {
-					firePSTrans.SetPos(glm::vec3(-2.5f, -3.0f, 1.8f));//close right
-				}
-				else if (i == 1) {
-					firePSTrans.SetPos(glm::vec3(20.f, -3.0f, 1.8f));//far left
-				}
-				else if (i == 2) {
-					firePSTrans.SetPos(glm::vec3(-20.0f, -3.0f, 1.8f));//far right
-				}
-				else if (i == 3) {
-					firePSTrans.SetPos(glm::vec3(7.5f, -3.0f, 1.8f));
-				}
-				else if (i == 4) {
-					firePSTrans.SetPos(glm::vec3(-7.5f, -3.0f, 1.8f));
-				}
+				TTN_Transform firePSTrans = TTN_Transform(Get<TTN_Transform>(flamethrowers[i]).GetGlobalPos() + glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f));
 
 				//attach that transform to the entity
 				AttachCopy(flames[i], firePSTrans);
@@ -1071,9 +1058,6 @@ void Game::Collisions()
 		//grab the entity numbers of the colliding entities
 		entt::entity entity1Ptr = collisionsThisFrame[i]->GetBody1();
 		entt::entity entity2Ptr = collisionsThisFrame[i]->GetBody2();
-		glm::vec3 loc = collisionsThisFrame[i]->GetCollisionPoint();
-
-
 
 		//check if both entities still exist
 		if (TTN_Scene::GetScene()->valid(entity1Ptr) && TTN_Scene::GetScene()->valid(entity2Ptr)) {
@@ -1086,9 +1070,7 @@ void Game::Collisions()
 				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Boat" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball") ||
 					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Boat"))) {
 
-					//play an expolsion at it's location
-					CreateExpolsion(glm::vec3(loc.x, -4.0f, loc.z));
-					std::cout << "collision - x: " << loc.x << " y: " << loc.y << " z: " << loc.z << std::endl;
+
 
 					//then iterate through the list of cannonballs until you find the one that's collided
 					std::vector<entt::entity>::iterator it = cannonBalls.begin();
@@ -1103,11 +1085,22 @@ void Game::Collisions()
 						}
 					}
 
-					//and do the same with the boats, iteratoring through all of them until you find matching entity numbers and then delete them
+					//and do the same with the boats, iteratoring through all of them until you find matching entity numbers
 					std::vector<entt::entity>::iterator itt = boats.begin();
 					while (itt != boats.end()) {
 						if (entity1Ptr == *itt || entity2Ptr == *itt) {
-							DeleteEntity(*itt);
+							//play an expolsion at it's location
+							glm::vec3 loc = Get<TTN_Transform>(*itt).GetGlobalPos();
+							CreateExpolsion(loc);
+							//remove the physics from it
+							Remove<TTN_Physics>(*itt);
+							//add a countdown until it deletes
+							TTN_DeleteCountDown countdown = TTN_DeleteCountDown(2.5f);
+							AttachCopy(*itt, countdown);
+							//mark it as dead
+							Get<EnemyComponent>(*itt).SetAlive(false);
+
+							//and remove it from the list of boats as it will be deleted soon
 							itt = boats.erase(itt);
 							m_boatsRemainingThisWave--;
 						}

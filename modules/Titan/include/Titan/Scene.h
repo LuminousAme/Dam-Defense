@@ -304,5 +304,21 @@ namespace Titan {
 		//reconstruct scenegraph as entt was shuffled
 		ReconstructScenegraph();
 	}
+
+	//overload for when removing specfically a physics component
+	template<>
+	inline void TTN_Scene::Remove<TTN_Physics>(entt::entity entity) {
+		//delete the entity's physics body from bullet
+		btRigidBody* body = Get<TTN_Physics>(entity).GetRigidBody();
+		delete body->getMotionState();
+		delete body->getCollisionShape();
+		m_physicsWorld->removeRigidBody(body);
+		delete body;
+		
+		//remove the component from the entity
+		m_Registry->remove<TTN_Physics>(entity);
+		//reconstruct scenegraph as entt was shuffled
+		ReconstructScenegraph();
+	}
 #pragma endregion ECS_functions_def
 }
