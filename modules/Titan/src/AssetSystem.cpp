@@ -172,6 +172,17 @@ namespace Titan {
 		return nullptr;
 	}
 
+	//TTN_LUT3D::st2dptr TTN_AssetSystem::GetCubeFile(std::string accessName)
+	//{
+	//	if (s_c.count(accessName))
+	//		return s_matMap[accessName];
+
+	//	//otherwise return a nullpointer
+	//	return nullptr;
+	//
+	//}
+
+
 	//loads an entire set of assets at the time of the function call
 	void TTN_AssetSystem::LoadSetNow(int set) {
 		//confirm there are textures in the set 

@@ -12,6 +12,19 @@
 class  TTN_LUT3D
 {
 public:
+	//defines a special easier to use name for shared(smart) pointers to the class 
+	typedef std::shared_ptr<TTN_LUT3D> st2dptr;
+
+	//creates and returns a shared(smart) pointer to the class 
+	static inline st2dptr Create() {
+		return std::make_shared<TTN_LUT3D>();
+	}
+
+	//Creates a new empty texture pointer, this is used by the framebuffer class 
+	static inline st2dptr CreateEmpty() {
+		return std::make_shared<TTN_LUT3D>();
+	}
+
 	 TTN_LUT3D();
 	 TTN_LUT3D(std::string path);
 	void loadFromFile(std::string path);

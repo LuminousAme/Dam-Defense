@@ -11,6 +11,7 @@
 #include "ObjLoader.h"
 #include "Shader.h"
 #include "Material.h"
+#include "LUT.h"
 
 namespace Titan {
 	//class to control all the assets in any given project
@@ -60,6 +61,8 @@ namespace Titan {
 		static TTN_Shader::sshptr GetShader(std::string accessName);
 		//Gets a material pointer from the system
 		static TTN_Material::smatptr GetMaterial(std::string accessName);
+		//gets a cube file pointer from the system
+		static TTN_LUT3D::st2dptr GetCubeFile(std::string accessName);
 
 		//functions to load a set of assets
 		//loads all the assets in a set without breaking
