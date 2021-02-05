@@ -14,17 +14,16 @@ namespace Titan {
 		_buffers[index]->AddDepthTarget();
 		_buffers[index]->Init(width, height);
 
-		index = int(_shaders.size());
 		_shaders.push_back(TTN_Shader::Create());
 		//placeholder shaders
-		_shaders[index]->LoadShaderStageFromFile("shaders/passthrough_vert.glsl", GL_VERTEX_SHADER);
-		_shaders[index]->LoadShaderStageFromFile("shaders/color_correction_frag.glsl", GL_FRAGMENT_SHADER);
-		_shaders[index]->Link();
+		_shaders[_shaders.size() - 1]->LoadShaderStageFromFile("shaders/passthrough_vert.glsl", GL_VERTEX_SHADER);
+		_shaders[_shaders.size() - 1]->LoadShaderStageFromFile("shaders/color_correction_frag.glsl", GL_FRAGMENT_SHADER);
+		_shaders[_shaders.size() - 1]->Link();
 
 	}
 
 	void TTN_PostEffect::ApplyEffect(TTN_PostEffect* prevBuffer) {
-		BindShader(0);
+		BindShader(_shaders.size() - 1);
 
 		prevBuffer->BindColorAsTexture(0, 0, 0);
 
@@ -37,7 +36,7 @@ namespace Titan {
 
 	void TTN_PostEffect::DrawToScreen() {
 
-		BindShader(0);
+		BindShader(_shaders.size() - 1);
 
 		BindColorAsTexture(0, 0, 0);
 		_buffers[0]->DrawFullScreenQuad();
