@@ -1,17 +1,20 @@
+//Titan Engine, by Atlas X Games 
+// Sound.h - header for the classes that allow for audio in applications
 #pragma once
 
-// FMOD
+// Include Fmod
 #include "fmod_studio.hpp"
 #include "fmod_errors.h"
 
+//include titan's precompiled header
 #include "ttn_pch.h"
 
-
-class AudioObject // Has helpers for audio classes
+//Class for an audio object, the other classes inherit from this
+class TTN_AudioObject // Has helpers for audio classes
 {
 
 public:
-	virtual ~AudioObject() {}
+	virtual ~TTN_AudioObject() {}
 
 protected:
 
@@ -24,9 +27,10 @@ protected:
 
 };
 
-class AudioBus : public AudioObject
+//Class for Audio buses
+class TTN_AudioBus : public TTN_AudioObject
 {
-	friend class AudioEngine;
+	friend class TTN_AudioEngine;
 
 public:
 
@@ -48,11 +52,11 @@ public:
 private:
 
 	// AudioEngine class uses this to create bus objects
-	AudioBus(FMOD::Studio::Bus* bus);
+	TTN_AudioBus(FMOD::Studio::Bus* bus);
 
 	// Don't want copies, should only grab refs from audio engine
-	AudioBus(AudioBus const&) = delete;
-	void operator=(AudioBus const&) = delete;
+	TTN_AudioBus(TTN_AudioBus const&) = delete;
+	void operator=(TTN_AudioBus const&) = delete;
 
 private:
 
@@ -61,9 +65,10 @@ private:
 };
 
 
-class AudioListener : public AudioObject
+//Class for audio listener, an object that can hear sounds in the world
+class TTN_AudioListener : public TTN_AudioObject
 {
-	friend class AudioEngine;
+	friend class TTN_AudioEngine;
 
 public:
 
@@ -87,9 +92,9 @@ private:
 
 	// Only AudioEngine can create a listener
 	// Get a ref from AudioEngine::GetListener()
-	AudioListener() {}
-	AudioListener(AudioListener const&) = delete;
-	void operator=(AudioListener const&) = delete;
+	TTN_AudioListener() {}
+	TTN_AudioListener(TTN_AudioListener const&) = delete;
+	void operator=(TTN_AudioListener const&) = delete;
 
 private:
 
@@ -106,14 +111,14 @@ private:
 
 };
 
-
-class AudioEvent : public AudioObject
+//Class for an audio event or source of sound in the world
+class TTN_AudioEvent : public TTN_AudioObject
 {
-	friend class AudioEngine;
+	friend class TTN_AudioEngine;
 
 public:
 
-	~AudioEvent();
+	~TTN_AudioEvent();
 
 	// Will only play if event is not currently playing
 	void Play();
@@ -141,11 +146,11 @@ public:
 private:
 
 	// AudioEngine class uses this to create Event objects
-	AudioEvent(FMOD::Studio::EventInstance* eventInstance);
+	TTN_AudioEvent(FMOD::Studio::EventInstance* eventInstance);
 
 	// Don't want copies, should only grab refs from audio engine
-	AudioEvent(AudioEvent const&) = delete;
-	void operator=(AudioEvent const&) = delete;
+	TTN_AudioEvent(TTN_AudioEvent const&) = delete;
+	void operator=(TTN_AudioEvent const&) = delete;
 
 private:
 
@@ -155,18 +160,18 @@ private:
 };
 
 
-class AudioEngine : public AudioObject
+class TTN_AudioEngine : public TTN_AudioObject
 {
-	friend class AudioEvent;
+	friend class TTN_AudioEngine;
 
 public:
 
 	//// Singleton ///////////////////
 
-	static AudioEngine& Instance();
+	static TTN_AudioEngine& Instance();
 
-	AudioEngine(AudioEngine const&) = delete;
-	void operator=(AudioEngine const&) = delete;
+	TTN_AudioEngine(TTN_AudioEngine const&) = delete;
+	void operator=(TTN_AudioEngine const&) = delete;
 
 	//////////////////////////////////
 
@@ -178,11 +183,11 @@ public:
 	void LoadBank(const std::string& strBankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags = FMOD_STUDIO_LOAD_BANK_NORMAL);
 
 	//// Listener ////
-	AudioListener& GetListener();
+	TTN_AudioListener& GetListener();
 
 	//// Events ////
-	AudioEvent& CreateEvent(const std::string& strEventName, const std::string& GUID);
-	AudioEvent& GetEvent(const std::string& strEventName);
+	TTN_AudioEvent& CreateEvent(const std::string& strEventName, const std::string& GUID);
+	TTN_AudioEvent& GetEvent(const std::string& strEventName);
 
 	//// Global Parameters ////
 	void SetGlobalParameter(const char* name, const float& value, const bool& ignoreSeekSpeed = false);
@@ -190,12 +195,12 @@ public:
 
 	//// Bus ////
 	void LoadBus(const std::string& strBusName, const std::string& GUID);
-	AudioBus& GetBus(const std::string& strBusName);
+	TTN_AudioBus& GetBus(const std::string& strBusName);
 
 
 private:
 
-	AudioEngine() {}
+	TTN_AudioEngine() {}
 
 private:
 
@@ -204,16 +209,16 @@ private:
 	FMOD::System* m_System;
 
 	// Listener
-	AudioListener m_Listener;
+	TTN_AudioListener m_Listener;
 
 	// Banks
 	std::unordered_map<std::string, FMOD::Studio::Bank*> m_BankMap;
 
 	// Events
-	std::unordered_map<std::string, AudioEvent*> m_EventMap;
+	std::unordered_map<std::string, TTN_AudioEvent*> m_EventMap;
 
 	// Bus
-	std::unordered_map<std::string, AudioBus*> m_BusMap;
+	std::unordered_map<std::string, TTN_AudioBus*> m_BusMap;
 
 };
 

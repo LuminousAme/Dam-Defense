@@ -170,7 +170,9 @@ namespace Titan {
 		//now all the scenes that should be rendered (current gameplay scene, ui, etc.) will be rendered
 		//while anything that doesn't need to be rendered (such as a prefabs scene) will not 
 		
+		//end Imgui
 		EndImgui();
+
 		//swap the buffers so all the drawings that the scenes just did are acutally visible 
 		glfwSwapBuffers(m_window);
 	}

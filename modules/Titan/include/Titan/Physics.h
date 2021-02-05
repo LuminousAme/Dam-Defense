@@ -124,10 +124,12 @@ namespace Titan {
 		//getters
 		const entt::entity GetBody1() { return b1; }
 		const entt::entity GetBody2() { return b2; }
+		const glm::vec3 GetCollisionPoint() { return collisionPoint; }
 
 		//setters
 		void SetBody1(const entt::entity body);
 		void SetBody2(const entt::entity body);
+		void SetCollisionPoint(const glm::vec3 point);
 
 		//checks if two collisions pointers represent a collision between the same objects
 		static bool same(scolptr collision1, scolptr collision2) {
@@ -146,5 +148,6 @@ namespace Titan {
 		//rigidbodies for the colliding objects (which should also contain a reference to the entity)
 		entt::entity b1;
 		entt::entity b2;
+		glm::vec3 collisionPoint;
 	};
 }

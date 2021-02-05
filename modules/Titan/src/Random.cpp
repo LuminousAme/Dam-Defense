@@ -10,20 +10,15 @@ namespace Titan {
 	//generates a pseudo-random integer between a min and max value
 	int TTN_Random::RandomInt(int min, int max)
 	{
-
 		if (firstCall) {
 			srand(time(NULL));
 			firstCall = false;
 		}
-
-		int randomInt = rand() / RAND_MAX;
-
-		//convert to range
-		int intInRange = (randomInt * (max - min)) + min;
-		//handle if the range is zero
-		if (max - min == 0) intInRange = min;
-		//return converted number
-		return intInRange;
+		
+		//generate number
+		int randomInt = rand() % (max - min + 1) + min;
+		//return number
+		return randomInt;
 	}
 
 	//generates a pseudo-random float between a min and max value

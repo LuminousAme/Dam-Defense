@@ -237,4 +237,9 @@ namespace Titan {
 	{
 		b2 = body;
 	}
+
+	void TTN_Collision::SetCollisionPoint(const glm::vec3 point)
+	{
+		collisionPoint = point;
+	}
 }

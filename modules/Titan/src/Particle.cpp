@@ -29,20 +29,7 @@ namespace Titan {
 		m_vao = TTN_VertexArrayObject::Create();
 
 		//reverse memory space for all the particle data
-		Positions = new glm::vec3[m_maxParticlesCount];
-		StartColors = new glm::vec4[m_maxParticlesCount];
-		EndColors = new glm::vec4[m_maxParticlesCount];
-		StartVelocities = new glm::vec3[m_maxParticlesCount];
-		EndVelocities = new glm::vec3[m_maxParticlesCount];
-		StartScales = new float[m_maxParticlesCount];
-		EndScales = new float[m_maxParticlesCount];
-		timeAlive = new float[m_maxParticlesCount];
-		lifeTimes = new float[m_maxParticlesCount];
-		Active = new bool[m_maxParticlesCount];
-
-		particle_pos = new glm::vec3[m_maxParticlesCount];
-		particle_col = new glm::vec4[m_maxParticlesCount];
-		particle_scale = new float[m_maxParticlesCount];
+		SetUpData();
 
 
 		//set up function pointers
@@ -63,20 +50,7 @@ namespace Titan {
 		m_paused = false;
 
 		//reverse memory space for all the particle data
-		Positions = new glm::vec3[m_maxParticlesCount];
-		StartColors = new glm::vec4[m_maxParticlesCount];
-		EndColors = new glm::vec4[m_maxParticlesCount];
-		StartVelocities = new glm::vec3[m_maxParticlesCount];
-		EndVelocities = new glm::vec3[m_maxParticlesCount];
-		StartScales = new float[m_maxParticlesCount];
-		EndScales = new float[m_maxParticlesCount];
-		timeAlive = new float[m_maxParticlesCount];
-		lifeTimes = new float[m_maxParticlesCount];
-		Active = new bool[m_maxParticlesCount];
-
-		particle_pos = new glm::vec3[m_maxParticlesCount];
-		particle_col = new glm::vec4[m_maxParticlesCount];
-		particle_scale = new float[m_maxParticlesCount];
+		SetUpData();
 
 		//setup the rest of the data
 		m_durationRemaining = 0.0f;
@@ -495,5 +469,41 @@ namespace Titan {
 		m_vao->AddVertexBuffer(ColorInstanceBuffer, { BufferAttribute(3, 4, GL_FLOAT, false, sizeof(float) * 4, 0, AttribUsage::Color, 1) });
 		m_vao->AddVertexBuffer(PositionInstanceBuffer, { BufferAttribute(4, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::User0, 1) });
 		m_vao->AddVertexBuffer(ScaleInstanceBuffer, { BufferAttribute(5, 1, GL_FLOAT, false, sizeof(float), 0, AttribUsage::User1, 1) });
+	}
+
+	//sets up the data making sure it's zeroed out
+	void TTN_ParticleSystem::SetUpData()
+	{
+		Positions = new glm::vec3[m_maxParticlesCount];
+		StartColors = new glm::vec4[m_maxParticlesCount];
+		EndColors = new glm::vec4[m_maxParticlesCount];
+		StartVelocities = new glm::vec3[m_maxParticlesCount];
+		EndVelocities = new glm::vec3[m_maxParticlesCount];
+		StartScales = new float[m_maxParticlesCount];
+		EndScales = new float[m_maxParticlesCount];
+		timeAlive = new float[m_maxParticlesCount];
+		lifeTimes = new float[m_maxParticlesCount];
+		Active = new bool[m_maxParticlesCount];
+
+		particle_pos = new glm::vec3[m_maxParticlesCount];
+		particle_col = new glm::vec4[m_maxParticlesCount];
+		particle_scale = new float[m_maxParticlesCount];
+
+		for (size_t i = 0; i < m_maxParticlesCount; i++) {
+			Positions[i] = glm::vec3(0.0f);
+			StartColors[i] = glm::vec4(0.0f);
+			EndColors[i] = glm::vec4(0.0f);
+			StartVelocities[i] = glm::vec3(0.0f);
+			EndVelocities[i] = glm::vec3(0.0f);
+			StartScales[i] = 0.0f;
+			EndScales[i] = 0.0f;
+			timeAlive[i] = 0.0f;
+			lifeTimes[i] = 0.0f;
+			Active[i] = false;
+
+			particle_pos[i] = glm::vec3(0.0f);
+			particle_col[i] = glm::vec4(0.0f);
+			particle_scale[i] = 0.0f;
+		}
 	}
 }

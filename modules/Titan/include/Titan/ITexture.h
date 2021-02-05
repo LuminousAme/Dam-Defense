@@ -29,7 +29,7 @@ namespace Titan {
 		static void Unbind(int slot);
 
 		// Gets the underlying OpenGL handle for this texture
-		GLuint GetHandle() const { return _handle; }
+		GLuint& GetHandle() { return _handle; }
 
 		//clears this texutre to a given colour
 		void Clear(const glm::vec4 color = glm::vec4(1.0f));
