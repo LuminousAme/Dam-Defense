@@ -149,8 +149,6 @@ protected:
 	float waveLenghtMultiplier;
 
 	float health = 100.f;
-	//int boatCount;
-
 
 	//Stuff for waves and spawning enemies
 	float Timer = 0.F;//timer for boat spawning (left side)

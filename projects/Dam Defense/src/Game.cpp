@@ -58,9 +58,7 @@ void Game::Update(float deltaTime)
 			BoatPathing(boats[i], p, n); //updates the pathing for the boat
 		}
 
-		if (wave <= 6 && boats.size() == 0) {
-			gameWin = true;
-		}
+	
 
 		if (FlameTimer <= 0) FlameTimer = 0.0f;
 		else FlameTimer -= deltaTime;
@@ -121,6 +119,10 @@ void Game::Update(float deltaTime)
 		printf("GAME OVER");
 	}
 
+	if (wave <= 6 && boats.size() == 0) {
+		gameWin = true;
+	}
+
 	AudioEvent& music = engine.GetEvent("music");
 
 	//get ref to bus
@@ -129,7 +131,6 @@ void Game::Update(float deltaTime)
 	//get ref to listener
 	AudioListener& listener = engine.GetListener();
 	engine.Update();
-
 
 #pragma region imgui
 	ImGui::Begin("Camera Controller");
