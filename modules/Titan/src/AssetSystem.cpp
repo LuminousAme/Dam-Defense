@@ -73,6 +73,19 @@ namespace Titan {
 		s_setsLoaded[set] = false;
 	}
 
+	void TTN_AssetSystem::AddCubeFileToBeLoaded(std::string accessName, std::string fileName, int set)
+	{
+		//ensure the set is a atleast zero
+		if (set < 0)
+			LOG_ERROR("Asset Sets cannot be a number below 0");
+
+		//push the asset back in the approriate set
+		s_CubeFilesToLoad[set].push_back(AccessAndFileName(accessName, fileName));
+
+		s_setsLoaded[set] = false;
+
+	}
+
 	//creates a new material pointer in the asset system
 	void TTN_AssetSystem::CreateNewMaterial(std::string accessName) {
 		//create a new material in the unordered map, keyed with the access name

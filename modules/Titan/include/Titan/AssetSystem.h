@@ -32,6 +32,8 @@ namespace Titan {
 		static void AddShaderToBeLoaded(std::string accessName, std::string VertShaderFileName, std::string FragShaderFileName, int set = 0);
 		//Adds a Titan default shader to be loaded
 		static void AddDefaultShaderToBeLoaded(std::string accessName, TTN_DefaultShaders VertShader, TTN_DefaultShaders FragShader, int set = 0);
+		//adds a .cube file to be loaded
+		static void AddCubeFileToBeLoaded(std::string accessName, std::string fileName, int set = 0);
 		//Creates a new material pointer in the system 
 		static void CreateNewMaterial(std::string accessName);
 
@@ -142,6 +144,8 @@ namespace Titan {
 		inline static std::unordered_map<int, std::vector<AccessAndFileName>> s_CubemapsToLoad = std::unordered_map<int, std::vector<AccessAndFileName>>();
 		//the map of vector of strings for non-animated meshes to load
 		inline static std::unordered_map<int, std::vector<AccessAndFileName>> s_NonAnimatedMeshesToLoad = std::unordered_map<int, std::vector<AccessAndFileName>>();
+		//map of cube files to load
+		inline static std::unordered_map<int, std::vector<AccessAndFileName>> s_CubeFilesToLoad = std::unordered_map<int, std::vector<AccessAndFileName>>();
 		//the map of strings and ints for animated meshes to load 
 		inline static std::unordered_map<int, std::vector<AccessNameFileNameAndNumber>> s_AnimatedMeshesToLoad = std::unordered_map<int, std::vector<AccessNameFileNameAndNumber>>();
 		//the map of sets of 3 string for non-default shaders to load

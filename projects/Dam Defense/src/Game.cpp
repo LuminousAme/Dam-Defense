@@ -77,7 +77,7 @@ void Game::Update(float deltaTime)
 	TTN_AudioListener& listener = engine.GetListener();
 	engine.Update();
 
-	ImGui();
+	//ImGui();
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
 }
@@ -260,9 +260,11 @@ void Game::SetUpAssets()
 	shaderProgramTerrain = TTN_AssetSystem::GetShader("Terrain shader");
 	shaderProgramWater = TTN_AssetSystem::GetShader("Water shader");
 	shaderProgramAnimatedTextured = TTN_AssetSystem::GetShader("Animated textured shader");
+	shaderColorCorrection  = TTN_AssetSystem::GetShader("Color correction shader");
 #pragma endregion
 
 	////MESHES////
+#pragma region MESHES
 	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
 	skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
 	sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
@@ -291,6 +293,9 @@ void Game::SetUpAssets()
 	birdMesh = TTN_AssetSystem::GetMesh("Bird mesh");
 	damMesh = TTN_AssetSystem::GetMesh("Dam mesh");
 
+#pragma endregion
+
+#pragma region TEXTURES
 	///TEXTURES////
 	cannonText = TTN_Texture2D::LoadFromFile("textures/metal.png");
 	skyboxText = TTN_TextureCubeMap::LoadFromImages("textures/skybox/sky.png");
@@ -322,6 +327,7 @@ void Game::SetUpAssets()
 	flamethrowerText = TTN_AssetSystem::GetTexture2D("Flamethrower texture");
 	birdText = TTN_AssetSystem::GetTexture2D("Bird texture");
 	damText = TTN_AssetSystem::GetTexture2D("Dam texture");
+#pragma endregion
 
 	////MATERIALS////
 	cannonMat = TTN_Material::Create();

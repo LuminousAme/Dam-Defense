@@ -7,6 +7,7 @@
 #include "Titan/ObjLoader.h"
 #include "Titan/Interpolation.h"
 #include "Titan/Sound.h"
+#include "Titan/LUT.h"
 #include "EnemyComponent.h"
 
 using namespace Titan;
@@ -55,6 +56,7 @@ public:
 	TTN_Shader::sshptr shaderProgramAnimatedTextured;
 	TTN_Shader::sshptr shaderProgramWater;
 	TTN_Shader::sshptr shaderProgramTerrain;
+	TTN_Shader::sshptr shaderColorCorrection;
 
 	//meshes
 	TTN_Mesh::smptr cannonMesh;
@@ -127,59 +129,7 @@ protected:
 	/////// OTHER DATA ///////////
 	#pragma region Data
 protected:
-<<<<<<< HEAD
-	//position of the mouse in screenspace
-	glm::vec2 mousePos;
-	//the ammount the main player should be rotated
-	glm::vec2 rotAmmount;
-	//the direction the cannon is currently facing
-	glm::vec3 playerDir;
-	//a multiplier for the ammount of force should be applied to a cannonball when it is fired
-	float cannonBallForce;
-	//the ammount of time in seconds that the player has to wait between shots
-	float playerShootCooldown;
-	float playerShootCooldownTimer;
-	//the terrain scale
-	float terrainScale;
-	//water animation control
-	float time;
-	float waveSpeed;
-	float waveBaseHeightIncrease;
-	float waveHeightMultiplier;
-	float waveLenghtMultiplier;
 
-	float health = 100.f;
-
-	//Stuff for waves and spawning enemies
-	float Timer = 0.F;//timer for boat spawning (left side)
-	float Timer2 = 0.F;//timer for boat spawning (right side)
-	bool Spawning = true; //whether or not the spawners should be spawning
-
-	float waveTimer = 0.F;//timer for waves
-	float restTimer = 0.F;//timer for waves
-	int wave = 0; // keep track of wave number
-	int waveEnd = 7;
-
-	bool Flaming = false; //if flamethrowers are active right now
-	float FlameTimer = 0.0f; //flamethrower cooldown
-	float FlameAnim = 0.0f; //flamethrower duration
-
-	//bird control
-	float birdTimer = 0.0f;
-	glm::vec3 birdBase, birdTarget;
-
-	//smoke particle
-	TTN_ParticleTemplate smokeParticle;
-	TTN_ParticleTemplate fireParticle;
-
-	//wheter or not the scene is paused
-	bool m_paused;
-
-	//gameover bool
-	bool m_gameOver;
-	//victory bool
-	bool gameWin = false;
-=======
 	/////// Player control data/////////
 	float cannonBallForce = 3600.0f;;//a multiplier for the ammount of force should be applied to a cannonball when it is fired
 	float playerShootCooldown = 0.7f;//the ammount of time in seconds that the player has to wait between shots
@@ -240,7 +190,7 @@ protected:
 	TTN_ParticleTemplate smokeParticle;//smoke burst particles
 	TTN_ParticleTemplate fireParticle;//fire particles
 	TTN_ParticleTemplate expolsionParticle;//expolsion particles
->>>>>>> Ame
+
 
 	//set up functions, called by InitScene()
 protected:
