@@ -573,11 +573,16 @@ namespace Titan {
 					//get the rigid bodies
 					const btRigidBody* b0 = btRigidBody::upcast(obj0);
 					const btRigidBody* b1 = btRigidBody::upcast(obj1);
+					const btVector3& location = point.getPositionWorldOnA();
+					const btVector3& location2 = point.getPositionWorldOnB();
+					glm::vec3 collisionLocation = (glm::vec3(location.getX(), location.getY(), location.getZ())
+						+ glm::vec3(location2.getX(), location2.getY(), location2.getZ())) * 0.5f;
 
 					//and make a collision object
 					TTN_Collision::scolptr newCollision = TTN_Collision::Create();
 					newCollision->SetBody1(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b0->getUserPointer())));
 					newCollision->SetBody2(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b1->getUserPointer())));
+					newCollision->SetCollisionPoint(collisionLocation);
 
 					//compare it to all the previous collisions
 					bool shouldAdd = true;

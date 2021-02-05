@@ -469,6 +469,7 @@ void Game::SetUpEntities()
 		AttachCopy(dam, damTrans);
 	}
 
+	flamethrowers = std::vector<entt::entity>();
 	//entities for flamethrowers
 	for (int i = 0; i < 6; i++) {
 		//flamethrower entities
@@ -588,7 +589,6 @@ void Game::SetUpEntities()
 
 	//vector for flamethrower models and flame particles
 	flames = std::vector<entt::entity>();
-	flamethrowers = std::vector<entt::entity>();
 
 	//set the cannon to be a child of the camera
 	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), &camera);
@@ -620,13 +620,27 @@ void Game::SetUpOtherData()
 		fireParticle = TTN_ParticleTemplate();
 		fireParticle.SetMat(fireMat);
 		fireParticle.SetMesh(sphereMesh);
-		fireParticle.SetOneEndColor(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		fireParticle.SetOneEndColor(glm::vec4(1.0f, 0.2f, 0.0f, 0.0f));
 		fireParticle.SetOneEndSize(4.0f);
 		fireParticle.SetOneEndSpeed(6.0f);
 		fireParticle.SetOneLifetime(2.0f);
-		fireParticle.SetOneStartColor(glm::vec4(1.0f, 0.65f, 0.0f, 1.0f));
+		fireParticle.SetTwoStartColors(glm::vec4(1.0f, 0.35f, 0.0f, 1.0f), glm::vec4(1.0f, 0.60f, 0.0f, 1.0f));
 		fireParticle.SetOneStartSize(0.5f);
 		fireParticle.SetOneStartSpeed(8.5f);
+	}
+
+	//expolsion particle template
+	{
+		expolsionParticle = TTN_ParticleTemplate();
+		expolsionParticle.SetMat(fireMat);
+		expolsionParticle.SetMesh(sphereMesh);
+		expolsionParticle.SetTwoEndColors(glm::vec4(0.5f, 0.1f, 0.0f, 0.2f), glm::vec4(0.8f, 0.3f, 0.0f, 0.2f));
+		expolsionParticle.SetOneEndSize(4.5f);
+		expolsionParticle.SetOneEndSpeed(0.05f);
+		expolsionParticle.SetTwoLifetimes(1.8f, 2.0f);
+		expolsionParticle.SetTwoStartColors(glm::vec4(1.0f, 0.35f, 0.0f, 1.0f), glm::vec4(1.0f, 0.60f, 0.0f, 1.0f));
+		expolsionParticle.SetOneStartSize(1.0f);
+		expolsionParticle.SetOneStartSpeed(4.5f);
 	}
 }
 
@@ -762,6 +776,34 @@ void Game::DeleteCannonballs()
 	}
 }
 
+//function that will create an expolsion particle effect at a given input location
+void Game::CreateExpolsion(glm::vec3 location)
+{
+	//we don't really need to save the entity number for any reason, so we just make the variable local
+	entt::entity newExpolsion = CreateEntity(2.0f);
+
+	//setup a transfrom for the particle system
+	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f));
+	//attach that transform to the entity
+	AttachCopy(newExpolsion, PSTrans);
+	glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
+	std::cout << "expolsion - x: " << tempLoc.x << " y: " << tempLoc.y << " z: " << tempLoc.z << std::endl;
+
+	//setup a particle system for the particle system
+	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(500, 0, expolsionParticle, 0.0f, false);
+	ps->MakeSphereEmitter();
+	ps->VelocityReadGraphCallback(FastStart);
+	ps->ColorReadGraphCallback(SlowStart);
+	ps->ScaleReadGraphCallback(ZeroOneZero);
+	//setup a particle system component
+	TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
+	//attach the particle system component to the entity
+	AttachCopy(newExpolsion, psComponent);
+
+	//get a reference to that particle system and burst it 
+	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(500);
+}
+
 //creates the flames for the flamethrower
 void Game::Flamethrower() {
 	//if the cooldown has ended
@@ -840,6 +882,7 @@ void Game::FlamethrowerUpdate(float deltaTime)
 				it++;
 			}
 			else {
+				m_boatsRemainingThisWave--;
 				DeleteEntity(*it);
 				it = boats.erase(it);
 			}
@@ -1022,6 +1065,9 @@ void Game::Collisions()
 		//grab the entity numbers of the colliding entities
 		entt::entity entity1Ptr = collisionsThisFrame[i]->GetBody1();
 		entt::entity entity2Ptr = collisionsThisFrame[i]->GetBody2();
+		glm::vec3 loc = collisionsThisFrame[i]->GetCollisionPoint();
+
+
 
 		//check if both entities still exist
 		if (TTN_Scene::GetScene()->valid(entity1Ptr) && TTN_Scene::GetScene()->valid(entity2Ptr)) {
@@ -1033,6 +1079,11 @@ void Game::Collisions()
 				//if one is a boat and the other is a cannonball
 				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Boat" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball") ||
 					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Boat"))) {
+
+					//play an expolsion at it's location
+					CreateExpolsion(glm::vec3(loc.x, -4.0f, loc.z));
+					std::cout << "collision - x: " << loc.x << " y: " << loc.y << " z: " << loc.z << std::endl;
+
 					//then iterate through the list of cannonballs until you find the one that's collided
 					std::vector<entt::entity>::iterator it = cannonBalls.begin();
 					while (it != cannonBalls.end()) {

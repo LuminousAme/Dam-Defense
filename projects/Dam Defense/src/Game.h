@@ -186,6 +186,7 @@ protected:
 	///////PARTICLE TEMPLATES//////////
 	TTN_ParticleTemplate smokeParticle;//smoke burst particles
 	TTN_ParticleTemplate fireParticle;//fire particles
+	TTN_ParticleTemplate expolsionParticle;//expolsion particles
 
 	//set up functions, called by InitScene()
 protected:
@@ -218,6 +219,8 @@ protected:
 protected:
 	void CreateCannonball();
 	void DeleteCannonballs();
+
+	void CreateExpolsion(glm::vec3 location);
 };
 
 inline float SmoothStep(float t) {
@@ -230,4 +233,8 @@ inline float FastStart(float t) {
 
 inline float SlowStart(float t) {
 	return (t * t * t);
+}
+
+inline float ZeroOneZero(float t) {
+	return (-4.0f * (t * t) + 4.0f * t);
 }
