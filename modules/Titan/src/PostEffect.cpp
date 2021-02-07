@@ -1,7 +1,6 @@
 #include "Titan/ttn_pch.h"
 #include "Titan/PostEffect.h"
 
-
 namespace Titan {
 
 	void TTN_PostEffect::Init(unsigned width, unsigned height)

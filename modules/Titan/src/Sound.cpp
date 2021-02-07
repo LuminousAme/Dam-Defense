@@ -2,11 +2,10 @@
 // Application.cpp - source file fpr the classes that allow for audio in applications
 
 #include "Titan/ttn_pch.h"
-
 #include "Titan/Sound.h"
 
 ////////////////////////////////////
-//			 AudioObject		  //
+//			 TTN_AudioObject		  //
 ////////////////////////////////////
 
 FMOD_VECTOR TTN_AudioObject::VectorToFmod(const glm::vec3& vec)
@@ -42,6 +41,8 @@ float TTN_AudioObject::VolumeTodb(float volume)
 int TTN_AudioObject::ErrorCheck(FMOD_RESULT result)
 {
 
+#ifdef _DEBUG
+
 	// Outputs FMOD error message
 	if (result != FMOD_OK)
 	{
@@ -52,12 +53,14 @@ int TTN_AudioObject::ErrorCheck(FMOD_RESULT result)
 		return 1;
 	}
 
+#endif // DEBUG
+
 	// All good
 	return 0;
 }
 
 ////////////////////////////////////
-//			 AudioBus   		  //
+//			 TTN_AudioBus   		  //
 ////////////////////////////////////
 
 TTN_AudioBus::TTN_AudioBus(FMOD::Studio::Bus* bus)
@@ -83,7 +86,6 @@ float TTN_AudioBus::GetVolume()
 	ErrorCheck(m_Bus->getVolume(&volume));
 	return volume;
 }
-
 void TTN_AudioBus::SetVolume(const float& newVolume)
 {
 	ErrorCheck(m_Bus->setVolume(newVolume));
@@ -117,7 +119,7 @@ void TTN_AudioBus::StopAllEvent(const bool& fade)
 
 
 ////////////////////////////////////
-//			 AudioListener		  //
+//			 TTN_AudioListener		  //
 ////////////////////////////////////
 
 void TTN_AudioListener::SetPosition(const glm::vec3& pos)
@@ -221,7 +223,7 @@ void TTN_AudioListener::SetID(const int& id)
 
 
 ////////////////////////////////////
-//			 AudioEvent			  //
+//			 TTN_AudioEvent			  //
 ////////////////////////////////////
 
 TTN_AudioEvent::TTN_AudioEvent(FMOD::Studio::EventInstance* eventInstance)
@@ -236,52 +238,39 @@ TTN_AudioEvent::~TTN_AudioEvent()
 void TTN_AudioEvent::Play()
 {
 
-	// Check if already playing
-	FMOD_STUDIO_PLAYBACK_STATE* state = NULL;
-
-	if (m_EventInstance->getPlaybackState(state) == FMOD_STUDIO_PLAYBACK_PLAYING)
+	if (isPlaying())
 	{
 		return;
 	}
 
 	// Start the event
-	m_EventInstance->start();
+	ErrorCheck(m_EventInstance->start());
 }
 
 
 void TTN_AudioEvent::Restart()
 {
 	// Start the event
-	m_EventInstance->start();
+	ErrorCheck(m_EventInstance->start());
 }
 
 void TTN_AudioEvent::Stop()
 {
-	// Check if already playing
-	FMOD_STUDIO_PLAYBACK_STATE* state = NULL;
-	if (m_EventInstance->getPlaybackState(state) == FMOD_STUDIO_PLAYBACK_PLAYING)
-	{
-		// Stop the event
-		m_EventInstance->stop(FMOD_STUDIO_STOP_ALLOWFADEOUT);
-	}
+	ErrorCheck(m_EventInstance->stop(FMOD_STUDIO_STOP_ALLOWFADEOUT));
 }
 
 void TTN_AudioEvent::StopImmediately()
 {
-	// Check if already playing
-	FMOD_STUDIO_PLAYBACK_STATE* state = NULL;
-	if (m_EventInstance->getPlaybackState(state) == FMOD_STUDIO_PLAYBACK_PLAYING)
-	{
-		// Stop the event
-		m_EventInstance->stop(FMOD_STUDIO_STOP_IMMEDIATE);
-	}
+	ErrorCheck(m_EventInstance->stop(FMOD_STUDIO_STOP_IMMEDIATE));
 }
 
 bool TTN_AudioEvent::isPlaying()
 {
 	// Check if already playing
-	FMOD_STUDIO_PLAYBACK_STATE* state = NULL;
-	if (m_EventInstance->getPlaybackState(state) == FMOD_STUDIO_PLAYBACK_PLAYING)
+	FMOD_STUDIO_PLAYBACK_STATE state;
+	ErrorCheck(m_EventInstance->getPlaybackState(&state));
+
+	if (state == FMOD_STUDIO_PLAYBACK_PLAYING)
 	{
 		return true;
 	}
@@ -421,7 +410,7 @@ TTN_AudioEvent& TTN_AudioEngine::CreateEvent(const std::string& eventName, const
 		ErrorCheck(eventDescription->createInstance(&newFMODEvent));
 
 		// Create an audio event
-		TTN_AudioEvent* newAudioEvent = new TTN_AudioEvent(newFMODEvent);
+		TTN_AudioEvent* newTTN_AudioEvent = new TTN_AudioEvent(newFMODEvent);
 
 		// Make sure multiple events with the same name aren't created
 		if (m_EventMap.find(eventName) != m_EventMap.end())
@@ -430,9 +419,9 @@ TTN_AudioEvent& TTN_AudioEngine::CreateEvent(const std::string& eventName, const
 		}
 
 		// Add the audio event to our map
-		m_EventMap[eventName] = newAudioEvent;
+		m_EventMap[eventName] = newTTN_AudioEvent;
 
-		return *newAudioEvent;
+		return *newTTN_AudioEvent;
 	}
 
 }
@@ -506,3 +495,8 @@ float TTN_AudioEngine::GetGlobalParameterValue(const char* name)
 	// Return float
 	return value;
 }
+
+
+
+
+
