@@ -96,6 +96,7 @@ namespace Titan {
 		unsigned int m_height = 0;
 
 	protected:
+
 		//OpenGL framebuffer handle
 		GLuint m_FBO;
 		//Depth attachment, either one or none

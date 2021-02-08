@@ -11,6 +11,7 @@
 #include "ObjLoader.h"
 #include "Shader.h"
 #include "Material.h"
+#include "LUT.h"
 
 namespace Titan {
 	//class to control all the assets in any given project
@@ -32,6 +33,8 @@ namespace Titan {
 		static void AddShaderToBeLoaded(std::string accessName, std::string VertShaderFileName, std::string FragShaderFileName, int set = 0);
 		//Adds a Titan default shader to be loaded
 		static void AddDefaultShaderToBeLoaded(std::string accessName, TTN_DefaultShaders VertShader, TTN_DefaultShaders FragShader, int set = 0);
+		//adds a .cube file to be loaded
+		static void AddCubeFileToBeLoaded(std::string accessName, std::string fileName, int set = 0);
 		//Creates a new material pointer in the system 
 		static void CreateNewMaterial(std::string accessName);
 
@@ -58,6 +61,8 @@ namespace Titan {
 		static TTN_Shader::sshptr GetShader(std::string accessName);
 		//Gets a material pointer from the system
 		static TTN_Material::smatptr GetMaterial(std::string accessName);
+		//gets a cube file pointer from the system
+		static TTN_LUT3D::st2dptr GetCubeFile(std::string accessName);
 
 		//functions to load a set of assets
 		//loads all the assets in a set without breaking
@@ -142,6 +147,8 @@ namespace Titan {
 		inline static std::unordered_map<int, std::vector<AccessAndFileName>> s_CubemapsToLoad = std::unordered_map<int, std::vector<AccessAndFileName>>();
 		//the map of vector of strings for non-animated meshes to load
 		inline static std::unordered_map<int, std::vector<AccessAndFileName>> s_NonAnimatedMeshesToLoad = std::unordered_map<int, std::vector<AccessAndFileName>>();
+		//map of cube files to load
+		inline static std::unordered_map<int, std::vector<AccessAndFileName>> s_CubeFilesToLoad = std::unordered_map<int, std::vector<AccessAndFileName>>();
 		//the map of strings and ints for animated meshes to load 
 		inline static std::unordered_map<int, std::vector<AccessNameFileNameAndNumber>> s_AnimatedMeshesToLoad = std::unordered_map<int, std::vector<AccessNameFileNameAndNumber>>();
 		//the map of sets of 3 string for non-default shaders to load

@@ -7,6 +7,7 @@
 #include "Titan/ObjLoader.h"
 #include "Titan/Interpolation.h"
 #include "Titan/Sound.h"
+#include "Titan/LUT.h"
 #include "EnemyComponent.h"
 
 using namespace Titan;
@@ -55,6 +56,7 @@ public:
 	TTN_Shader::sshptr shaderProgramAnimatedTextured;
 	TTN_Shader::sshptr shaderProgramWater;
 	TTN_Shader::sshptr shaderProgramTerrain;
+	TTN_Shader::sshptr shaderColorCorrection;
 
 	//meshes
 	TTN_Mesh::smptr cannonMesh;
@@ -127,6 +129,7 @@ protected:
 	/////// OTHER DATA ///////////
 	#pragma region Data
 protected:
+
 	/////// Player control data/////////
 	float cannonBallForce = 3600.0f;;//a multiplier for the ammount of force should be applied to a cannonball when it is fired
 	float playerShootCooldown = 0.7f;//the ammount of time in seconds that the player has to wait between shots
@@ -187,6 +190,7 @@ protected:
 	TTN_ParticleTemplate smokeParticle;//smoke burst particles
 	TTN_ParticleTemplate fireParticle;//fire particles
 	TTN_ParticleTemplate expolsionParticle;//expolsion particles
+
 
 	//set up functions, called by InitScene()
 protected:
