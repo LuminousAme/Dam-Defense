@@ -38,7 +38,15 @@ namespace Titan {
 		void SetSkybox(TTN_TextureCubeMap::stcmptr Skybox);
 		void SetHeightMap(TTN_Texture2D::st2dptr height);
 		void SetHeightInfluence(float influence);
-
+		void SetHasAmbient(bool hasAmbient);
+		void SetHasSpecular(bool hasSpecular);
+		void SetHasOutline(bool hasOutline);
+		void SetOutlineSize(float outlineSize);
+		void SetDiffuseRamp(TTN_Texture2D::st2dptr ramp);
+		void SetUseDiffuseRamp(bool useRamp);
+		void SetSpecularRamp(TTN_Texture2D::st2dptr ramp);
+		void SetUseSpecularRamp(bool useRamp);
+		
 		//getters
 		TTN_Texture2D::st2dptr GetAlbedo() { return m_Albedo; }
 		float GetShininess() { return m_Shininess; }
@@ -46,6 +54,14 @@ namespace Titan {
 		TTN_TextureCubeMap::stcmptr GetSkybox() { return m_SkyboxTexture; }
 		TTN_Texture2D::st2dptr GetHeightMap() { return m_HeightMap; }
 		float GetHeightInfluence() { return m_HeightInfluence; }
+		bool GetHasAmbient() { return m_hasAmbientLighting; }
+		bool GetHasSpecular() { return m_hasSpecularLighting; }
+		bool GetHasOutline() { return m_hasOutline; }
+		float GetOutlineSize() { return m_outlineSize; }
+		TTN_Texture2D::st2dptr GetDiffuseRamp() { return m_diffuseRamp; }
+		bool GetUseDiffuseRamp() { return m_useDiffuseRamp; }
+		TTN_Texture2D::st2dptr GetSpecularRamp() { return m_specularRamp; }
+		bool GetUseSpecularRamp() { return m_useSpecularRamp; }
 
 	private:
 		//albedo 
@@ -59,5 +75,17 @@ namespace Titan {
 		//texture for displacement mapping
 		TTN_Texture2D::st2dptr m_HeightMap;
 		float m_HeightInfluence;
+
+		//lighting controls
+		bool m_hasAmbientLighting;
+		bool m_hasSpecularLighting;
+		bool m_hasOutline;
+		float m_outlineSize;
+
+		//toon shading ramps
+		TTN_Texture2D::st2dptr m_diffuseRamp;
+		bool m_useDiffuseRamp;
+		TTN_Texture2D::st2dptr m_specularRamp;
+		bool m_useSpecularRamp;
 	};
 }

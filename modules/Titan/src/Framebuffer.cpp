@@ -68,6 +68,10 @@ namespace Titan {
 
 	void TTN_Framebuffer::Init()
 	{
+		//if the fullscreen quad has not been initliazed, initliaze it 
+		if (!m_isInitFSQ)
+			InitFullScreenQuad();
+
 		//Generates the FBO
 		glGenFramebuffers(1, &m_FBO);
 		//Bind it
@@ -77,6 +81,9 @@ namespace Titan {
 		{
 			//because we have depth we need to clear our depth bit
 			m_clearFlag |= GL_DEPTH_BUFFER_BIT;
+
+			//create the pointer for the texture
+			m_depth.m_texture = TTN_Texture2D::CreateEmpty();
 
 			//Generate the texture
 			glGenTextures(1, &m_depth.m_texture->GetHandle());
@@ -111,6 +118,10 @@ namespace Titan {
 			//Loops through them
 			for (unsigned i = 0; i < m_color.m_numAttachments; i++)
 			{
+				//create the texture pointers
+				m_color.m_textures[i] = TTN_Texture2D::CreateEmpty();
+
+				//set the handle
 				m_color.m_textures[i]->GetHandle() = textureHandles[i];
 
 				//Binds the texture
@@ -143,7 +154,7 @@ namespace Titan {
 	void TTN_Framebuffer::AddDepthTarget()
 	{
 		//if there is a handle already, unload it
-		if (m_depth.m_texture->GetHandle())
+		if (m_depth.m_texture != nullptr && m_depth.m_texture->GetHandle())
 		{
 			m_depth.Unload();
 		}
@@ -335,6 +346,8 @@ namespace Titan {
 
 		glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
 		glBindVertexArray(GL_NONE);
+
+		m_isInitFSQ = true;
 	}
 
 	//renders the fullscreen quad

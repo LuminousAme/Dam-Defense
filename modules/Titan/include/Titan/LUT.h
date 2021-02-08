@@ -1,39 +1,47 @@
+//Titan Engine by Atlas X Games
+//LUT.h - Header for the class that represents 3D look up tables for color correction
 #pragma once
 
 //include the precompile header with a bunch of system
 #include "ttn_pch.h"
 
-#include <vector>
-#include <fstream>
-#include <string>
-#include <glad/glad.h>
-#include "glm/common.hpp"
+namespace Titan {
+	//class the represents a 3D cube look up table
+	class  TTN_LUT3D
+	{
+	public:
+		//defines a special easier to use name for shared(smart) pointers to the class 
+		typedef std::shared_ptr<TTN_LUT3D> sltptr;
 
-class  TTN_LUT3D
-{
-public:
-	//defines a special easier to use name for shared(smart) pointers to the class 
-	typedef std::shared_ptr<TTN_LUT3D> st2dptr;
+		//creates and returns a shared(smart) pointer to the class 
+		static inline sltptr Create() {
+			return std::make_shared<TTN_LUT3D>();
+		}
 
-	//creates and returns a shared(smart) pointer to the class 
-	static inline st2dptr Create() {
-		return std::make_shared<TTN_LUT3D>();
-	}
+		//creates and returns a shared(smart) pointer to the class with a value loaded
+		static inline sltptr Create(std::string path) {
+			return std::make_shared<TTN_LUT3D>(path);
+		}
 
-	//Creates a new empty texture pointer, this is used by the framebuffer class 
-	static inline st2dptr CreateEmpty() {
-		return std::make_shared<TTN_LUT3D>();
-	}
+	public:
+		//default constructor
+		TTN_LUT3D();
+		//constructor that takes the path to a .cube file
+		TTN_LUT3D(std::string path);
+		
+		//load in from a cube file
+		void loadFromFile(std::string path);
+		//bind and unbind the look up table
+		void bind();
+		void unbind();
 
-	 TTN_LUT3D();
-	 TTN_LUT3D(std::string path);
-	void loadFromFile(std::string path);
-	void bind();
-	void unbind();
+		//bind and unbind to and from a specfic texture slot
+		void bind(int textureSlot);
+		void unbind(int textureSlot);
 
-	void bind(int textureSlot);
-	void unbind(int textureSlot);
-private:
-	GLuint _handle = GL_NONE;
-	std::vector<glm::vec3> data;
-};
+	private:
+		//Gl handle and data
+		GLuint m_handle = GL_NONE;
+		std::vector<glm::vec3> data;
+	};
+}

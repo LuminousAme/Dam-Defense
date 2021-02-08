@@ -27,6 +27,9 @@ void MainMenu::Update(float deltaTime)
 	//increase the total time of the scene to make the water animated correctly
 	time += deltaTime;
 
+	//call imgui's update for this scene
+	ImGui();
+
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
 }
@@ -41,6 +44,7 @@ void MainMenu::PostRender()
 		//vert shader
 		//bind the height map texture
 		terrainMap->Bind(0);
+		TTN_AssetSystem::GetTexture2D("Normal Map")->Bind(1);
 
 		//pass the scale uniform
 		shaderProgramTerrain->SetUniform("u_scale", terrainScale);
@@ -58,13 +62,57 @@ void MainMenu::PostRender()
 
 		//frag shader
 		//bind the textures
-		sandText->Bind(1);
-		rockText->Bind(2);
-		grassText->Bind(3);
+		sandText->Bind(2);
+		rockText->Bind(3);
+		grassText->Bind(4);
+
+		m_mats[0]->GetDiffuseRamp()->Bind(10);
+		m_mats[0]->GetSpecularMap()->Bind(11);
 
 		//send lighting from the scene
 		shaderProgramTerrain->SetUniform("u_AmbientCol", TTN_Scene::GetSceneAmbientColor());
 		shaderProgramTerrain->SetUniform("u_AmbientStrength", TTN_Scene::GetSceneAmbientLightStrength());
+		shaderProgramTerrain->SetUniform("u_Shininess", 128.0f);
+		shaderProgramTerrain->SetUniform("u_hasAmbientLighting", (int)m_mats[0]->GetHasAmbient());
+		shaderProgramTerrain->SetUniform("u_hasSpecularLighting", (int)m_mats[0]->GetHasSpecular());
+		shaderProgramTerrain->SetUniform("u_hasOutline", (int)m_mats[0]->GetHasOutline());
+		shaderProgramTerrain->SetUniform("u_useDiffuseRamp", m_mats[0]->GetUseDiffuseRamp());
+		shaderProgramTerrain->SetUniform("u_useSpecularRamp", (int)m_mats[0]->GetUseSpecularRamp());
+		//stuff from the light
+		glm::vec3 lightPositions[16];
+		glm::vec3 lightColor[16];
+		float lightAmbientStr[16];
+		float lightSpecStr[16];
+		float lightAttenConst[16];
+		float lightAttenLinear[16];
+		float lightAttenQuadartic[16];
+
+		for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
+			auto& light = Get<TTN_Light>(m_Lights[i]);
+			auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
+			lightPositions[i] = lightTrans.GetPos();
+			lightColor[i] = light.GetColor();
+			lightAmbientStr[i] = light.GetAmbientStrength();
+			lightSpecStr[i] = light.GetSpecularStrength();
+			lightAttenConst[i] = light.GetConstantAttenuation();
+			lightAttenLinear[i] = light.GetConstantAttenuation();
+			lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
+		}
+
+		//send all the data about the lights to glsl
+		shaderProgramTerrain->SetUniform("u_LightPos", lightPositions[0], 16);
+		shaderProgramTerrain->SetUniform("u_LightCol", lightColor[0], 16);
+		shaderProgramTerrain->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
+		shaderProgramTerrain->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
+		shaderProgramTerrain->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
+		shaderProgramTerrain->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
+		shaderProgramTerrain->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
+
+		//and tell it how many lights there actually are
+		shaderProgramTerrain->SetUniform("u_NumOfLights", (int)m_Lights.size());
+
+		//stuff from the camera
+		shaderProgramTerrain->SetUniform("u_CamPos", Get<TTN_Transform>(camera).GetPos());
 
 		//render the terrain
 		terrainPlain->GetVAOPointer()->Render();
@@ -142,16 +190,26 @@ void MainMenu::SetUpAssets()
 	cannonMat = TTN_Material::Create();
 	cannonMat->SetAlbedo(cannonText);
 	cannonMat->SetShininess(128.0f);
+	m_mats.push_back(cannonMat);
 
 	flamethrowerMat = TTN_Material::Create();
 	flamethrowerMat->SetAlbedo(flamethrowerText);
 	flamethrowerMat->SetShininess(128.0f);
+	m_mats.push_back(flamethrowerMat);
 
 	skyboxMat = TTN_Material::Create();
 	skyboxMat->SetSkybox(skyboxText);
 
 	damMat = TTN_Material::Create();
 	damMat->SetAlbedo(damText);
+	m_mats.push_back(damMat);
+
+	for (int i = 0; i < m_mats.size(); i++) {
+		m_mats[i]->SetDiffuseRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
+		m_mats[i]->SetSpecularRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
+		m_mats[i]->SetUseDiffuseRamp(m_useDiffuseRamp);
+		m_mats[i]->SetUseSpecularRamp(m_useSpecularRamp);
+	}
 }
 
 void MainMenu::SetUpEntities()
@@ -329,6 +387,315 @@ void MainMenu::SetUpOtherData()
 	waveBaseHeightIncrease = 0.0f;
 	waveHeightMultiplier = 0.005f;
 	waveLenghtMultiplier = -10.0f;
+
+	//setup up the color correction effect
+	glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
+	m_colorCorrectEffect = TTN_ColorCorrect::Create();
+	m_colorCorrectEffect->Init(windowSize.x, windowSize.y);
+	//set it so it doesn't render
+	m_colorCorrectEffect->SetShouldApply(false);
+	m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
+	//and add it to this scene's list of effects
+	m_PostProcessingEffects.push_back(m_colorCorrectEffect);
+
+	//set all 3 effects to false
+	m_applyWarmLut = false;
+	m_applyCoolLut = false;
+	m_applyCustomLut = false;
+
+	//set the lighting bools
+	m_noLighting = false;
+	m_ambientOnly = false;
+	m_specularOnly = false;
+	m_ambientAndSpecular = true;
+	m_ambientSpecularAndOutline = false;
+
+	for (int i = 0; i < m_mats.size(); i++)
+		m_mats[i]->SetOutlineSize(m_outlineSize);
+}
+
+//imgui update for this scene and frame
+void MainMenu::ImGui()
+{
+	ImGui::Begin("Editor");
+
+	if (ImGui::CollapsingHeader("Light Controls")) {
+		ImGui::Text("Maximum number of lights: 16");
+
+		//scene level lighting
+		float sceneAmbientLight[3], sceneAmbientStr;
+		sceneAmbientLight[0] = GetSceneAmbientColor().r;
+		sceneAmbientLight[1] = GetSceneAmbientColor().g;
+		sceneAmbientLight[2] = GetSceneAmbientColor().b;
+		sceneAmbientStr = GetSceneAmbientLightStrength();
+
+		//scene level ambient strenght
+		if (ImGui::SliderFloat("Scene level ambient strenght", &sceneAmbientStr, 0.0f, 1.0f)) {
+			SetSceneAmbientLightStrength(sceneAmbientStr);
+		}
+
+		//scene level ambient color
+		if (ImGui::ColorPicker3("Scene level ambient color", sceneAmbientLight)) {
+			SetSceneAmbientColor(glm::vec3(sceneAmbientLight[0], sceneAmbientLight[1], sceneAmbientLight[2]));
+		}
+
+		//loop through all the lights 
+		int i = 0;
+		std::vector<entt::entity>::iterator it = m_Lights.begin();
+		while (it != m_Lights.end()) {
+			//make temp floats for their data
+			float color[3], pos[3], ambientStr, specularStr, attenConst, attenLine, attenQuad;
+			TTN_Light& tempLightRef = Get<TTN_Light>(*it);
+			TTN_Transform& tempLightTransRef = Get<TTN_Transform>(*it);
+			color[0] = tempLightRef.GetColor().r;
+			color[1] = tempLightRef.GetColor().g;
+			color[2] = tempLightRef.GetColor().b;
+			pos[0] = tempLightTransRef.GetPos().x;
+			pos[1] = tempLightTransRef.GetPos().y;
+			pos[2] = tempLightTransRef.GetPos().z;
+			ambientStr = tempLightRef.GetAmbientStrength();
+			specularStr = tempLightRef.GetSpecularStrength();
+			attenConst = tempLightRef.GetConstantAttenuation();
+			attenLine = tempLightRef.GetLinearAttenuation();
+			attenQuad = tempLightRef.GetQuadraticAttenuation();
+
+			//position
+			std::string tempPosString = "Light " + std::to_string(i) + " Position";
+			if (ImGui::SliderFloat3(tempPosString.c_str(), pos, -100.0f, 100.0f)) {
+				tempLightTransRef.SetPos(glm::vec3(pos[0], pos[1], pos[2]));
+			}
+
+			//color
+			std::string tempColorString = "Light " + std::to_string(i) + " Color";
+			if (ImGui::ColorPicker3(tempColorString.c_str(), color)) {
+				tempLightRef.SetColor(glm::vec3(color[0], color[1], color[2]));
+			}
+
+			//strenghts
+			std::string tempAmbientStrString = "Light " + std::to_string(i) + " Ambient strenght";
+			if (ImGui::SliderFloat(tempAmbientStrString.c_str(), &ambientStr, 0.0f, 10.0f)) {
+				tempLightRef.SetAmbientStrength(ambientStr);
+			}
+
+			std::string tempSpecularStrString = "Light " + std::to_string(i) + " Specular strenght";
+			if (ImGui::SliderFloat(tempSpecularStrString.c_str(), &specularStr, 0.0f, 10.0f)) {
+				tempLightRef.SetSpecularStrength(specularStr);
+			}
+
+			//attenutaition
+			std::string tempAttenConst = "Light " + std::to_string(i) + " Constant Attenuation";
+			if (ImGui::SliderFloat(tempAttenConst.c_str(), &attenConst, 0.0f, 100.0f)) {
+				tempLightRef.SetConstantAttenuation(attenConst);
+			}
+
+			std::string tempAttenLine = "Light " + std::to_string(i) + " Linear Attenuation";
+			if (ImGui::SliderFloat(tempAttenLine.c_str(), &attenLine, 0.0f, 100.0f)) {
+				tempLightRef.SetLinearAttenuation(attenLine);
+			}
+
+			std::string tempAttenQuad = "Light " + std::to_string(i) + " Quadratic Attenuation";
+			if (ImGui::SliderFloat(tempAttenQuad.c_str(), &attenQuad, 0.0f, 100.0f)) {
+				tempLightRef.SetQuadraticAttenuation(attenQuad);
+			}
+
+			std::string tempButton = "Remove Light " + std::to_string(i);
+			if (ImGui::Button(tempButton.c_str())) {
+				DeleteEntity(*it);
+				it = m_Lights.erase(it);
+			}
+
+			i++;
+			it++;
+		}
+
+		//if there are less than 16 lights, give a button that allows the user to add a new light
+		if (i < 15) {
+			if (ImGui::Button("Add New Light")) {
+				m_Lights.push_back(CreateEntity());
+
+				TTN_Transform newTrans = TTN_Transform();
+				TTN_Light newLight = TTN_Light();
+
+				AttachCopy(m_Lights[m_Lights.size() - 1], newTrans);
+				AttachCopy(m_Lights[m_Lights.size() - 1], newLight);
+			}
+		}
+	}
+
+	if (ImGui::CollapsingHeader("Effect Controls")) {
+		//Lighting controls
+		//size of the outline
+		if (ImGui::SliderFloat("Outline Size", &m_outlineSize, 0.0f, 1.0f)) {
+			//set the size of the outline in the materials
+			for (int i = 0; i < m_mats.size(); i++)
+				m_mats[i]->SetOutlineSize(m_outlineSize);
+		}
+
+		//No ligthing
+		if (ImGui::Checkbox("No Lighting", &m_noLighting)) {
+			//set no lighting to true
+			m_noLighting = true;
+			//change all the other lighting settings to false
+			m_ambientOnly = false;
+			m_specularOnly = false;
+			m_ambientAndSpecular = false;
+			m_ambientSpecularAndOutline = false;
+
+			//set that data in the materials
+			for (int i = 0; i < m_mats.size(); i++) {
+				m_mats[i]->SetHasAmbient(false);
+				m_mats[i]->SetHasSpecular(false);
+				m_mats[i]->SetHasOutline(false);
+			}
+		}
+
+		//Ambient only
+		if (ImGui::Checkbox("Ambient Lighting Only", &m_ambientOnly)) {
+			//set ambient only to true
+			m_ambientOnly = true;
+			//change all the other lighting settings to false
+			m_noLighting = false;
+			m_specularOnly = false;
+			m_ambientAndSpecular = false;
+			m_ambientSpecularAndOutline = false;
+
+			//set that data in the materials
+			for (int i = 0; i < m_mats.size(); i++) {
+				m_mats[i]->SetHasAmbient(true);
+				m_mats[i]->SetHasSpecular(false);
+				m_mats[i]->SetHasOutline(false);
+			}
+		}
+
+		//Specular only
+		if (ImGui::Checkbox("Specular Lighting Only", &m_specularOnly)) {
+			//set Specular only to true
+			m_specularOnly = true;
+			//change all the other lighting settings to false
+			m_noLighting = false;
+			m_ambientOnly = false;
+			m_ambientAndSpecular = false;
+			m_ambientSpecularAndOutline = false;
+
+			//set that data in the materials
+			for (int i = 0; i < m_mats.size(); i++) {
+				m_mats[i]->SetHasAmbient(false);
+				m_mats[i]->SetHasSpecular(true);
+				m_mats[i]->SetHasOutline(false);
+			}
+		}
+
+		//Ambient and specular
+		if (ImGui::Checkbox("Ambient and Specular Lighting", &m_ambientAndSpecular)) {
+			//set ambient and specular to true
+			m_ambientAndSpecular = true;
+			//change all the other lighting settings to false
+			m_noLighting = false;
+			m_ambientOnly = false;
+			m_specularOnly = false;
+			m_ambientSpecularAndOutline = false;
+
+			//set that data in the materials
+			for (int i = 0; i < m_mats.size(); i++) {
+				m_mats[i]->SetHasAmbient(true);
+				m_mats[i]->SetHasSpecular(true);
+				m_mats[i]->SetHasOutline(false);
+			}
+		}
+
+		//Ambient, specular, and lineart outline 
+		if (ImGui::Checkbox("Ambient, Specular, and custom(outline) Lighting", &m_ambientSpecularAndOutline)) {
+			//set ambient, specular, and outline to true
+			m_ambientSpecularAndOutline = true;
+			//change all the other lighting settings to false
+			m_noLighting = false;
+			m_ambientOnly = false;
+			m_specularOnly = false;
+			m_ambientAndSpecular = false;
+
+			//set that data in the materials
+			for (int i = 0; i < m_mats.size(); i++) {
+				m_mats[i]->SetHasAmbient(true);
+				m_mats[i]->SetHasSpecular(true);
+				m_mats[i]->SetHasOutline(true);
+			}
+		}
+
+		//Ramp controls
+
+		//diffuse ramp
+		if (ImGui::Checkbox("Use Diffuse Ramp", &m_useDiffuseRamp)) {
+			for (int i = 0; i < m_mats.size(); i++) {
+				m_mats[i]->SetUseDiffuseRamp(m_useDiffuseRamp);
+			}
+		}
+
+		//specular ramp
+		if (ImGui::Checkbox("Use Specular Ramp", &m_useSpecularRamp)) {
+			for (int i = 0; i < m_mats.size(); i++) {
+				m_mats[i]->SetUseSpecularRamp(m_useSpecularRamp);
+			}
+		}
+
+		//Lut controls
+
+		//toogles the warm color correction effect on or off
+		if (ImGui::Checkbox("Warm Color Correction", &m_applyWarmLut)) {
+			switch (m_applyWarmLut)
+			{
+			case true:
+				//if it's been turned on set the effect to render
+				m_colorCorrectEffect->SetShouldApply(true);
+				m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
+				//and make sure the cool and customs luts are set not to render
+				m_applyCoolLut = false;
+				m_applyCustomLut = false;
+				break;
+			case false:
+				//if it's been turned of set the effect not to render
+				m_colorCorrectEffect->SetShouldApply(false);
+				break;
+			}
+		}
+
+		//toogles the cool color correction effect on or off
+		if (ImGui::Checkbox("Cool Color Correction", &m_applyCoolLut)) {
+			switch (m_applyCoolLut)
+			{
+			case true:
+				//if it's been turned on set the effect to render
+				m_colorCorrectEffect->SetShouldApply(true);
+				m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Cool LUT"));
+				//and make sure the warm and customs luts are set not to render
+				m_applyWarmLut = false;
+				m_applyCustomLut = false;
+				break;
+			case false:
+				m_colorCorrectEffect->SetShouldApply(false);
+				break;
+			}
+		}
+
+		//toogles the custom color correction effect on or off
+		if (ImGui::Checkbox("Custom Color Correction", &m_applyCustomLut)) {
+			switch (m_applyCustomLut)
+			{
+			case true:
+				//if it's been turned on set the effect to render
+				m_colorCorrectEffect->SetShouldApply(true);
+				m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Custom LUT"));
+				//and make sure the warm and cool luts are set not to render
+				m_applyWarmLut = false;
+				m_applyCoolLut = false;
+				break;
+			case false:
+				m_colorCorrectEffect->SetShouldApply(false);
+				break;
+			}
+		}
+	}
+
+	ImGui::End();
 }
 
 MainMenuUI::MainMenuUI()
@@ -447,7 +814,7 @@ void MainMenuUI::Update(float deltaTime)
 
 	//get play buttons transform
 	TTN_Transform playButtonTrans = Get<TTN_Transform>(playButton);
-	if (mousePosWorldSpace.x < playButtonTrans.GetPos().x + 0.5f  * abs(playButtonTrans.GetScale().x) && 
+	if (mousePosWorldSpace.x < playButtonTrans.GetPos().x + 0.5f * abs(playButtonTrans.GetScale().x) &&
 		mousePosWorldSpace.x > playButtonTrans.GetPos().x - 0.5f * abs(playButtonTrans.GetScale().x) &&
 		mousePosWorldSpace.y < playButtonTrans.GetPos().y + 0.5f * abs(playButtonTrans.GetScale().y) &&
 		mousePosWorldSpace.y > playButtonTrans.GetPos().y - 0.5f * abs(playButtonTrans.GetScale().y)) {

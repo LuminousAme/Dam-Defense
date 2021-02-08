@@ -49,6 +49,9 @@ namespace Titan {
 		//set the window we want to draw on to the window that was just created
 		glfwMakeContextCurrent(m_window);
 
+		//send the window to backend so other parts of titan can access the screensize
+		TTN_Backend::setWindow(m_window);
+
 		//initliaze glad and check it initliazed properly 
 		if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) == 0) {
 			//if it did not init properly print that to the console and throw a runtime error
@@ -80,7 +83,9 @@ namespace Titan {
 		TTN_Renderer2D::InitRenderer2D();
 		
 		//Set the background colour for our scene to the base black
-		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+		glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+
+		
 	}
 
 	//function to check if the window is being closed
@@ -170,8 +175,11 @@ namespace Titan {
 		//now all the scenes that should be rendered (current gameplay scene, ui, etc.) will be rendered
 		//while anything that doesn't need to be rendered (such as a prefabs scene) will not 
 		
-		//end Imgui
+		//end Imgui, rendering it
 		EndImgui();
+
+		//set the last effect to nullpointer so it's set up correctly for the next frame
+		TTN_Backend::SetLastEffect(nullptr);
 
 		//swap the buffers so all the drawings that the scenes just did are acutally visible 
 		glfwSwapBuffers(m_window);

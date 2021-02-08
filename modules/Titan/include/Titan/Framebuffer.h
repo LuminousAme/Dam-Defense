@@ -36,6 +36,16 @@ namespace Titan {
 	//framebuffer class
 	class TTN_Framebuffer {
 	public:
+		//defines a special easier to use name for shared(smart) pointers to the class 
+		typedef std::shared_ptr<TTN_Framebuffer> sfboptr;
+
+		//creates and returns a shared(smart) pointer to the class 
+		static inline sfboptr Create() {
+			return std::make_shared<TTN_Framebuffer>();
+		}
+
+	public:
+		//default constructors and destructors
 		TTN_Framebuffer();
 		~TTN_Framebuffer();
 
@@ -96,7 +106,6 @@ namespace Titan {
 		unsigned int m_height = 0;
 
 	protected:
-
 		//OpenGL framebuffer handle
 		GLuint m_FBO;
 		//Depth attachment, either one or none
@@ -118,13 +127,13 @@ namespace Titan {
 		bool m_depthActive = false;
 
 		//Full screen quad VBO handle
-		static GLuint m_fullscreenQuadVBO;
+		inline static GLuint m_fullscreenQuadVBO = 0;
 		//Full screen VAO handle
-		static GLuint m_fullscreenQuadVAO;
+		inline static GLuint m_fullscreenQuadVAO = 0;
 
 		//the maximum amount of color attachments
 		static int m_maxColorAttachments;
 		//is the fullscreen quad initliazed
-		static bool m_isInitFSQ;
+		inline static bool m_isInitFSQ = false;
 	};
 }

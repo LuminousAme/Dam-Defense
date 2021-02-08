@@ -15,8 +15,8 @@
 #include "Titan/Scene.h"
 //include the asset manager class
 #include "Titan/AssetSystem.h"
-//include glfw
-#include <GLFW/glfw3.h>
+//include the backend 
+#include "Titan/Backend.h"
  
  
 namespace Titan {
@@ -193,8 +193,6 @@ namespace Titan {
 		//vector for all the scenes in the application
 		static std::vector<Titan::TTN_Scene*> scenes;
 		static GLFWwindow* m_window;
-		//static std::vector<std::function<void()>> imGuiCallbacks;
-
 
 	protected:
 		//default constructor, just creates an empty aplication project

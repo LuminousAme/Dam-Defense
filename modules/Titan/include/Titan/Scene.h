@@ -4,6 +4,8 @@
 
 //precompile header, this file uses entt.hpp
 #include "ttn_pch.h"
+//include access to the backend
+#include "Backend.h"
 //include all the component class definitions we need
 #include "Transform.h"
 #include "Renderer.h"
@@ -16,7 +18,7 @@
 #include "Particle.h"
 //include all the graphics features we need
 #include "Shader.h"
-#include "Framebuffer.h"
+#include "ColorCorrect.h"
 //include ImGui stuff
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include "imgui.h"
@@ -36,7 +38,7 @@ namespace Titan {
 		//constructor with data, using basic scene level lighting information
 		TTN_Scene(glm::vec3 AmbientLightingColor, float AmbientLightingStrength, std::string name = std::string());
 
-		//copy, move, and assingment operators
+		//copy, move, and assignment operators
 		TTN_Scene(const TTN_Scene& oldScene) = default;
 		TTN_Scene(TTN_Scene&&) = default;
 		TTN_Scene& operator=(TTN_Scene&) = default;
@@ -109,7 +111,7 @@ namespace Titan {
 		void SetShouldRender(bool _shouldRender);
 		//sets the ambient color of the lighting in the scene
 		void SetSceneAmbientColor(glm::vec3 color);
-		//sets the strenght of the abmient lighting in the scene
+		//sets the strenght of the ambient lighting in the scene
 		void SetSceneAmbientLightStrength(float str);
 
 		//gets wheter or not the scene should be rendered 
@@ -141,9 +143,12 @@ namespace Titan {
 		//get wheter or not the scene is paused
 		bool GetPaused() { return m_Paused; }
 
-		//variable to store the entities of the lights
+	protected:
+		//vector to store the entities of the lights
 		std::vector<entt::entity> m_Lights;
 
+		//vector to store the post processing effects
+		std::vector<TTN_PostEffect::spostptr> m_PostProcessingEffects;
 	private:
 		//name of the scene
 		std::string m_sceneName;
@@ -178,6 +183,11 @@ namespace Titan {
 
 		//vector of titan collision objects, containing pointers to the rigid bodies (from which you can get entity numbers) and glm vec3s for collision normals
 		std::vector<TTN_Collision::scolptr> collisions;
+
+		//empty post processing effect that just draws to a framebuffer
+		TTN_PostEffect::spostptr m_emptyEffect;
+		//color correct effect
+		TTN_PostEffect::spostptr m_colorCorrectEffect;
 
 		//constructs the TTN_Collision objects
 		void ConstructCollisions();

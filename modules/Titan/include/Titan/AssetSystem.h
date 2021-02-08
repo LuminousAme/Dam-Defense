@@ -33,10 +33,10 @@ namespace Titan {
 		static void AddShaderToBeLoaded(std::string accessName, std::string VertShaderFileName, std::string FragShaderFileName, int set = 0);
 		//Adds a Titan default shader to be loaded
 		static void AddDefaultShaderToBeLoaded(std::string accessName, TTN_DefaultShaders VertShader, TTN_DefaultShaders FragShader, int set = 0);
-		//adds a .cube file to be loaded
-		static void AddCubeFileToBeLoaded(std::string accessName, std::string fileName, int set = 0);
 		//Creates a new material pointer in the system 
 		static void CreateNewMaterial(std::string accessName);
+		//Adds a 3D cube look up table to be loaded
+		static void AddLUTTobeLoaded(std::string accessName, std::string fileName, int set = 0);
 
 		/////////////functions for adding preexisting/loaded assets into the system/////////////////////
 		//Adds an already loaded 2D texture to the system
@@ -49,6 +49,8 @@ namespace Titan {
 		static void AddExistingShader(std::string accessName, TTN_Shader::sshptr shader);
 		//Adds an already existing material 
 		static void AddExistingMaterial(std::string accessName, TTN_Material::smatptr material);
+		//Adds an already existing cube look up table
+		static void AddExistingLUT(std::string accessName, TTN_LUT3D::sltptr cube);
 
 		/////////////functions for accessing assets in the system/////////////////////
 		//Gets a 2D texture pointer from the system 
@@ -61,8 +63,8 @@ namespace Titan {
 		static TTN_Shader::sshptr GetShader(std::string accessName);
 		//Gets a material pointer from the system
 		static TTN_Material::smatptr GetMaterial(std::string accessName);
-		//gets a cube file pointer from the system
-		static TTN_LUT3D::st2dptr GetCubeFile(std::string accessName);
+		//Gets a lut pointer from the system
+		static TTN_LUT3D::sltptr GetLUT(std::string accessName);
 
 		//functions to load a set of assets
 		//loads all the assets in a set without breaking
@@ -147,14 +149,14 @@ namespace Titan {
 		inline static std::unordered_map<int, std::vector<AccessAndFileName>> s_CubemapsToLoad = std::unordered_map<int, std::vector<AccessAndFileName>>();
 		//the map of vector of strings for non-animated meshes to load
 		inline static std::unordered_map<int, std::vector<AccessAndFileName>> s_NonAnimatedMeshesToLoad = std::unordered_map<int, std::vector<AccessAndFileName>>();
-		//map of cube files to load
-		inline static std::unordered_map<int, std::vector<AccessAndFileName>> s_CubeFilesToLoad = std::unordered_map<int, std::vector<AccessAndFileName>>();
 		//the map of strings and ints for animated meshes to load 
 		inline static std::unordered_map<int, std::vector<AccessNameFileNameAndNumber>> s_AnimatedMeshesToLoad = std::unordered_map<int, std::vector<AccessNameFileNameAndNumber>>();
 		//the map of sets of 3 string for non-default shaders to load
 		inline static std::unordered_map<int, std::vector<AccessNameAndTwoShaderFiles>> s_ShadersToLoad = std::unordered_map<int, std::vector<AccessNameAndTwoShaderFiles>>();
 		//the map of strings and sets of 2 defualt shader enums for default shaders to load
 		inline static std::unordered_map<int, std::vector<AccessNameAndTwoDefaultShaders>> s_DefaultShadersToLoad = std::unordered_map<int, std::vector<AccessNameAndTwoDefaultShaders>>();
+		//the map of vector of strings for cube look up tables to load
+		inline static std::unordered_map<int, std::vector<AccessAndFileName>> s_LUTsToLoad = std::unordered_map<int, std::vector<AccessAndFileName>>();
 
 		//unordered maps to store the assets 
 		//2D textures
@@ -167,5 +169,7 @@ namespace Titan {
 		inline static std::unordered_map<std::string, TTN_Shader::sshptr> s_shaderMap = std::unordered_map<std::string, TTN_Shader::sshptr>();
 		//materials
 		inline static std::unordered_map<std::string, TTN_Material::smatptr> s_matMap = std::unordered_map<std::string, TTN_Material::smatptr>();
+		//luts
+		inline static std::unordered_map<std::string, TTN_LUT3D::sltptr> s_LUTMap = std::unordered_map<std::string, TTN_LUT3D::sltptr>();
 	};
 }

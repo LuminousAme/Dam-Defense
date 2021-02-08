@@ -8,6 +8,8 @@
 #include "Titan/Interpolation.h"
 #include "Titan/Sound.h"
 #include "Titan/LUT.h"
+#include "Titan/ColorCorrect.h"
+#include "Titan/PostEffect.h"
 #include "EnemyComponent.h"
 
 using namespace Titan;
@@ -56,7 +58,6 @@ public:
 	TTN_Shader::sshptr shaderProgramAnimatedTextured;
 	TTN_Shader::sshptr shaderProgramWater;
 	TTN_Shader::sshptr shaderProgramTerrain;
-	TTN_Shader::sshptr shaderColorCorrection;
 
 	//meshes
 	TTN_Mesh::smptr cannonMesh;
@@ -98,6 +99,7 @@ public:
 	TTN_Material::smatptr treeMat;
 	TTN_Material::smatptr rockMat;
 	TTN_Material::smatptr damMat;
+	std::vector<TTN_Material::smatptr> m_mats;
 
 	TTN_Material::smatptr cannonMat;
 	TTN_Material::smatptr skyboxMat;
@@ -129,7 +131,6 @@ protected:
 	/////// OTHER DATA ///////////
 	#pragma region Data
 protected:
-
 	/////// Player control data/////////
 	float cannonBallForce = 3600.0f;;//a multiplier for the ammount of force should be applied to a cannonball when it is fired
 	float playerShootCooldown = 0.7f;//the ammount of time in seconds that the player has to wait between shots
@@ -191,7 +192,6 @@ protected:
 	TTN_ParticleTemplate fireParticle;//fire particles
 	TTN_ParticleTemplate expolsionParticle;//expolsion particles
 
-
 	//set up functions, called by InitScene()
 protected:
 	void SetUpAssets();
@@ -225,6 +225,27 @@ protected:
 	void DeleteCannonballs();
 
 	void CreateExpolsion(glm::vec3 location);
+
+	//CG assingment 2 stuff
+protected:
+	//color correction effect
+	TTN_ColorCorrect::scolcorptr m_colorCorrectEffect;
+	//bools for imgui controls
+	bool m_applyWarmLut;
+	bool m_applyCoolLut;
+	bool m_applyCustomLut;
+
+	bool m_noLighting;
+	bool m_ambientOnly;
+	bool m_specularOnly;
+	bool m_ambientAndSpecular;
+	bool m_ambientSpecularAndOutline;
+	//float to control outline size
+	float m_outlineSize = 0.2f;
+
+	//variables for if the specular and diffuse ramps should be used
+	bool m_useDiffuseRamp = false;
+	bool m_useSpecularRamp = false;
 };
 
 inline float SmoothStep(float t) {

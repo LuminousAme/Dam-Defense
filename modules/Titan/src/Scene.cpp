@@ -7,8 +7,8 @@
 
 namespace Titan {
 	//default constructor
- 
-	TTN_Scene::TTN_Scene(std::string name) 
+
+	TTN_Scene::TTN_Scene(std::string name)
 		: m_sceneName(name)
 	{
 		//setup basic data and systems
@@ -31,6 +31,11 @@ namespace Titan {
 		m_physicsWorld->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 
 		m_Paused = false;
+
+		//init the basic effect
+		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
+		m_emptyEffect = TTN_PostEffect::Create();
+		m_emptyEffect->Init(windowSize.x, windowSize.y);
 	}
 
 	//construct with lightning data
@@ -55,6 +60,11 @@ namespace Titan {
 		m_physicsWorld->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 
 		m_Paused = false;
+
+		//init the basic effect
+		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
+		m_emptyEffect = TTN_PostEffect::Create();
+		m_emptyEffect->Init(windowSize.x, windowSize.y);
 	}
 
 	//destructor
@@ -240,10 +250,10 @@ namespace Titan {
 		}
 	}
 
-	//function that executes after the main render 
+	//function that executes after the main render
 	void TTN_Scene::PostRender()
 	{
-		//set up the view matrix 
+		//set up the view matrix
 		glm::mat4 viewMat = glm::inverse(Get<TTN_Transform>(m_Cam).GetGlobal());
 
 		//create a view of all the entities with a particle system and a transform
@@ -253,11 +263,58 @@ namespace Titan {
 			Get<TTN_ParticeSystemComponent>(entity).GetParticleSystemPointer()->Render(Get<TTN_Transform>(entity).GetGlobalPos(),
 				viewMat, Get<TTN_Camera>(m_Cam).GetProj());
 		}
+
+		//unbind the empty effect and run through all the post effect
+		m_emptyEffect->UnbindBuffer();
+
+		//if there are post processing effects that can be applied
+		if (m_PostProcessingEffects.size() > 0) {
+			//track the index of the last effect that was applied
+			int index = -1;
+			//and iterate through all the post processing effects
+			for (int i = 0; i < m_PostProcessingEffects.size(); i++) {
+				//if the effect should be applied
+				if (m_PostProcessingEffects[i]->GetShouldApply()) {
+					//apply the effect
+					if (index == -1)
+						m_PostProcessingEffects[i]->ApplyEffect(m_emptyEffect);
+					else
+						m_PostProcessingEffects[i]->ApplyEffect(m_PostProcessingEffects[index]);
+
+					//and save the index as this was most recent effect applied
+					index = i;
+				}
+			}
+			//at the end, draw to the screen
+			if (index == -1) {
+				//if none should be applied, just draw the empty effect
+				m_emptyEffect->DrawToScreen();
+				//and save it as the last effect played
+				TTN_Backend::SetLastEffect(m_emptyEffect);
+			}
+			else {
+				//if they should be applied, draw from the last effect
+				m_PostProcessingEffects[index]->DrawToScreen();
+				//and save it
+				TTN_Backend::SetLastEffect(m_PostProcessingEffects[index]);
+			}
+		}
+		//if there are no post processing effects to apply, just save the empty effect
+		else {
+			m_emptyEffect->DrawToScreen();
+			//and save it as the last effect played
+			TTN_Backend::SetLastEffect(m_emptyEffect);
+		}
 	}
 
 	//renders all the messes in our game
 	void TTN_Scene::Render()
 	{
+		//clear all the post processing effects
+		m_emptyEffect->Clear();
+		for (int i = 0; i < m_PostProcessingEffects.size(); i++)
+			m_PostProcessingEffects[i]->Clear();
+
 		//get the view and projection martix
 		glm::mat4 vp;
 		//update the camera for the scene
@@ -285,6 +342,15 @@ namespace Titan {
 
 		ReconstructScenegraph();
 
+		//before going through see if it needs to render another scene as the background first 
+		if (TTN_Backend::GetLastEffect() != nullptr) {
+			//if it does, apply the buffer from that scene before drawing
+			m_emptyEffect->ApplyEffect(TTN_Backend::GetLastEffect());
+		}
+
+		//bind the empty effect
+		m_emptyEffect->BindBuffer(0); //this gets unbound in postRender
+
 		//go through every entity with a transform and a mesh renderer and render the mesh
 		m_RenderGroup->each([&](entt::entity entity, TTN_Transform& transform, TTN_Renderer& renderer) {
 			//get the shader pointer
@@ -292,7 +358,7 @@ namespace Titan {
 
 			//bind the shader
 			shader->Bind();
-			
+
 			//sets some uniforms
 			if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
 				//scene level ambient lighting
@@ -334,6 +400,24 @@ namespace Titan {
 
 				//stuff from the camera
 				shader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetPos());
+
+				//if it has a material send some lighting and shading data from that material
+				if (renderer.GetMat() != nullptr) {
+					//and material details about the lighting and shading
+					shader->SetUniform("u_hasAmbientLighting", (int)(renderer.GetMat()->GetHasAmbient()));
+					shader->SetUniform("u_hasSpecularLighting", (int)(renderer.GetMat()->GetHasSpecular()));
+					//the ! is because it has to be reversed in the shader
+					shader->SetUniform("u_hasOutline", (int)(!renderer.GetMat()->GetHasOutline()));
+					shader->SetUniform("u_OutlineSize", renderer.GetMat()->GetOutlineSize());
+
+					//wheter or not ramps for toon shading should be used
+					shader->SetUniform("u_useDiffuseRamp", (int)renderer.GetMat()->GetUseDiffuseRamp());
+					shader->SetUniform("u_useSpecularRamp", (int)renderer.GetMat()->GetUseSpecularRamp());
+
+					//bind the ramps as textures
+					renderer.GetMat()->GetDiffuseRamp()->Bind(10);
+					renderer.GetMat()->GetSpecularRamp()->Bind(11);
+				}
 			}
 
 			//if it's not the skybox shader, set some uniforms for lighting
@@ -376,16 +460,33 @@ namespace Titan {
 
 				//and tell it how many lights there actually are
 				shader->SetUniform("u_NumOfLights", (int)m_Lights.size());
-
+				
 				//stuff from the camera
 				shader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetPos());
+
+				//if it has a material send some lighting and shading data from that material
+				if (renderer.GetMat() != nullptr) {
+					//and material details about the lighting and shading
+					shader->SetUniform("u_hasAmbientLighting", (int)(renderer.GetMat()->GetHasAmbient()));
+					shader->SetUniform("u_hasSpecularLighting", (int)(renderer.GetMat()->GetHasSpecular()));
+					//the ! is because it has to be reversed in the shader
+					shader->SetUniform("u_hasOutline", (int)(!renderer.GetMat()->GetHasOutline()));
+					shader->SetUniform("u_OutlineSize", renderer.GetMat()->GetOutlineSize());
+
+					//wheter or not ramps for toon shading should be used
+					shader->SetUniform("u_useDiffuseRamp", (int)renderer.GetMat()->GetUseDiffuseRamp());
+					shader->SetUniform("u_useSpecularRamp", (int)renderer.GetMat()->GetUseSpecularRamp());
+
+					//bind the ramps as textures
+					renderer.GetMat()->GetDiffuseRamp()->Bind(10);
+					renderer.GetMat()->GetSpecularRamp()->Bind(11);
+				}
 			}
 
 			//if the mesh has a material send data from that
 			if (renderer.GetMat() != nullptr)
 			{
-
-				//give openGL the shinniess
+				//give openGL the shiniess
 				if (shader->GetFragShaderDefaultStatus() != 8) shader->SetUniform("u_Shininess", renderer.GetMat()->GetShininess());
 				//if they're using a texture
 				if (shader->GetFragShaderDefaultStatus() == 4 || shader->GetFragShaderDefaultStatus() == 5)
@@ -398,11 +499,11 @@ namespace Titan {
 				//texture slot to dynamically send textures across different types of shaders
 				int textureSlot = 0;
 
-				//if they're using a displacement map 
+				//if they're using a displacement map
 				if (shader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_COLOR_HEIGHTMAP
 					|| shader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_NO_COLOR_HEIGHTMAP)
 				{
-					//bind it to the slot 
+					//bind it to the slot
 					renderer.GetMat()->GetHeightMap()->Bind(textureSlot);
 					//update the texture slot for future textures to use
 					textureSlot++;
@@ -410,10 +511,10 @@ namespace Titan {
 					shader->SetUniform("u_influence", renderer.GetMat()->GetHeightInfluence());
 				}
 
-				//if they're using an animator 
+				//if they're using an animator
 				if (shader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR
 					|| shader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_COLOR) {
-					//try to get an animator component 
+					//try to get an animator component
 					if (Has<TTN_MorphAnimator>(entity)) {
 						shader->SetUniform("t", Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getInterpolationParameter());
 					}
@@ -421,7 +522,7 @@ namespace Titan {
 						shader->SetUniform("t", 0.0f);
 				}
 
-				//if they're using an albedo texture 
+				//if they're using an albedo texture
 				if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY
 					|| shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR)
 
@@ -435,8 +536,7 @@ namespace Titan {
 				//if they're using a specular map
 				if (shader->GetFragShaderDefaultStatus() == 5)
 
-
-					//if they're using a specular map 
+					//if they're using a specular map
 					if (shader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR)
 
 					{
@@ -456,7 +556,6 @@ namespace Titan {
 					//set the skybox matrix uniform
 					shader->SetUniformMatrix("u_SkyboxMatrix", Get<TTN_Camera>(m_Cam).GetProj() * glm::mat4(glm::mat3(viewMat)));
 				}
-
 			}
 			//otherwise send a default shinnies value
 			else if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
@@ -492,7 +591,7 @@ namespace Titan {
 		mergeSortEntitiesZ(tempSpriteEntitiesToRender, 0, tempSpriteEntitiesToRender.size() - 1);
 
 		//and loop through, rendering them in reverse order
-		for (int i = tempSpriteEntitiesToRender.size() - 1; i >= 0; i--) 
+		for (int i = tempSpriteEntitiesToRender.size() - 1; i >= 0; i--)
 			Get<TTN_Renderer2D>(tempSpriteEntitiesToRender[i]).Render(Get<TTN_Transform>(tempSpriteEntitiesToRender[i]).GetGlobal(), vp);
 	}
 
@@ -577,7 +676,7 @@ namespace Titan {
 					const btVector3& location2 = point.getPositionWorldOnB();
 					glm::vec3 collisionLocation = (glm::vec3(location.getX(), location.getY(), location.getZ())
 						+ glm::vec3(location2.getX(), location2.getY(), location2.getZ())) * 0.5f;
-
+					
 					//and make a collision object
 					TTN_Collision::scolptr newCollision = TTN_Collision::Create();
 					newCollision->SetBody1(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b0->getUserPointer())));
