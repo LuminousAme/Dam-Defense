@@ -31,9 +31,7 @@ protected:
 class TTN_AudioBus : public TTN_AudioObject
 {
 	friend class TTN_AudioEngine;
-
 public:
-
 	// Get and Set Paused
 	bool CheckPaused();
 	void SetPaused(const bool& pause);
@@ -50,7 +48,6 @@ public:
 	void StopAllEvent(const bool& fade = false);
 
 private:
-
 	// AudioEngine class uses this to create bus objects
 	TTN_AudioBus(FMOD::Studio::Bus* bus);
 
@@ -59,9 +56,7 @@ private:
 	void operator=(TTN_AudioBus const&) = delete;
 
 private:
-
 	FMOD::Studio::Bus* m_Bus;
-
 };
 
 
@@ -69,17 +64,13 @@ private:
 class TTN_AudioListener : public TTN_AudioObject
 {
 	friend class TTN_AudioEngine;
-
 public:
-
 	void SetPosition(const glm::vec3& pos);
 	glm::vec3 GetPosition();
-
 
 	// Vel not working
 	void SetVelocity(const glm::vec3& vel);
 	glm::vec3 GetVelocity();
-
 
 	// TODO: Test these
 	void SetForward(const glm::vec3& forward);
@@ -87,9 +78,7 @@ public:
 	void SetUp(const glm::vec3& up);
 	glm::vec3 GetUp();
 
-
 private:
-
 	// Only AudioEngine can create a listener
 	// Get a ref from AudioEngine::GetListener()
 	TTN_AudioListener() {}
@@ -97,7 +86,6 @@ private:
 	void operator=(TTN_AudioListener const&) = delete;
 
 private:
-
 	// Ref to the FMOD System
 	FMOD::Studio::System* m_StudioSystem;
 
@@ -108,14 +96,12 @@ private:
 	// Basic ID, first listener is 0
 	int m_ID;
 	void SetID(const int& id);
-
 };
 
 //Class for an audio event or source of sound in the world
 class TTN_AudioEvent : public TTN_AudioObject
 {
 	friend class TTN_AudioEngine;
-
 public:
 
 	~TTN_AudioEvent();
@@ -142,9 +128,7 @@ public:
 	void SetPosition(const glm::vec3& pos);
 	glm::vec3 GetPosition();
 
-
 private:
-
 	// AudioEngine class uses this to create Event objects
 	TTN_AudioEvent(FMOD::Studio::EventInstance* eventInstance);
 
@@ -153,9 +137,7 @@ private:
 	void operator=(TTN_AudioEvent const&) = delete;
 
 private:
-
 	FMOD_3D_ATTRIBUTES m_Attributes;
-
 	FMOD::Studio::EventInstance* m_EventInstance;
 };
 
@@ -163,16 +145,12 @@ private:
 class TTN_AudioEngine : public TTN_AudioObject
 {
 	friend class TTN_AudioEngine;
-
 public:
-
 	//// Singleton ///////////////////
-
 	static TTN_AudioEngine& Instance();
 
 	TTN_AudioEngine(TTN_AudioEngine const&) = delete;
 	void operator=(TTN_AudioEngine const&) = delete;
-
 	//////////////////////////////////
 
 	void Init();
@@ -199,11 +177,9 @@ public:
 
 
 private:
-
 	TTN_AudioEngine() {}
 
 private:
-
 	// FMOD Systems
 	FMOD::Studio::System* m_StudioSystem;
 	FMOD::System* m_System;
@@ -219,5 +195,4 @@ private:
 
 	// Bus
 	std::unordered_map<std::string, TTN_AudioBus*> m_BusMap;
-
 };

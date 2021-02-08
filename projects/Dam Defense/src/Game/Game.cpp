@@ -317,9 +317,6 @@ void Game::MouseButtonUpChecks()
 void Game::SetUpAssets()
 {
 	//// SOUNDS ////
-	//engine.Instance();
-	engine.Init();
-
 	engine.LoadBank("Master");
 	engine.LoadBus("MusicBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}");
 

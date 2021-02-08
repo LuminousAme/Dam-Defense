@@ -3,7 +3,7 @@
 #pragma once
 
 //precompile header, this file uses glad/glad.h
-#include "ttn_pch.h"
+#include "Titan/ttn_pch.h"
 
 namespace Titan {
 	//enums for texture details

@@ -346,7 +346,6 @@ void TTN_AudioEngine::Update()
 {
 	// Update FMOD system
 	ErrorCheck(m_StudioSystem->update());
-
 }
 
 void TTN_AudioEngine::Shutdown()

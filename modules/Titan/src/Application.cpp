@@ -81,27 +81,40 @@ namespace Titan {
 
 		//set up the shader and vaos for the sprite rendering system
 		TTN_Renderer2D::InitRenderer2D();
+
+		//set up the audio engine
+		m_soundEngine.Init();
 		
 		//Set the background colour for our scene to the base black
 		glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
-
-		
 	}
 
 	//function to check if the window is being closed
 	bool TTN_Application::GetIsClosing()
 	{
-		//have glfw check if the user has tried to close the window, return what it says
+		//check if quit() has been called, if it has, return that the application is closing
+		if (m_hasQuit)
+			return m_hasQuit;
+
+		//otherwise have glfw check if the user has tried to close the window, return what it says
 		return glfwWindowShouldClose(m_window);
 	}
 
 	//function that cleans things up when the window closes so there are no memory leaks and everything goes cleanly 
 	void TTN_Application::Closing()
 	{
+		//clean up imgui
+		CleanImgui();
+
+		//shutdown the audio engine
+		m_soundEngine.Shutdown();
+
 		//have glfw destroy the window 
 		glfwDestroyWindow(m_window);
+
 		//close glfw
 		glfwTerminate();
+
 		//delete scene pointers
 		for (auto x : scenes)
 			delete x;
@@ -136,59 +149,68 @@ namespace Titan {
 	//function to run each frame 
 	void TTN_Application::Update()
 	{
-		//start a new frame 
-		TTN_Application::NewFrameStart();
+		if (!m_hasQuit) {
+			//start a new frame 
+			TTN_Application::NewFrameStart();
 
-		//start ImGui
-		StartImgui();
+			//start ImGui
+			StartImgui();
 
-		//check for events from glfw 
-		glfwPollEvents();
+			//check for events from glfw 
+			glfwPollEvents();
 
-		//update the asset system
-		TTN_AssetSystem::Update();
+			//update the asset system
+			TTN_AssetSystem::Update();
 
-		//go through each scene 
-		for (int i = 0; i < TTN_Application::scenes.size(); i++) {
-			//and check if they should be rendered
-			if (TTN_Application::scenes[i]->GetShouldRender()) {
-				//if they should, then check input, update, and render them 
-				TTN_Application::scenes[i]->KeyDownChecks();
-				TTN_Application::scenes[i]->KeyChecks();
-				TTN_Application::scenes[i]->KeyUpChecks();
+			//go through each scene 
+			for (int i = 0; i < TTN_Application::scenes.size(); i++) {
+				//and check if they should be rendered
+				if (TTN_Application::scenes[i]->GetShouldRender()) {
+					//if they should, then check input, update, and render them 
+					TTN_Application::scenes[i]->KeyDownChecks();
+					TTN_Application::scenes[i]->KeyChecks();
+					TTN_Application::scenes[i]->KeyUpChecks();
 
-				TTN_Application::scenes[i]->MouseButtonDownChecks();
-				TTN_Application::scenes[i]->MouseButtonChecks();
-				TTN_Application::scenes[i]->MouseButtonUpChecks();
+					TTN_Application::scenes[i]->MouseButtonDownChecks();
+					TTN_Application::scenes[i]->MouseButtonChecks();
+					TTN_Application::scenes[i]->MouseButtonUpChecks();
 
-				TTN_Application::scenes[i]->Update(m_dt);
-				TTN_Application::scenes[i]->Render();
-				TTN_Application::scenes[i]->PostRender();
+					TTN_Application::scenes[i]->Update(m_dt);
+					TTN_Application::scenes[i]->Render();
+					TTN_Application::scenes[i]->PostRender();
+				}
 			}
+
+			//reset the keys so they work properly on the next frame
+			TTN_Application::TTN_Input::ResetKeys();
+			//reset the mouse buttons so they work properly on the next frame
+			TTN_Application::TTN_Input::ResetMouseButtons();
+
+			//update the sound engine
+			m_soundEngine.Update();
+
+			//now all the scenes that should be rendered (current gameplay scene, ui, etc.) will be rendered
+			//while anything that doesn't need to be rendered (such as a prefabs scene) will not 
+
+			//end Imgui, rendering it
+			EndImgui();
+
+			//set the last effect to nullpointer so it's set up correctly for the next frame
+			TTN_Backend::SetLastEffect(nullptr);
+
+			//swap the buffers so all the drawings that the scenes just did are acutally visible 
+			glfwSwapBuffers(m_window);
 		}
-
-		//reset the keys so they work properly on the next frame
-		TTN_Application::TTN_Input::ResetKeys();
-		//reset the mouse buttons so they work properly on the next frame
-		TTN_Application::TTN_Input::ResetMouseButtons();
-
-		//now all the scenes that should be rendered (current gameplay scene, ui, etc.) will be rendered
-		//while anything that doesn't need to be rendered (such as a prefabs scene) will not 
-		
-		//end Imgui, rendering it
-		EndImgui();
-
-		//set the last effect to nullpointer so it's set up correctly for the next frame
-		TTN_Backend::SetLastEffect(nullptr);
-
-		//swap the buffers so all the drawings that the scenes just did are acutally visible 
-		glfwSwapBuffers(m_window);
 	}
 
 	//quits the application
 	void TTN_Application::Quit()
 	{
-		Closing();
+		//check if quit hasn't already been called
+		if (!m_hasQuit) {
+			//if hasn't set the quit flag to true and call the closing function
+			m_hasQuit = true;
+		}
 	}
 
 #pragma region IMGUI STUFF

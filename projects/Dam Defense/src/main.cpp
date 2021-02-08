@@ -100,7 +100,6 @@ int main() {
 		//check if the game should quit
 		if (titleScreenUI->GetShouldQuit() || paused->GetShouldQuit()) {
 			TTN_Application::Quit();
-			break;
 		}
 
 		//pause menu rendering
@@ -134,7 +133,9 @@ int main() {
 		//update the scenes and render the screen
 		TTN_Application::Update();
 	}
-	TTN_Application::CleanImgui();
+	
+	//clean up all the application data
+	TTN_Application::Closing();
 
 	//when the application has ended, exit the program with no errors
 	return 0; 
