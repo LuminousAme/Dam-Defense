@@ -9,14 +9,14 @@
 
 //import the precompiled headers 
 //glad/glad.h, GLM/glm.hpp, string, vector, and unordered map are used here
-#include "ttn_pch.h"
+#include "Titan/ttn_pch.h"
 
 //include the titan scene class 
-#include "Titan/Scene.h"
+#include "Titan/Utilities/Scene.h"
 //include the asset manager class
-#include "Titan/AssetSystem.h"
+#include "Titan/Systems/AssetSystem.h"
 //include the backend 
-#include "Titan/Backend.h"
+#include "Titan/Utilities/Backend.h"
  
  
 namespace Titan {

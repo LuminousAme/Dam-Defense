@@ -4,11 +4,11 @@
 //import required titan features
 #include "Titan/Application.h"
 //include the other headers in dam defense
-#include "Game.h"
-#include "SplashCard.h"
-#include "LoadingScene.h"
-#include "MainMenu.h"
-#include "PauseMenu.h"
+#include "Game/Game.h"
+#include "Launch/SplashCard.h"
+#include "Launch/LoadingScene.h"
+#include "Menu/MainMenu.h"
+#include "Game/PauseMenu.h"
 
 using namespace Titan;
 
