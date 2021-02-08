@@ -4,11 +4,11 @@
 //import required titan features
 #include "Titan/Application.h"
 //include the other headers in dam defense
-#include "Game.h"
-#include "SplashCard.h"
-#include "LoadingScene.h"
-#include "MainMenu.h"
-#include "PauseMenu.h"
+#include "Game/Game.h"
+#include "Launch/SplashCard.h"
+#include "Launch/LoadingScene.h"
+#include "Menu/MainMenu.h"
+#include "Game/PauseMenu.h"
 
 using namespace Titan;
 
@@ -100,7 +100,6 @@ int main() {
 		//check if the game should quit
 		if (titleScreenUI->GetShouldQuit() || paused->GetShouldQuit()) {
 			TTN_Application::Quit();
-			break;
 		}
 
 		//pause menu rendering
@@ -134,7 +133,9 @@ int main() {
 		//update the scenes and render the screen
 		TTN_Application::Update();
 	}
-	TTN_Application::CleanImgui();
+	
+	//clean up all the application data
+	TTN_Application::Closing();
 
 	//when the application has ended, exit the program with no errors
 	return 0; 
@@ -167,9 +168,13 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddDefaultShaderToBeLoaded("Animated textured shader", TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR, TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY, 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Terrain shader", "shaders/terrain_vert.glsl", "shaders/terrain_frag.glsl", 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Water shader", "shaders/water_vert.glsl", "shaders/water_frag.glsl", 1);
-	TTN_AssetSystem::AddShaderToBeLoaded("Color correction shader", "shaders/passthrough_vert.glsl", "shaders/color_correction_frag.glsl", 1);
+	
+	TTN_AssetSystem::AddLUTTobeLoaded("Warm LUT", "Warm_LUT.cube",  1);
+	TTN_AssetSystem::AddLUTTobeLoaded("Cool LUT", "Cool_LUT.cube",  1);
+	TTN_AssetSystem::AddLUTTobeLoaded("Custom LUT", "Custom_LUT.cube",  1);
 
-	TTN_AssetSystem::AddCubeFileToBeLoaded("Warm LUT", "Warm_LUT.cube", 1);
+	TTN_AssetSystem::AddTexture2DToBeLoaded("blue ramp", "textures/ramps/blue ramp.png");
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Normal Map", "textures/terrain nomral map.png");
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Base", "textures/Button_1.png", 1); //button when not being hovered over
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Hovering", "textures/Button_2.png", 1); //button when being hovered over

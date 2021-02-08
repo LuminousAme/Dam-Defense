@@ -9,14 +9,16 @@
 
 //import the precompiled headers 
 //glad/glad.h, GLM/glm.hpp, string, vector, and unordered map are used here
-#include "ttn_pch.h"
+#include "Titan/ttn_pch.h"
 
 //include the titan scene class 
-#include "Titan/Scene.h"
+#include "Titan/Utilities/Scene.h"
 //include the asset manager class
-#include "Titan/AssetSystem.h"
-//include glfw
-#include <GLFW/glfw3.h>
+#include "Titan/Systems/AssetSystem.h"
+//include the backend 
+#include "Titan/Utilities/Backend.h"
+//include the sound engine
+#include "Titan/Systems/Sound.h"
  
  
 namespace Titan {
@@ -189,19 +191,27 @@ namespace Titan {
 		static void StartImgui();
 		static void EndImgui();
 
+		//gets a refernece to the sound engine
+		static TTN_AudioEngine& GetSoundEngine() { return m_soundEngine; }
+
 	public:
 		//vector for all the scenes in the application
 		static std::vector<Titan::TTN_Scene*> scenes;
 		static GLFWwindow* m_window;
-		//static std::vector<std::function<void()>> imGuiCallbacks;
-
 
 	protected:
 		//default constructor, just creates an empty aplication project
 		TTN_Application() = default;
 
+		//variables that hold time data
 		static float m_dt;
 		static float m_previousFrameTime;
+
+		//sound engine
+		inline static TTN_AudioEngine& m_soundEngine = TTN_AudioEngine::Instance();
+
+		//variable for if the game has quit
+		inline static bool m_hasQuit = false;
 
 	public:
 		//input helper class

@@ -21,6 +21,7 @@
 
 //math
 #include "GLM/glm.hpp"
+#include "glm/common.hpp"
 #include <GLM/gtc/type_ptr.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
 //allow use of experimental glm features

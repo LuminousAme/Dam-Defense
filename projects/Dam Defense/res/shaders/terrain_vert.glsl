@@ -12,6 +12,7 @@ layout(location = 3) out float outHeight;
 
 //texture
 layout(binding=0)uniform sampler2D map;
+layout(binding=1)uniform sampler2D normalMap;
 
 //influnce the displacement map should have 
 uniform float u_scale;
@@ -25,7 +26,7 @@ uniform mat3 NormalMat;
 
 void main() {
 	//pass data onto the frag shader
-	outNormal = NormalMat * inNormal;
+	outNormal = NormalMat * texture(normalMap, inUV).rgb;
 	outUV = inUV;
 
 	//displace the terrain based on the map
