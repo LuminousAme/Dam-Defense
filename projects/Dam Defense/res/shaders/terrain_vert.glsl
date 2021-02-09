@@ -26,7 +26,7 @@ uniform mat3 NormalMat;
 
 void main() {
 	//pass data onto the frag shader
-	outNormal = NormalMat * texture(normalMap, inUV).rgb;
+	outNormal = NormalMat * normalize(texture(normalMap, inUV).rbg * 2.0 - 1.0);
 	outUV = inUV;
 
 	//displace the terrain based on the map
