@@ -26,7 +26,6 @@ public:
 	//late render (terrain, water, etc.)
 	void PostRender();
 
-
 	//keyboard input
 	void KeyDownChecks();
 	void KeyChecks();
@@ -147,7 +146,7 @@ protected:
 
 	//////// DAM AND FLAMETHROWER CONTROL DATA ///////
 	float FlameThrowerCoolDown = 10.0f; //how long the player has to wait between flamethrower uses
-	float FlameActiceTime = 3.0f; //how long the flamethrower lasts
+	float FlameActiveTime = 3.0f; //how long the flamethrower lasts
 	int Dam_MaxHealth = 100; //the maximum health of the dam
 
 	bool Flaming; //if flamethrowers are active right now
@@ -155,19 +154,15 @@ protected:
 	float FlameAnim; //flamethrower duration
 	int Dam_health;//the current health on the dam
 
-
 	//////// BIRD CONTROL DATA ///////////////
 	glm::vec3 birdBase = glm::vec3(100, 15, 135); //starting position
 	glm::vec3 birdTarget = glm::vec3(-100, 15, -65); //lerps to this position
-
 	float birdTimer;//timer to track how far through the lerp they are
-
 
 	///////////SCENE CONTROL DATA///////////
 	bool m_paused; //wheter or not the scene is paused
 	bool m_gameOver; //wheter or not the player has yet gameover
 	bool gameWin;//wheter or not the player has won
-
 
 	/////////////ENEMY AND WAVE CONTROLS//////////////////
 	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
@@ -180,6 +175,12 @@ protected:
 	int m_boatsRemainingThisWave; //the number of boats that need to be destoryed before the wave starts again
 	int m_boatsStillNeedingToSpawnThisWave; //the number of boats that still need to be spawned before the wave can end
 	bool m_rightSideSpawn = true; //wheter or not it should be using the right (true) or left (false) spawner
+
+	/////////// SOUND CONTROL ///////////////
+	float cannonTime;
+	float flameSoundTime;
+
+
 #pragma endregion
 
 	///////PARTICLE TEMPLATES//////////
