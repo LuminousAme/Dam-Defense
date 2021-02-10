@@ -64,10 +64,26 @@ void Game::Update(float deltaTime)
 
 		BirdUpate(deltaTime);
 
+		TTN_AudioEvent& cannon = engine.GetEvent("cannon");
+		if (cannonTime >= 0.0f) {
+			cannonTime = cannonTime - deltaTime;
+		}
+		if (cannonTime <= 0.0f && cannon.isPlaying()) {
+			cannon.Stop();
+		}
+
+		TTN_AudioEvent& flame = engine.GetEvent("flame");
+		if (flameSoundTime >= 0.0f) {
+			flameSoundTime = flameSoundTime - deltaTime;
+		}
+		if (flameSoundTime <= 0.0f && flame.isPlaying()) {
+			flame.Stop();
+		}
+	
 		//increase the total time of the scene to make the water animated correctly
 		water_time += deltaTime;
 	}
-
+	
 	//game over stuff
 	if (Dam_health <= 0.0f) {
 		m_gameOver = true;
@@ -78,6 +94,10 @@ void Game::Update(float deltaTime)
 
 	//get ref to bus
 	TTN_AudioBus& musicBus = engine.GetBus("MusicBus");
+	musicBus.SetPaused(false);
+	if (m_paused) {
+		musicBus.SetPaused(true);
+	}
 
 	//get ref to listener
 	TTN_AudioListener& listener = engine.GetListener();
@@ -302,8 +322,15 @@ void Game::MouseButtonChecks()
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
 				SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
+
+			TTN_AudioEvent& cannon = engine.GetEvent("cannon");
+			cannon.Play();
+			cannonTime = playerShootCooldown-0.05f;
 		}
 	}
+
+
+
 }
 
 //function to check for when a mouse button has been released
@@ -321,7 +348,10 @@ void Game::SetUpAssets()
 	engine.LoadBus("MusicBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}");
 
 	TTN_AudioEvent& music = engine.CreateEvent("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
-	music.Play();
+	TTN_AudioEvent& cannon = engine.CreateEvent("cannon", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
+	TTN_AudioEvent& flame = engine.CreateEvent("flame", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
+
+	//music.Play();
 
 	//// SHADERS ////
 #pragma region SHADERS
@@ -916,8 +946,13 @@ void Game::Flamethrower() {
 	if (FlameTimer <= 0.0f) {
 		//reset cooldown
 		FlameTimer = FlameThrowerCoolDown;
+		flameSoundTime = FlameAnim;
 		//set the active flag to true
 		Flaming = true;
+		//sounds
+		TTN_AudioEvent& flame = engine.GetEvent("flame");
+		flame.Play();
+		flameSoundTime = FlameActiveTime;
 		//and through and create the fire particle systems
 		for (int i = 0; i < 6; i++) {
 			//fire particle entities
@@ -959,13 +994,13 @@ void Game::FlamethrowerUpdate(float deltaTime)
 		FlameAnim += deltaTime;
 
 		//if it's reached the end of the animation
-		if (FlameAnim >= FlameActiceTime) {
+		if (FlameAnim >= FlameActiveTime) {
 			//get rid of all the flames, reset the timer and set the active flag to false
 			flames.clear();
 			FlameAnim = 0.0f;
 			Flaming = false;
 		}
-
+		
 		//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 20
 		std::vector<entt::entity>::iterator it = boats.begin();
 		while (it != boats.end()) {
