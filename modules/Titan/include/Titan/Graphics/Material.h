@@ -33,6 +33,7 @@ namespace Titan {
 
 		//setters
 		void SetAlbedo(TTN_Texture2D::st2dptr albedo);
+		void SetUseAlbedo(bool useAlbedo);
 		void SetShininess(float shininess);
 		void SetSpecularMap(TTN_Texture2D::st2dptr specular);
 		void SetSkybox(TTN_TextureCubeMap::stcmptr Skybox);
@@ -49,6 +50,7 @@ namespace Titan {
 		
 		//getters
 		TTN_Texture2D::st2dptr GetAlbedo() { return m_Albedo; }
+		bool GetUseAlbedo() { return m_UseAlbedo; }
 		float GetShininess() { return m_Shininess; }
 		TTN_Texture2D::st2dptr GetSpecularMap() { return m_SpecularMap; }
 		TTN_TextureCubeMap::stcmptr GetSkybox() { return m_SkyboxTexture; }
@@ -66,6 +68,8 @@ namespace Titan {
 	private:
 		//albedo 
 		TTN_Texture2D::st2dptr m_Albedo;
+		//bool for if abledo textures should be applied
+		bool m_UseAlbedo;
 		//specular
 		TTN_Texture2D::st2dptr m_SpecularMap;
 		//how shiny the object is

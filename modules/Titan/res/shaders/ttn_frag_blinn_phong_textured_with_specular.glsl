@@ -8,6 +8,7 @@ layout(location = 3) in vec3 inColor;
 
 //material data
 uniform sampler2D s_Diffuse;
+uniform int u_UseDiffuse;
 uniform sampler2D s_Specular;
 uniform float u_Shininess;
 
@@ -69,8 +70,8 @@ void main() {
 					N, viewDir, texSpec);
 	}
 
-	//add that to the texture color
-	result = result * inColor * textureColor.rgb;
+	//add that to the texture color if the texture color should be applied
+	result = mix(result * inColor, result * inColor * textureColor.rgb, u_UseDiffuse);
 
 	//calculate if it should be coloured as a black outline
 	float edge = max(step(u_OutlineSize, abs(dot(viewDir, N))), u_hasOutline);

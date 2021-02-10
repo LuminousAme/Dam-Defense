@@ -146,6 +146,9 @@ void Game::PostRender()
 		m_mats[0]->GetDiffuseRamp()->Bind(10);
 		m_mats[0]->GetSpecularMap()->Bind(11);
 
+		//set if the albedo textures should be used
+		shaderProgramTerrain->SetUniform("u_UseDiffuse", (int)m_mats[0]->GetUseAlbedo());
+
 		//send lighting from the scene
 		shaderProgramTerrain->SetUniform("u_AmbientCol", TTN_Scene::GetSceneAmbientColor());
 		shaderProgramTerrain->SetUniform("u_AmbientStrength", TTN_Scene::GetSceneAmbientLightStrength());
@@ -1582,6 +1585,13 @@ void Game::ImGui()
 			case false:
 				m_colorCorrectEffect->SetShouldApply(false);
 				break;
+			}
+		}
+
+		//texture controls
+		if (ImGui::Checkbox("Use Textures", &m_useTextures)) {
+			for (int i = 0; i < m_mats.size(); i++) {
+				m_mats[i]->SetUseAlbedo(m_useTextures);
 			}
 		}
 	}
