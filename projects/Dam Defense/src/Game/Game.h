@@ -242,6 +242,7 @@ protected:
 	//variables for if the specular and diffuse ramps should be used
 	bool m_useDiffuseRamp = false;
 	bool m_useSpecularRamp = false;
+	bool m_useTextures = true;
 };
 
 inline float SmoothStep(float t) {

@@ -10,7 +10,7 @@ namespace Titan {
 	//default constructor
 	TTN_Material::TTN_Material() 
 		: m_Shininess(0), m_HeightInfluence(1.0f), m_hasAmbientLighting(true), m_hasSpecularLighting(true), 
-		m_hasOutline(false), m_outlineSize(0.0f), m_useDiffuseRamp(false), m_useSpecularRamp(false)
+		m_hasOutline(false), m_outlineSize(0.0f), m_useDiffuseRamp(false), m_useSpecularRamp(false), m_UseAlbedo(true)
 	{
 		//set the albedo to an all white texture by default
 		m_Albedo = TTN_Texture2D::Create();
@@ -44,6 +44,12 @@ namespace Titan {
 	void TTN_Material::SetAlbedo(TTN_Texture2D::st2dptr albedo)
 	{
 		m_Albedo = albedo;
+	}
+
+	//function to set wheter or not albedo texturing should be applied to the models
+	void TTN_Material::SetUseAlbedo(bool useAlbedo)
+	{
+		m_UseAlbedo = useAlbedo;
 	}
 
 	//sets the shininess

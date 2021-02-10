@@ -17,6 +17,7 @@ uniform float u_AmbientStrength;
 
 //material stuff
 uniform float u_Shininess;
+uniform int u_UseDiffuse;
 
 //uniforms for different lighting effects
 uniform int u_hasAmbientLighting;
@@ -75,7 +76,7 @@ void main() {
 	}
 
 	//add that to the texture color
-	result = result * textureColor.rgb;
+	result = mix(result * vec3(1.0), result * textureColor.rgb, u_UseDiffuse);
 
 	//calculate if it should be coloured as a black outline
 	float edge = max(step(u_OutlineSize, abs(dot(viewDir, N))), u_hasOutline);

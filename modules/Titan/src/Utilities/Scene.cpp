@@ -529,6 +529,7 @@ namespace Titan {
 				{
 					//bind it so openGL can see it
 					renderer.GetMat()->GetAlbedo()->Bind(textureSlot);
+					shader->SetUniform("u_UseDiffuse", (int)renderer.GetMat()->GetUseAlbedo());
 					//update the texture slot for future textures to use
 					textureSlot++;
 				}

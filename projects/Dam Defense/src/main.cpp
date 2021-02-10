@@ -174,7 +174,7 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddLUTTobeLoaded("Custom LUT", "Custom_LUT.cube",  1);
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("blue ramp", "textures/ramps/blue ramp.png");
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Normal Map", "textures/terrain nomral map.png");
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Normal Map", "textures/terrain normal map.png");
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Base", "textures/Button_1.png", 1); //button when not being hovered over
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Hovering", "textures/Button_2.png", 1); //button when being hovered over
