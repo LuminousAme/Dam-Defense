@@ -176,9 +176,10 @@ protected:
 	int m_boatsStillNeedingToSpawnThisWave; //the number of boats that still need to be spawned before the wave can end
 	bool m_rightSideSpawn = true; //wheter or not it should be using the right (true) or left (false) spawner
 
-	/////////// SOUND CONTROL ///////////////
+	/////////// SOUND CONTROL (Duration) ///////////////
 	float cannonTime;
 	float flameSoundTime;
+	float splashSoundTime;
 
 
 #pragma endregion
@@ -211,6 +212,8 @@ protected:
 	void Collisions();
 	void Damage(float deltaTime);
 
+	//sounds
+	void GameSounds(float dt);
 	//misc
 	void BirdUpate(float deltaTime);
 	void ImGui();

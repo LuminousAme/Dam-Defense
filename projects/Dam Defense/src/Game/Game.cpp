@@ -58,28 +58,12 @@ void Game::Update(float deltaTime)
 
 		//updates the flamethrower logic
 		FlamethrowerUpdate(deltaTime);
-
+		GameSounds(deltaTime); //sounds for game stuff (cannon, ft, splash)
 		Collisions(); //collision check
 		Damage(deltaTime); //damage function, contains cooldoown
 
 		BirdUpate(deltaTime);
 
-		TTN_AudioEvent& cannon = engine.GetEvent("cannon");
-		if (cannonTime >= 0.0f) {
-			cannonTime = cannonTime - deltaTime;
-		}
-		if (cannonTime <= 0.0f && cannon.isPlaying()) {
-			cannon.Stop();
-		}
-
-		TTN_AudioEvent& flame = engine.GetEvent("flame");
-		if (flameSoundTime >= 0.0f) {
-			flameSoundTime = flameSoundTime - deltaTime;
-		}
-		if (flameSoundTime <= 0.0f && flame.isPlaying()) {
-			flame.Stop();
-		}
-	
 		//increase the total time of the scene to make the water animated correctly
 		water_time += deltaTime;
 	}
@@ -348,11 +332,13 @@ void Game::SetUpAssets()
 {
 	//// SOUNDS ////
 	engine.LoadBank("Master");
-	engine.LoadBus("MusicBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}");
+	engine.LoadBus("SFXBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}"); // sounds effects
+	engine.LoadBus("MusicBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}"); //ambinet music
 
 	TTN_AudioEvent& music = engine.CreateEvent("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
 	TTN_AudioEvent& cannon = engine.CreateEvent("cannon", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
 	TTN_AudioEvent& flame = engine.CreateEvent("flame", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
+	TTN_AudioEvent& splash = engine.CreateEvent("splash", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
 
 	//music.Play();
 
@@ -1225,6 +1211,9 @@ void Game::Collisions()
 							//play an expolsion at it's location
 							glm::vec3 loc = Get<TTN_Transform>(*itt).GetGlobalPos();
 							CreateExpolsion(loc);
+							TTN_AudioEvent& splash = engine.GetEvent("splash");
+							splash.Play();
+							splashSoundTime = 0.6f;
 							//remove the physics from it
 							Remove<TTN_Physics>(*itt);
 							//add a countdown until it deletes
@@ -1275,6 +1264,35 @@ void Game::Damage(float deltaTime) {
 	}
 }
 #pragma endregion
+
+
+void Game::GameSounds(float deltaTime)
+{
+	TTN_AudioEvent& cannon = engine.GetEvent("cannon");
+	if (cannonTime >= 0.0f) {
+		cannonTime = cannonTime - deltaTime;
+	}
+	if (cannonTime <= 0.0f && cannon.isPlaying()) {
+		cannon.Stop();
+	}
+
+	TTN_AudioEvent& flame = engine.GetEvent("flame");
+	if (flameSoundTime >= 0.0f) {
+		flameSoundTime = flameSoundTime - deltaTime;
+	}
+	if (flameSoundTime <= 0.0f && flame.isPlaying()) {
+		flame.Stop();
+	}
+
+	TTN_AudioEvent& splash = engine.GetEvent("splash");
+	if (splashSoundTime >= 0.0f) {
+		splashSoundTime = splashSoundTime - deltaTime;
+	}
+	if (splashSoundTime <= 0.0f && splash.isPlaying()) {
+		splash.Stop();
+	}
+
+}
 
 void Game::BirdUpate(float deltaTime)
 {
