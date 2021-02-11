@@ -77,7 +77,7 @@ void Game::Update(float deltaTime)
 	TTN_AudioEvent& music = engine.GetEvent("music");
 
 	//get ref to bus
-	TTN_AudioBus& musicBus = engine.GetBus("MusicBus");
+	TTN_AudioBus& musicBus = engine.GetBus("Reverb");
 	musicBus.SetPaused(false);
 	if (m_paused) {
 		musicBus.SetPaused(true);
@@ -331,14 +331,16 @@ void Game::MouseButtonUpChecks()
 void Game::SetUpAssets()
 {
 	//// SOUNDS ////
-	engine.LoadBank("Master");
-	engine.LoadBus("SFXBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}"); // sounds effects
-	engine.LoadBus("MusicBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}"); //ambinet music
+	engine.LoadBank("SFX");
 
-	TTN_AudioEvent& music = engine.CreateEvent("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
-	TTN_AudioEvent& cannon = engine.CreateEvent("cannon", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
-	TTN_AudioEvent& flame = engine.CreateEvent("flame", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
-	TTN_AudioEvent& splash = engine.CreateEvent("splash", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
+	engine.LoadBus("Reverb", "{36a0649f-4f49-4467-8dca-29d45bbcda5c}"); // sounds effects
+	//engine.LoadBus("MusicBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}"); //ambient music
+
+	//TTN_AudioEvent& music = engine.CreateEvent("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
+
+	TTN_AudioEvent& cannon = engine.CreateEvent("cannon", "{68ebd2af-e6ff-42e5-851c-a45b669330d6}");
+	TTN_AudioEvent& flame = engine.CreateEvent("flame", "{0f594f5c-6e37-4fcb-a8e3-80ba7b29e42b}");
+	TTN_AudioEvent& splash = engine.CreateEvent("splash", "{03156626-835a-4067-b5af-1b3f6b59f388}");
 
 	//music.Play();
 
