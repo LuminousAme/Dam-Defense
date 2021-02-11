@@ -78,6 +78,7 @@ void Game::Update(float deltaTime)
 
 	//get ref to bus
 	TTN_AudioBus& musicBus = engine.GetBus("Reverb");
+	musicBus.SetVolume(250.f);
 	musicBus.SetPaused(false);
 	if (m_paused) {
 		musicBus.SetPaused(true);
@@ -85,6 +86,8 @@ void Game::Update(float deltaTime)
 
 	//get ref to listener
 	TTN_AudioListener& listener = engine.GetListener();
+	//std::cout << glm::to_string (listener.GetPosition())<<std::endl;
+	
 	engine.Update();
 
 	//call the update on ImGui
@@ -1214,6 +1217,8 @@ void Game::Collisions()
 							glm::vec3 loc = Get<TTN_Transform>(*itt).GetGlobalPos();
 							CreateExpolsion(loc);
 							TTN_AudioEvent& splash = engine.GetEvent("splash");
+							splash.SetPosition(glm::vec3(loc.x / 10.f, loc.y / 10.f, loc.z / 5.f));
+							std::cout << glm::to_string(splash.GetPosition()) << std::endl;
 							splash.Play();
 							splashSoundTime = 0.6f;
 							//remove the physics from it
@@ -1266,7 +1271,6 @@ void Game::Damage(float deltaTime) {
 	}
 }
 #pragma endregion
-
 
 void Game::GameSounds(float deltaTime)
 {
