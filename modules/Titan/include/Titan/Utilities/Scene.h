@@ -159,10 +159,10 @@ namespace Titan {
 		//entt group that has all the entities with renderer and transform components so we can edit and render them live
 		std::unique_ptr<RenderGroupType> m_RenderGroup;
 
-		//boolean to store wheter or not this scene should currently be rendered
+		//boolean to store whether or not this scene should currently be rendered
 		bool m_ShouldRender; 
 
-		//boolean to store wheter or not this scene should currently be updating 
+		//boolean to store whether or not this scene should currently be updating 
 		bool m_Paused;
 
 		//variable to store the entity for the camera

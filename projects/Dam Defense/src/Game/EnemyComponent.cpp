@@ -278,8 +278,9 @@ void EnemyComponent::Update(float deltaTime)
 //function to seek a targetted position, returns a velocity towards that position
 glm::vec3 EnemyComponent::Seek(glm::vec3 target, glm::vec3 currentVelocity, glm::vec3 currentPosition)
 {
-	//base restriction
-	glm::vec3 maxVelo(-10.0f, 0.0f, -10.0f);
+	//base restriction (-10, 0 ,-10)
+	//glm::vec3 maxVelo(-25.0f, 0.0f, -65.0f); //fast version
+	glm::vec3 maxVelo(-10.0f, 0.0f, -12.0f);
 
 	//gets the desired vector
 	glm::vec3 desired = (currentPosition - target);

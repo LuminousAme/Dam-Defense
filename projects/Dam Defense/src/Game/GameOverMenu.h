@@ -1,5 +1,5 @@
 //Dam Defense, by Atlas X Games
-//MainMenu.h, the header file for the class that represents the main menu
+//GameOverMenu.h, the header file for the class that represents the game over menu
 #pragma once
 
 //include required features from titan
@@ -8,13 +8,12 @@
 
 using namespace Titan;
 
-class MainMenu : public TTN_Scene {
+class GameOverMenu : public TTN_Scene {
 public:
 	//default constructor
-	MainMenu();
+	GameOverMenu();
 
-	//default destrcutor
-	~MainMenu() = default;
+	~GameOverMenu()=default;
 
 	//sets up the scene
 	void InitScene();
@@ -124,13 +123,14 @@ protected:
 	void ImGui();
 };
 
-class MainMenuUI : public TTN_Scene {
+
+class GameOverMenuUI : public TTN_Scene {
 public:
 	//default constructor
-	MainMenuUI();
+	GameOverMenuUI();
 
-	//default destrcutor
-	~MainMenuUI() = default;
+	//default destrcutor 
+	~GameOverMenuUI() = default;
 
 	//sets up the scene
 	void InitScene();
@@ -141,28 +141,24 @@ public:
 	//mouse input
 	void MouseButtonDownChecks();
 
-	void SetFirstTime(bool time) { firstTime = time; }
 	void SetShouldPlay(bool play) { shouldPlay = play; }
 	void SetShouldQuit(bool quit) { shouldQuit = quit; }
-
-	bool GetFirstTime() { return firstTime; }
+	void SetShouldMenu(bool menu) { shouldMenu = menu; }
 
 	bool GetShouldPlay() { return shouldPlay; }
 	bool GetShouldQuit() { return shouldQuit; }
+	bool GetShouldMenu() { return shouldMenu; }
 
 private:
 	//entities
 	entt::entity cam;
-	entt::entity gameLogo;
+	entt::entity gameOver;
 	//play
 	entt::entity playButton;
 	entt::entity playText;
-	//arcade
-	entt::entity arcadeButton;
-	entt::entity arcadeText;
-	//options
-	entt::entity optionsButton;
-	entt::entity optionsText;
+	//main menu
+	entt::entity menuButton;
+	entt::entity menuText;
 	//quit
 	entt::entity quitButton;
 	entt::entity quitText;
@@ -171,12 +167,15 @@ private:
 	TTN_Texture2D::st2dptr textureGameLogo;
 	TTN_Texture2D::st2dptr textureButton1;
 	TTN_Texture2D::st2dptr textureButton2;
-	TTN_Texture2D::st2dptr texturePlay;
-	TTN_Texture2D::st2dptr textureArcade;
-	TTN_Texture2D::st2dptr textureOptions;
+	TTN_Texture2D::st2dptr texturePlayAgain;
+	TTN_Texture2D::st2dptr textureScore;
+	TTN_Texture2D::st2dptr textureMainMenu;
+	TTN_Texture2D::st2dptr textureGameOver;
 	TTN_Texture2D::st2dptr textureQuit;
 
 	bool shouldQuit;
 	bool shouldPlay;
-	bool firstTime;
+	bool shouldMenu;
+
 };
+

@@ -14,7 +14,7 @@ public:
 	//default constructor
 	Game();
 
-	//default destrcutor 
+	//default destrcutor
 	~Game() = default;
 
 	//sets up the scene
@@ -38,12 +38,22 @@ public:
 
 	bool GetGameIsPaused() { return m_paused; }
 	void SetGameIsPaused(bool paused) { m_paused = paused; }
+
+	bool GetGameIsOver() { return m_gameOver; }
+	void SetGameIsOver(bool over) { m_gameOver = over; }
+
+	bool GetGameWin() { return m_gameWin; }
+	void SetGameWin(bool win) { m_gameWin = win; }
+
+	bool GetGameShouldRestart() { return m_restart; }
+	void SetGameShouldRestart(bool restart) { m_restart = restart; }
+
 	int GetDamHealth() { return Dam_health; }
 
 	//function to restart the game reseting all the data
-
+	void RestartData();
 	//Assets
-public: 
+public:
 #pragma region assets
 	//shader programs
 	TTN_Shader::sshptr shaderProgramUnTextured;
@@ -123,7 +133,7 @@ protected:
 	std::vector<entt::entity> flames;
 
 	/////// OTHER DATA ///////////
-	#pragma region Data
+#pragma region Data
 protected:
 	/////// Player control data/////////
 	float cannonBallForce = 3600.0f;;//a multiplier for the ammount of force should be applied to a cannonball when it is fired
@@ -134,6 +144,9 @@ protected:
 	glm::vec3 playerDir;//the direction the cannon is currently facing
 	float playerShootCooldownTimer;//how much time until the player can shoot again
 
+	//////// GAMEPLAY DATA ////////////
+	float damage = 1.0f; //damage of boats (dam health is 100.f)
+	int lastWave = 2; //the wave the player needs to reach and beat to win
 
 	/////// Terrain and water control data ////////
 	float terrainScale = 0.15f;//the terrain scale
@@ -161,13 +174,14 @@ protected:
 
 	///////////SCENE CONTROL DATA///////////
 	bool m_paused; //wheter or not the scene is paused
-	bool m_gameOver; //wheter or not the player has yet gameover
-	bool gameWin;//wheter or not the player has won
+	bool m_gameOver = false; //wheter or not the player has yet gameover
+	bool m_gameWin = false;//wheter or not the player has won
+	bool m_restart;//wheter or not the game is restarting
 
 	/////////////ENEMY AND WAVE CONTROLS//////////////////
 	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
 	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
-	int m_enemiesPerWave = 5; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
+	int m_enemiesPerWave = 1; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
 
 	int m_currentWave = 1; //the current wave
 	float m_timeTilNextWave; //the timer until the next wave starts, used after a wave has ended
@@ -181,7 +195,6 @@ protected:
 	float flameSoundTime;
 	float splashSoundTime;
 
-
 #pragma endregion
 
 	///////PARTICLE TEMPLATES//////////
@@ -194,8 +207,7 @@ protected:
 	void SetUpAssets();
 	void SetUpEntities();
 	void SetUpOtherData();
-	void RestartData();
-	
+
 	//update functions, called by Update()
 protected:
 	void PlayerRotate(float deltaTime);
