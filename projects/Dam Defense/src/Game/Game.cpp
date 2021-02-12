@@ -22,6 +22,8 @@ void Game::InitScene()
 
 	//create the entities
 	SetUpEntities();
+
+	RestartData();
 }
 
 //updates the scene every frame
@@ -58,42 +60,31 @@ void Game::Update(float deltaTime)
 
 		//updates the flamethrower logic
 		FlamethrowerUpdate(deltaTime);
-
+		GameSounds(deltaTime); //sounds for game stuff (cannon, ft, splash)
 		Collisions(); //collision check
 		Damage(deltaTime); //damage function, contains cooldoown
 
 		BirdUpate(deltaTime);
 
-		TTN_AudioEvent& cannon = engine.GetEvent("cannon");
-		if (cannonTime >= 0.0f) {
-			cannonTime = cannonTime - deltaTime;
-		}
-		if (cannonTime <= 0.0f && cannon.isPlaying()) {
-			cannon.Stop();
-		}
-
-		TTN_AudioEvent& flame = engine.GetEvent("flame");
-		if (flameSoundTime >= 0.0f) {
-			flameSoundTime = flameSoundTime - deltaTime;
-		}
-		if (flameSoundTime <= 0.0f && flame.isPlaying()) {
-			flame.Stop();
-		}
-	
 		//increase the total time of the scene to make the water animated correctly
 		water_time += deltaTime;
 	}
-	
+
 	//game over stuff
 	if (Dam_health <= 0.0f) {
 		m_gameOver = true;
 		printf("GAME OVER");
 	}
+	if (m_currentWave > lastWave) {
+		m_gameWin = true;
+	}
 
-	TTN_AudioEvent& music = engine.GetEvent("music");
+	//TTN_AudioEvent& music = engine.GetEvent("music");
 
 	//get ref to bus
-	TTN_AudioBus& musicBus = engine.GetBus("MusicBus");
+	TTN_AudioBus& musicBus = engine.GetBus("");
+	musicBus.SetVolume(350.f);
+
 	musicBus.SetPaused(false);
 	if (m_paused) {
 		musicBus.SetPaused(true);
@@ -101,6 +92,8 @@ void Game::Update(float deltaTime)
 
 	//get ref to listener
 	TTN_AudioListener& listener = engine.GetListener();
+	//std::cout << glm::to_string (listener.GetPosition())<<std::endl;
+
 	engine.Update();
 
 	//call the update on ImGui
@@ -292,7 +285,6 @@ void Game::KeyChecks()
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Space)) {
 		a.SetPos(glm::vec3(a.GetPos().x - 2.0f, a.GetPos().y + 2.0f, a.GetPos().z));
 	}
-
 }
 
 //function to check for when a key has been released
@@ -328,12 +320,9 @@ void Game::MouseButtonChecks()
 
 			TTN_AudioEvent& cannon = engine.GetEvent("cannon");
 			cannon.Play();
-			cannonTime = playerShootCooldown-0.05f;
+			cannonTime = playerShootCooldown - 0.05f;
 		}
 	}
-
-
-
 }
 
 //function to check for when a mouse button has been released
@@ -347,12 +336,16 @@ void Game::MouseButtonUpChecks()
 void Game::SetUpAssets()
 {
 	//// SOUNDS ////
-	engine.LoadBank("Master");
-	engine.LoadBus("MusicBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}");
+	engine.LoadBank("SFX");
 
-	TTN_AudioEvent& music = engine.CreateEvent("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
-	TTN_AudioEvent& cannon = engine.CreateEvent("cannon", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
-	TTN_AudioEvent& flame = engine.CreateEvent("flame", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
+	engine.LoadBus("", "{36a0649f-4f49-4467-8dca-29d45bbcda5c}"); // sounds effects
+	//engine.LoadBus("MusicBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}"); //ambient music
+
+	//TTN_AudioEvent& music = engine.CreateEvent("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
+
+	TTN_AudioEvent& cannon = engine.CreateEvent("cannon", "{68ebd2af-e6ff-42e5-851c-a45b669330d6}");
+	TTN_AudioEvent& flame = engine.CreateEvent("flame", "{0f594f5c-6e37-4fcb-a8e3-80ba7b29e42b}");
+	TTN_AudioEvent& splash = engine.CreateEvent("splash", "{03156626-835a-4067-b5af-1b3f6b59f388}");
 
 	//music.Play();
 
@@ -809,11 +802,11 @@ void Game::RestartData()
 	//bird data setup
 	birdTimer = 0.0f;
 
-	//scene data steup
+	//scene data setup
 	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));
 	m_paused = false;
 	m_gameOver = false;
-	gameWin = false;
+	m_gameWin = false;
 
 	//enemy and wave data setup
 	m_currentWave = 1;
@@ -822,6 +815,18 @@ void Game::RestartData()
 	m_boatsRemainingThisWave = m_enemiesPerWave;
 	m_boatsStillNeedingToSpawnThisWave = m_boatsRemainingThisWave;
 	m_rightSideSpawn = (bool)(rand() % 2);
+
+	//delete all boats in scene
+	std::vector<entt::entity>::iterator it = boats.begin();
+	while (it != boats.end()) {
+		if (Get<TTN_Transform>(*it).GetPos().z >= 300.0f) {
+			it++;
+		}
+		else {
+			DeleteEntity(*it);
+			it = boats.erase(it);
+		}
+	}
 }
 
 #pragma endregion
@@ -1003,8 +1008,8 @@ void Game::FlamethrowerUpdate(float deltaTime)
 			FlameAnim = 0.0f;
 			Flaming = false;
 		}
-		
-		//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 20
+
+		//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 27
 		std::vector<entt::entity>::iterator it = boats.begin();
 		while (it != boats.end()) {
 			if (Get<TTN_Transform>(*it).GetPos().z >= 27.0f) {
@@ -1225,6 +1230,11 @@ void Game::Collisions()
 							//play an expolsion at it's location
 							glm::vec3 loc = Get<TTN_Transform>(*itt).GetGlobalPos();
 							CreateExpolsion(loc);
+							TTN_AudioEvent& splash = engine.GetEvent("splash");
+							splash.SetPosition(glm::vec3(loc.x / 9.f, loc.y / 9.f, loc.z / 5.f));
+							std::cout << glm::to_string(splash.GetPosition()) << std::endl;
+							splash.Play();
+							splashSoundTime = 0.6f;
 							//remove the physics from it
 							Remove<TTN_Physics>(*itt);
 							//add a countdown until it deletes
@@ -1258,7 +1268,7 @@ void Game::Damage(float deltaTime) {
 			if (Get<EnemyComponent>(*it).GetCooldown() <= 0.f) {
 				//if they are do damage
 				Get<EnemyComponent>(*it).SetCooldown(3.0f);
-				Dam_health--;
+				Dam_health = Dam_health - damage;
 				std::cout << Dam_health << std::endl;
 			}
 			//otherwise lower the remaining damage cooldown
@@ -1275,6 +1285,33 @@ void Game::Damage(float deltaTime) {
 	}
 }
 #pragma endregion
+
+void Game::GameSounds(float deltaTime)
+{
+	TTN_AudioEvent& cannon = engine.GetEvent("cannon");
+	if (cannonTime >= 0.0f) {
+		cannonTime = cannonTime - deltaTime;
+	}
+	if (cannonTime <= 0.0f && cannon.isPlaying()) {
+		cannon.Stop();
+	}
+
+	TTN_AudioEvent& flame = engine.GetEvent("flame");
+	if (flameSoundTime >= 0.0f) {
+		flameSoundTime = flameSoundTime - deltaTime;
+	}
+	if (flameSoundTime <= 0.0f && flame.isPlaying()) {
+		flame.Stop();
+	}
+
+	TTN_AudioEvent& splash = engine.GetEvent("splash");
+	if (splashSoundTime >= 0.0f) {
+		splashSoundTime = splashSoundTime - deltaTime;
+	}
+	if (splashSoundTime <= 0.0f && splash.isPlaying()) {
+		splash.Stop();
+	}
+}
 
 void Game::BirdUpate(float deltaTime)
 {
@@ -1318,10 +1355,10 @@ void Game::ImGui()
 			SetSceneAmbientColor(glm::vec3(sceneAmbientLight[0], sceneAmbientLight[1], sceneAmbientLight[2]));
 		}
 
-		//loop through all the lights 
+		//loop through all the lights
 		int i = 0;
 		std::vector<entt::entity>::iterator it = m_Lights.begin();
-		while(it != m_Lights.end()) {
+		while (it != m_Lights.end()) {
 			//make temp floats for their data
 			float color[3], pos[3], ambientStr, specularStr, attenConst, attenLine, attenQuad;
 			TTN_Light& tempLightRef = Get<TTN_Light>(*it);
@@ -1442,7 +1479,7 @@ void Game::ImGui()
 				m_mats[i]->SetHasOutline(false);
 			}
 		}
-		
+
 		//Ambient only
 		if (ImGui::Checkbox("Ambient Lighting Only", &m_ambientOnly)) {
 			//set ambient only to true
@@ -1497,7 +1534,7 @@ void Game::ImGui()
 			}
 		}
 
-		//Ambient, specular, and lineart outline 
+		//Ambient, specular, and lineart outline
 		if (ImGui::Checkbox("Ambient, Specular, and custom(outline) Lighting", &m_ambientSpecularAndOutline)) {
 			//set ambient, specular, and outline to true
 			m_ambientSpecularAndOutline = true;

@@ -9,6 +9,8 @@
 #include "Launch/LoadingScene.h"
 #include "Menu/MainMenu.h"
 #include "Game/PauseMenu.h"
+#include "Game/GameOverMenu.h"
+#include "Game/GameWinMenu.h"
 
 using namespace Titan;
 
@@ -40,16 +42,23 @@ int main() {
 	MainMenu* titleScreen = new MainMenu;
 	MainMenuUI* titleScreenUI = new MainMenuUI;
 	PauseMenu* paused = new PauseMenu;
+	GameOverMenu* gameOver = new GameOverMenu;
+	GameOverMenuUI* gameOverUI = new GameOverMenuUI;
+	GameWinMenu* gameWin = new GameWinMenu;
+	GameWinMenuUI* gameWinUI = new GameWinMenuUI;
 
 	//initliaze them
-	//gameScene->InitScene();
 	splash->InitScene();
 	loadingScreen->InitScene();
 	loadingScreen->SetShouldRender(false);
 	gameScene->SetShouldRender(false);
 	titleScreen->SetShouldRender(false);
 	titleScreenUI->SetShouldRender(false);
+	gameOver->SetShouldRender(false);
+	gameOverUI->SetShouldRender(false);
 	paused->SetShouldRender(false);
+	gameWin->SetShouldRender(false);
+	gameWinUI->SetShouldRender(false);
 
 	//add them to the application
 	TTN_Application::scenes.push_back(splash);
@@ -58,10 +67,14 @@ int main() {
 	TTN_Application::scenes.push_back(paused);
 	TTN_Application::scenes.push_back(titleScreen);
 	TTN_Application::scenes.push_back(titleScreenUI);
+	TTN_Application::scenes.push_back(gameOver);
+	TTN_Application::scenes.push_back(gameOverUI);
+	TTN_Application::scenes.push_back(gameWin);
+	TTN_Application::scenes.push_back(gameWinUI);
 
 	// init's the configs and contexts for imgui
 	TTN_Application::InitImgui();
-
+	bool firstTime = false;
 	//while the application is running
 	while (!TTN_Application::GetIsClosing()) {
 		
@@ -84,21 +97,47 @@ int main() {
 			titleScreen->SetShouldRender(true);
 			titleScreenUI->InitScene();
 			titleScreenUI->SetShouldRender(true);
+			
 		}
 
 		//check if the loading is done and the menu should be going to the game
-		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldPlay() && set2Loaded) {
-			//if it is, go to the main menu
+		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldPlay() && set2Loaded && (!firstTime) ) {
+			//if it is, go to the game
 			titleScreen->SetShouldRender(false);
 			titleScreenUI->SetShouldRender(false);
+			titleScreenUI->SetShouldPlay(false);
 			TTN_Application::TTN_Input::SetCursorLocked(true);
 			gameScene->InitScene();
-			gameScene->SetShouldRender(true);
 			paused->InitScene();
+			gameOver->InitScene();
+			gameOverUI->InitScene();
+			gameWin->InitScene();
+			gameWinUI->InitScene();
+			gameOver->SetShouldRender(false);
+			gameOverUI->SetShouldRender(false);
+			gameWin->SetShouldRender(false);
+			gameWinUI->SetShouldRender(false);
+			gameScene->SetShouldRender(true);
+			firstTime = true;
+		}
+
+		//for going back to the main menu in game over
+		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldPlay() && set2Loaded && (firstTime)) {
+			//if it is, go to the game
+			titleScreen->SetShouldRender(false);
+			titleScreenUI->SetShouldRender(false);
+			titleScreenUI->SetShouldPlay(false);
+			TTN_Application::TTN_Input::SetCursorLocked(true);
+			gameOver->SetShouldRender(false);
+			gameOverUI->SetShouldRender(false);
+			gameWin->SetShouldRender(false);
+			gameWinUI->SetShouldRender(false);
+			gameScene->SetShouldRender(true);
+			gameScene->RestartData();
 		}
 
 		//check if the game should quit
-		if (titleScreenUI->GetShouldQuit() || paused->GetShouldQuit()) {
+		if (titleScreenUI->GetShouldQuit() || paused->GetShouldQuit() || gameOverUI->GetShouldQuit() || gameWinUI->GetShouldQuit()) {
 			TTN_Application::Quit();
 		}
 
@@ -123,6 +162,77 @@ int main() {
 			paused->SetShouldResume(false);
 			paused->SetShouldRender(false);
 		}
+
+		//if the game is over
+		if (gameScene->GetGameIsOver()) {
+			TTN_Application::TTN_Input::SetCursorLocked(false);
+			gameScene->SetGameIsOver(false);
+			gameScene->SetShouldRender(false);
+			paused->SetShouldRender(false);
+			gameScene->SetGameIsPaused(true);
+			gameOver->SetShouldRender(true);
+			gameOverUI->SetShouldRender(true);
+			gameOverUI->SetShouldMenu(false);
+		}
+
+		//if game over should render and restart
+		if (gameOverUI->GetShouldRender() && gameOverUI->GetShouldPlay() && gameOver->GetShouldRender()) {
+			gameOver->SetShouldRender(false);
+			gameOverUI->SetShouldRender(false);
+			gameOverUI->SetShouldPlay(false);
+			gameOverUI->SetShouldMenu(false);
+			TTN_Application::TTN_Input::SetCursorLocked(true);
+			gameScene->SetGameIsPaused(false);
+			gameScene->SetShouldRender(true);
+			gameScene->SetGameIsOver(false);
+			gameScene->RestartData();
+		}
+		//game over go to menu
+		if (gameOverUI->GetShouldRender() && gameOverUI->GetShouldMenu() && gameOver->GetShouldRender()) {
+			gameOver->SetShouldRender(false);
+			gameOverUI->SetShouldRender(false);
+			gameOverUI->SetShouldMenu(false);
+			gameOverUI->SetShouldPlay(false);
+			TTN_Application::TTN_Input::SetCursorLocked(false);
+			titleScreen->SetShouldRender(true);
+			titleScreenUI->SetShouldRender(true);
+		}
+
+		//if player wins game
+		if (gameScene->GetGameWin()) {
+			TTN_Application::TTN_Input::SetCursorLocked(false);
+			gameScene->SetGameWin(false);
+			gameScene->SetShouldRender(false);
+			paused->SetShouldRender(false);
+			gameScene->SetGameIsPaused(true);
+			gameWin->SetShouldRender(true);
+			gameWinUI->SetShouldRender(true);
+			gameWinUI->SetShouldMenu(false);
+		}
+
+		//if game win and they want to play again
+		if (gameWinUI->GetShouldRender() && gameWinUI->GetShouldPlay() && gameWin->GetShouldRender()) {
+			gameWin->SetShouldRender(false);
+			gameWinUI->SetShouldRender(false);
+			gameWinUI->SetShouldPlay(false);
+			gameWinUI->SetShouldMenu(false);
+			TTN_Application::TTN_Input::SetCursorLocked(true);
+			gameScene->SetGameIsPaused(false);
+			gameScene->SetShouldRender(true);
+			gameScene->SetGameIsOver(false);
+			gameScene->RestartData();
+		}
+
+		if (gameWinUI->GetShouldRender() && gameWinUI->GetShouldMenu() && gameWin->GetShouldRender()) {
+			gameWin->SetShouldRender(false);
+			gameWinUI->SetShouldRender(false);
+			gameWinUI->SetShouldMenu(false);
+			gameWinUI->SetShouldPlay(false);
+			TTN_Application::TTN_Input::SetCursorLocked(false);
+			titleScreen->SetShouldRender(true);
+			titleScreenUI->SetShouldRender(true);
+		}
+
 
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)
 			set1Loaded = true;
@@ -181,7 +291,13 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Play-Text", "textures/text/play.png", 1); //rendered text of word Play
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Arcade-Text", "textures/text/Arcade.png", 1); //rendered text of word Arcade
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Options-Text", "textures/text/Options.png", 1); //rendered text of word Options
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Game Over", "textures/text/Game over.png", 1); //rendered text of words game over
+	TTN_AssetSystem::AddTexture2DToBeLoaded("You Win", "textures/text/You win.png", 1); //rendered text of words you win!
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Score", "textures/text/Score.png", 1); //rendered text of word Score:
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Play Again", "textures/text/Play again.png", 1); //rendered text of words Play again
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Quit-Text", "textures/text/Quit.png", 1); //rendered text of word Quit
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Main Menu", "textures/text/Main Menu.png", 1); //rendered text of word main menu
+
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Game logo", "textures/Dam Defense logo.png", 1); //logo for the game
 	TTN_AssetSystem::AddMeshToBeLoaded("Sphere", "models/IcoSphereMesh.obj", 1);
 
@@ -199,7 +315,7 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Score-Text", "textures/text/Score.png", 2); //rendered text of the word Score
 
 	//set 3, win/lose screen
-	TTN_AssetSystem::AddTexture2DToBeLoaded("You Win-Text", "textures/text/You win!.png", 3); //rendered text of the pharse "You Win!" 
+	TTN_AssetSystem::AddTexture2DToBeLoaded("You Win-Text", "textures/text/You win.png", 3); //rendered text of the pharse "You Win!" 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Game Over-Text", "textures/text/Game over.png", 3); //rendered text of the phrase "Game Over..." 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Play Again-Text", "textures/text/Play again.png", 3); //rendered text of the phrase "Play Again" 
 }
