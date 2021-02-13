@@ -29,12 +29,36 @@ void Game::InitScene()
 //updates the scene every frame
 void Game::Update(float deltaTime)
 {
+	engine.GetListener();
+	engine.GetBus("Music").SetVolume(350.0f);
+	engine.GetBus("SFX").SetVolume(350.0f);
+
+	//call the sound update
+	GameSounds(deltaTime);
+
 	if (!m_paused) {
 		//allow the player to rotate
 		PlayerRotate(deltaTime);
 
 		//switch to the cannon's normal static animation if it's firing animation has ended
 		StopFiring();
+
+		//if a cannonball has passed the water plane but not yet splashed, play the splash effect
+		for (int i = 0; i < cannonBalls.size(); i++) {
+			if (!cannonBalls[i].second && Get<TTN_Transform>(cannonBalls[i].first).GetGlobalPos().y <= 
+				Get<TTN_Transform>(water).GetGlobalPos().y) {
+				//sets the position where the sound should play
+				glm::vec3 temp = Get<TTN_Transform>(cannonBalls[i].first).GetGlobalPos();
+				temp.x *= -1.0f;
+				temp.y = Get<TTN_Transform>(water).GetGlobalPos().y;
+				m_splashSounds->SetNextPostion(temp);
+				//and plays the splash sound
+				m_splashSounds->PlayFromQueue();
+
+				//and mark the cannonball as having splashed
+				cannonBalls[i].second = true;
+			}
+		}
 
 		//delete any cannonballs that're way out of range
 		DeleteCannonballs();
@@ -60,7 +84,7 @@ void Game::Update(float deltaTime)
 
 		//updates the flamethrower logic
 		FlamethrowerUpdate(deltaTime);
-		GameSounds(deltaTime); //sounds for game stuff (cannon, ft, splash)
+		
 		Collisions(); //collision check
 		Damage(deltaTime); //damage function, contains cooldoown
 
@@ -79,21 +103,11 @@ void Game::Update(float deltaTime)
 		m_gameWin = true;
 	}
 
-	//TTN_AudioEvent& music = engine.GetEvent("music");
-
 	//get ref to bus
-	TTN_AudioBus& musicBus = engine.GetBus("");
-	musicBus.SetVolume(350.f);
+	//TTN_AudioBus& musicBus = engine.GetBus("");
+	//musicBus.SetVolume(350.f);
 
-	musicBus.SetPaused(false);
-	if (m_paused) {
-		musicBus.SetPaused(true);
-	}
-
-	//get ref to listener
-	TTN_AudioListener& listener = engine.GetListener();
-	//std::cout << glm::to_string (listener.GetPosition())<<std::endl;
-
+	//update the sound
 	engine.Update();
 
 	//call the update on ImGui
@@ -313,14 +327,11 @@ void Game::MouseButtonChecks()
 			//reset the cooldown
 			playerShootCooldownTimer = playerShootCooldown;
 			//and play the smoke particle effect
-			Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f, 0.0f) + 1.5f * playerDir);
+			Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f, 0.0f) + 1.75f * playerDir);
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
 				SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
-
-			TTN_AudioEvent& cannon = engine.GetEvent("cannon");
-			cannon.Play();
-			cannonTime = playerShootCooldown - 0.05f;
+			m_cannonFiringSounds->PlayFromQueue();
 		}
 	}
 }
@@ -336,27 +347,29 @@ void Game::MouseButtonUpChecks()
 void Game::SetUpAssets()
 {
 	//// SOUNDS ////
-	engine.LoadBank("SFX");
-	engine.LoadBus("", "{36a0649f-4f49-4467-8dca-29d45bbcda5c}"); // sounds effects
-	//engine.LoadBus("MusicBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}"); //ambient music
-	//TTN_AudioEvent& music = engine.CreateEvent("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
+	//load the banks
+	engine.LoadBank("Sound/Music");
+	engine.LoadBank("Sound/SFX");
 
-	TTN_AudioEvent& cannon = engine.CreateEvent("cannon", "{68ebd2af-e6ff-42e5-851c-a45b669330d6}");
-	TTN_AudioEvent& flame = engine.CreateEvent("flame", "{0f594f5c-6e37-4fcb-a8e3-80ba7b29e42b}");
-	TTN_AudioEvent& splash = engine.CreateEvent("splash", "{03156626-835a-4067-b5af-1b3f6b59f388}");
+	//load the buses
+	engine.LoadBus("Music", "{0b8d00f4-2fe5-4264-9626-a7a1988daf35}");
+	engine.LoadBus("SFX", "{b9fcc2bc-7614-4852-a78d-6cad54329f8b}");
 
-	//music.Play();
+	
+	//make the events
+	m_cannonFiringSounds = TTN_AudioEventHolder::Create("Cannon Shot", "{01c9d609-b06a-4bb8-927d-01ee25b2b815}", 2);
+	m_splashSounds = TTN_AudioEventHolder::Create("Splash", "{ca17eafa-bffe-4121-80a3-441a94ee2fe7}", 8);
+	m_flamethrowerSound = TTN_AudioEventHolder::Create("Flamethrower", "{b52a7dfc-88df-47a9-9263-859e6564e161}", 1);
+	m_jingle = TTN_AudioEventHolder::Create("Wave Complete", "{d28d68df-bb3e-4153-95b6-89fd2715a5a3}", 1);
+	m_music = TTN_AudioEventHolder::Create("Music", "{239bd7d6-7e7e-47a7-a0f6-7afc6f1b35bc}", 1);
 
 	//// SHADERS ////
-#pragma region SHADERS
 	//grab the shaders
 	shaderProgramTextured = TTN_AssetSystem::GetShader("Basic textured shader");
 	shaderProgramSkybox = TTN_AssetSystem::GetShader("Skybox shader");
 	shaderProgramTerrain = TTN_AssetSystem::GetShader("Terrain shader");
 	shaderProgramWater = TTN_AssetSystem::GetShader("Water shader");
 	shaderProgramAnimatedTextured = TTN_AssetSystem::GetShader("Animated textured shader");
-
-#pragma endregion
 
 	////MESHES////
 	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
@@ -689,7 +702,7 @@ void Game::SetUpEntities()
 	}
 
 	//prepare the vector of cannonballs
-	cannonBalls = std::vector<entt::entity>();
+	cannonBalls = std::vector<std::pair<entt::entity, bool>>();
 	//vector of boats
 	boats = std::vector<entt::entity>();
 
@@ -825,6 +838,25 @@ void Game::RestartData()
 			it = boats.erase(it);
 		}
 	}
+
+	//sets the buses to not be paused
+	engine.GetBus("Music").SetPaused(true);
+	engine.GetBus("SFX").SetPaused(true);
+
+	//turn off all the instruments except the hihats
+	engine.GetEvent(m_music->GetNextEvent()).SetParameter("BangoPlaying", 0);
+	engine.GetEvent(m_music->GetNextEvent()).SetParameter("MarimbraPlaying", 0);
+	engine.GetEvent(m_music->GetNextEvent()).SetParameter("RecorderPlaying", 0);
+	engine.GetEvent(m_music->GetNextEvent()).SetParameter("TrumpetsPlaying", 0);
+	engine.GetEvent(m_music->GetNextEvent()).SetParameter("HihatsPlaying", 1);
+	engine.GetEvent(m_music->GetNextEvent()).SetParameter("Clap1Playing", 0);
+	engine.GetEvent(m_music->GetNextEvent()).SetParameter("Clap2Playing", 0);
+	engine.GetEvent(m_music->GetNextEvent()).SetParameter("Clap3Playing", 0);
+	engine.GetEvent(m_music->GetNextEvent()).SetParameter("BassDrumPlaying", 0);
+	//and set the number of times the melody should play
+	timesMelodyShouldPlay = rand() % 3 + 4;
+	//and play the music
+	m_music->PlayFromQueue();
 }
 
 #pragma endregion
@@ -873,47 +905,47 @@ void Game::CreateCannonball()
 	//create the cannonball
 	{
 		//create the entity
-		cannonBalls.push_back(CreateEntity());
+		cannonBalls.push_back(std::pair(CreateEntity(), false));
 
 		//set up a renderer for the cannonball
 		TTN_Renderer cannonBallRenderer = TTN_Renderer(sphereMesh, shaderProgramTextured, cannonMat);
 		//attach that renderer to the entity
-		AttachCopy(cannonBalls[cannonBalls.size() - 1], cannonBallRenderer);
+		AttachCopy(cannonBalls[cannonBalls.size() - 1].first, cannonBallRenderer);
 
 		//set up a transform for the cannonball
 		TTN_Transform cannonBallTrans = TTN_Transform();
 		cannonBallTrans.SetPos(Get<TTN_Transform>(cannon).GetGlobalPos());
 		cannonBallTrans.SetScale(glm::vec3(0.35f));
 		//attach that transform to the entity
-		AttachCopy(cannonBalls[cannonBalls.size() - 1], cannonBallTrans);
+		AttachCopy(cannonBalls[cannonBalls.size() - 1].first, cannonBallTrans);
 
 		//set up a physics body for the cannonball
 		TTN_Physics cannonBallPhysBod = TTN_Physics(cannonBallTrans.GetPos(), glm::vec3(0.0f), cannonBallTrans.GetScale(),
-			cannonBalls[cannonBalls.size() - 1]);
+			cannonBalls[cannonBalls.size() - 1].first);
 
 		//attach that physics body to the entity
-		AttachCopy(cannonBalls[cannonBalls.size() - 1], cannonBallPhysBod);
+		AttachCopy(cannonBalls[cannonBalls.size() - 1].first, cannonBallPhysBod);
 
 		TTN_Tag ballTag = TTN_Tag("Ball"); //sets boat path number to ttn_tag
-		AttachCopy<TTN_Tag>(cannonBalls[cannonBalls.size() - 1], ballTag);
+		AttachCopy<TTN_Tag>(cannonBalls[cannonBalls.size() - 1].first, ballTag);
 	}
 	//TTN_Physics& tt = Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1]);
 
 	//after the cannonball has been created, get the physics body and apply a force along the player's direction
-	Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1]).AddForce((cannonBallForce * playerDir));
+	Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1].first).AddForce((cannonBallForce * playerDir));
 }
 
 //function that will check the positions of the cannonballs each frame and delete any that're too low
 void Game::DeleteCannonballs()
 {
 	//iterate through the vector of cannonballs, deleting the cannonball if it is at or below y = -50
-	std::vector<entt::entity>::iterator it = cannonBalls.begin();
+	std::vector<std::pair<entt::entity, bool>>::iterator it = cannonBalls.begin();
 	while (it != cannonBalls.end()) {
-		if (Get<TTN_Transform>(*it).GetGlobalPos().y > -40.0f) {
+		if (Get<TTN_Transform>((*it).first).GetGlobalPos().y > -40.0f) {
 			it++;
 		}
 		else {
-			DeleteEntity(*it);
+			DeleteEntity((*it).first);
 			it = cannonBalls.erase(it);
 		}
 	}
@@ -952,13 +984,8 @@ void Game::Flamethrower() {
 	if (FlameTimer <= 0.0f) {
 		//reset cooldown
 		FlameTimer = FlameThrowerCoolDown;
-		flameSoundTime = FlameAnim;
 		//set the active flag to true
 		Flaming = true;
-		//sounds
-		TTN_AudioEvent& flame = engine.GetEvent("flame");
-		flame.Play();
-		flameSoundTime = FlameActiveTime;
 		//and through and create the fire particle systems
 		for (int i = 0; i < 6; i++) {
 			//fire particle entities
@@ -981,6 +1008,9 @@ void Game::Flamethrower() {
 				AttachCopy(flames[i], psComponent);
 			}
 		}
+
+		//play the sound effect
+		m_flamethrowerSound->PlayFromQueue();
 	}
 	//otherwise nothing happens
 	else {
@@ -1159,6 +1189,7 @@ void Game::WaveUpdate(float deltaTime)
 		m_boatsRemainingThisWave = m_enemiesPerWave * m_currentWave;
 		m_boatsStillNeedingToSpawnThisWave = m_boatsRemainingThisWave;
 		m_timeUntilNextSpawn = m_timeBetweenEnemySpawns;
+		playJingle = true;
 	}
 
 	//if it is in the cooldown between waves, reduce the cooldown by deltaTime
@@ -1209,11 +1240,11 @@ void Game::Collisions()
 				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Boat" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball") ||
 					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Boat"))) {
 					//then iterate through the list of cannonballs until you find the one that's collided
-					std::vector<entt::entity>::iterator it = cannonBalls.begin();
+					std::vector<std::pair<entt::entity, bool>>::iterator it = cannonBalls.begin();
 					while (it != cannonBalls.end()) {
-						if (entity1Ptr == *it || entity2Ptr == *it) {
+						if (entity1Ptr == (*it).first || entity2Ptr == (*it).first) {
 							//and delete it
-							DeleteEntity(*it);
+							DeleteEntity((*it).first);
 							it = cannonBalls.erase(it);
 						}
 						else {
@@ -1228,11 +1259,6 @@ void Game::Collisions()
 							//play an expolsion at it's location
 							glm::vec3 loc = Get<TTN_Transform>(*itt).GetGlobalPos();
 							CreateExpolsion(loc);
-							TTN_AudioEvent& splash = engine.GetEvent("splash");
-							splash.SetPosition(glm::vec3(loc.x / 9.f, loc.y / 9.f, loc.z / 5.f));
-							std::cout << glm::to_string(splash.GetPosition()) << std::endl;
-							splash.Play();
-							splashSoundTime = 0.6f;
 							//remove the physics from it
 							Remove<TTN_Physics>(*itt);
 							//add a countdown until it deletes
@@ -1286,28 +1312,122 @@ void Game::Damage(float deltaTime) {
 
 void Game::GameSounds(float deltaTime)
 {
-	TTN_AudioEvent& cannon = engine.GetEvent("cannon");
-	if (cannonTime >= 0.0f) {
-		cannonTime = cannonTime - deltaTime;
-	}
-	if (cannonTime <= 0.0f && cannon.isPlaying()) {
-		cannon.Stop();
+	//check to make sure it's approraitely playing the paused or not paused theme
+	if (m_paused != (bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("Paused")) {
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("Paused", (int)m_paused);
 	}
 
-	TTN_AudioEvent& flame = engine.GetEvent("flame");
-	if (flameSoundTime >= 0.0f) {
-		flameSoundTime = flameSoundTime - deltaTime;
-	}
-	if (flameSoundTime <= 0.0f && flame.isPlaying()) {
-		flame.Stop();
+	//reset frame sensetive bools
+	melodyFinishedThisFrame = false;
+	fullMelodyFinishedThisFrame = false;
+
+	//check if the melody should be switching
+	if (timesMelodiesPlayed >= timesMelodyShouldPlay) {
+		//generate a random number for the number of times it should play, 2 or 3
+		timesMelodyShouldPlay = rand() % 3 + 4;
+		//reset the counter for the number of times it has played
+		timesMelodiesPlayed = 0;
+		//and swap wheter it is currently playing the main or the off melody
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("Main Melody",
+			(int)(!((bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("Main Melody"))));
 	}
 
-	TTN_AudioEvent& splash = engine.GetEvent("splash");
-	if (splashSoundTime >= 0.0f) {
-		splashSoundTime = splashSoundTime - deltaTime;
+	//if the time the melody has been playing has surpassed 6 seconds
+	if (melodyTimeTracker >= 3.0f) {
+		//take it back down
+		melodyTimeTracker = std::fmod(melodyTimeTracker, 3.0f);
+		//and add to the times the melodies has been played
+		timesMelodiesPlayed++;
+		//set the flag to say a melody has finished playing this frame to true
+		melodyFinishedThisFrame = true;
+		if (partialMelody) fullMelodyFinishedThisFrame = true;
+		partialMelody = !partialMelody;
 	}
-	if (splashSoundTime <= 0.0f && splash.isPlaying()) {
-		splash.Stop();
+
+
+	float percentBoatsRemaining = (float)m_boatsRemainingThisWave / (float)(m_enemiesPerWave * m_currentWave);
+	//check if the bango should begin playing
+	if (fullMelodyFinishedThisFrame && percentBoatsRemaining <= 0.85f && 
+		!(bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("BangoPlaying")) {
+		//if it should begin playing it 
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("BangoPlaying", 1);
+
+		//and make sure all of the drums are also playing
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("HihatsPlaying", 1);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("Clap1Playing", 1);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("Clap2Playing", 1);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("Clap3Playing", 1);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("BassDrumPlaying", 1);
+	}
+
+	//check if the marimbra should begin playing
+	if (fullMelodyFinishedThisFrame && percentBoatsRemaining <= 0.7f && 
+		!(bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("MarimbraPlaying")) {
+		//if it should begin playing it 
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("MarimbraPlaying", 1);
+	}
+
+	//check if the recorder should begin playing
+	if (fullMelodyFinishedThisFrame && percentBoatsRemaining <= 0.55f && 
+		!(bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("RecorderPlaying")) {
+		//if it should begin playing it 
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("RecorderPlaying", 1);
+	}
+
+	//check if the trumpets should begin playing
+	if (fullMelodyFinishedThisFrame && percentBoatsRemaining <= 0.4f && engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("TrumpetsPlaying")) {
+		//if it should begin playing it 
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("TrumpetsPlaying", 1);
+	}
+
+	//if only the hihats and all the claps are playing and it's been a lenght of the melody, start playing the bass drum
+	if (fullMelodyFinishedThisFrame && ((bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("Clap3Playing")) &&
+		!(bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("BassDrumPlaying")) {
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("BassDrumPlaying", 1);
+	}
+
+	//if only the hihats and clap 1 and 2 are playing and it's been a lenght of the melody, start playing the third clap
+	if (fullMelodyFinishedThisFrame && ((bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("Clap2Playing")) &&
+		!(bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("Clap3Playing")) {
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("Clap3Playing", 1);
+	}
+
+	//if only the hihats and clap 1 are playing and it's been a lenght of the melody, start playing the second clap
+	if (fullMelodyFinishedThisFrame && ((bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("Clap1Playing")) &&
+		!(bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("Clap2Playing")) {
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("Clap2Playing", 1);
+	}
+
+	//if only the hihats are playing and it's been a lenght of the melody, start playing the first clap
+	if (fullMelodyFinishedThisFrame && ((bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("HihatsPlaying")) &&
+		!(bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("Clap1Playing")) {
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("Clap1Playing", 1);
+	}
+
+	//if none of the instruments are playing, and it's been a lenght of the melody since they last played, start playing them again
+	if (!playJingle && melodyFinishedThisFrame && !((bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("HihatsPlaying"))) {
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("HihatsPlaying", 1);
+	}
+
+	//if the wave has ended this frame and the jingle should play, turn off all the instruments and play the jingle
+	if (melodyFinishedThisFrame && playJingle) {
+		//turn off each of the instruments
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("BangoPlaying", 0);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("MarimbraPlaying", 0);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("RecorderPlaying", 0);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("TrumpetsPlaying", 0);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("HihatsPlaying", 0);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("Clap1Playing", 0);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("Clap2Playing", 0);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("Clap3Playing", 0);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("BassDrumPlaying", 0);
+
+		//reset the flag
+		playJingle = false;
+		//play the jingle
+		m_jingle->PlayFromQueue();
+		//reset the timer
+		timeSinceJingleStartedPlaying = 0.0f;
 	}
 }
 
