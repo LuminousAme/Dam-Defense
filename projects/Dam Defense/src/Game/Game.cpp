@@ -331,6 +331,7 @@ void Game::MouseButtonChecks()
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
 				SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
+			m_cannonFiringSounds->SetNextPostion(glm::vec3(0.0f));
 			m_cannonFiringSounds->PlayFromQueue();
 		}
 	}
@@ -362,6 +363,7 @@ void Game::SetUpAssets()
 	m_flamethrowerSound = TTN_AudioEventHolder::Create("Flamethrower", "{b52a7dfc-88df-47a9-9263-859e6564e161}", 1);
 	m_jingle = TTN_AudioEventHolder::Create("Wave Complete", "{d28d68df-bb3e-4153-95b6-89fd2715a5a3}", 1);
 	m_music = TTN_AudioEventHolder::Create("Music", "{239bd7d6-7e7e-47a7-a0f6-7afc6f1b35bc}", 1);
+
 
 	//// SHADERS ////
 	//grab the shaders
@@ -840,8 +842,8 @@ void Game::RestartData()
 	}
 
 	//sets the buses to not be paused
-	engine.GetBus("Music").SetPaused(true);
-	engine.GetBus("SFX").SetPaused(true);
+	engine.GetBus("Music").SetPaused(false);
+	engine.GetBus("SFX").SetPaused(false);
 
 	//turn off all the instruments except the hihats
 	engine.GetEvent(m_music->GetNextEvent()).SetParameter("BangoPlaying", 0);
@@ -856,6 +858,7 @@ void Game::RestartData()
 	//and set the number of times the melody should play
 	timesMelodyShouldPlay = rand() % 3 + 4;
 	//and play the music
+	m_music->SetNextPostion(glm::vec3(0.0f));
 	m_music->PlayFromQueue();
 }
 
@@ -1010,6 +1013,7 @@ void Game::Flamethrower() {
 		}
 
 		//play the sound effect
+		m_flamethrowerSound->SetNextPostion(glm::vec3(0.0f));
 		m_flamethrowerSound->PlayFromQueue();
 	}
 	//otherwise nothing happens
@@ -1425,6 +1429,7 @@ void Game::GameSounds(float deltaTime)
 		//reset the flag
 		playJingle = false;
 		//play the jingle
+		m_jingle->SetNextPostion(glm::vec3(0.0f));
 		m_jingle->PlayFromQueue();
 		//reset the timer
 		timeSinceJingleStartedPlaying = 0.0f;
