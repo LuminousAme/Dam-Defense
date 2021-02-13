@@ -395,7 +395,7 @@ TTN_AudioListener& TTN_AudioEngine::GetListener()
 	return m_Listener;
 }
 
-TTN_AudioEvent& TTN_AudioEngine::CreateEvent(const std::string& eventName, const std::string& GUID)
+TTN_AudioEvent& TTN_AudioEngine::MakeEvent(const std::string& eventName, const std::string& GUID)
 {
 	// Get find event in file
 	FMOD::Studio::EventDescription* eventDescription = NULL;
@@ -422,7 +422,6 @@ TTN_AudioEvent& TTN_AudioEngine::CreateEvent(const std::string& eventName, const
 
 		return *newTTN_AudioEvent;
 	}
-
 }
 
 TTN_AudioEvent& TTN_AudioEngine::GetEvent(const std::string& strEventName)
@@ -495,7 +494,36 @@ float TTN_AudioEngine::GetGlobalParameterValue(const char* name)
 	return value;
 }
 
+//default constructor, makes an audio event holder
+TTN_AudioEventHolder::TTN_AudioEventHolder()
+{
+	m_events = std::queue<std::string>();
+	m_nextPosition = glm::vec3(0.0f);
+}
 
+//constructor that takes data and uses it to make an audio event holder
+TTN_AudioEventHolder::TTN_AudioEventHolder(const std::string& EventName, const std::string& GUID, unsigned num)
+{
+	//call the default constructor
+	TTN_AudioEventHolder();
 
+	//generate all of the events and put them in the queue 
+	for (unsigned i = 0; i < num; i++) {
+		engine.MakeEvent(EventName + " " + std::to_string(i), GUID);
+		m_events.push(EventName + " " + std::to_string(i));
+	}
+}
 
-
+//plays the event at the top of the queue at the next position, and then pushes it to the back of the queue
+void TTN_AudioEventHolder::PlayFromQueue()
+{
+	//set the position
+	TTN_AudioEvent& temp = engine.GetEvent(m_events.front());
+	temp.SetPosition(m_nextPosition);
+	//restart the event
+	temp.StopImmediately();
+	temp.Play();
+	//move the event to the back of the queue
+	m_events.push(m_events.front());
+	m_events.pop();
+}

@@ -111,9 +111,17 @@ public:
 	TTN_Material::smatptr fireMat;
 
 	TTN_Texture2D::st2dptr healthBar;
-#pragma endregion
 
+	//sound
 	TTN_AudioEngine& engine = TTN_AudioEngine::Instance();
+	
+	TTN_AudioEventHolder::saehptr m_cannonFiringSounds;
+	TTN_AudioEventHolder::saehptr m_splashSounds;
+	TTN_AudioEventHolder::saehptr m_music;
+	TTN_AudioEventHolder::saehptr m_jingle;
+	TTN_AudioEventHolder::saehptr m_flamethrowerSound;
+
+#pragma endregion
 
 	//Entities
 protected:
@@ -121,7 +129,7 @@ protected:
 	entt::entity light;
 	entt::entity skybox;
 	entt::entity cannon;
-	std::vector<entt::entity> cannonBalls;
+	std::vector<std::pair<entt::entity, bool>> cannonBalls;
 	std::vector<entt::entity> boats;
 	entt::entity smokePS;
 	entt::entity terrain;
@@ -146,7 +154,7 @@ protected:
 
 	//////// GAMEPLAY DATA ////////////
 	float damage = 1.0f; //damage of boats (dam health is 100.f)
-	int lastWave = 2; //the wave the player needs to reach and beat to win
+	int lastWave = 3; //the wave the player needs to reach and beat to win
 
 	/////// Terrain and water control data ////////
 	float terrainScale = 0.15f;//the terrain scale
@@ -181,7 +189,7 @@ protected:
 	/////////////ENEMY AND WAVE CONTROLS//////////////////
 	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
 	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
-	int m_enemiesPerWave = 1; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
+	int m_enemiesPerWave = 5; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
 
 	int m_currentWave = 1; //the current wave
 	float m_timeTilNextWave; //the timer until the next wave starts, used after a wave has ended
@@ -190,10 +198,18 @@ protected:
 	int m_boatsStillNeedingToSpawnThisWave; //the number of boats that still need to be spawned before the wave can end
 	bool m_rightSideSpawn = true; //wheter or not it should be using the right (true) or left (false) spawner
 
-	/////////// SOUND CONTROL (Duration) ///////////////
-	float cannonTime;
-	float flameSoundTime;
-	float splashSoundTime;
+	/////////// SOUND CONTROL///////////////
+	//control melody
+	float melodyTimeTracker = 0.0f;
+	int timesMelodiesPlayed = 0;
+	int timesMelodyShouldPlay; //will be random between 2 and 3 every time
+	bool melodyFinishedThisFrame = false;
+	bool partialMelody = false;
+	bool fullMelodyFinishedThisFrame = false;
+
+	//jingle controls
+	bool playJingle = false;
+	float timeSinceJingleStartedPlaying = 0.0f;
 
 #pragma endregion
 

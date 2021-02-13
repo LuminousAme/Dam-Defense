@@ -141,7 +141,7 @@ private:
 	FMOD::Studio::EventInstance* m_EventInstance;
 };
 
-
+//Class for the audio engine singleton 
 class TTN_AudioEngine : public TTN_AudioObject
 {
 	friend class TTN_AudioEngine;
@@ -164,7 +164,7 @@ public:
 	TTN_AudioListener& GetListener();
 
 	//// Events ////
-	TTN_AudioEvent& CreateEvent(const std::string& strEventName, const std::string& GUID);
+	TTN_AudioEvent& MakeEvent(const std::string& strEventName, const std::string& GUID);
 	TTN_AudioEvent& GetEvent(const std::string& strEventName);
 
 	//// Global Parameters ////
@@ -195,4 +195,46 @@ private:
 
 	// Bus
 	std::unordered_map<std::string, TTN_AudioBus*> m_BusMap;
+};
+
+class TTN_AudioEventHolder {
+public:
+	//define a special name for shared (smart) pointers to this class
+	typedef std::shared_ptr<TTN_AudioEventHolder> saehptr;
+
+	//create a pointer to a new object of this class
+	static saehptr Create() {
+		return std::make_shared<TTN_AudioEventHolder>();
+	}
+
+	//create a pointer to a new object of this class
+	static saehptr Create(const std::string& EventName, const std::string& GUID, unsigned num) {
+		return std::make_shared<TTN_AudioEventHolder>(EventName, GUID, num);
+	}
+
+public:
+	//default constructor
+	TTN_AudioEventHolder();
+	//constructor that takes data
+	TTN_AudioEventHolder(const std::string& EventName, const std::string& GUID, unsigned num);
+
+	//Sets the next position
+	void SetNextPostion(glm::vec3 pos) { m_nextPosition = pos; }
+	//Gets the next positions
+	glm::vec3 GetNextPosition() { return m_nextPosition; }
+
+	//Plays the next effect from the queue
+	void PlayFromQueue();
+
+	//Gets a reference to the next event in the qeuue
+	std::string GetNextEvent() { return m_events.front(); }
+
+private:
+	//queue of all the copies of references to the effect
+	std::queue<std::string> m_events;
+	//position that the next event should be played at
+	glm::vec3 m_nextPosition;
+
+	//engine reference
+	TTN_AudioEngine& engine = TTN_AudioEngine::Instance();
 };

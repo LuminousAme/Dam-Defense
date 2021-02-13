@@ -26,6 +26,9 @@ int main() {
 	bool set1Loaded = false;
 	bool set2Loaded = false;
 
+	//reference to the audio engine (used to pause game audio while the game isn't running)
+	TTN_AudioEngine& audioEngine = TTN_AudioEngine::Instance();
+
 	//lock the cursor while focused in the application window
 	TTN_Application::TTN_Input::SetCursorLocked(false);
 
@@ -173,6 +176,8 @@ int main() {
 			gameOver->SetShouldRender(true);
 			gameOverUI->SetShouldRender(true);
 			gameOverUI->SetShouldMenu(false);
+			audioEngine.GetBus("Music").SetPaused(true);
+			audioEngine.GetBus("SFX").SetPaused(true);
 		}
 
 		//if game over should render and restart
@@ -208,6 +213,8 @@ int main() {
 			gameWin->SetShouldRender(true);
 			gameWinUI->SetShouldRender(true);
 			gameWinUI->SetShouldMenu(false);
+			audioEngine.GetBus("Music").SetPaused(true);
+			audioEngine.GetBus("SFX").SetPaused(true);
 		}
 
 		//if game win and they want to play again
