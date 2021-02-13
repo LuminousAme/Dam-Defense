@@ -348,14 +348,14 @@ void Game::SetUpAssets()
 {
 	//// SOUNDS ////
 	//load the banks
+	engine.LoadBank("Sound/Master");
 	engine.LoadBank("Sound/Music");
 	engine.LoadBank("Sound/SFX");
 
 	//load the buses
-	engine.LoadBus("Music", "{0b8d00f4-2fe5-4264-9626-a7a1988daf35}");
 	engine.LoadBus("SFX", "{b9fcc2bc-7614-4852-a78d-6cad54329f8b}");
+	engine.LoadBus("Music", "{0b8d00f4-2fe5-4264-9626-a7a1988daf35}");
 
-	
 	//make the events
 	m_cannonFiringSounds = TTN_AudioEventHolder::Create("Cannon Shot", "{01c9d609-b06a-4bb8-927d-01ee25b2b815}", 2);
 	m_splashSounds = TTN_AudioEventHolder::Create("Splash", "{ca17eafa-bffe-4121-80a3-441a94ee2fe7}", 8);
@@ -845,7 +845,7 @@ void Game::RestartData()
 
 	//turn off all the instruments except the hihats
 	engine.GetEvent(m_music->GetNextEvent()).SetParameter("BangoPlaying", 0);
-	engine.GetEvent(m_music->GetNextEvent()).SetParameter("MarimbraPlaying", 0);
+	engine.GetEvent(m_music->GetNextEvent()).SetParameter("MarimbaPlaying", 0);
 	engine.GetEvent(m_music->GetNextEvent()).SetParameter("RecorderPlaying", 0);
 	engine.GetEvent(m_music->GetNextEvent()).SetParameter("TrumpetsPlaying", 0);
 	engine.GetEvent(m_music->GetNextEvent()).SetParameter("HihatsPlaying", 1);
@@ -1362,9 +1362,9 @@ void Game::GameSounds(float deltaTime)
 
 	//check if the marimbra should begin playing
 	if (fullMelodyFinishedThisFrame && percentBoatsRemaining <= 0.7f && 
-		!(bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("MarimbraPlaying")) {
+		!(bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("MarimbaPlaying")) {
 		//if it should begin playing it 
-		engine.GetEvent(m_music->GetNextEvent()).SetParameter("MarimbraPlaying", 1);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("MarimbaPlaying", 1);
 	}
 
 	//check if the recorder should begin playing
@@ -1413,7 +1413,7 @@ void Game::GameSounds(float deltaTime)
 	if (melodyFinishedThisFrame && playJingle) {
 		//turn off each of the instruments
 		engine.GetEvent(m_music->GetNextEvent()).SetParameter("BangoPlaying", 0);
-		engine.GetEvent(m_music->GetNextEvent()).SetParameter("MarimbraPlaying", 0);
+		engine.GetEvent(m_music->GetNextEvent()).SetParameter("MarimbaPlaying", 0);
 		engine.GetEvent(m_music->GetNextEvent()).SetParameter("RecorderPlaying", 0);
 		engine.GetEvent(m_music->GetNextEvent()).SetParameter("TrumpetsPlaying", 0);
 		engine.GetEvent(m_music->GetNextEvent()).SetParameter("HihatsPlaying", 0);
