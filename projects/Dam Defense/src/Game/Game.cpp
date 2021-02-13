@@ -1434,6 +1434,8 @@ void Game::GameSounds(float deltaTime)
 		//reset the timer
 		timeSinceJingleStartedPlaying = 0.0f;
 	}
+
+	melodyTimeTracker += deltaTime;
 }
 
 void Game::BirdUpate(float deltaTime)
