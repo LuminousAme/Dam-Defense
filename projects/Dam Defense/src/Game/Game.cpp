@@ -337,10 +337,8 @@ void Game::SetUpAssets()
 {
 	//// SOUNDS ////
 	engine.LoadBank("SFX");
-
 	engine.LoadBus("", "{36a0649f-4f49-4467-8dca-29d45bbcda5c}"); // sounds effects
 	//engine.LoadBus("MusicBus", "{a5b53ded-d7b3-4e6b-a920-0b241ef6f268}"); //ambient music
-
 	//TTN_AudioEvent& music = engine.CreateEvent("music", "{b56cb9d2-1d47-4099-b80e-7d257b99a823}");
 
 	TTN_AudioEvent& cannon = engine.CreateEvent("cannon", "{68ebd2af-e6ff-42e5-851c-a45b669330d6}");
@@ -1636,12 +1634,11 @@ void Game::ImGui()
 	ImGui::End();
 }
 
-
-
 GameUI::GameUI() : TTN_Scene()
 {
-
 }
+
+
 
 void GameUI::InitScene()
 {
@@ -1682,13 +1679,13 @@ void GameUI::InitScene()
 
 	//health of dam
 	{
-		//create an entity 
+		//create an entity
 		healthDam = CreateEntity();
 
 		//create a transform for the logo
 		//TTN_Transform healthDamTrans = TTN_Transform(glm::vec3(700.0f, -380.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-950.0f, 100.0f, 1.0f));
 
-		TTN_Transform healthDamTrans = TTN_Transform(glm::vec3(700.0f, -380.0f, 1.0f), glm::vec3(0.0f), glm::vec3(DamHealth *-3.50f, 100.0f, 1.0f));
+		TTN_Transform healthDamTrans = TTN_Transform(glm::vec3(700.0f, -380.0f, 10.0f), glm::vec3(0.0f), glm::vec3(DamHealth * -3.50f, 100.0f, 1.0f));
 		AttachCopy(healthDam, healthDamTrans);
 
 		//create a sprite renderer for the logo
@@ -1709,7 +1706,6 @@ void GameUI::InitScene()
 		TTN_Renderer2D logoRenderer = TTN_Renderer2D(textureScore);
 		AttachCopy(score, logoRenderer);
 	}
-
 }
 
 void GameUI::Update(float deltaTime)
@@ -1731,8 +1727,7 @@ void GameUI::Update(float deltaTime)
 	DamHealth = Game::GetDamHealth();
 	std::cout << DamHealth << " UIIIII" << std::endl;
 	Get<TTN_Transform>(healthDam).SetScale(glm::vec3(DamHealth * -3.50f, 100.0f, 1.0f));
-	//Get<TTN_Transform>(healthDam).SetPos(glm::vec3(DamHealth * 3.50f, -380.0f, 1.0f));
+	//Get<TTN_Transform>(healthDam).SetPos(glm::vec3(DamHealth * -4.50f, -380.0f, 1.0f));
 
 
 }
-

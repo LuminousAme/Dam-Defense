@@ -260,6 +260,10 @@ protected:
 	bool m_useTextures = true;
 };
 
+enum class Numbers {
+	
+
+};
 
 class GameUI : public TTN_Scene {
 	friend class Game;
