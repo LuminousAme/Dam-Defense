@@ -48,7 +48,7 @@ public:
 	bool GetGameShouldRestart() { return m_restart; }
 	void SetGameShouldRestart(bool restart) { m_restart = restart; }
 
-	int GetDamHealth() { return Dam_health; }
+	static int GetDamHealth() { return Dam_health; }
 
 	//function to restart the game reseting all the data
 	void RestartData();
@@ -153,8 +153,8 @@ protected:
 	float playerShootCooldownTimer;//how much time until the player can shoot again
 
 	//////// GAMEPLAY DATA ////////////
-	float damage = 1.0f; //damage of boats (dam health is 100.f)
 	int lastWave = 3; //the wave the player needs to reach and beat to win
+	float damage = 1.0f; //damage of boats (dam health is 100.f)
 
 	/////// Terrain and water control data ////////
 	float terrainScale = 0.15f;//the terrain scale
@@ -173,7 +173,7 @@ protected:
 	bool Flaming; //if flamethrowers are active right now
 	float FlameTimer; //flamethrower cooldown
 	float FlameAnim; //flamethrower duration
-	int Dam_health;//the current health on the dam
+	inline static int Dam_health;//the current health on the dam
 
 	//////// BIRD CONTROL DATA ///////////////
 	glm::vec3 birdBase = glm::vec3(100, 15, 135); //starting position
@@ -274,6 +274,46 @@ protected:
 	bool m_useDiffuseRamp = false;
 	bool m_useSpecularRamp = false;
 	bool m_useTextures = true;
+};
+
+enum class Numbers {
+	
+
+};
+
+class GameUI : public TTN_Scene {
+	friend class Game;
+public:
+	//default constructor
+	GameUI();
+
+	//default destrcutor 
+	~GameUI() = default;
+
+	//sets up the scene
+	void InitScene();
+
+	//update the scene
+	void Update(float deltaTime);
+
+private:
+	//entities
+	entt::entity cam;
+	//healthbar
+	entt::entity healthBar;
+	//health
+	entt::entity healthDam;
+	//score
+	entt::entity score;
+	
+
+	//assets
+	TTN_Texture2D::st2dptr textureHealth;
+	TTN_Texture2D::st2dptr textureHealthDam;
+	TTN_Texture2D::st2dptr textureScore;
+
+	//dam health
+	float DamHealth;
 };
 
 inline float SmoothStep(float t) {

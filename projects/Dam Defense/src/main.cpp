@@ -42,6 +42,7 @@ int main() {
 	SplashCard* splash = new SplashCard;
 	LoadingScene* loadingScreen = new LoadingScene;
 	Game* gameScene = new Game;
+	GameUI* gameSceneUI = new GameUI;
 	MainMenu* titleScreen = new MainMenu;
 	MainMenuUI* titleScreenUI = new MainMenuUI;
 	PauseMenu* paused = new PauseMenu;
@@ -55,6 +56,7 @@ int main() {
 	loadingScreen->InitScene();
 	loadingScreen->SetShouldRender(false);
 	gameScene->SetShouldRender(false);
+	gameSceneUI->SetShouldRender(false);
 	titleScreen->SetShouldRender(false);
 	titleScreenUI->SetShouldRender(false);
 	gameOver->SetShouldRender(false);
@@ -67,6 +69,7 @@ int main() {
 	TTN_Application::scenes.push_back(splash);
 	TTN_Application::scenes.push_back(loadingScreen);
 	TTN_Application::scenes.push_back(gameScene);
+	TTN_Application::scenes.push_back(gameSceneUI);
 	TTN_Application::scenes.push_back(paused);
 	TTN_Application::scenes.push_back(titleScreen);
 	TTN_Application::scenes.push_back(titleScreenUI);
@@ -111,6 +114,7 @@ int main() {
 			titleScreenUI->SetShouldPlay(false);
 			TTN_Application::TTN_Input::SetCursorLocked(true);
 			gameScene->InitScene();
+			gameSceneUI->InitScene();
 			paused->InitScene();
 			gameOver->InitScene();
 			gameOverUI->InitScene();
@@ -121,6 +125,7 @@ int main() {
 			gameWin->SetShouldRender(false);
 			gameWinUI->SetShouldRender(false);
 			gameScene->SetShouldRender(true);
+			gameSceneUI->SetShouldRender(true);
 			firstTime = true;
 		}
 
@@ -136,6 +141,7 @@ int main() {
 			gameWin->SetShouldRender(false);
 			gameWinUI->SetShouldRender(false);
 			gameScene->SetShouldRender(true);
+			gameSceneUI->SetShouldRender(true);
 			gameScene->RestartData();
 		}
 
@@ -171,6 +177,7 @@ int main() {
 			TTN_Application::TTN_Input::SetCursorLocked(false);
 			gameScene->SetGameIsOver(false);
 			gameScene->SetShouldRender(false);
+			gameSceneUI->SetShouldRender(false);
 			paused->SetShouldRender(false);
 			gameScene->SetGameIsPaused(true);
 			gameOver->SetShouldRender(true);
@@ -189,6 +196,7 @@ int main() {
 			TTN_Application::TTN_Input::SetCursorLocked(true);
 			gameScene->SetGameIsPaused(false);
 			gameScene->SetShouldRender(true);
+			gameSceneUI->SetShouldRender(true);
 			gameScene->SetGameIsOver(false);
 			gameScene->RestartData();
 		}
@@ -208,6 +216,7 @@ int main() {
 			TTN_Application::TTN_Input::SetCursorLocked(false);
 			gameScene->SetGameWin(false);
 			gameScene->SetShouldRender(false);
+			gameSceneUI->SetShouldRender(false);
 			paused->SetShouldRender(false);
 			gameScene->SetGameIsPaused(true);
 			gameWin->SetShouldRender(true);
@@ -226,6 +235,7 @@ int main() {
 			TTN_Application::TTN_Input::SetCursorLocked(true);
 			gameScene->SetGameIsPaused(false);
 			gameScene->SetShouldRender(true);
+			gameSceneUI->SetShouldRender(true);
 			gameScene->SetGameIsOver(false);
 			gameScene->RestartData();
 		}
@@ -293,6 +303,12 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("blue ramp", "textures/ramps/blue ramp.png");
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Normal Map", "textures/terrain normal map.png");
 
+	//TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar", "textures/health.png", 1); //full health bar
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar", "textures/healthbar.png", 1); //health bar hud empty
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar Dam", "textures/healthDam.png", 1); //health  hud 
+
+
+
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Base", "textures/Button_1.png", 1); //button when not being hovered over
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Hovering", "textures/Button_2.png", 1); //button when being hovered over
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Play-Text", "textures/text/play.png", 1); //rendered text of word Play
@@ -322,7 +338,7 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Score-Text", "textures/text/Score.png", 2); //rendered text of the word Score
 
 	//set 3, win/lose screen
-	TTN_AssetSystem::AddTexture2DToBeLoaded("You Win-Text", "textures/text/You win.png", 3); //rendered text of the pharse "You Win!" 
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Game Over-Text", "textures/text/Game over.png", 3); //rendered text of the phrase "Game Over..." 
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Play Again-Text", "textures/text/Play again.png", 3); //rendered text of the phrase "Play Again" 
+	//TTN_AssetSystem::AddTexture2DToBeLoaded("You Win-Text", "textures/text/You win.png", 3); //rendered text of the pharse "You Win!" 
+	//TTN_AssetSystem::AddTexture2DToBeLoaded("Game Over-Text", "textures/text/Game over.png", 3); //rendered text of the phrase "Game Over..." 
+	//TTN_AssetSystem::AddTexture2DToBeLoaded("Play Again-Text", "textures/text/Play again.png", 3); //rendered text of the phrase "Play Again" 
 }
