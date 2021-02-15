@@ -798,6 +798,7 @@ void Game::RestartData()
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
 	playerShootCooldownTimer = playerShootCooldown;
+	m_score = 0;
 
 	//water and terrain data setup
 	water_time = 0.0f;
@@ -1048,9 +1049,20 @@ void Game::FlamethrowerUpdate(float deltaTime)
 				it++;
 			}
 			else {
-				m_boatsRemainingThisWave--;
-				DeleteEntity(*it);
+				//remove the physics from it
+				Remove<TTN_Physics>(*it);
+				//add a countdown until it deletes
+				TTN_DeleteCountDown countdown = TTN_DeleteCountDown(2.5f);
+				AttachCopy(*it, countdown);
+				//mark it as dead
+				Get<EnemyComponent>(*it).SetAlive(false);
+
+				//add to the player's score
+				m_score += 50;
+
+				//and remove it from the list of boats as it will be deleted soon
 				it = boats.erase(it);
+				m_boatsRemainingThisWave--;
 			}
 		}
 	}
@@ -1270,6 +1282,15 @@ void Game::Collisions()
 							AttachCopy(*itt, countdown);
 							//mark it as dead
 							Get<EnemyComponent>(*itt).SetAlive(false);
+
+							//add to the player's score, based on the distance of the boat
+							if (Get<TTN_Transform>(*itt).GetGlobalPos().z <= 30.0f)
+								m_score += 50;
+							else if (Get<TTN_Transform>(*itt).GetGlobalPos().z > 30.0f
+								&& Get<TTN_Transform>(*itt).GetGlobalPos().z <= 70.0f)
+								m_score += 100;
+							else
+								m_score += 200;
 
 							//and remove it from the list of boats as it will be deleted soon
 							itt = boats.erase(itt);
@@ -1759,102 +1780,4 @@ void Game::ImGui()
 	}
 
 	ImGui::End();
-}
-
-GameUI::GameUI() : TTN_Scene()
-{
-}
-
-
-
-void GameUI::InitScene()
-{
-	textureHealth = TTN_AssetSystem::GetTexture2D("Health Bar");
-	textureHealthDam = TTN_AssetSystem::GetTexture2D("Health Bar Dam");
-	textureScore = TTN_AssetSystem::GetTexture2D("Score");
-	DamHealth = Game::GetDamHealth();
-
-	//main camera
-	{
-		//create an entity in the scene for the camera
-		cam = CreateEntity();
-		SetCamEntity(cam);
-		Attach<TTN_Transform>(cam);
-		Attach<TTN_Camera>(cam);
-		auto& camTrans = Get<TTN_Transform>(cam);
-		camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
-		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
-		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		Get<TTN_Camera>(cam).CalcOrtho(-960.0f, 960.0f, -540.0f, 540.0f, 0.0f, 10.0f);
-		//Get<TTN_Camera>(cam).CalcPerspective(60.0f, 1.78f, 0.01f, 1000.f);
-		Get<TTN_Camera>(cam).View();
-	}
-
-	//health bar
-	{
-		//create an entity in the scene for the logo
-		healthBar = CreateEntity();
-
-		//create a transform for the logo
-		TTN_Transform healthTrans = TTN_Transform(glm::vec3(700.0f, -380.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-350.0f, 100.0f, 1.0f));
-		AttachCopy(healthBar, healthTrans);
-
-		//create a sprite renderer for the logo
-		TTN_Renderer2D healthRenderer = TTN_Renderer2D(textureHealth);
-		AttachCopy(healthBar, healthRenderer);
-	}
-
-	//health of dam
-	{
-		//create an entity
-		healthDam = CreateEntity();
-
-		//create a transform for the logo
-		//TTN_Transform healthDamTrans = TTN_Transform(glm::vec3(700.0f, -380.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-950.0f, 100.0f, 1.0f));
-
-		TTN_Transform healthDamTrans = TTN_Transform(glm::vec3(700.0f, -380.0f, 10.0f), glm::vec3(0.0f), glm::vec3(DamHealth * -3.50f, 100.0f, 1.0f));
-		AttachCopy(healthDam, healthDamTrans);
-
-		//create a sprite renderer for the logo
-		TTN_Renderer2D healthDamRenderer = TTN_Renderer2D(textureHealthDam);
-		AttachCopy(healthDam, healthDamRenderer);
-	}
-
-	//score
-	{
-		//create an entity in the scene for the logo
-		score = CreateEntity();
-
-		//create a transform for the logo
-		TTN_Transform logoTrans = TTN_Transform(glm::vec3(700.0f, 380.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-250.0f, 100.0f, 1.0f));
-		AttachCopy(score, logoTrans);
-
-		//create a sprite renderer for the logo
-		TTN_Renderer2D logoRenderer = TTN_Renderer2D(textureScore);
-		AttachCopy(score, logoRenderer);
-	}
-}
-
-void GameUI::Update(float deltaTime)
-{
-	//get the mouse position
-	glm::vec2 mousePos = TTN_Application::TTN_Input::GetMousePosition();
-	//convert it to worldspace
-	glm::vec3 mousePosWorldSpace;
-	{
-		float tx = TTN_Interpolation::InverseLerp(0.0f, 1920.0f, mousePos.x);
-		float ty = TTN_Interpolation::InverseLerp(0.0f, 1080.0f, mousePos.y);
-
-		float newX = TTN_Interpolation::Lerp(960.0f, -960.0f, tx);
-		float newY = TTN_Interpolation::Lerp(540.0f, -540.0f, ty);
-
-		mousePosWorldSpace = glm::vec3(newX, newY, 2.0f);
-	}
-
-	DamHealth = Game::GetDamHealth();
-	std::cout << DamHealth << " UIIIII" << std::endl;
-	Get<TTN_Transform>(healthDam).SetScale(glm::vec3(DamHealth * -3.50f, 100.0f, 1.0f));
-	//Get<TTN_Transform>(healthDam).SetPos(glm::vec3(DamHealth * -4.50f, -380.0f, 1.0f));
-
-
 }
