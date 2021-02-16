@@ -9,8 +9,9 @@
 #include "Launch/LoadingScene.h"
 #include "Menu/MainMenu.h"
 #include "Game/PauseMenu.h"
-#include "Game/GameOverMenu.h"
-#include "Game/GameWinMenu.h"
+#include "Menu/GameOverMenu.h"
+#include "Menu/GameWinMenu.h"
+#include "Game/HUD.h"
 
 using namespace Titan;
 
@@ -250,6 +251,11 @@ int main() {
 			titleScreenUI->SetShouldRender(true);
 		}
 
+		//if the game is running 
+		if (gameScene->GetShouldRender() && gameSceneUI->GetShouldRender()) {
+			//pass the score between the scenes
+			gameSceneUI->SetScore(gameScene->GetScore());
+		}
 
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)
 			set1Loaded = true;
