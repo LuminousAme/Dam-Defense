@@ -401,6 +401,8 @@ void MainMenu::SetUpOtherData()
 	//and add it to this scene's list of effects
 	m_PostProcessingEffects.push_back(m_colorCorrectEffect);
 
+	
+
 	//set all 3 effects to false
 	m_applyWarmLut = false;
 	m_applyCoolLut = false;
