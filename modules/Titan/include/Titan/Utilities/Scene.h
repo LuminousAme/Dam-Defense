@@ -19,6 +19,7 @@
 //include all the graphics features we need
 #include "Titan/Graphics/Shader.h"
 #include "Titan/Graphics/Post/ColorCorrect.h"
+#include "Titan/Graphics/Post/BloomEffect.h"
 //include ImGui stuff
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include "imgui.h"
