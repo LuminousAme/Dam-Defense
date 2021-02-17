@@ -933,6 +933,8 @@ void MainMenuUI::MouseButtonDownChecks()
 			mousePosWorldSpace.y < arcadeButtonTrans.GetPos().y + 0.5f * abs(arcadeButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > arcadeButtonTrans.GetPos().y - 0.5f * abs(arcadeButtonTrans.GetScale().y)) {
 			//do something
+			shouldPlay = true;
+			shouldArcade = true;
 		}
 
 		//get options buttons transform

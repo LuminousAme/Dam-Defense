@@ -37,6 +37,9 @@ private:
 	entt::entity healthBar;
 	//health
 	entt::entity healthDam;
+	//health numbers
+	std::vector<entt::entity> healthNums;
+	float healthTextScale = 0.4f;
 	//score text
 	entt::entity scoreText;
 	float scoreTextScale = 0.5f;
@@ -54,6 +57,7 @@ private:
 	unsigned m_score;
 
 	void MakeScoreNumEntity();
+	void MakeHealthNumEntity();
 };
 
 //get the number of digits in a number
