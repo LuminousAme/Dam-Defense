@@ -79,11 +79,30 @@ void GameUI::InitScene()
 void GameUI::Update(float deltaTime)
 {
 	//update the score number
+	while (GetNumOfDigits(m_score) < scoreNums.size()) {
+		DeleteEntity(scoreNums[scoreNums.size() - 1]);
+		scoreNums.pop_back();
+	}
+
 	if (GetNumOfDigits(m_score) > scoreNums.size())
 		MakeScoreNumEntity();
 
 	for (int i = 0; i < scoreNums.size(); i++) {
 		Get<TTN_Renderer2D>(scoreNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_score, scoreNums.size() - i - 1)) + "-Text"));
+	}
+
+	//update the health number
+	unsigned health = std::ceil(m_DamHealth);
+	while (GetNumOfDigits(health) < healthNums.size()) {
+		DeleteEntity(healthNums[healthNums.size() - 1]);
+		healthNums.pop_back();
+	}
+
+	if (GetNumOfDigits(health) > healthNums.size())
+		MakeHealthNumEntity();
+
+	for (int i = 0; i < healthNums.size(); i++) {
+		Get<TTN_Renderer2D>(healthNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(health, healthNums.size() - i - 1)) + "-Text"));
 	}
 
 	//get the mouse position
@@ -123,4 +142,23 @@ void GameUI::MakeScoreNumEntity()
 			//create a sprite renderer for the logo
 	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
 	AttachCopy(scoreNums[scoreNums.size() - 1], numRenderer);
+}
+
+void GameUI::MakeHealthNumEntity()
+{
+	healthNums.push_back(CreateEntity());
+
+	//reference to the health bar's transform
+	TTN_Transform& healthTrans = Get<TTN_Transform>(healthBar);
+
+	//setup a transform for the new entity
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(healthTrans.GetGlobalPos().x + 0.3f * std::abs(healthTrans.GetScale().x)  -
+		(float)healthNums.size() * 0.5f * healthTextScale * 150.0f, healthTrans.GetGlobalPos().y, healthTrans.GetGlobalPos().z),
+		glm::vec3(0.0f), glm::vec3(-healthTextScale * 150.0f, healthTextScale * 150.0f, 1.0f));
+	AttachCopy(healthNums[healthNums.size() - 1], numTrans);
+
+	//setup a 2D renderer for the new entity
+			//create a sprite renderer for the logo
+	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
+	AttachCopy(healthNums[healthNums.size() - 1], numRenderer);
 }

@@ -99,7 +99,7 @@ void Game::Update(float deltaTime)
 		m_gameOver = true;
 		printf("GAME OVER");
 	}
-	if (m_currentWave > lastWave) {
+	if (m_currentWave > lastWave && !m_arcade) {
 		m_gameWin = true;
 	}
 

@@ -114,6 +114,8 @@ int main() {
 			titleScreenUI->SetShouldRender(false);
 			titleScreenUI->SetShouldPlay(false);
 			TTN_Application::TTN_Input::SetCursorLocked(true);
+			gameScene->SetArcade(titleScreenUI->GetShouldArcade());
+			titleScreenUI->SetShouldArcade(false);
 			gameScene->InitScene();
 			gameSceneUI->InitScene();
 			paused->InitScene();
@@ -130,13 +132,15 @@ int main() {
 			firstTime = true;
 		}
 
-		//for going back to the main menu in game over
+		//for if it should be going to the game from the main menu and the player has already played the game in this session
 		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldPlay() && set2Loaded && (firstTime)) {
 			//if it is, go to the game
 			titleScreen->SetShouldRender(false);
 			titleScreenUI->SetShouldRender(false);
 			titleScreenUI->SetShouldPlay(false);
 			TTN_Application::TTN_Input::SetCursorLocked(true);
+			gameScene->SetArcade(titleScreenUI->GetShouldArcade());
+			titleScreenUI->SetShouldArcade(false);
 			gameOver->SetShouldRender(false);
 			gameOverUI->SetShouldRender(false);
 			gameWin->SetShouldRender(false);
@@ -255,6 +259,7 @@ int main() {
 		if (gameScene->GetShouldRender() && gameSceneUI->GetShouldRender()) {
 			//pass the score between the scenes
 			gameSceneUI->SetScore(gameScene->GetScore());
+			gameSceneUI->SetDamHP(gameScene->GetDamHealth());
 		}
 
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)

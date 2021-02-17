@@ -48,10 +48,13 @@ public:
 	bool GetGameShouldRestart() { return m_restart; }
 	void SetGameShouldRestart(bool restart) { m_restart = restart; }
 
-	static int GetDamHealth() { return Dam_health; }
+	float GetDamHealth() { return Dam_health; }
 
 	unsigned GetScore() { return m_score; }
 	void SetScore(unsigned score) { m_score = score; }
+	
+	void SetArcade(bool arcade) { m_arcade = arcade; }
+	bool GetArcade() { return m_arcade; }
 
 	//function to restart the game reseting all the data
 	void RestartData();
@@ -173,12 +176,12 @@ protected:
 	//////// DAM AND FLAMETHROWER CONTROL DATA ///////
 	float FlameThrowerCoolDown = 10.0f; //how long the player has to wait between flamethrower uses
 	float FlameActiveTime = 3.0f; //how long the flamethrower lasts
-	int Dam_MaxHealth = 100; //the maximum health of the dam
+	const float Dam_MaxHealth = 100; //the maximum health of the dam
 
 	bool Flaming; //if flamethrowers are active right now
 	float FlameTimer; //flamethrower cooldown
 	float FlameAnim; //flamethrower duration
-	inline static int Dam_health;//the current health on the dam
+	float Dam_health;//the current health on the dam
 
 	//////// BIRD CONTROL DATA ///////////////
 	glm::vec3 birdBase = glm::vec3(100, 15, 135); //starting position
@@ -190,6 +193,7 @@ protected:
 	bool m_gameOver = false; //wheter or not the player has yet gameover
 	bool m_gameWin = false;//wheter or not the player has won
 	bool m_restart;//wheter or not the game is restarting
+	bool m_arcade = false; //wheter or not the game is in arcade mode
 
 	/////////////ENEMY AND WAVE CONTROLS//////////////////
 	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
