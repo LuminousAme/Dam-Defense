@@ -13,12 +13,21 @@ namespace Titan {
 		m_sprite = nullptr;
 		m_color = glm::vec4(1.0f);
 		m_RenderLayer = 0;
+		m_startFromBottom = false;
+		m_startFromRight = false;
+		m_horizontalMask = 1.0f;
+		m_veritcalMask = 1.0f;
 	}
 
 	//constructor that takes data
 	TTN_Renderer2D::TTN_Renderer2D(TTN_Texture2D::st2dptr sprite, glm::vec4 color, int renderOrderLayer)
 		: m_sprite(sprite), m_color(color), m_RenderLayer(renderOrderLayer)
-	{}
+	{
+		m_startFromBottom = false;
+		m_startFromRight = false;
+		m_horizontalMask = 1.0f;
+		m_veritcalMask = 1.0f;
+	}
 
 	//renders the sprite
 	void TTN_Renderer2D::Render(glm::mat4 model, glm::mat4 VP)
@@ -31,6 +40,10 @@ namespace Titan {
 			//send the uniforms to openGL 
 			s_shader->SetUniformMatrix("MVP", VP * model);
 			s_shader->SetUniform("u_Color", m_color);
+			s_shader->SetUniform("u_VerticalMask", m_veritcalMask);
+			s_shader->SetUniform("u_startMaskAtBottom", (int)m_startFromBottom);
+			s_shader->SetUniform("u_HorizontalMask", m_horizontalMask);
+			s_shader->SetUniform("u_startMaskOnRight", (int)m_startFromRight);
 
 			//bind the texture
 			m_sprite->Bind(0);
@@ -80,5 +93,4 @@ namespace Titan {
 		s_shader->LoadShaderStageFromFile("shaders/ttn_sprite_frag.glsl", GL_FRAGMENT_SHADER);
 		s_shader->Link();
 	}
-
 }

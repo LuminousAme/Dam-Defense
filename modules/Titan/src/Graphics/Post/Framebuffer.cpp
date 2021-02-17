@@ -184,7 +184,7 @@ namespace Titan {
 	//binds a given color buffer in the framebuffer as a texture
 	void TTN_Framebuffer::BindColorAsTexture(unsigned colorBuffer, int textureSlot) const
 	{
-		m_color.m_textures[colorBuffer]->Bind(colorBuffer);
+		m_color.m_textures[colorBuffer]->Bind(textureSlot);
 	}
 
 	//unbinds a texutre in a given texture slot
