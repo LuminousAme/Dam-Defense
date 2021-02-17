@@ -29,11 +29,19 @@ namespace Titan {
 		void SetSprite(TTN_Texture2D::st2dptr sprite) { m_sprite = sprite; }
 		void SetColor(glm::vec4 color) { m_color = color; }
 		void SetRenderOrderLayer(int renderOrderLayer) { m_RenderLayer = renderOrderLayer; }
+		void SetVertMask(float maskPercentage) { m_veritcalMask = maskPercentage; }
+		void SetHoriMask(float maskPercentage) { m_horizontalMask = maskPercentage; }
+		void StartVertMaskAtBottom(bool startAtBottom) { m_startFromBottom = startAtBottom; }
+		void StartHoriMaskAtRight(bool StartAtRight) { m_startFromRight = StartAtRight; }
 
 		//getters
 		TTN_Texture2D::st2dptr GetSprite() { return m_sprite; }
 		glm::vec4 GetColor() { return m_color; }
 		int GetRenderOrderLayer() { return m_RenderLayer; }
+		float GetVertMask() { return m_veritcalMask; }
+		float GetHoriMask() { return m_horizontalMask; }
+		bool GetVertMaskStartsAtBottom() { return m_startFromBottom; }
+		bool GetHoriMaskStartsAtRight() { return m_startFromRight; }
 
 		//renders the sprite
 		void Render(glm::mat4 model, glm::mat4 VP);
@@ -55,6 +63,12 @@ namespace Titan {
 
 		//the render layer, to help control the order things should render
 		int m_RenderLayer;
+
+		//masking controls
+		float m_veritcalMask;
+		bool m_startFromBottom;
+		float m_horizontalMask;
+		bool m_startFromRight;
 
 		//the shader program used to render sprites
 		inline static TTN_Shader::sshptr s_shader = nullptr;

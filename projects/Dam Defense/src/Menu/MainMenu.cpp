@@ -869,6 +869,35 @@ void MainMenuUI::Update(float deltaTime)
 	else {
 		Get<TTN_Renderer2D>(quitButton).SetSprite(textureButton1);
 	}
+
+	ImGui::Begin("Ui Editor");
+
+	if (ImGui::CollapsingHeader("Sprite Masking Testing")) {
+		//grab a refernece ot the logo's renderer
+		TTN_Renderer2D& logoRenderer = Get<TTN_Renderer2D>(gameLogo);
+
+		float hori = logoRenderer.GetHoriMask();
+		if (ImGui::SliderFloat("Horizontal Mask", &hori, 0.0f, 1.0f)) {
+			logoRenderer.SetHoriMask(hori);
+		}
+
+		float vert = logoRenderer.GetVertMask();
+		if (ImGui::SliderFloat("Vertical Mask", &vert, 0.0f, 1.0f)) {
+			logoRenderer.SetVertMask(vert);
+		}
+
+		bool right = logoRenderer.GetHoriMaskStartsAtRight();
+		if (ImGui::Checkbox("Start Hori mask on right", &right)) {
+			logoRenderer.StartHoriMaskAtRight(right);
+		}
+
+		bool bottom = logoRenderer.GetVertMaskStartsAtBottom();
+		if (ImGui::Checkbox("Start Vert mask at bottom", &bottom)) {
+			logoRenderer.StartVertMaskAtBottom(bottom);
+		}
+	}
+
+	ImGui::End();
 }
 
 void MainMenuUI::MouseButtonDownChecks()
