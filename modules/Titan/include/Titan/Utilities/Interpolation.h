@@ -11,8 +11,10 @@ namespace Titan {
 		static T Lerp(T p0, T p1, float t);
 
 		//inverse linear interpolation function
-		template<typename T>
-		static float InverseLerp(T p0, T p1, T result);
+		static float InverseLerp(float p0, float p1, float result);
+
+		//Remap functions, maps a value from one range to another
+		static float ReMap(float originalMin, float originalMax, float newMin, float newMax, float value);
 
 		//cubic interpolation function
 		template<typename T>
@@ -36,10 +38,15 @@ namespace Titan {
 	}
 
 	//inverse linear interpolation function
-	template<typename T>
-	inline float TTN_Interpolation::InverseLerp(T p0, T p1, T result)
+	inline float TTN_Interpolation::InverseLerp(float p0, float p1, float result)
 	{
 		return (result - p0) / (p1 - p0);
+	}
+
+	//remap function that remaps a value from one range to another
+	inline float TTN_Interpolation::ReMap(float originalMin, float originalMax, float newMin, float newMax, float value) {
+		float t = TTN_Interpolation::InverseLerp(originalMin, originalMax, value);
+		return TTN_Interpolation::Lerp(newMin, newMax, t);
 	}
 
 	//cubic interpolation function

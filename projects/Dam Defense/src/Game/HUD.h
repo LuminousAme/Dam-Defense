@@ -35,8 +35,10 @@ private:
 	entt::entity cam;
 	//healthbar
 	entt::entity healthBar;
+	entt::entity healthBarBg;
 	//health
 	entt::entity healthDam;
+	float healthScale = 0.3f;
 	//health numbers
 	std::vector<entt::entity> healthNums;
 	float healthTextScale = 0.4f;
@@ -47,8 +49,6 @@ private:
 	std::vector<entt::entity> scoreNums;
 
 	//assets
-	TTN_Texture2D::st2dptr textureHealth;
-	TTN_Texture2D::st2dptr textureHealthDam;
 	TTN_Texture2D::st2dptr textureScore;
 
 	//dam health

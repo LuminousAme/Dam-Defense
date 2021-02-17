@@ -314,11 +314,9 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("blue ramp", "textures/ramps/blue ramp.png");
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Normal Map", "textures/terrain normal map.png");
 
-	//TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar", "textures/health.png", 1); //full health bar
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar", "textures/healthbar.png", 1); //health bar hud empty
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar Dam", "textures/healthDam.png", 1); //health  hud 
-
-
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar Border", "textures/Health_Bar_Border.png", 1); //overlay border of the health bar
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar", "textures/Health_Bar.png", 1); //health bar itself
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar BG", "textures/Health_Bar_BG.png", 1); //background behind the healthbar
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Base", "textures/Button_1.png", 1); //button when not being hovered over
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Hovering", "textures/Button_2.png", 1); //button when being hovered over
