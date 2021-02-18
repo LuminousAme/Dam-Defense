@@ -26,17 +26,21 @@ public:
 	//setters
 	void SetScore(unsigned score) { m_score = score; }
 	void SetDamHP(float health) { m_DamHealth = health; }
+	void SetWaveProgress(float waveProgress) { m_waveProgress = waveProgress; }
 	//getters
 	unsigned GetScore() { return m_score; }
 	float GetDamHealth() { return m_DamHealth; }
+	float GetWaveProgress() { return m_waveProgress; }
 
 private:
 	//entities
 	entt::entity cam;
 	//healthbar
 	entt::entity healthBar;
+	entt::entity healthBarBg;
 	//health
 	entt::entity healthDam;
+	float healthScale = 0.3f;
 	//health numbers
 	std::vector<entt::entity> healthNums;
 	float healthTextScale = 0.4f;
@@ -45,14 +49,20 @@ private:
 	float scoreTextScale = 0.5f;
 	//score numbers
 	std::vector<entt::entity> scoreNums;
+	//progress bar
+	entt::entity progressBar;
+	entt::entity progressBarBg;
+	entt::entity progressRepresentation;
+	glm::vec2 progressScale = glm::vec2(0.6f, 0.25f);
 
 	//assets
-	TTN_Texture2D::st2dptr textureHealth;
-	TTN_Texture2D::st2dptr textureHealthDam;
 	TTN_Texture2D::st2dptr textureScore;
 
 	//dam health
 	float m_DamHealth;
+	//progess
+	float m_waveProgress;
+	float m_displayedWaveProgress;
 	//the player's score
 	unsigned m_score;
 

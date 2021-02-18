@@ -373,6 +373,22 @@ void Game::SetUpAssets()
 	shaderProgramAnimatedTextured = TTN_AssetSystem::GetShader("Animated textured shader");
 
 	////MESHES////
+	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
+	skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
+	sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
+	flamethrowerMesh = TTN_ObjLoader::LoadFromFile("models/Flamethrower.obj");
+	flamethrowerMesh->SetUpVao();
+	boat1Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 1.obj");
+	boat2Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 2.obj");
+	boat3Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 3.obj");
+	terrainPlain = TTN_ObjLoader::LoadFromFile("models/terrainPlain.obj");
+	terrainPlain->SetUpVao();
+	birdMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/bird/bird", 2);
+	treeMesh[0] = TTN_ObjLoader::LoadFromFile("models/Tree1.obj");
+	treeMesh[1] = TTN_ObjLoader::LoadFromFile("models/Tree2.obj");
+	treeMesh[2] = TTN_ObjLoader::LoadFromFile("models/Tree3.obj");
+	damMesh = TTN_ObjLoader::LoadFromFile("models/Dam.obj");
+
 	//grab the meshes
 	cannonMesh = TTN_AssetSystem::GetMesh("Cannon mesh");
 	skyboxMesh = TTN_AssetSystem::GetMesh("Skybox mesh");
@@ -797,12 +813,14 @@ void Game::RestartData()
 	m_gameWin = false;
 
 	//enemy and wave data setup
-	m_currentWave = 1;
+	m_currentWave = 0;
 	m_timeTilNextWave = m_timeBetweenEnemyWaves;
-	m_timeUntilNextSpawn = m_timeBetweenEnemySpawns;
+	m_timeUntilNextSpawn = m_timeBetweenEnemyWaves;
 	m_boatsRemainingThisWave = m_enemiesPerWave;
 	m_boatsStillNeedingToSpawnThisWave = m_boatsRemainingThisWave;
 	m_rightSideSpawn = (bool)(rand() % 2);
+	m_waveInProgress = false;
+	m_firstWave = true;
 
 	//delete all boats in scene
 	std::vector<entt::entity>::iterator it = boats.begin();
@@ -1291,18 +1309,25 @@ void Game::SpawnBoatRight()
 void Game::WaveUpdate(float deltaTime)
 {
 	//if there are no more boats in this wave, begin the countdown to the next wave
-	if (m_boatsRemainingThisWave == 0 && m_timeTilNextWave <= 0.0f) {
+	if (m_waveInProgress && m_boatsRemainingThisWave == 0 && m_timeTilNextWave <= 0.0f) {
 		m_timeTilNextWave = m_timeBetweenEnemyWaves;
-		m_currentWave++;
-		m_boatsRemainingThisWave = m_enemiesPerWave * m_currentWave;
-		m_boatsStillNeedingToSpawnThisWave = m_boatsRemainingThisWave;
-		m_timeUntilNextSpawn = m_timeBetweenEnemySpawns;
+		m_timeUntilNextSpawn = m_timeBetweenEnemyWaves;
 		playJingle = true;
+		m_waveInProgress = false;
 	}
 
 	//if it is in the cooldown between waves, reduce the cooldown by deltaTime
 	if (m_timeTilNextWave >= 0.0f) {
 		m_timeTilNextWave -= deltaTime;
+	}
+	//if the cooldown between waves has ended, begin the next wave
+	else if (!m_waveInProgress && m_timeTilNextWave <= 0.0f && m_timeUntilNextSpawn >= 0.0f) {
+		m_currentWave++;
+		m_boatsRemainingThisWave = m_enemiesPerWave * m_currentWave;
+		m_boatsStillNeedingToSpawnThisWave = m_boatsRemainingThisWave;
+		m_timeUntilNextSpawn = 0.0f;
+		m_waveInProgress = true;
+		m_firstWave = false;
 	}
 	//otherwise, check if it should spawn
 	else {

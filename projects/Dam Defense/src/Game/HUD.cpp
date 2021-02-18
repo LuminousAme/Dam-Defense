@@ -9,10 +9,10 @@ GameUI::GameUI() : TTN_Scene()
 
 void GameUI::InitScene()
 {
-	textureHealth = TTN_AssetSystem::GetTexture2D("Health Bar");
-	textureHealthDam = TTN_AssetSystem::GetTexture2D("Health Bar Dam");
 	textureScore = TTN_AssetSystem::GetTexture2D("Score");
 	m_DamHealth = 100.0f;
+	m_displayedWaveProgress = 0.0f;
+	m_waveProgress = 0.0f;
 
 	//main camera
 	{
@@ -32,32 +32,86 @@ void GameUI::InitScene()
 
 	//health bar
 	{
-		//create an entity in the scene for the logo
+		//create an entity in the scene for the health bar overlay
 		healthBar = CreateEntity();
 
-		//create a transform for the logo
-		TTN_Transform healthTrans = TTN_Transform(glm::vec3(700.0f, -380.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-350.0f, 100.0f, 1.0f));
+		//create a transform for the health bar overlay
+		TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 0.9f), glm::vec3(0.0f), glm::vec3(-1228.0f * healthScale, 239.0f * healthScale, 1.0f));
 		AttachCopy(healthBar, healthTrans);
 
-		//create a sprite renderer for the logo
-		TTN_Renderer2D healthRenderer = TTN_Renderer2D(textureHealth);
+		//create a sprite renderer for the health bar overlay
+		TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar Border"));
 		AttachCopy(healthBar, healthRenderer);
 	}
 
 	//health of dam
 	{
-		//create an entity
+		//create an entity for the health bar
 		healthDam = CreateEntity();
 
-		//create a transform for the logo
-		//TTN_Transform healthDamTrans = TTN_Transform(glm::vec3(700.0f, -380.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-950.0f, 100.0f, 1.0f));
+		//create a transform for the health bar
+		TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-1228.0f * healthScale, 239.0f * healthScale, 1.0f));
+		AttachCopy(healthDam, healthTrans);
 
-		TTN_Transform healthDamTrans = TTN_Transform(glm::vec3(700.0f, -380.0f, 10.0f), glm::vec3(0.0f), glm::vec3(m_DamHealth * -3.50f, 100.0f, 1.0f));
-		AttachCopy(healthDam, healthDamTrans);
+		//create a sprite renderer for the health bar
+		TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar"), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		AttachCopy(healthDam, healthRenderer);
+	}
 
-		//create a sprite renderer for the logo
-		TTN_Renderer2D healthDamRenderer = TTN_Renderer2D(textureHealthDam);
-		AttachCopy(healthDam, healthDamRenderer);
+	//health bar background
+	{
+		//create an entity for the health bar background
+		healthBarBg = CreateEntity();
+
+		//create a transform for the health bar background
+		TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 1.1f), glm::vec3(0.0f), glm::vec3(-1228.0f * healthScale, 239.0f * healthScale, 1.0f));
+		AttachCopy(healthBarBg, healthTrans);
+
+		//create a sprite renderer for the health bar background
+		TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar BG"), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		AttachCopy(healthBarBg, healthRenderer);
+	}
+
+	//progress bar
+	{
+		//create an entity in the scene for the progress bar overlay
+		progressBar = CreateEntity();
+
+		//create a transform for the progress bar overlay
+		TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 0.9f), glm::vec3(0.0f), glm::vec3(-1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
+		AttachCopy(progressBar, progressTrans);
+
+		//create a sprite renderer for the progress bar overlay
+		TTN_Renderer2D progressRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar Border"));
+		AttachCopy(progressBar, progressRenderer);
+	}
+
+	//acutal progress
+	{
+		//create an entity for the progress bar
+		progressRepresentation = CreateEntity();
+
+		//create a transform for the progress bar
+		TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
+		AttachCopy(progressRepresentation, progressTrans);
+
+		//create a sprite renderer for the progress bar
+		TTN_Renderer2D progressRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar"), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+		AttachCopy(progressRepresentation, progressRenderer);
+	}
+
+	//progess bar background
+	{
+		//create an entity for the progress bar background
+		progressBarBg = CreateEntity();
+
+		//create a transform for the progress bar background
+		TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 1.1f), glm::vec3(0.0f), glm::vec3(-1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
+		AttachCopy(progressBarBg, progressTrans);
+
+		//create a sprite renderer for the progress bar background
+		TTN_Renderer2D progressRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar BG"), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+		AttachCopy(progressBarBg, progressRenderer);
 	}
 
 	//score
@@ -66,7 +120,7 @@ void GameUI::InitScene()
 		scoreText = CreateEntity();
 
 		//create a transform for the logo
-		TTN_Transform logoTrans = TTN_Transform(glm::vec3(800.0f, 450.0f, 1.0f), glm::vec3(0.0f), 
+		TTN_Transform logoTrans = TTN_Transform(glm::vec3(825.0f, 480.0f, 1.0f), glm::vec3(0.0f), 
 			glm::vec3(-scoreTextScale * 550.0f, scoreTextScale * 150.0f, 1.0f));
 		AttachCopy(scoreText, logoTrans);
 
@@ -79,50 +133,48 @@ void GameUI::InitScene()
 void GameUI::Update(float deltaTime)
 {
 	//update the score number
-	while (GetNumOfDigits(m_score) < scoreNums.size()) {
-		DeleteEntity(scoreNums[scoreNums.size() - 1]);
-		scoreNums.pop_back();
-	}
-
-	if (GetNumOfDigits(m_score) > scoreNums.size())
-		MakeScoreNumEntity();
-
-	for (int i = 0; i < scoreNums.size(); i++) {
-		Get<TTN_Renderer2D>(scoreNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_score, scoreNums.size() - i - 1)) + "-Text"));
-	}
-
-	//update the health number
-	unsigned health = std::ceil(m_DamHealth);
-	while (GetNumOfDigits(health) < healthNums.size()) {
-		DeleteEntity(healthNums[healthNums.size() - 1]);
-		healthNums.pop_back();
-	}
-
-	if (GetNumOfDigits(health) > healthNums.size())
-		MakeHealthNumEntity();
-
-	for (int i = 0; i < healthNums.size(); i++) {
-		Get<TTN_Renderer2D>(healthNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(health, healthNums.size() - i - 1)) + "-Text"));
-	}
-
-	//get the mouse position
-	glm::vec2 mousePos = TTN_Application::TTN_Input::GetMousePosition();
-	//convert it to worldspace
-	glm::vec3 mousePosWorldSpace;
 	{
-		float tx = TTN_Interpolation::InverseLerp(0.0f, 1920.0f, mousePos.x);
-		float ty = TTN_Interpolation::InverseLerp(0.0f, 1080.0f, mousePos.y);
+		while (GetNumOfDigits(m_score) < scoreNums.size()) {
+			DeleteEntity(scoreNums[scoreNums.size() - 1]);
+			scoreNums.pop_back();
+		}
 
-		float newX = TTN_Interpolation::Lerp(960.0f, -960.0f, tx);
-		float newY = TTN_Interpolation::Lerp(540.0f, -540.0f, ty);
+		if (GetNumOfDigits(m_score) > scoreNums.size())
+			MakeScoreNumEntity();
 
-		mousePosWorldSpace = glm::vec3(newX, newY, 2.0f);
+		for (int i = 0; i < scoreNums.size(); i++) {
+			Get<TTN_Renderer2D>(scoreNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_score, scoreNums.size() - i - 1)) + "-Text"));
+		}
+	}
+	
+	//update the health number
+	{
+		unsigned health = std::ceil(m_DamHealth);
+		while (GetNumOfDigits(health) < healthNums.size()) {
+			DeleteEntity(healthNums[healthNums.size() - 1]);
+			healthNums.pop_back();
+		}
+
+		if (GetNumOfDigits(health) > healthNums.size())
+			MakeHealthNumEntity();
+
+		for (int i = 0; i < healthNums.size(); i++) {
+			Get<TTN_Renderer2D>(healthNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(health, healthNums.size() - i - 1)) + "-Text"));
+		}
 	}
 
-	//DamHealth = Game::GetDamHealth();
-	std::cout << m_DamHealth << " UIIIII" << std::endl;
-	Get<TTN_Transform>(healthDam).SetScale(glm::vec3(m_DamHealth * -3.50f, 100.0f, 1.0f));
-	//Get<TTN_Transform>(healthDam).SetPos(glm::vec3(DamHealth * -4.50f, -380.0f, 1.0f));
+	//update the health bar
+	float normalizedDamHealth = TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, m_DamHealth);
+	Get<TTN_Renderer2D>(healthDam).SetHoriMask(normalizedDamHealth);
+
+	//update the progress bar
+	if (m_displayedWaveProgress >= m_waveProgress + 0.01f || m_displayedWaveProgress <= m_waveProgress - 0.01f) {
+		float sign = (m_waveProgress - m_displayedWaveProgress) / std::abs(m_waveProgress - m_displayedWaveProgress);
+		m_displayedWaveProgress += sign * 0.5f * deltaTime;
+		m_displayedWaveProgress = std::clamp(m_displayedWaveProgress, 0.0f, 1.0f);
+	}
+
+	Get<TTN_Renderer2D>(progressRepresentation).SetHoriMask(m_displayedWaveProgress);
 }
 
 void GameUI::MakeScoreNumEntity()
