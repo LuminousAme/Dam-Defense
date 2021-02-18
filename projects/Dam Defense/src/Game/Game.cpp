@@ -1048,6 +1048,7 @@ void Game::FlamethrowerUpdate(float deltaTime)
 				TTN_DeleteCountDown cannonCountdown = TTN_DeleteCountDown(2.48f);
 				AttachCopy(*it, countdown);
 				AttachCopy(Get<EnemyComponent>(*it).GetCannonEntity(), cannonCountdown);
+				Get<TTN_MorphAnimator>(Get<EnemyComponent>(*it).GetCannonEntity()).SetActiveAnim(0);
 				//mark it as dead
 				Get<EnemyComponent>(*it).SetAlive(false);
 
@@ -1454,6 +1455,7 @@ void Game::Collisions()
 							TTN_DeleteCountDown cannonCountdown = TTN_DeleteCountDown(2.48f);
 							AttachCopy(*itt, countdown);
 							AttachCopy(Get<EnemyComponent>(*itt).GetCannonEntity(), cannonCountdown);
+							Get<TTN_MorphAnimator>(Get<EnemyComponent>(*itt).GetCannonEntity()).SetActiveAnim(0);
 							//mark it as dead
 							Get<EnemyComponent>(*itt).SetAlive(false);
 
