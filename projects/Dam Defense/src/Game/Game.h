@@ -50,6 +50,15 @@ public:
 
 	float GetDamHealth() { return Dam_health; }
 
+	float GetWaveProgress() {
+		if (m_firstWave)
+			return 0.0f;
+
+		float percentBoatsRemaining = (float)m_boatsRemainingThisWave / (float)(m_enemiesPerWave * m_currentWave);
+		return TTN_Interpolation::ReMap(1.0f, 0.0f, 0.0f, 1.0f, percentBoatsRemaining);
+		
+	}
+
 	unsigned GetScore() { return m_score; }
 	void SetScore(unsigned score) { m_score = score; }
 	
@@ -200,12 +209,14 @@ protected:
 	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
 	int m_enemiesPerWave = 5; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
 
-	int m_currentWave = 1; //the current wave
+	int m_currentWave = 0; //the current wave
 	float m_timeTilNextWave; //the timer until the next wave starts, used after a wave has ended
 	float m_timeUntilNextSpawn; //the timer until the next boat spawns
 	int m_boatsRemainingThisWave; //the number of boats that need to be destoryed before the wave starts again
 	int m_boatsStillNeedingToSpawnThisWave; //the number of boats that still need to be spawned before the wave can end
 	bool m_rightSideSpawn = true; //wheter or not it should be using the right (true) or left (false) spawner
+	bool m_waveInProgress;
+	bool m_firstWave = true;
 
 	/////////// SOUND CONTROL///////////////
 	//control melody

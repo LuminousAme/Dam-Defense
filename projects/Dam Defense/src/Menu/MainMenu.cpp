@@ -714,10 +714,16 @@ MainMenuUI::MainMenuUI()
 	//set set the navigation bools
 	shouldPlay = false;
 	shouldQuit = false;
+	shouldArcade = false;
 }
 
 void MainMenuUI::InitScene()
 {
+	//set set the navigation bools
+	shouldPlay = false;
+	shouldQuit = false;
+	shouldArcade = false;
+
 	//grab the textures
 	textureGameLogo = TTN_AssetSystem::GetTexture2D("Game logo");
 	textureButton1 = TTN_AssetSystem::GetTexture2D("Button Base");

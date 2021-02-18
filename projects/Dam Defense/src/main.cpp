@@ -104,7 +104,6 @@ int main() {
 			titleScreen->SetShouldRender(true);
 			titleScreenUI->InitScene();
 			titleScreenUI->SetShouldRender(true);
-			
 		}
 
 		//check if the loading is done and the menu should be going to the game
@@ -260,6 +259,7 @@ int main() {
 			//pass the score between the scenes
 			gameSceneUI->SetScore(gameScene->GetScore());
 			gameSceneUI->SetDamHP(gameScene->GetDamHealth());
+			gameSceneUI->SetWaveProgress(gameScene->GetWaveProgress());
 		}
 
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)
@@ -314,9 +314,9 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("blue ramp", "textures/ramps/blue ramp.png");
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Normal Map", "textures/terrain normal map.png");
 
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar Border", "textures/Health_Bar_Border.png", 1); //overlay border of the health bar
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar", "textures/Health_Bar.png", 1); //health bar itself
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar BG", "textures/Health_Bar_BG.png", 1); //background behind the healthbar
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Bar Border", "textures/Health_Bar_Border.png", 1); //overlay border of the health/progress bar
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Bar", "textures/Health_Bar.png", 1); //health/progress bar itself
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Bar BG", "textures/Health_Bar_BG.png", 1); //background behind the health/progress bar
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Base", "textures/Button_1.png", 1); //button when not being hovered over
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Hovering", "textures/Button_2.png", 1); //button when being hovered over
