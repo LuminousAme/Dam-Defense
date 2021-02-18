@@ -702,7 +702,7 @@ void Game::SetUpEntities()
 	flames = std::vector<entt::entity>();
 
 	//set the cannon to be a child of the camera
-	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), &camera);
+	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), camera);
 }
 
 //sets up any other data the game needs to store
@@ -1045,7 +1045,9 @@ void Game::FlamethrowerUpdate(float deltaTime)
 				Remove<TTN_Physics>(*it);
 				//add a countdown until it deletes
 				TTN_DeleteCountDown countdown = TTN_DeleteCountDown(2.5f);
+				TTN_DeleteCountDown cannonCountdown = TTN_DeleteCountDown(2.48f);
 				AttachCopy(*it, countdown);
+				AttachCopy(Get<EnemyComponent>(*it).GetCannonEntity(), cannonCountdown);
 				//mark it as dead
 				Get<EnemyComponent>(*it).SetAlive(false);
 
@@ -1053,6 +1055,15 @@ void Game::FlamethrowerUpdate(float deltaTime)
 				m_score += 50;
 
 				//and remove it from the list of boats as it will be deleted soon
+				std::vector<entt::entity>::iterator itt = enemyCannons.begin();
+				while (itt != enemyCannons.end()) {
+					if (*itt == Get<EnemyComponent>(*it).GetCannonEntity()) {
+						itt = enemyCannons.erase(itt);
+					}
+					else
+						itt++;
+				}
+
 				it = boats.erase(it);
 				m_boatsRemainingThisWave--;
 			}
@@ -1189,7 +1200,6 @@ void Game::SpawnBoatLeft()
 		firingFrameLengths.push_back(3.0f / 37.0f);//9
 		firingFrameLengths.push_back(3.0f / 37.0f);//9
 		firingFrameLengths.push_back(3.0f / 37.0f);//9
-		firingFrameLengths.push_back(4.0f / 37.0f);//9
 		TTN_MorphAnimation firingAnim = TTN_MorphAnimation(firingFrameIndices, firingFrameLengths, true); //anim 1
 		//add both animatons to the animator
 		cannonAnimator.AddAnim(notFiringAnim);
@@ -1199,7 +1209,7 @@ void Game::SpawnBoatLeft()
 		//attach that animator to the entity
 		AttachCopy(enemyCannons[enemyCannons.size() - 1], cannonAnimator);
 	}
-
+	Get<EnemyComponent>(boats[boats.size() - 1]).SetCannonEntity(enemyCannons[enemyCannons.size() - 1]);
 	//Get<TTN_Transform>(enemyCannons[enemyCannons.size() - 1]).SetParent(&Get<TTN_Transform>(boats[boats.size() - 1]), &boats[boats.size() - 1]);
 	/*entt::entity tempBoat = boats[boats.size() - 1];
 	entt::entity tempCannon = enemyCannons[enemyCannons.size() - 1];
@@ -1330,7 +1340,6 @@ void Game::SpawnBoatRight()
 		firingFrameLengths.push_back(2.0f / 37.0f);//9
 		firingFrameLengths.push_back(3.0f / 37.0f);//9
 		firingFrameLengths.push_back(3.0f / 37.0f);//9
-		firingFrameLengths.push_back(4.0f / 37.0f);//9
 		TTN_MorphAnimation firingAnim = TTN_MorphAnimation(firingFrameIndices, firingFrameLengths, true); //anim 1
 		//add both animatons to the animator
 		cannonAnimator.AddAnim(notFiringAnim);
@@ -1341,6 +1350,7 @@ void Game::SpawnBoatRight()
 		AttachCopy(enemyCannons[enemyCannons.size() - 1], cannonAnimator);
 	}
 
+	Get<EnemyComponent>(boats[boats.size() - 1]).SetCannonEntity(enemyCannons[enemyCannons.size() - 1]);
 	//Get<TTN_Transform>(enemyCannons[enemyCannons.size() - 1]).SetParent(&Get<TTN_Transform>(boats[boats.size() - 1]), &boats[boats.size() - 1]);
 	//entt::entity tempBoat = boats[boats.size() - 1];
 	//entt::entity tempCannon = enemyCannons[enemyCannons.size() - 1];
@@ -1381,7 +1391,7 @@ void Game::WaveUpdate(float deltaTime)
 				SpawnBoatRight();
 			else
 				SpawnBoatLeft();
-
+			
 			Get<TTN_Transform>(enemyCannons[enemyCannons.size() - 1]).SetParent(&Get<TTN_Transform>(boats[boats.size() - 1]), &boats[boats.size() - 1]);
 
 			m_rightSideSpawn = !m_rightSideSpawn;
@@ -1440,7 +1450,9 @@ void Game::Collisions()
 							Remove<TTN_Physics>(*itt);
 							//add a countdown until it deletes
 							TTN_DeleteCountDown countdown = TTN_DeleteCountDown(2.5f);
+							TTN_DeleteCountDown cannonCountdown = TTN_DeleteCountDown(2.48f);
 							AttachCopy(*itt, countdown);
+							AttachCopy(Get<EnemyComponent>(*itt).GetCannonEntity(), cannonCountdown);
 							//mark it as dead
 							Get<EnemyComponent>(*itt).SetAlive(false);
 
@@ -1454,6 +1466,14 @@ void Game::Collisions()
 								m_score += 200;
 
 							//and remove it from the list of boats as it will be deleted soon
+							std::vector<entt::entity>::iterator ittt = enemyCannons.begin();
+							while (ittt != enemyCannons.end()) {
+								if (*ittt == Get<EnemyComponent>(*itt).GetCannonEntity()) {
+									ittt = enemyCannons.erase(ittt);
+								}
+								else
+									ittt++;
+							}
 							itt = boats.erase(itt);
 							m_boatsRemainingThisWave--;
 						}
@@ -1500,6 +1520,7 @@ void Game::Damage(float deltaTime) {
 	//attack anim
 	std::vector<entt::entity>::iterator can = enemyCannons.begin(); //enemy cannon vector
 	while (can != enemyCannons.end()) {
+
 		if (Get<EnemyComponent>(*(Get<TTN_Transform>(*can).GetParentEntity())).GetAttacking()) {
 			Get<TTN_MorphAnimator>(*can).SetActiveAnim(1);
 		}

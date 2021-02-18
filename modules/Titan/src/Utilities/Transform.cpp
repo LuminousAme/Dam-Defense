@@ -14,13 +14,13 @@ namespace Titan {
 		m_scale = glm::vec3(1.0f, 1.0f, 1.0f);
 		m_rotation = glm::quat(glm::radians(glm::vec3(0.0f, 0.0f, 0.0f)));
 		m_Parent = nullptr;
-		m_parentEntity = nullptr;
+		m_parentEntity = entt::null;
 		m_Children = std::vector<TTN_Transform*>();
 		Recompute();
 	}
 
 	//constructor that takes all the data and makes a transform out of it
-	TTN_Transform::TTN_Transform(glm::vec3 pos, glm::vec3 rotation, glm::vec3 scale, TTN_Transform* parent, entt::entity* parentEntity)
+	TTN_Transform::TTN_Transform(glm::vec3 pos, glm::vec3 rotation, glm::vec3 scale, TTN_Transform* parent, entt::entity parentEntity)
 	{
 		m_pos = pos;
 		m_rotation = glm::quat(glm::radians(rotation));
@@ -35,7 +35,7 @@ namespace Titan {
 
 	TTN_Transform::~TTN_Transform()
 	{
-		SetParent(nullptr, nullptr);
+		SetParent(nullptr, entt::null);
 	}
 
 	//sets the position to the value passed in
@@ -65,7 +65,7 @@ namespace Titan {
 	}
 
 	//sets the transform that acts as this object's parent
-	void TTN_Transform::SetParent(TTN_Transform* parent, entt::entity* parentEntity)
+	void TTN_Transform::SetParent(TTN_Transform* parent, entt::entity parentEntity)
 	{
 		//if this tranform already had a parent
 		if (m_Parent != nullptr) {
@@ -82,7 +82,6 @@ namespace Titan {
 			m_Parent->AddChild(this);
 			Recompute();
 		}
-
 	}
 
 	//returns the position value
