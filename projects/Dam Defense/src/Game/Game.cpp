@@ -694,7 +694,7 @@ void Game::SetUpEntities()
 	cannonBalls = std::vector<std::pair<entt::entity, bool>>();
 	//vector of boats
 	boats = std::vector<entt::entity>();
-	
+
 	//vector of enemy cannons
 	enemyCannons = std::vector<entt::entity>();
 
@@ -1081,6 +1081,7 @@ void Game::SpawnBoatLeft()
 		//create the entity
 		boats.push_back(CreateEntity());
 		int randomBoat = rand() % 3;
+		//int randomBoat = 0;
 
 		//create a renderer
 		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
@@ -1151,9 +1152,24 @@ void Game::SpawnBoatLeft()
 
 		//transform component
 		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(4.0f, 3.0f, -14.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+
+		if (Get<EnemyComponent>(boats[boats.size() - 1]).GetBoatType() == 0) {//green
+			cannonTrans.SetPos(glm::vec3(16.0f, 7.0f, 1.35f));  // x and z axis flipped ?
+			cannonTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
+			cannonTrans.SetScale(glm::vec3(0.35f));
+		}
+
+		else if (Get<EnemyComponent>(boats[boats.size() - 1]).GetBoatType() == 1) {//ac carrier /red
+			cannonTrans.SetPos(glm::vec3(-28.0f, 18.0f, -10.0f));
+			cannonTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
+			cannonTrans.SetScale(glm::vec3(1.95f));
+		}
+
 		//cannonTrans.SetPos(Get<TTN_Transform>(boats[boats.size() - 1]).GetPos());
-		cannonTrans.SetScale(glm::vec3(1.0f));
-		cannonTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
+		else if (Get<EnemyComponent>(boats[boats.size() - 1]).GetBoatType() == 2) { //yellow
+			cannonTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
+			cannonTrans.SetScale(glm::vec3(1.0f));
+		}
 
 		//attach transform to cannon
 		AttachCopy<TTN_Transform>(enemyCannons[enemyCannons.size() - 1], cannonTrans);
@@ -1208,6 +1224,7 @@ void Game::SpawnBoatRight()
 		boats.push_back(CreateEntity());
 		//gets the type of boat
 		int randomBoat = rand() % 3;
+		//int randomBoat = 0;
 
 		//create a renderer
 		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
@@ -1225,7 +1242,7 @@ void Game::SpawnBoatRight()
 		}
 		//attach the renderer to the entity
 		AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
-	
+
 		//create a transform for the boat
 		//TTN_Transform boatTrans = TTN_Transform();
 		TTN_Transform boatTrans = TTN_Transform(glm::vec3(21.0f, 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
@@ -1277,10 +1294,25 @@ void Game::SpawnBoatRight()
 		AttachCopy<TTN_Renderer>(enemyCannons[enemyCannons.size() - 1], cannonRenderer);
 
 		//transform component
-		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(21.0f, 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-		cannonTrans.SetPos(Get<TTN_Transform>(boats[boats.size() - 1]).GetPos());
-		cannonTrans.SetScale(glm::vec3(0.2f));
+		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(4.0f, 2.0f, -18.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 
+		if (Get<EnemyComponent>(boats[boats.size() - 1]).GetBoatType() == 0) {//green
+			cannonTrans.SetPos(glm::vec3(16.0f, 7.0f, 1.35f));  // x and z axis flipped ?
+			cannonTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
+			cannonTrans.SetScale(glm::vec3(0.35f));
+		}
+
+		else if (Get<EnemyComponent>(boats[boats.size() - 1]).GetBoatType() == 1) {//ac carrier /red
+			cannonTrans.SetPos(glm::vec3(-28.0f, 18.0f, -10.0f));
+			cannonTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
+			cannonTrans.SetScale(glm::vec3(1.95f));
+		}
+
+		//cannonTrans.SetPos(Get<TTN_Transform>(boats[boats.size() - 1]).GetPos());
+		else if (Get<EnemyComponent>(boats[boats.size() - 1]).GetBoatType() == 2) { //yellow
+			cannonTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
+			cannonTrans.SetScale(glm::vec3(1.0f));
+		}
 		//attach transform to cannon
 		AttachCopy<TTN_Transform>(enemyCannons[enemyCannons.size() - 1], cannonTrans);
 
@@ -1495,8 +1527,6 @@ void Game::Damage(float deltaTime) {
 		}
 		can++;
 	}
-
-
 }
 
 #pragma endregion
