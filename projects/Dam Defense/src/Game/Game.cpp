@@ -1276,19 +1276,29 @@ void Game::SpawnBoatRight()
 		//create an animator
 		TTN_MorphAnimator cannonAnimator = TTN_MorphAnimator();
 
-		//create an animation for the cannon when it's not firing
-		TTN_MorphAnimation notFiringAnim = TTN_MorphAnimation({ 0 }, { 3.0f / 24 }, true); //anim 0
+		TTN_MorphAnimation notFiringAnim = TTN_MorphAnimation({ 0 }, { 3.0f / 37 }, true); //anim 0
 		//create an animation for the cannon when it is firing
 		std::vector<int> firingFrameIndices = std::vector<int>();
 		std::vector<float> firingFrameLengths = std::vector<float>();
-		for (int i = 0; i < 7; i++) firingFrameIndices.push_back(i);
-		firingFrameLengths.push_back(3.0f / 24.0f);
-		firingFrameLengths.push_back(1.0f / 24.0f);
-		firingFrameLengths.push_back(1.0f / 24.0f);
-		firingFrameLengths.push_back(1.0f / 24.0f);
-		firingFrameLengths.push_back(1.0f / 24.0f);
-		firingFrameLengths.push_back(2.0f / 24.0f);
-		firingFrameLengths.push_back(3.0f / 24.0f);
+		for (int i = 0; i < 17; i++) firingFrameIndices.push_back(i);
+		firingFrameLengths.push_back(4.0f / 37.0f);
+		firingFrameLengths.push_back(2.0f / 37.0f);
+		firingFrameLengths.push_back(3.0f / 37.0f);
+		firingFrameLengths.push_back(2.0f / 37.0f);
+		firingFrameLengths.push_back(2.0f / 37.0f);
+		firingFrameLengths.push_back(2.0f / 37.0f);
+		firingFrameLengths.push_back(2.0f / 37.0f);
+		firingFrameLengths.push_back(2.0f / 37.0f);//8
+		firingFrameLengths.push_back(3.0f / 37.0f);//9
+		firingFrameLengths.push_back(2.0f / 37.0f);//9
+		firingFrameLengths.push_back(3.0f / 37.0f);//10
+		firingFrameLengths.push_back(2.0f / 37.0f);//9
+		firingFrameLengths.push_back(2.0f / 37.0f);//9
+		firingFrameLengths.push_back(2.0f / 37.0f);//9
+		firingFrameLengths.push_back(2.0f / 37.0f);//9
+		firingFrameLengths.push_back(3.0f / 37.0f);//9
+		firingFrameLengths.push_back(3.0f / 37.0f);//9
+		firingFrameLengths.push_back(4.0f / 37.0f);//9
 		TTN_MorphAnimation firingAnim = TTN_MorphAnimation(firingFrameIndices, firingFrameLengths, true); //anim 1
 		//add both animatons to the animator
 		cannonAnimator.AddAnim(notFiringAnim);
