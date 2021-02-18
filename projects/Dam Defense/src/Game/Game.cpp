@@ -45,7 +45,7 @@ void Game::Update(float deltaTime)
 
 		//if a cannonball has passed the water plane but not yet splashed, play the splash effect
 		for (int i = 0; i < cannonBalls.size(); i++) {
-			if (!cannonBalls[i].second && Get<TTN_Transform>(cannonBalls[i].first).GetGlobalPos().y <= 
+			if (!cannonBalls[i].second && Get<TTN_Transform>(cannonBalls[i].first).GetGlobalPos().y <=
 				Get<TTN_Transform>(water).GetGlobalPos().y) {
 				//sets the position where the sound should play
 				glm::vec3 temp = Get<TTN_Transform>(cannonBalls[i].first).GetGlobalPos();
@@ -84,7 +84,7 @@ void Game::Update(float deltaTime)
 
 		//updates the flamethrower logic
 		FlamethrowerUpdate(deltaTime);
-		
+
 		Collisions(); //collision check
 		Damage(deltaTime); //damage function, contains cooldoown
 
@@ -364,7 +364,6 @@ void Game::SetUpAssets()
 	m_jingle = TTN_AudioEventHolder::Create("Wave Complete", "{d28d68df-bb3e-4153-95b6-89fd2715a5a3}", 1);
 	m_music = TTN_AudioEventHolder::Create("Music", "{239bd7d6-7e7e-47a7-a0f6-7afc6f1b35bc}", 1);
 
-
 	//// SHADERS ////
 	//grab the shaders
 	shaderProgramTextured = TTN_AssetSystem::GetShader("Basic textured shader");
@@ -374,22 +373,6 @@ void Game::SetUpAssets()
 	shaderProgramAnimatedTextured = TTN_AssetSystem::GetShader("Animated textured shader");
 
 	////MESHES////
-	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
-	skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
-	sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
-	flamethrowerMesh = TTN_ObjLoader::LoadFromFile("models/Flamethrower.obj");
-	flamethrowerMesh->SetUpVao();
-	boat1Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 1.obj");
-	boat2Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 2.obj");
-	boat3Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 3.obj");
-	terrainPlain = TTN_ObjLoader::LoadFromFile("models/terrainPlain.obj");
-	terrainPlain->SetUpVao();
-	birdMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/bird/bird", 2);
-	treeMesh[0] = TTN_ObjLoader::LoadFromFile("models/Tree1.obj");
-	treeMesh[1] = TTN_ObjLoader::LoadFromFile("models/Tree2.obj");
-	treeMesh[2] = TTN_ObjLoader::LoadFromFile("models/Tree3.obj");
-	damMesh = TTN_ObjLoader::LoadFromFile("models/Dam.obj");
-
 	//grab the meshes
 	cannonMesh = TTN_AssetSystem::GetMesh("Cannon mesh");
 	skyboxMesh = TTN_AssetSystem::GetMesh("Skybox mesh");
@@ -401,24 +384,9 @@ void Game::SetUpAssets()
 	terrainPlain = TTN_AssetSystem::GetMesh("Terrain plane");
 	birdMesh = TTN_AssetSystem::GetMesh("Bird mesh");
 	damMesh = TTN_AssetSystem::GetMesh("Dam mesh");
+	enemyCannonMesh = TTN_AssetSystem::GetMesh("Enemy Cannon mesh");
 
 	///TEXTURES////
-	cannonText = TTN_Texture2D::LoadFromFile("textures/metal.png");
-	skyboxText = TTN_TextureCubeMap::LoadFromImages("textures/skybox/sky.png");
-	terrainMap = TTN_Texture2D::LoadFromFile("textures/Game Map Long.jpg");
-	sandText = TTN_Texture2D::LoadFromFile("textures/SandTexture.jpg");
-	rockText = TTN_Texture2D::LoadFromFile("textures/RockTexture.jpg");
-	grassText = TTN_Texture2D::LoadFromFile("textures/GrassTexture.jpg");
-	waterText = TTN_Texture2D::LoadFromFile("textures/water.png");
-	boat1Text = TTN_Texture2D::LoadFromFile("textures/Boat 1 Texture.png");
-	boat2Text = TTN_Texture2D::LoadFromFile("textures/Boat 2 Texture.png");
-	boat3Text = TTN_Texture2D::LoadFromFile("textures/Boat 3 Texture.png");
-	flamethrowerText = TTN_Texture2D::LoadFromFile("textures/FlamethrowerTexture.png");
-	birdText = TTN_Texture2D::LoadFromFile("textures/BirdTexture.png");
-	treeText = TTN_Texture2D::LoadFromFile("textures/Trees Texture.png");
-	damText = TTN_Texture2D::LoadFromFile("textures/Dam.png");
-
-	healthBar = TTN_Texture2D::LoadFromFile("textures/health.png");
 	//grab textures
 	cannonText = TTN_AssetSystem::GetTexture2D("Cannon texture");
 	skyboxText = TTN_AssetSystem::GetSkybox("Skybox texture");
@@ -433,12 +401,18 @@ void Game::SetUpAssets()
 	flamethrowerText = TTN_AssetSystem::GetTexture2D("Flamethrower texture");
 	birdText = TTN_AssetSystem::GetTexture2D("Bird texture");
 	damText = TTN_AssetSystem::GetTexture2D("Dam texture");
+	enemyCannonText = TTN_AssetSystem::GetTexture2D("Enemy Cannon texture");
 
 	////MATERIALS////
 	cannonMat = TTN_Material::Create();
 	cannonMat->SetAlbedo(cannonText);
 	cannonMat->SetShininess(128.0f);
 	m_mats.push_back(cannonMat);
+
+	enemyCannonMat = TTN_Material::Create();
+	enemyCannonMat->SetAlbedo(enemyCannonText);
+	enemyCannonMat->SetShininess(128.0f);
+	m_mats.push_back(enemyCannonMat);
 
 	boat1Mat = TTN_Material::Create();
 	boat1Mat->SetAlbedo(boat1Text);
@@ -557,16 +531,16 @@ void Game::SetUpEntities()
 		TTN_MorphAnimation notFiringAnim = TTN_MorphAnimation({ 0 }, { 3.0f / 24 }, true); //anim 0
 		//create an animation for the cannon when it is firing
 		std::vector<int> firingFrameIndices = std::vector<int>();
-		std::vector<float> firingFrameLenghts = std::vector<float>();
+		std::vector<float> firingFrameLengths = std::vector<float>();
 		for (int i = 0; i < 7; i++) firingFrameIndices.push_back(i);
-		firingFrameLenghts.push_back(3.0f / 24.0f);
-		firingFrameLenghts.push_back(1.0f / 24.0f);
-		firingFrameLenghts.push_back(1.0f / 24.0f);
-		firingFrameLenghts.push_back(1.0f / 24.0f);
-		firingFrameLenghts.push_back(1.0f / 24.0f);
-		firingFrameLenghts.push_back(2.0f / 24.0f);
-		firingFrameLenghts.push_back(3.0f / 24.0f);
-		TTN_MorphAnimation firingAnim = TTN_MorphAnimation(firingFrameIndices, firingFrameLenghts, true); //anim 1
+		firingFrameLengths.push_back(3.0f / 24.0f);
+		firingFrameLengths.push_back(1.0f / 24.0f);
+		firingFrameLengths.push_back(1.0f / 24.0f);
+		firingFrameLengths.push_back(1.0f / 24.0f);
+		firingFrameLengths.push_back(1.0f / 24.0f);
+		firingFrameLengths.push_back(2.0f / 24.0f);
+		firingFrameLengths.push_back(3.0f / 24.0f);
+		TTN_MorphAnimation firingAnim = TTN_MorphAnimation(firingFrameIndices, firingFrameLengths, true); //anim 1
 		//add both animatons to the animator
 		cannonAnimator.AddAnim(notFiringAnim);
 		cannonAnimator.AddAnim(firingAnim);
@@ -673,15 +647,12 @@ void Game::SetUpEntities()
 		birds[i] = CreateEntity();
 
 		//create a renderer
-
 		TTN_Renderer birdRenderer = TTN_Renderer(birdMesh, shaderProgramAnimatedTextured, birdMat);
 
 		//attach that renderer to the entity
-
 		AttachCopy(birds[i], birdRenderer);
 
 		//create an animator
-
 		TTN_MorphAnimator birdAnimator = TTN_MorphAnimator();
 
 		//create an animation for the bird flying
@@ -707,6 +678,9 @@ void Game::SetUpEntities()
 	cannonBalls = std::vector<std::pair<entt::entity, bool>>();
 	//vector of boats
 	boats = std::vector<entt::entity>();
+	
+	//vector of enemy cannons
+	enemyCannons = std::vector<entt::entity>();
 
 	//vector for flamethrower models and flame particles
 	flames = std::vector<entt::entity>();
@@ -1073,126 +1047,244 @@ void Game::FlamethrowerUpdate(float deltaTime)
 //spawn a boat on the left side of the map
 void Game::SpawnBoatLeft()
 {
-	//create the entity
-	boats.push_back(CreateEntity());
-	int randomBoat = rand() % 3;
+	//boats
+	{
+		//create the entity
+		boats.push_back(CreateEntity());
+		int randomBoat = rand() % 3;
 
-	//create a renderer
-	TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
-	//setup renderer for green boat
-	if (randomBoat == 0) {
-		boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
-	}
-	//setup renderer for red boat
-	else if (randomBoat == 1) {
-		boatRenderer = TTN_Renderer(boat2Mesh, shaderProgramTextured, boat2Mat);
-	}
-	//set up renderer for yellow boat
-	else if (randomBoat == 2) {
-		boatRenderer = TTN_Renderer(boat3Mesh, shaderProgramTextured, boat3Mat);
-	}
-	//attach the renderer to the boat
-	AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
+		//create a renderer
+		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
+		//setup renderer for green boat
+		if (randomBoat == 0) {
+			boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
+			//boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramAnimatedTextured, boat1Mat);
+		}
+		//setup renderer for red boat
+		else if (randomBoat == 1) {
+			boatRenderer = TTN_Renderer(boat2Mesh, shaderProgramTextured, boat2Mat);
+		}
+		//set up renderer for yellow boat
+		else if (randomBoat == 2) {
+			boatRenderer = TTN_Renderer(boat3Mesh, shaderProgramTextured, boat3Mat);
+		}
+		//attach the renderer to the boat
+		AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
 
-	//create a transform for the boat
-	TTN_Transform boatTrans = TTN_Transform(glm::vec3(21.0f, 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-	//set up the transform for the green boat
-	if (randomBoat == 0) {
-		boatTrans.RotateFixed(glm::vec3(0.0f, 180.0f, 0.0f));
-		boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
-		boatTrans.SetPos(glm::vec3(90.0f, -8.5f, 115.0f));
-	}
-	//setup transform for the red boat
-	else if (randomBoat == 1) {
-		boatTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
-		boatTrans.SetScale(glm::vec3(0.05f, 0.05f, 0.05f));
-		boatTrans.SetPos(glm::vec3(90.0f, -8.0f, 115.0f));
-	}
-	//set up transform for the yellow boat
-	else if (randomBoat == 2) {
-		boatTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
-		boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
-		boatTrans.SetPos(glm::vec3(90.0f, -7.5f, 115.0f));
-	}
-	//attach the transform
-	AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
+		//create a transform for the boat
+		TTN_Transform boatTrans = TTN_Transform(glm::vec3(20.0f, 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		//set up the transform for the green boat
+		if (randomBoat == 0) {
+			boatTrans.RotateFixed(glm::vec3(0.0f, 180.0f, 0.0f));
+			boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
+			boatTrans.SetPos(glm::vec3(90.0f, -8.5f, 115.0f));
+		}
+		//setup transform for the red boat
+		else if (randomBoat == 1) {
+			boatTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
+			boatTrans.SetScale(glm::vec3(0.05f, 0.05f, 0.05f));
+			boatTrans.SetPos(glm::vec3(90.0f, -8.0f, 115.0f));
+		}
+		//set up transform for the yellow boat
+		else if (randomBoat == 2) {
+			boatTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
+			boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
+			boatTrans.SetPos(glm::vec3(90.0f, -7.5f, 115.0f));
+		}
+		//attach the transform
+		AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
+		//AttachCopy(boats[boats.size() - 1], boatTrans);
 
-	//create an attach a transform
-	TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.0f, 4.0f, 8.95f), boats[boats.size() - 1], TTN_PhysicsBodyType::DYNAMIC);
-	pbody.SetLinearVelocity(glm::vec3(-25.0f, 0.0f, 0.0f));//-2.0f
-	AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
+		//create an attach a physics body
+		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.0f, 4.0f, 8.95f), boats[boats.size() - 1], TTN_PhysicsBodyType::DYNAMIC);
+		pbody.SetLinearVelocity(glm::vec3(-25.0f, 0.0f, 0.0f));//-2.0f
+		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
 
-	//creates and attaches a tag to the boat
-	TTN_Tag boatTag = TTN_Tag("Boat");
-	AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
+		//creates and attaches a tag to the boat
+		TTN_Tag boatTag = TTN_Tag("Boat");
+		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
 
-	//create and attach the enemy component to the boat
-	int randPath = rand() % 3; // generates path number between 0-2 (left side paths, right side path nums are 3-5)
-	EnemyComponent en = EnemyComponent(boats[boats.size() - 1], this, randomBoat, randPath, 0.0f);
-	AttachCopy(boats[boats.size() - 1], en);
+		//create and attach the enemy component to the boat
+		int randPath = rand() % 3; // generates path number between 0-2 (left side paths, right side path nums are 3-5)
+		EnemyComponent en = EnemyComponent(boats[boats.size() - 1], this, randomBoat, randPath, 0.0f);
+		AttachCopy(boats[boats.size() - 1], en);
+	}
+
+	//enemy ship cannons
+	{
+		enemyCannons.push_back(CreateEntity());
+
+		//create a renderer
+		TTN_Renderer cannonRenderer = TTN_Renderer(enemyCannonMesh, shaderProgramAnimatedTextured, enemyCannonMat);
+
+		//attach that renderer to the entity
+		AttachCopy<TTN_Renderer>(enemyCannons[enemyCannons.size() - 1], cannonRenderer);
+
+		//transform component
+		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(4.0f, 3.0f, -14.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		//cannonTrans.SetPos(Get<TTN_Transform>(boats[boats.size() - 1]).GetPos());
+		cannonTrans.SetScale(glm::vec3(1.0f));
+		cannonTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
+
+		//attach transform to cannon
+		AttachCopy<TTN_Transform>(enemyCannons[enemyCannons.size() - 1], cannonTrans);
+
+		//create an animator
+		TTN_MorphAnimator cannonAnimator = TTN_MorphAnimator();
+
+		//create an animation for the cannon when it's not firing
+		TTN_MorphAnimation notFiringAnim = TTN_MorphAnimation({ 0 }, { 3.0f / 37 }, true); //anim 0
+		//create an animation for the cannon when it is firing
+		std::vector<int> firingFrameIndices = std::vector<int>();
+		std::vector<float> firingFrameLengths = std::vector<float>();
+		for (int i = 0; i < 17; i++) firingFrameIndices.push_back(i);
+		firingFrameLengths.push_back(4.0f / 37.0f);
+		firingFrameLengths.push_back(2.0f / 37.0f);
+		firingFrameLengths.push_back(3.0f / 37.0f);
+		firingFrameLengths.push_back(2.0f / 37.0f);
+		firingFrameLengths.push_back(2.0f / 37.0f);
+		firingFrameLengths.push_back(2.0f / 37.0f);
+		firingFrameLengths.push_back(2.0f / 37.0f);
+		firingFrameLengths.push_back(2.0f / 37.0f);//8
+		firingFrameLengths.push_back(3.0f / 37.0f);//9
+		firingFrameLengths.push_back(2.0f / 37.0f);//9
+		firingFrameLengths.push_back(3.0f / 37.0f);//10
+		firingFrameLengths.push_back(2.0f / 37.0f);//9
+		firingFrameLengths.push_back(2.0f / 37.0f);//9
+		firingFrameLengths.push_back(2.0f / 37.0f);//9
+		firingFrameLengths.push_back(3.0f / 37.0f);//9
+		firingFrameLengths.push_back(3.0f / 37.0f);//9
+		firingFrameLengths.push_back(3.0f / 37.0f);//9
+		firingFrameLengths.push_back(4.0f / 37.0f);//9
+		TTN_MorphAnimation firingAnim = TTN_MorphAnimation(firingFrameIndices, firingFrameLengths, true); //anim 1
+		//add both animatons to the animator
+		cannonAnimator.AddAnim(notFiringAnim);
+		cannonAnimator.AddAnim(firingAnim);
+		//start on the not firing anim
+		cannonAnimator.SetActiveAnim(0);
+		//attach that animator to the entity
+		AttachCopy(enemyCannons[enemyCannons.size() - 1], cannonAnimator);
+	}
+	
+	//Get<TTN_Transform>(enemyCannons[enemyCannons.size() - 1]).SetParent(&Get<TTN_Transform>(boats[boats.size() - 1]), &boats[boats.size() - 1]);
+	/*entt::entity tempBoat = boats[boats.size() - 1];
+	entt::entity tempCannon = enemyCannons[enemyCannons.size() - 1];
+	Get<TTN_Transform>(tempCannon).SetParent(&Get<TTN_Transform>(tempBoat), &tempBoat);*/
 }
 
 //spawn a boat on the right side of the map
 void Game::SpawnBoatRight()
 {
-	boats.push_back(CreateEntity());
+	{
+		boats.push_back(CreateEntity());
+		//gets the type of boat
+		int randomBoat = rand() % 3;
 
-	//gets the type of boat
-	int randomBoat = rand() % 3;
+		//create a renderer
+		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
+		//set up renderer for green boat
+		if (randomBoat == 0) {
+			boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
+		}
+		//set up renderer for red boat
+		else if (randomBoat == 1) {
+			boatRenderer = TTN_Renderer(boat2Mesh, shaderProgramTextured, boat2Mat);
+		}
+		//set up renderer for yellow boat
+		else if (randomBoat == 2) {
+			boatRenderer = TTN_Renderer(boat3Mesh, shaderProgramTextured, boat3Mat);
+		}
+		//attach the renderer to the entity
+		AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
+	
+		//create a transform for the boat
+		//TTN_Transform boatTrans = TTN_Transform();
+		TTN_Transform boatTrans = TTN_Transform(glm::vec3(21.0f, 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		//set up the transform for the green boat
+		if (randomBoat == 0) {
+			boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
+			boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
+			boatTrans.SetPos(glm::vec3(-90.0f, -8.5f, 115.0f));
+		}
+		//set up the transform for the red boat
+		else if (randomBoat == 1) {
+			boatTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
+			boatTrans.SetScale(glm::vec3(0.05f, 0.05f, 0.05f));
+			boatTrans.SetPos(glm::vec3(-90.0f, -8.0f, 115.0f));
+		}
+		//set up the transform the yellow boat
+		else if (randomBoat == 2) {
+			boatTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
+			boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
+			boatTrans.SetPos(glm::vec3(-90.0f, -7.5f, 115.0f));
+		}
+		//attach the transform
+		//AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
+		AttachCopy(boats[boats.size() - 1], boatTrans);
 
-	//create a renderer
-	TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
-	//set up renderer for green boat
-	if (randomBoat == 0) {
-		boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
-	}
-	//set up renderer for red boat
-	else if (randomBoat == 1) {
-		boatRenderer = TTN_Renderer(boat2Mesh, shaderProgramTextured, boat2Mat);
-	}
-	//set up renderer for yellow boat
-	else if (randomBoat == 2) {
-		boatRenderer = TTN_Renderer(boat3Mesh, shaderProgramTextured, boat3Mat);
-	}
-	//attach the renderer to the entity
-	AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
+		//create and attach a physics body to the boats
+		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.0f, 4.0f, 8.95f), boats[boats.size() - 1]);
+		pbody.SetLinearVelocity(glm::vec3(25.0f, 0.0f, 0.0f));//-2.0f
+		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
 
-	//create a transform for the boat
-	TTN_Transform boatTrans = TTN_Transform();
-	//set up the transform for the green boat
-	if (randomBoat == 0) {
-		boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
-		boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
-		boatTrans.SetPos(glm::vec3(-90.0f, -8.5f, 115.0f));
-	}
-	//set up the transform for the red boat
-	else if (randomBoat == 1) {
-		boatTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
-		boatTrans.SetScale(glm::vec3(0.05f, 0.05f, 0.05f));
-		boatTrans.SetPos(glm::vec3(-90.0f, -8.0f, 115.0f));
-	}
-	//set up the transform the yellow boat
-	else if (randomBoat == 2) {
-		boatTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
-		boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
-		boatTrans.SetPos(glm::vec3(-90.0f, -7.5f, 115.0f));
-	}
-	//attach the transform
-	AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
+		//creates and attaches a tag to the boat
+		TTN_Tag boatTag = TTN_Tag("Boat");
+		AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
 
-	//create and attach a physics body to the boats
-	TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.0f, 4.0f, 8.95f), boats[boats.size() - 1]);
-	pbody.SetLinearVelocity(glm::vec3(25.0f, 0.0f, 0.0f));//-2.0f
-	AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
+		//create and attach the enemy component to the boat
+		int randPath = rand() % 3 + 3; // generates path number between 3-5 (right side paths, left side path nums are 0-2)
+		EnemyComponent en = EnemyComponent(boats[boats.size() - 1], this, randomBoat, randPath, 0.0f);
+		AttachCopy(boats[boats.size() - 1], en);
+	}
 
-	//creates and attaches a tag to the boat
-	TTN_Tag boatTag = TTN_Tag("Boat");
-	AttachCopy<TTN_Tag>(boats[boats.size() - 1], boatTag);
+	//enemy ship cannons
+	{
+		enemyCannons.push_back(CreateEntity());
 
-	//create and attach the enemy component to the boat
-	int randPath = rand() % 3 + 3; // generates path number between 3-5 (right side paths, left side path nums are 0-2)
-	EnemyComponent en = EnemyComponent(boats[boats.size() - 1], this, randomBoat, randPath, 0.0f);
-	AttachCopy(boats[boats.size() - 1], en);
+		//create a renderer
+		TTN_Renderer cannonRenderer = TTN_Renderer(enemyCannonMesh, shaderProgramAnimatedTextured, enemyCannonMat);
+
+		//attach that renderer to the entity
+		AttachCopy<TTN_Renderer>(enemyCannons[enemyCannons.size() - 1], cannonRenderer);
+
+		//transform component
+		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(21.0f, 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		cannonTrans.SetPos(Get<TTN_Transform>(boats[boats.size() - 1]).GetPos());
+		cannonTrans.SetScale(glm::vec3(0.2f));
+
+		//attach transform to cannon
+		AttachCopy<TTN_Transform>(enemyCannons[enemyCannons.size() - 1], cannonTrans);
+
+		//create an animator
+		TTN_MorphAnimator cannonAnimator = TTN_MorphAnimator();
+
+		//create an animation for the cannon when it's not firing
+		TTN_MorphAnimation notFiringAnim = TTN_MorphAnimation({ 0 }, { 3.0f / 24 }, true); //anim 0
+		//create an animation for the cannon when it is firing
+		std::vector<int> firingFrameIndices = std::vector<int>();
+		std::vector<float> firingFrameLengths = std::vector<float>();
+		for (int i = 0; i < 7; i++) firingFrameIndices.push_back(i);
+		firingFrameLengths.push_back(3.0f / 24.0f);
+		firingFrameLengths.push_back(1.0f / 24.0f);
+		firingFrameLengths.push_back(1.0f / 24.0f);
+		firingFrameLengths.push_back(1.0f / 24.0f);
+		firingFrameLengths.push_back(1.0f / 24.0f);
+		firingFrameLengths.push_back(2.0f / 24.0f);
+		firingFrameLengths.push_back(3.0f / 24.0f);
+		TTN_MorphAnimation firingAnim = TTN_MorphAnimation(firingFrameIndices, firingFrameLengths, true); //anim 1
+		//add both animatons to the animator
+		cannonAnimator.AddAnim(notFiringAnim);
+		cannonAnimator.AddAnim(firingAnim);
+		//start on the not firing anim
+		cannonAnimator.SetActiveAnim(0);
+		//attach that animator to the entity
+		AttachCopy(enemyCannons[enemyCannons.size() - 1], cannonAnimator);
+	}
+
+	//Get<TTN_Transform>(enemyCannons[enemyCannons.size() - 1]).SetParent(&Get<TTN_Transform>(boats[boats.size() - 1]), &boats[boats.size() - 1]);
+	//entt::entity tempBoat = boats[boats.size() - 1];
+	//entt::entity tempCannon = enemyCannons[enemyCannons.size() - 1];
+	//Get<TTN_Transform>(tempCannon).SetParent(&Get<TTN_Transform>(tempBoat), &tempBoat);
 }
 
 //updates the waves
@@ -1222,6 +1314,8 @@ void Game::WaveUpdate(float deltaTime)
 				SpawnBoatRight();
 			else
 				SpawnBoatLeft();
+			
+			Get<TTN_Transform>(enemyCannons[enemyCannons.size() - 1]).SetParent(&Get<TTN_Transform>(boats[boats.size() - 1]), &boats[boats.size() - 1]);
 
 			m_rightSideSpawn = !m_rightSideSpawn;
 			m_timeUntilNextSpawn = m_timeBetweenEnemySpawns;
@@ -1317,6 +1411,8 @@ void Game::Damage(float deltaTime) {
 			if (Get<EnemyComponent>(*it).GetCooldown() <= 0.f) {
 				//if they are do damage
 				Get<EnemyComponent>(*it).SetCooldown(3.0f);
+				Get<EnemyComponent>(*it).SetAttacking(true);
+				//Get<TTN_Transform>(*it).get
 				Dam_health = Dam_health - damage;
 				std::cout << Dam_health << std::endl;
 			}
@@ -1324,6 +1420,7 @@ void Game::Damage(float deltaTime) {
 			else {
 				Get<EnemyComponent>(*it).SetCooldown(Get<EnemyComponent>(*it).GetCooldown() - deltaTime);
 			}
+
 			//and move to the next boat
 			it++;
 		}
@@ -1332,7 +1429,20 @@ void Game::Damage(float deltaTime) {
 			it++;
 		}
 	}
+
+	//attack anim
+	std::vector<entt::entity>::iterator can = enemyCannons.begin(); //enemy cannon vector
+	while (can != enemyCannons.end()) {
+
+		if (Get<EnemyComponent>(*(Get<TTN_Transform>(*can).GetParentEntity())).GetAttacking()) {
+			Get<TTN_MorphAnimator>(*can).SetActiveAnim(1);
+		}
+		can++;
+	}
+
+
 }
+
 #pragma endregion
 
 void Game::GameSounds(float deltaTime)
@@ -1369,12 +1479,11 @@ void Game::GameSounds(float deltaTime)
 		partialMelody = !partialMelody;
 	}
 
-
 	float percentBoatsRemaining = (float)m_boatsRemainingThisWave / (float)(m_enemiesPerWave * m_currentWave);
 	//check if the bango should begin playing
-	if (fullMelodyFinishedThisFrame && percentBoatsRemaining <= 0.85f && 
+	if (fullMelodyFinishedThisFrame && percentBoatsRemaining <= 0.85f &&
 		!(bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("BangoPlaying")) {
-		//if it should begin playing it 
+		//if it should begin playing it
 		engine.GetEvent(m_music->GetNextEvent()).SetParameter("BangoPlaying", 1);
 
 		//and make sure all of the drums are also playing
@@ -1386,22 +1495,22 @@ void Game::GameSounds(float deltaTime)
 	}
 
 	//check if the marimbra should begin playing
-	if (fullMelodyFinishedThisFrame && percentBoatsRemaining <= 0.7f && 
+	if (fullMelodyFinishedThisFrame && percentBoatsRemaining <= 0.7f &&
 		!(bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("MarimbaPlaying")) {
-		//if it should begin playing it 
+		//if it should begin playing it
 		engine.GetEvent(m_music->GetNextEvent()).SetParameter("MarimbaPlaying", 1);
 	}
 
 	//check if the recorder should begin playing
-	if (fullMelodyFinishedThisFrame && percentBoatsRemaining <= 0.55f && 
+	if (fullMelodyFinishedThisFrame && percentBoatsRemaining <= 0.55f &&
 		!(bool)engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("RecorderPlaying")) {
-		//if it should begin playing it 
+		//if it should begin playing it
 		engine.GetEvent(m_music->GetNextEvent()).SetParameter("RecorderPlaying", 1);
 	}
 
 	//check if the trumpets should begin playing
 	if (fullMelodyFinishedThisFrame && percentBoatsRemaining <= 0.4f && engine.GetEvent(m_music->GetNextEvent()).GetParameterValue("TrumpetsPlaying")) {
-		//if it should begin playing it 
+		//if it should begin playing it
 		engine.GetEvent(m_music->GetNextEvent()).SetParameter("TrumpetsPlaying", 1);
 	}
 

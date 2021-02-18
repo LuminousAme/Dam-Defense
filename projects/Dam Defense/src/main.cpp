@@ -307,6 +307,11 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddShaderToBeLoaded("Terrain shader", "shaders/terrain_vert.glsl", "shaders/terrain_frag.glsl", 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Water shader", "shaders/water_vert.glsl", "shaders/water_frag.glsl", 1);
 	
+
+	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Enemy Cannon mesh", "models/Enemy Cannon/e_cannon", 17, 1); //mesh for the enemy cannons
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Enemy Cannon texture", "textures/FlamethrowerTexture.png", 1); //enemy cannon texture
+
+
 	TTN_AssetSystem::AddLUTTobeLoaded("Warm LUT", "Warm_LUT.cube",  1);
 	TTN_AssetSystem::AddLUTTobeLoaded("Cool LUT", "Cool_LUT.cube",  1);
 	TTN_AssetSystem::AddLUTTobeLoaded("Custom LUT", "Custom_LUT.cube",  1);
@@ -317,8 +322,6 @@ void PrepareAssetLoading() {
 	//TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar", "textures/health.png", 1); //full health bar
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar", "textures/healthbar.png", 1); //health bar hud empty
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Health Bar Dam", "textures/healthDam.png", 1); //health  hud 
-
-
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Base", "textures/Button_1.png", 1); //button when not being hovered over
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Hovering", "textures/Button_2.png", 1); //button when being hovered over

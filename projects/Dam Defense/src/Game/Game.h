@@ -76,6 +76,7 @@ public:
 	TTN_Mesh::smptr boat3Mesh;
 	TTN_Mesh::smptr flamethrowerMesh;
 	TTN_Mesh::smptr birdMesh;
+	TTN_Mesh::smptr enemyCannonMesh;
 	TTN_Mesh::smptr treeMesh[3];
 	TTN_Mesh::smptr rockMesh[5];
 	TTN_Mesh::smptr damMesh;
@@ -99,6 +100,7 @@ public:
 	TTN_Texture2D::st2dptr birdText;
 	TTN_Texture2D::st2dptr treeText;
 	TTN_Texture2D::st2dptr damText;
+	TTN_Texture2D::st2dptr enemyCannonText;
 
 	//materials
 	TTN_Material::smatptr boat1Mat;
@@ -109,13 +111,13 @@ public:
 	TTN_Material::smatptr treeMat;
 	TTN_Material::smatptr rockMat;
 	TTN_Material::smatptr damMat;
+	TTN_Material::smatptr enemyCannonMat;
 	std::vector<TTN_Material::smatptr> m_mats;
 
 	TTN_Material::smatptr cannonMat;
 	TTN_Material::smatptr skyboxMat;
 	TTN_Material::smatptr smokeMat;
 	TTN_Material::smatptr fireMat;
-
 	TTN_Texture2D::st2dptr healthBar;
 
 	//sound
@@ -137,6 +139,7 @@ protected:
 	entt::entity cannon;
 	std::vector<std::pair<entt::entity, bool>> cannonBalls;
 	std::vector<entt::entity> boats;
+	std::vector<entt::entity> enemyCannons;//enemy
 	entt::entity smokePS;
 	entt::entity terrain;
 	entt::entity water;
@@ -198,7 +201,7 @@ protected:
 	/////////////ENEMY AND WAVE CONTROLS//////////////////
 	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
 	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
-	int m_enemiesPerWave = 5; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
+	int m_enemiesPerWave = 1; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
 
 	int m_currentWave = 1; //the current wave
 	float m_timeTilNextWave; //the timer until the next wave starts, used after a wave has ended

@@ -11,10 +11,11 @@ EnemyComponent::EnemyComponent()
 	m_damageCooldown = 0.0f;
 	m_ypos = 7.5f;
 	m_alive = true;
+	m_attacking = false;
 }
 
 EnemyComponent::EnemyComponent(entt::entity boat, TTN_Scene* scene, int boatType, int path, float damageCooldown)
-	: m_entityNumber(boat), m_scene(scene), m_boatType(boatType), m_path(path), m_damageCooldown(damageCooldown), m_ypos(0.0f), m_alive(true)
+	: m_entityNumber(boat), m_scene(scene), m_boatType(boatType), m_path(path), m_damageCooldown(damageCooldown), m_ypos(0.0f), m_alive(true), m_attacking(false)
 {
 	//set the y position as approriate based on ship model
 	switch (m_boatType) {
@@ -40,7 +41,6 @@ void EnemyComponent::Update(float deltaTime)
 
 		//left side middle path
 		if (m_path == 0) {
-
 			if (tBoat.GetPos().x <= 65.f) {
 				//rotation for the green boats
 				if (m_boatType == 0) {
@@ -200,7 +200,7 @@ void EnemyComponent::Update(float deltaTime)
 
 		//right center path
 		if (m_path == 5) {
-			//part 1 
+			//part 1
 			if (tBoat.GetPos().x >= -65.f && !(tBoat.GetPos().x >= -5.F)) {
 				//green boat rotation
 				if (m_boatType == 0) {
@@ -273,6 +273,7 @@ void EnemyComponent::Update(float deltaTime)
 		//sink the ship
 		tBoat.SetPos(tBoat.GetPos() + glm::vec3(0.0f, -2.0f * deltaTime, 0.0f));
 	}
+
 }
 
 //function to seek a targetted position, returns a velocity towards that position
@@ -296,9 +297,10 @@ glm::vec3 EnemyComponent::Seek(glm::vec3 target, glm::vec3 currentVelocity, glm:
 glm::vec3 EnemyComponent::Arrive(glm::vec3 target, glm::vec3 currentVelocity, glm::vec3 currentPosition, float accetpableDistance)
 {
 	//if they are within an acceptable distance of the target position, return a zeroed vector
-	if (abs(glm::distance(target, currentPosition)) <= accetpableDistance)
+	if (abs(glm::distance(target, currentPosition)) <= accetpableDistance) {
+		m_attacking = true;
 		return glm::vec3(0.0f);
-
+	}
 	//otherwise seek the target position
 	return Seek(target, currentVelocity, currentPosition);
 }
