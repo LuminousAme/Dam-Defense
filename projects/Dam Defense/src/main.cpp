@@ -307,6 +307,11 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddShaderToBeLoaded("Terrain shader", "shaders/terrain_vert.glsl", "shaders/terrain_frag.glsl", 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Water shader", "shaders/water_vert.glsl", "shaders/water_frag.glsl", 1);
 	
+
+	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Enemy Cannon mesh", "models/Enemy Cannon/e_cannon", 17, 1); //mesh for the enemy cannons
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Enemy Cannon texture", "textures/FlamethrowerTexture.png", 1); //enemy cannon texture
+
+
 	TTN_AssetSystem::AddLUTTobeLoaded("Warm LUT", "Warm_LUT.cube",  1);
 	TTN_AssetSystem::AddLUTTobeLoaded("Cool LUT", "Cool_LUT.cube",  1);
 	TTN_AssetSystem::AddLUTTobeLoaded("Custom LUT", "Custom_LUT.cube",  1);

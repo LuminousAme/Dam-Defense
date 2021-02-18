@@ -23,11 +23,13 @@ public:
 	void SetPath(int path) { m_path = path; }
 	void SetCooldown(float cooldown) { m_damageCooldown = cooldown; }
 	void SetAlive(bool alive) { m_alive = alive; }
+	void SetAttacking(bool attacking) { m_attacking = attacking; }
 	//getters
 	int GetBoatType() { return m_boatType; }
 	int GetPath() { return m_path; }
 	float GetCooldown() { return m_damageCooldown; }
 	bool GetAlive() { return m_alive; }
+	bool GetAttacking() { return m_attacking; }
 	static float GetZTarget() { return m_ztarget; }
 	static float GetZTargetDistance() { return m_targetDistance; }
 
@@ -50,4 +52,5 @@ protected:
 	inline static float m_targetDistance = 5.0f; //how close it's allowed to get to that point
 
 	bool m_alive; //wheter or not a ship is alive
+	bool m_attacking; //whether or not a ship is attacking
 };
