@@ -24,12 +24,14 @@ public:
 	void SetCooldown(float cooldown) { m_damageCooldown = cooldown; }
 	void SetAlive(bool alive) { m_alive = alive; }
 	void SetAttacking(bool attacking) { m_attacking = attacking; }
+	void SetCannonEntity(entt::entity entity) { m_cannonEntityRef = entity; }
 	//getters
 	int GetBoatType() { return m_boatType; }
 	int GetPath() { return m_path; }
 	float GetCooldown() { return m_damageCooldown; }
 	bool GetAlive() { return m_alive; }
 	bool GetAttacking() { return m_attacking; }
+	entt::entity GetCannonEntity() { return m_cannonEntityRef; }
 	static float GetZTarget() { return m_ztarget; }
 	static float GetZTargetDistance() { return m_targetDistance; }
 
@@ -53,4 +55,5 @@ protected:
 
 	bool m_alive; //wheter or not a ship is alive
 	bool m_attacking; //whether or not a ship is attacking
+	entt::entity m_cannonEntityRef;
 };

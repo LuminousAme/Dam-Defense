@@ -116,6 +116,11 @@ namespace Titan {
 			delete body;
 		}
 
+		//remove any parents
+		if (m_Registry->has<TTN_Transform>(entity)) {
+			Get<TTN_Transform>(entity).SetParent(nullptr, entt::null);
+		}
+
 		//delete the entity from the registry
 		m_Registry->destroy(entity);
 
@@ -169,9 +174,9 @@ namespace Titan {
 		auto transView = m_Registry->view<TTN_Transform>();
 		for (auto entity : transView) {
 			//if it should have a parent
-			if (Get<TTN_Transform>(entity).GetParentEntity() != nullptr) {
+			if (Get<TTN_Transform>(entity).GetParentEntity() != entt::null) {
 				//then reatach that parent
-				Get<TTN_Transform>(entity).SetParent(&Get<TTN_Transform>(*Get<TTN_Transform>(entity).GetParentEntity()),
+				Get<TTN_Transform>(entity).SetParent(&Get<TTN_Transform>(Get<TTN_Transform>(entity).GetParentEntity()),
 					Get<TTN_Transform>(entity).GetParentEntity());
 			}
 		}
