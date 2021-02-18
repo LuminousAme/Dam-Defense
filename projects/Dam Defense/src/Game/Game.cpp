@@ -1048,6 +1048,7 @@ void Game::FlamethrowerUpdate(float deltaTime)
 				TTN_DeleteCountDown cannonCountdown = TTN_DeleteCountDown(2.48f);
 				AttachCopy(*it, countdown);
 				AttachCopy(Get<EnemyComponent>(*it).GetCannonEntity(), cannonCountdown);
+				Get<TTN_MorphAnimator>(Get<EnemyComponent>(*it).GetCannonEntity()).SetActiveAnim(0);
 				//mark it as dead
 				Get<EnemyComponent>(*it).SetAlive(false);
 
@@ -1209,6 +1210,7 @@ void Game::SpawnBoatLeft()
 		//attach that animator to the entity
 		AttachCopy(enemyCannons[enemyCannons.size() - 1], cannonAnimator);
 	}
+	
 	Get<EnemyComponent>(boats[boats.size() - 1]).SetCannonEntity(enemyCannons[enemyCannons.size() - 1]);
 	//Get<TTN_Transform>(enemyCannons[enemyCannons.size() - 1]).SetParent(&Get<TTN_Transform>(boats[boats.size() - 1]), &boats[boats.size() - 1]);
 	/*entt::entity tempBoat = boats[boats.size() - 1];
@@ -1392,7 +1394,8 @@ void Game::WaveUpdate(float deltaTime)
 			else
 				SpawnBoatLeft();
 			
-			Get<TTN_Transform>(enemyCannons[enemyCannons.size() - 1]).SetParent(&Get<TTN_Transform>(boats[boats.size() - 1]), &boats[boats.size() - 1]);
+			Get<TTN_Transform>(enemyCannons[enemyCannons.size() - 1]).SetParent(&Get<TTN_Transform>(boats[boats.size() - 1]), boats[boats.size() - 1]);
+>>>>>>>>> Temporary merge branch 2
 
 			m_rightSideSpawn = !m_rightSideSpawn;
 			m_timeUntilNextSpawn = m_timeBetweenEnemySpawns;
@@ -1453,6 +1456,7 @@ void Game::Collisions()
 							TTN_DeleteCountDown cannonCountdown = TTN_DeleteCountDown(2.48f);
 							AttachCopy(*itt, countdown);
 							AttachCopy(Get<EnemyComponent>(*itt).GetCannonEntity(), cannonCountdown);
+							Get<TTN_MorphAnimator>(Get<EnemyComponent>(*itt).GetCannonEntity()).SetActiveAnim(0);
 							//mark it as dead
 							Get<EnemyComponent>(*itt).SetAlive(false);
 
@@ -1521,7 +1525,8 @@ void Game::Damage(float deltaTime) {
 	std::vector<entt::entity>::iterator can = enemyCannons.begin(); //enemy cannon vector
 	while (can != enemyCannons.end()) {
 
-		if (Get<EnemyComponent>(*(Get<TTN_Transform>(*can).GetParentEntity())).GetAttacking()) {
+		if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetAttacking()) {
+>>>>>>>>> Temporary merge branch 2
 			Get<TTN_MorphAnimator>(*can).SetActiveAnim(1);
 		}
 		can++;
