@@ -30,8 +30,13 @@ void Game::InitScene()
 void Game::Update(float deltaTime)
 {
 	engine.GetListener();
-	engine.GetBus("Music").SetVolume(350.0f);
-	engine.GetBus("SFX").SetVolume(350.0f);
+	float normalizedMasterVolume = (float)masterVolume / 100.0f; 
+	float normalizedMusicVolume = (float)musicVolume / 100.0f;
+	float musicvol = TTN_Interpolation::ReMap(0.0, 1.0, 0.0, 50.0, normalizedMusicVolume * normalizedMasterVolume);
+	float normalizedSFXVolume = (float)sfxVolume / 100.0f;
+	float sfxvol = TTN_Interpolation::ReMap(0.0, 1.0, 0.0, 50.0, normalizedSFXVolume * normalizedMasterVolume);
+	engine.GetBus("Music").SetVolume(musicvol);
+	engine.GetBus("SFX").SetVolume(sfxvol);
 
 	//call the sound update
 	GameSounds(deltaTime);
@@ -1497,28 +1502,11 @@ void Game::Damage(float deltaTime) {
 	std::vector<entt::entity>::iterator it = boats.begin();
 	while (it != boats.end()) {
 		//check if the boat is close enough to the dam to damage it
-		if (Get<TTN_Transform>(*it).GetPos().z <= EnemyComponent::GetZTarget() + 2.0f * EnemyComponent::GetZTargetDistance()) {
-			//if they are check if they're through the cooldown
-			if (Get<EnemyComponent>(*it).GetCooldown() <= 0.f) {
-				//if they are do damage
-				Get<EnemyComponent>(*it).SetCooldown(3.0f);
-				Get<EnemyComponent>(*it).SetAttacking(true);
-				//Get<TTN_Transform>(*it).get
-				Dam_health = Dam_health - damage;
-				std::cout << Dam_health << std::endl;
-			}
-			//otherwise lower the remaining damage cooldown
-			else {
-				Get<EnemyComponent>(*it).SetCooldown(Get<EnemyComponent>(*it).GetCooldown() - deltaTime);
-			}
-
-			//and move to the next boat
-			it++;
-		}
-		//otherwise just move to the next boat
-		else {
-			it++;
-		}
+		if (Get<TTN_Transform>(*it).GetPos().z <= EnemyComponent::GetZTarget() + 2.0f * EnemyComponent::GetZTargetDistance())
+			//if it is, damage it	
+			Dam_health = Dam_health - damage * deltaTime;
+		//and move onto the next boat
+		it++;
 	}
 
 	//attack anim
@@ -1677,6 +1665,15 @@ void Game::BirdUpate(float deltaTime)
 
 void Game::ImGui()
 {
+	//Volume control
+	ImGui::Begin("Temp Volume Control");
+
+	ImGui::SliderInt("Master", &masterVolume, 0, 100);
+	ImGui::SliderInt("Music", &musicVolume, 0, 100);
+	ImGui::SliderInt("Sound Effects", &sfxVolume, 0, 100);
+
+	ImGui::End();
+
 	//ImGui controller for the camera
 	ImGui::Begin("Editor");
 

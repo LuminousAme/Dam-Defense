@@ -176,6 +176,5 @@ private:
 	bool shouldQuit;
 	bool shouldPlay;
 	bool shouldMenu;
-
 };
 

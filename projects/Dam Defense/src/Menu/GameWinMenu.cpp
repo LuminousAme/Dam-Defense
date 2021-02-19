@@ -751,7 +751,7 @@ void GameWinMenuUI::InitScene()
 		gameOver = CreateEntity();
 
 		//create a transform for the logo
-		TTN_Transform logoTrans = TTN_Transform(glm::vec3(0.0f, 360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-1100.0f, 385.5f, 1.0f));
+		TTN_Transform logoTrans = TTN_Transform(glm::vec3(0.0f, 360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f * 2.0f, 150.0f * 2.0f, 1.0f));
 		AttachCopy(gameOver, logoTrans);
 
 		//create a sprite renderer for the logo
@@ -768,8 +768,8 @@ void GameWinMenuUI::InitScene()
 
 		//create a transform for the text
 		TTN_Transform textTrans;
-		if (i == 0) textTrans = TTN_Transform(glm::vec3(500.0f, -180.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f / 2.5f, 150.0f / 2.75f, 1.0f));
-		else if (i == 1) textTrans = TTN_Transform(glm::vec3(10.0f, -180.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		if (i == 0) textTrans = TTN_Transform(glm::vec3(500.0f, -180.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f / 2.0f, 150.0f / 2.0f, 1.0f));
+		else if (i == 1) textTrans = TTN_Transform(glm::vec3(10.0f, -180.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f / 2.0f, 150.0f / 2.0f, 1.0f));
 		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-500.0f, -180.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
 		AttachCopy(temp, textTrans);
 

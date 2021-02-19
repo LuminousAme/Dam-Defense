@@ -13,6 +13,7 @@ void GameUI::InitScene()
 	m_DamHealth = 100.0f;
 	m_displayedWaveProgress = 0.0f;
 	m_waveProgress = 0.0f;
+	m_waveCompleteTime = 10.0f;
 
 	//main camera
 	{
@@ -128,53 +129,140 @@ void GameUI::InitScene()
 		TTN_Renderer2D logoRenderer = TTN_Renderer2D(textureScore);
 		AttachCopy(scoreText, logoRenderer);
 	}
+
+	//wave complete 
+	for (int i = 0; i < 3; i++) {
+		//create an entity in the scene 
+		entt::entity entity = CreateEntity();
+		if (i == 0) waveText = entity;
+		else if (i == 1) waveNums.push_back(entity);
+		else if (i == 2) completeText = entity;
+
+		//create a transform 
+		TTN_Transform Trans;
+		if (i == 0)
+			Trans = TTN_Transform(glm::vec3(1500.0f, 0.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-200.0f * waveCompleteScale, 150.0f * waveCompleteScale, 1.0f));
+		else if (i == 1)
+			Trans = TTN_Transform(glm::vec3(Get<TTN_Transform>(waveText).GetGlobalPos().x - 0.5f * std::abs(Get<TTN_Transform>(waveText).GetScale().x) - 0.5f * waveCompleteScale * 150.0f, 0.0f, 1.0f),
+				glm::vec3(0.0f), glm::vec3(-100.0f * waveCompleteScale, 100.0f * waveCompleteScale, 1.0f));
+		else if (i == 2) 
+			Trans = TTN_Transform(glm::vec3(Get<TTN_Transform>(waveNums[waveNums.size()-1]).GetGlobalPos().x - 
+				0.5f * std::abs(Get<TTN_Transform>(waveNums[waveNums.size() - 1]).GetScale().x) - 0.5f * waveCompleteScale * 350.0f, 0.0f, 1.0f),
+				glm::vec3(0.0f), glm::vec3(-350.0f * waveCompleteScale, 150.0f * waveCompleteScale, 1.0f));
+		AttachCopy(entity, Trans);
+
+		//create a sprite renderer for the logo
+		TTN_Renderer2D Renderer;
+		if (i == 0)
+			Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Wave-Text"));
+		else if (i == 1)
+			Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
+		else if (i == 2)
+			Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Complete-Text"));
+		AttachCopy(entity, Renderer);
+	}
 }
 
 void GameUI::Update(float deltaTime)
 {
-	//update the score number
-	{
-		while (GetNumOfDigits(m_score) < scoreNums.size()) {
-			DeleteEntity(scoreNums[scoreNums.size() - 1]);
-			scoreNums.pop_back();
+	if (!m_paused) {
+		//update the score number
+		{
+			while (GetNumOfDigits(m_score) < scoreNums.size()) {
+				DeleteEntity(scoreNums[scoreNums.size() - 1]);
+				scoreNums.pop_back();
+			}
+
+			if (GetNumOfDigits(m_score) > scoreNums.size())
+				MakeScoreNumEntity();
+
+			for (int i = 0; i < scoreNums.size(); i++) {
+				Get<TTN_Renderer2D>(scoreNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_score, scoreNums.size() - i - 1)) + "-Text"));
+			}
 		}
 
-		if (GetNumOfDigits(m_score) > scoreNums.size())
-			MakeScoreNumEntity();
+		//update the health number
+		{
+			unsigned health = std::ceil(m_DamHealth);
+			while (GetNumOfDigits(health) < healthNums.size()) {
+				DeleteEntity(healthNums[healthNums.size() - 1]);
+				healthNums.pop_back();
+			}
 
-		for (int i = 0; i < scoreNums.size(); i++) {
-			Get<TTN_Renderer2D>(scoreNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_score, scoreNums.size() - i - 1)) + "-Text"));
+			if (GetNumOfDigits(health) > healthNums.size())
+				MakeHealthNumEntity();
+
+			for (int i = 0; i < healthNums.size(); i++) {
+				Get<TTN_Renderer2D>(healthNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(health, healthNums.size() - i - 1)) + "-Text"));
+			}
 		}
-	}
+
+		//update the health bar
+		{
+			float normalizedDamHealth = TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, m_DamHealth);
+			Get<TTN_Renderer2D>(healthDam).SetHoriMask(normalizedDamHealth);
+
+			//update the progress bar
+			if (m_displayedWaveProgress >= m_waveProgress + 0.01f || m_displayedWaveProgress <= m_waveProgress - 0.01f) {
+				float sign = (m_waveProgress - m_displayedWaveProgress) / std::abs(m_waveProgress - m_displayedWaveProgress);
+				m_displayedWaveProgress += sign * 0.5f * deltaTime;
+				m_displayedWaveProgress = std::clamp(m_displayedWaveProgress, 0.0f, 1.0f);
+			}
+
+			Get<TTN_Renderer2D>(progressRepresentation).SetHoriMask(m_displayedWaveProgress);
+		}
 	
-	//update the health number
-	{
-		unsigned health = std::ceil(m_DamHealth);
-		while (GetNumOfDigits(health) < healthNums.size()) {
-			DeleteEntity(healthNums[healthNums.size() - 1]);
-			healthNums.pop_back();
-		}
 
-		if (GetNumOfDigits(health) > healthNums.size())
-			MakeHealthNumEntity();
+		//update the wave complete
+		{
+			while (GetNumOfDigits(m_currentWave) < waveNums.size()) {
+				DeleteEntity(waveNums[waveNums.size() - 1]);
+				waveNums.pop_back();
+			}
 
-		for (int i = 0; i < healthNums.size(); i++) {
-			Get<TTN_Renderer2D>(healthNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(health, healthNums.size() - i - 1)) + "-Text"));
+			if (GetNumOfDigits(m_currentWave) > waveNums.size())
+				MakeWaveNumEntity();
+
+			for (int i = 0; i < waveNums.size(); i++) {
+				Get<TTN_Renderer2D>(waveNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_currentWave, waveNums.size() - i - 1)) + "-Text"));
+			}
+
+			//update time
+			m_waveCompleteTime += deltaTime;
+			if (m_waveProgress == 1.0f && waveDone && m_waveCompleteTime > 10.0f) {
+				m_waveCompleteTime = 0.0f;
+			}
+
+			//update position
+			float t = waveCompleteLerpParamter(m_waveCompleteTime / m_waveCompleteTotalTime);
+			glm::vec3 centerPos = TTN_Interpolation::Lerp(glm::vec3(1500.0f, 0.0f, 1.0f), glm::vec3(-1500.0f, 0.0f, 1.0f), t);
+			int offset = std::ceil((float)waveNums.size() / 2.0f);
+			//position of the numbers
+			for (int i = 0; i < waveNums.size(); i++) {
+				TTN_Transform& trans = Get<TTN_Transform>(waveNums[i]);
+				if (i < offset) {
+					//places the numbers to the left of the center
+					trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+				}
+				else {
+					//places the numbers on and to the right of the center
+					trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+				}
+			}
+			TTN_Transform& firstNumTrans = Get<TTN_Transform>(waveNums[0]);
+			//places the wave text
+			Get<TTN_Transform>(waveText).SetPos(firstNumTrans.GetGlobalPos() + glm::vec3(0.5f * std::abs(firstNumTrans.GetScale().x) + 0.4f * 
+			std::abs(Get<TTN_Transform>(waveText).GetScale().x), 0.0f, 0.0f));
+
+			TTN_Transform& lastNumTrans = Get<TTN_Transform>(waveNums[waveNums.size() - 1]);
+			//places the complete text
+			Get<TTN_Transform>(completeText).SetPos(lastNumTrans.GetGlobalPos() - glm::vec3(0.6f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
+				std::abs(Get<TTN_Transform>(completeText).GetScale().x), 0.0f, 0.0f));
 		}
 	}
+		
 
-	//update the health bar
-	float normalizedDamHealth = TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, m_DamHealth);
-	Get<TTN_Renderer2D>(healthDam).SetHoriMask(normalizedDamHealth);
-
-	//update the progress bar
-	if (m_displayedWaveProgress >= m_waveProgress + 0.01f || m_displayedWaveProgress <= m_waveProgress - 0.01f) {
-		float sign = (m_waveProgress - m_displayedWaveProgress) / std::abs(m_waveProgress - m_displayedWaveProgress);
-		m_displayedWaveProgress += sign * 0.5f * deltaTime;
-		m_displayedWaveProgress = std::clamp(m_displayedWaveProgress, 0.0f, 1.0f);
-	}
-
-	Get<TTN_Renderer2D>(progressRepresentation).SetHoriMask(m_displayedWaveProgress);
+	TTN_Scene::Update(deltaTime);
 }
 
 void GameUI::MakeScoreNumEntity()
@@ -213,4 +301,23 @@ void GameUI::MakeHealthNumEntity()
 			//create a sprite renderer for the logo
 	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
 	AttachCopy(healthNums[healthNums.size() - 1], numRenderer);
+}
+
+void GameUI::MakeWaveNumEntity()
+{
+	waveNums.push_back(CreateEntity());
+
+	//reference to the wave's transform
+	TTN_Transform& Trans = Get<TTN_Transform>(waveText);
+
+	//setup a transform for the new entity
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(Trans.GetGlobalPos().x + 0.5f * std::abs(Trans.GetScale().x) -
+		(float)waveNums.size() * 0.5f * waveCompleteScale * 150.0f, Trans.GetGlobalPos().y, Trans.GetGlobalPos().z),
+		glm::vec3(0.0f), glm::vec3(-waveCompleteScale * 100.0f, waveCompleteScale * 100.0f, 1.0f));
+	AttachCopy(waveNums[waveNums.size() - 1], numTrans);
+
+	//setup a 2D renderer for the new entity
+			//create a sprite renderer for the logo
+	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
+	AttachCopy(waveNums[waveNums.size() - 1], numRenderer);
 }
