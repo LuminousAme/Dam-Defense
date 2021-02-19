@@ -30,8 +30,13 @@ void Game::InitScene()
 void Game::Update(float deltaTime)
 {
 	engine.GetListener();
-	engine.GetBus("Music").SetVolume(350.0f);
-	engine.GetBus("SFX").SetVolume(350.0f);
+	float normalizedMasterVolume = (float)masterVolume / 100.0f; 
+	float normalizedMusicVolume = (float)musicVolume / 100.0f;
+	float musicvol = TTN_Interpolation::ReMap(0.0, 1.0, 0.0, 50.0, normalizedMusicVolume * normalizedMasterVolume);
+	float normalizedSFXVolume = (float)sfxVolume / 100.0f;
+	float sfxvol = TTN_Interpolation::ReMap(0.0, 1.0, 0.0, 50.0, normalizedSFXVolume * normalizedMasterVolume);
+	engine.GetBus("Music").SetVolume(musicvol);
+	engine.GetBus("SFX").SetVolume(sfxvol);
 
 	//call the sound update
 	GameSounds(deltaTime);
@@ -1658,6 +1663,15 @@ void Game::BirdUpate(float deltaTime)
 
 void Game::ImGui()
 {
+	//Volume control
+	ImGui::Begin("Temp Volume Control");
+
+	ImGui::SliderInt("Master", &masterVolume, 0, 100);
+	ImGui::SliderInt("Music", &musicVolume, 0, 100);
+	ImGui::SliderInt("Sound Effects", &sfxVolume, 0, 100);
+
+	ImGui::End();
+
 	//ImGui controller for the camera
 	ImGui::Begin("Editor");
 

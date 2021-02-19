@@ -236,6 +236,11 @@ protected:
 	bool playJingle = false;
 	float timeSinceJingleStartedPlaying = 0.0f;
 
+	//volume controls
+	int masterVolume = 100;
+	int musicVolume = 20;
+	int sfxVolume = 5;
+
 #pragma endregion
 
 	///////PARTICLE TEMPLATES//////////
