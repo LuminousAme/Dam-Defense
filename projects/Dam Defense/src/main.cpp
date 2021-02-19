@@ -263,6 +263,9 @@ int main() {
 			gameSceneUI->SetGamePaused(gameScene->GetGameIsPaused());
 			gameSceneUI->SetWave(gameScene->GetWave());
 			gameSceneUI->SetWaveOver(gameScene->GetWaveOver());
+			gameSceneUI->SetFlameThrowerMaxCoolDown(gameScene->GetFlameThrowerMaxCoolDownTime());
+			gameSceneUI->SetFlameThrowerCoolDownTime(gameScene->GetFlameThrowerCoolDownTime());
+			gameSceneUI->SetFlameThrowerRealCoolDown(gameScene->GetRealFlameThrowerCoolDownTime());
 		}
 
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)
@@ -354,6 +357,11 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Paused-Text", "textures/text/Paused.png", 2); //rendered text of the word paused
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Resume-Text", "textures/text/Resume.png", 2); //rendered text of the word resume
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Score-Text", "textures/text/Score.png", 2); //rendered text of the word Score
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Flamethrower Icon", "textures/Fire_Icon.png", 2); //icon of the fire
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Overlay", "textures/Special_Ability_Border.png", 2); //overlay for special abilities
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Background", "textures/Special_Ability_BG.png", 2); //background for the special abilities
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Bar", "textures/Special_Ability_Bar.png", 2); //bar for the special abilities cooldown
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Flamethrower Key", "textures/text/flamethrower-key.png", 2); //the key the player needs to press to use the flamethrower
 	
 	//set 3, win/lose screen
 	//TTN_AssetSystem::AddTexture2DToBeLoaded("You Win-Text", "textures/text/You win.png", 3); //rendered text of the pharse "You Win!" 

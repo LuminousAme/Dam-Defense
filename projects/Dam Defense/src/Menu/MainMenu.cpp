@@ -28,7 +28,7 @@ void MainMenu::Update(float deltaTime)
 	time += deltaTime;
 
 	//call imgui's update for this scene
-	ImGui();
+	//ImGui();
 
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
@@ -878,6 +878,7 @@ void MainMenuUI::Update(float deltaTime)
 		Get<TTN_Renderer2D>(quitButton).SetSprite(textureButton1);
 	}
 
+	/*
 	ImGui::Begin("Ui Editor");
 
 	if (ImGui::CollapsingHeader("Sprite Masking Testing")) {
@@ -905,7 +906,7 @@ void MainMenuUI::Update(float deltaTime)
 		}
 	}
 
-	ImGui::End();
+	ImGui::End();*/
 }
 
 void MainMenuUI::MouseButtonDownChecks()

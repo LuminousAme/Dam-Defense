@@ -108,10 +108,6 @@ void Game::Update(float deltaTime)
 		m_gameWin = true;
 	}
 
-	//get ref to bus
-	//TTN_AudioBus& musicBus = engine.GetBus("");
-	//musicBus.SetVolume(350.f);
-
 	//update the sound
 	engine.Update();
 
@@ -257,7 +253,7 @@ void Game::KeyDownChecks()
 	//if the game is not paused
 	if (!m_paused) {
 		//and they press the 2 key, try to activate the flamethrower
-		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Two)) {
+		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::One)) {
 			Flamethrower();
 		}
 	}
@@ -268,6 +264,7 @@ void Game::KeyDownChecks()
 		TTN_Scene::SetPaused(m_paused);
 	}
 
+	/*
 	//just some temp controls to let us access the mouse for ImGUI, remeber to remove these in the final game
 	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::P)) {
 		TTN_Application::TTN_Input::SetCursorLocked(true);
@@ -275,12 +272,13 @@ void Game::KeyDownChecks()
 
 	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::O)) {
 		TTN_Application::TTN_Input::SetCursorLocked(false);
-	}
+	}*/
 }
 
 //function to cehck for when a key is being pressed
 void Game::KeyChecks()
 {
+	/*
 	auto& a = Get<TTN_Transform>(camera);
 	/// CAMERA MOVEMENT FOR A2 ///
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
@@ -303,7 +301,7 @@ void Game::KeyChecks()
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Space)) {
 		a.SetPos(glm::vec3(a.GetPos().x - 2.0f, a.GetPos().y + 2.0f, a.GetPos().z));
-	}
+	}*/
 }
 
 //function to check for when a key has been released
@@ -1217,10 +1215,6 @@ void Game::SpawnBoatLeft()
 	}
 	
 	Get<EnemyComponent>(boats[boats.size() - 1]).SetCannonEntity(enemyCannons[enemyCannons.size() - 1]);
-	//Get<TTN_Transform>(enemyCannons[enemyCannons.size() - 1]).SetParent(&Get<TTN_Transform>(boats[boats.size() - 1]), &boats[boats.size() - 1]);
-	/*entt::entity tempBoat = boats[boats.size() - 1];
-	entt::entity tempCannon = enemyCannons[enemyCannons.size() - 1];
-	Get<TTN_Transform>(tempCannon).SetParent(&Get<TTN_Transform>(tempBoat), &tempBoat);*/
 }
 
 //spawn a boat on the right side of the map
@@ -1358,10 +1352,6 @@ void Game::SpawnBoatRight()
 	}
 
 	Get<EnemyComponent>(boats[boats.size() - 1]).SetCannonEntity(enemyCannons[enemyCannons.size() - 1]);
-	//Get<TTN_Transform>(enemyCannons[enemyCannons.size() - 1]).SetParent(&Get<TTN_Transform>(boats[boats.size() - 1]), &boats[boats.size() - 1]);
-	//entt::entity tempBoat = boats[boats.size() - 1];
-	//entt::entity tempCannon = enemyCannons[enemyCannons.size() - 1];
-	//Get<TTN_Transform>(tempCannon).SetParent(&Get<TTN_Transform>(tempBoat), &tempBoat);
 }
 
 //updates the waves
@@ -1672,6 +1662,7 @@ void Game::ImGui()
 
 	ImGui::End();
 
+	/*
 	//ImGui controller for the camera
 	ImGui::Begin("Editor");
 
@@ -1974,4 +1965,5 @@ void Game::ImGui()
 	}
 
 	ImGui::End();
+	*/
 }

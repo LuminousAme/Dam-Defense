@@ -30,6 +30,9 @@ public:
 	void SetGamePaused(bool paused) { m_paused = paused; }
 	void SetWave(unsigned wave) { m_currentWave = wave; }
 	void SetWaveOver(bool waveOver) { waveDone = waveOver; }
+	void SetFlameThrowerCoolDownTime(float cooldownRemaining) { flameThrowerCoolDownTime = cooldownRemaining; }
+	void SetFlameThrowerMaxCoolDown(float cooldown) { flameThrowerMaxCoolDownTime = cooldown; }
+	void SetFlameThrowerRealCoolDown(float realCoolDownTime) { flameThrowerRealCoolDownTime = realCoolDownTime; }
 	//getters
 	unsigned GetScore() { return m_score; }
 	float GetDamHealth() { return m_DamHealth; }
@@ -63,6 +66,14 @@ private:
 	entt::entity completeText;
 	std::vector<entt::entity> waveNums;
 	float waveCompleteScale = 2.0f;
+	//flamethrower
+	entt::entity flameThrowerBG;
+	entt::entity flameThrowerOverlay;
+	entt::entity flameThrowerBar;
+	entt::entity flameThrowerIcon;
+	entt::entity flameThrowerKey;
+	std::vector<entt::entity> flamethrowerNums;
+	float specialAbilityScale = 0.2f;
 
 	//assets
 	TTN_Texture2D::st2dptr textureScore;
@@ -84,9 +95,16 @@ private:
 	float m_waveCompleteTotalTime = 4.0f;
 	bool waveDone = false;
 
+	//special ability variables
+	float flameThrowerCoolDownTime = 0.0f;
+	float flameThrowerRealCoolDownTime = 0.0f;
+	float flameThrowerMaxCoolDownTime;
+	float flameThrowerCoolDownPercent = 1.0f;
+
 	void MakeScoreNumEntity();
 	void MakeHealthNumEntity();
 	void MakeWaveNumEntity();
+	void MakeFlamethrowerNumEntity();
 };
 
 //get the number of digits in a number

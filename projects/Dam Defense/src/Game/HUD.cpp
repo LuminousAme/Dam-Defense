@@ -161,6 +161,88 @@ void GameUI::InitScene()
 			Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Complete-Text"));
 		AttachCopy(entity, Renderer);
 	}
+
+	//flamethrower background
+	{
+		//create an entity
+		flameThrowerBG = CreateEntity();
+
+		//create a transform 
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 1.2f), glm::vec3(0.0f), glm::vec3(-1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f, 1.1f));
+		AttachCopy(flameThrowerBG, Trans);
+
+		//create a sprite renderer 
+		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Background"));
+		AttachCopy(flameThrowerBG, Renderer);
+	}
+
+	//flamethrower bar
+	{
+		//create an entity
+		flameThrowerBar = CreateEntity();
+
+		//get a copy of the background's transform
+		TTN_Transform bgTrans = Get<TTN_Transform>(flameThrowerBG);
+		
+		//create a transform 
+		TTN_Transform Trans = TTN_Transform(glm::vec3(bgTrans.GetPos().x - 0.175f * std::abs(bgTrans.GetScale().x) , bgTrans.GetPos().y - 0.25f * bgTrans.GetScale().y, 1.1f),
+			glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.65f, bgTrans.GetScale().y * 0.1f, 1.0f));
+		AttachCopy(flameThrowerBar, Trans);
+
+		//create a sprite renderer 
+		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Bar"), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+		AttachCopy(flameThrowerBar, Renderer);
+	}
+
+	//flamethrower overlay
+	{
+		//create an entity
+		flameThrowerOverlay = CreateEntity();
+
+		//create a transform 
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.9f), glm::vec3(0.0f), glm::vec3(-1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f, 1.1f));
+		AttachCopy(flameThrowerOverlay, Trans);
+
+		//create a sprite renderer 
+		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Overlay"));
+		AttachCopy(flameThrowerOverlay, Renderer);
+	}
+
+	//flamethrower icon
+	{
+		//create an entity
+		flameThrowerIcon = CreateEntity();
+
+		//create a transform 
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.8f), glm::vec3(0.0f), glm::vec3(-1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f, 1.1f));
+		AttachCopy(flameThrowerIcon, Trans);
+
+		//create a sprite renderer 
+		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Flamethrower Icon"));
+		AttachCopy(flameThrowerIcon, Renderer);
+	}
+
+	//flamethrower key
+	{
+		//create an entity
+		flameThrowerKey = CreateEntity();
+
+		//get a copy of the background's transform
+		TTN_Transform bgTrans = Get<TTN_Transform>(flameThrowerBG);
+
+		//create a transform 
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.25f, bgTrans.GetScale().y * 0.25f, 1.0f));
+		Trans.SetPos(glm::vec3(bgTrans.GetPos().x + 0.4f * std::abs(bgTrans.GetScale().x) + 0.5f * std::abs(Trans.GetScale().x), 
+			bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 0.5f));
+		AttachCopy(flameThrowerKey, Trans);
+
+		//create a sprite renderer 
+		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Flamethrower Key"));
+		AttachCopy(flameThrowerKey, Renderer);
+	}
 }
 
 void GameUI::Update(float deltaTime)
@@ -259,9 +341,78 @@ void GameUI::Update(float deltaTime)
 			Get<TTN_Transform>(completeText).SetPos(lastNumTrans.GetGlobalPos() - glm::vec3(0.6f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
 				std::abs(Get<TTN_Transform>(completeText).GetScale().x), 0.0f, 0.0f));
 		}
+
+		//update the flame thrower 
+		{
+			//normalized cooldown
+			flameThrowerCoolDownPercent = TTN_Interpolation::ReMap(flameThrowerMaxCoolDownTime, 0.0f, 0.0f, 1.0f, flameThrowerCoolDownTime);
+
+			//if there is no more cooldown but the numbers are still displayed, delete all the numbers
+			while (flameThrowerRealCoolDownTime <= 0.0f && flamethrowerNums.size() > 0) {
+				DeleteEntity(flamethrowerNums[flamethrowerNums.size() - 1]);
+				flamethrowerNums.pop_back();
+			}
+			if (flameThrowerRealCoolDownTime > 0.0f) {
+				//get the time as an int
+				unsigned time = std::ceil(flameThrowerRealCoolDownTime);
+				//make sure there are the correct number of digits
+				while (GetNumOfDigits(flameThrowerRealCoolDownTime) < flamethrowerNums.size()) {
+					DeleteEntity(flamethrowerNums[flamethrowerNums.size() - 1]);
+					flamethrowerNums.pop_back();
+				}
+
+				if (GetNumOfDigits(time) > flamethrowerNums.size())
+					MakeFlamethrowerNumEntity();
+
+				//update each digit approriately
+				TTN_Transform bgTrans = Get<TTN_Transform>(flameThrowerBG);
+				glm::vec3 centerPos = glm::vec3(bgTrans.GetPos().x - 0.15f * std::abs(bgTrans.GetScale().x),
+					bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 0.5f);
+				int offset = std::ceil((float)flamethrowerNums.size() / 2.0f);
+				for (int i = 0; i < flamethrowerNums.size(); i++) {
+					//update position
+					TTN_Transform& trans = Get<TTN_Transform>(flamethrowerNums[i]);
+					if (i < offset) {
+						//places the numbers to the left of the center
+						trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+					}
+					else {
+						//places the numbers on and to the right of the center
+						trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+					}
+
+					//update renderer
+					Get<TTN_Renderer2D>(flamethrowerNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(time, flamethrowerNums.size() - i - 1)) + "-Text"));
+
+					//make the renderers of the icon, overlay, and backdrop darker
+					Get<TTN_Renderer2D>(flameThrowerIcon).SetColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+					Get<TTN_Renderer2D>(flameThrowerBG).SetColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+					Get<TTN_Renderer2D>(flameThrowerOverlay).SetColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+					//set the colour of the bar
+					glm::vec3 color = glm::vec3(1.0f);
+					if (flameThrowerCoolDownPercent <= 0.75) {
+						color = TTN_Interpolation::Lerp(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f), TTN_Interpolation::ReMap(0.0f, 0.75f, 0.0f, 1.0f, flameThrowerCoolDownPercent));
+					}
+					else {
+						color = TTN_Interpolation::Lerp(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), TTN_Interpolation::ReMap(0.75f, 1.0f, 0.0f, 1.0f, flameThrowerCoolDownPercent));
+					}
+					Get<TTN_Renderer2D>(flameThrowerBar).SetColor(glm::vec4(color, 1.0f));
+				}
+			}
+			else {
+				//make the renderers of the icon, overlay, bar and backdrop to their regular color
+				Get<TTN_Renderer2D>(flameThrowerIcon).SetColor(glm::vec4(1.0f));
+				Get<TTN_Renderer2D>(flameThrowerBG).SetColor(glm::vec4(1.0f));
+				Get<TTN_Renderer2D>(flameThrowerOverlay).SetColor(glm::vec4(1.0f));
+				Get<TTN_Renderer2D>(flameThrowerBar).SetColor(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+			}
+
+			//set the ammount the bar should render
+			Get<TTN_Renderer2D>(flameThrowerBar).SetHoriMask(flameThrowerCoolDownPercent);
+		}
 	}
 		
-
+	//update the base scene
 	TTN_Scene::Update(deltaTime);
 }
 
@@ -320,4 +471,21 @@ void GameUI::MakeWaveNumEntity()
 			//create a sprite renderer for the logo
 	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
 	AttachCopy(waveNums[waveNums.size() - 1], numRenderer);
+}
+
+void GameUI::MakeFlamethrowerNumEntity()
+{
+	flamethrowerNums.push_back(CreateEntity());
+
+	//reference to the icon's transform
+	TTN_Transform& Trans = Get<TTN_Transform>(flameThrowerIcon);
+
+	//setup a transform for the new entity
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(-150.0f * scoreTextScale, 150.0f * scoreTextScale, 1.0f));
+	AttachCopy(flamethrowerNums[flamethrowerNums.size() - 1], numTrans);
+
+	//setup a 2D renderer for the new entity
+			//create a sprite renderer for the logo
+	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
+	AttachCopy(flamethrowerNums[flamethrowerNums.size() - 1], numRenderer);
 }
