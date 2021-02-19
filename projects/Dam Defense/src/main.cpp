@@ -309,11 +309,6 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddDefaultShaderToBeLoaded("Animated textured shader", TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR, TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY, 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Terrain shader", "shaders/terrain_vert.glsl", "shaders/terrain_frag.glsl", 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Water shader", "shaders/water_vert.glsl", "shaders/water_frag.glsl", 1);
-	
-
-	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Enemy Cannon mesh", "models/Enemy Cannon/e_cannon", 17, 1); //mesh for the enemy cannons
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Enemy Cannon texture", "textures/FlamethrowerTexture.png", 1); //enemy cannon texture
-
 
 	TTN_AssetSystem::AddLUTTobeLoaded("Warm LUT", "Warm_LUT.cube",  1);
 	TTN_AssetSystem::AddLUTTobeLoaded("Cool LUT", "Cool_LUT.cube",  1);
@@ -353,11 +348,13 @@ void PrepareAssetLoading() {
 		TTN_AssetSystem::AddTexture2DToBeLoaded("Boat texture " + std::to_string(i), "textures/Boat " + std::to_string(i) + " Texture.png", 2); //enemy boat textures 
 	}
 	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Bird mesh", "models/bird/bird", 2, 2); //bird mesh
+	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Enemy Cannon mesh", "models/Enemy Cannon/e_cannon", 17, 2); //mesh for the enemy cannons
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Enemy Cannon texture", "textures/Enemy_Cannon_Texture.png", 2); //enemy cannon texture
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Bird texture", "textures/BirdTexture.png", 2); //bird texture
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Paused-Text", "textures/text/Paused.png", 2); //rendered text of the word paused
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Resume-Text", "textures/text/Resume.png", 2); //rendered text of the word resume
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Score-Text", "textures/text/Score.png", 2); //rendered text of the word Score
-
+	
 	//set 3, win/lose screen
 	//TTN_AssetSystem::AddTexture2DToBeLoaded("You Win-Text", "textures/text/You win.png", 3); //rendered text of the pharse "You Win!" 
 	//TTN_AssetSystem::AddTexture2DToBeLoaded("Game Over-Text", "textures/text/Game over.png", 3); //rendered text of the phrase "Game Over..." 
