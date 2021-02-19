@@ -56,11 +56,13 @@ public:
 
 		float percentBoatsRemaining = (float)m_boatsRemainingThisWave / (float)(m_enemiesPerWave * m_currentWave);
 		return TTN_Interpolation::ReMap(1.0f, 0.0f, 0.0f, 1.0f, percentBoatsRemaining);
-		
 	}
 
 	unsigned GetScore() { return m_score; }
 	void SetScore(unsigned score) { m_score = score; }
+
+	unsigned GetWave() { return m_currentWave; }
+	bool GetWaveOver() { return playJingle; }
 	
 	void SetArcade(bool arcade) { m_arcade = arcade; }
 	bool GetArcade() { return m_arcade; }
@@ -172,7 +174,7 @@ protected:
 
 	//////// GAMEPLAY DATA ////////////
 	int lastWave = 3; //the wave the player needs to reach and beat to win
-	float damage = 1.0f; //damage of boats (dam health is 100.f)
+	float damage = 2.0f; //damage of boats (dam health is 100.f)
 
 	unsigned m_score = 0;
 

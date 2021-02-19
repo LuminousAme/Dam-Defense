@@ -260,6 +260,9 @@ int main() {
 			gameSceneUI->SetScore(gameScene->GetScore());
 			gameSceneUI->SetDamHP(gameScene->GetDamHealth());
 			gameSceneUI->SetWaveProgress(gameScene->GetWaveProgress());
+			gameSceneUI->SetGamePaused(gameScene->GetGameIsPaused());
+			gameSceneUI->SetWave(gameScene->GetWave());
+			gameSceneUI->SetWaveOver(gameScene->GetWaveOver());
 		}
 
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)
@@ -341,6 +344,10 @@ void PrepareAssetLoading() {
 	//set 2, the game (excluding things already loaded into set 1)
 	for(int i = 0; i < 10; i++)
 		TTN_AssetSystem::AddTexture2DToBeLoaded(std::to_string(i) + "-Text", "textures/text/" + std::to_string(i) + ".png", 2); //numbers for health and score
+
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Wave-Text", "textures/text/Wave.png");
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Complete-Text", "textures/text/Complete.png");
+
 	for (int i = 1; i < 4; i++) {
 		TTN_AssetSystem::AddMeshToBeLoaded("Boat " + std::to_string(i), "models/Boat " + std::to_string(i) + ".obj", 2); //enemy boat meshes
 		TTN_AssetSystem::AddTexture2DToBeLoaded("Boat texture " + std::to_string(i), "textures/Boat " + std::to_string(i) + " Texture.png", 2); //enemy boat textures 

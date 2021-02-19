@@ -27,10 +27,14 @@ public:
 	void SetScore(unsigned score) { m_score = score; }
 	void SetDamHP(float health) { m_DamHealth = health; }
 	void SetWaveProgress(float waveProgress) { m_waveProgress = waveProgress; }
+	void SetGamePaused(bool paused) { m_paused = paused; }
+	void SetWave(unsigned wave) { m_currentWave = wave; }
+	void SetWaveOver(bool waveOver) { waveDone = waveOver; }
 	//getters
 	unsigned GetScore() { return m_score; }
 	float GetDamHealth() { return m_DamHealth; }
 	float GetWaveProgress() { return m_waveProgress; }
+	bool GetGamePaused() { return m_paused; }
 
 private:
 	//entities
@@ -54,6 +58,11 @@ private:
 	entt::entity progressBarBg;
 	entt::entity progressRepresentation;
 	glm::vec2 progressScale = glm::vec2(0.6f, 0.25f);
+	//wave complete
+	entt::entity waveText;
+	entt::entity completeText;
+	std::vector<entt::entity> waveNums;
+	float waveCompleteScale = 2.0f;
 
 	//assets
 	TTN_Texture2D::st2dptr textureScore;
@@ -65,9 +74,19 @@ private:
 	float m_displayedWaveProgress;
 	//the player's score
 	unsigned m_score;
+	//if the game is paused
+	bool m_paused;
+	//the current wave the player is on
+	unsigned m_currentWave = 0;
+
+	//wave complete time tracker
+	float m_waveCompleteTime = 10.0f;
+	float m_waveCompleteTotalTime = 4.0f;
+	bool waveDone = false;
 
 	void MakeScoreNumEntity();
 	void MakeHealthNumEntity();
+	void MakeWaveNumEntity();
 };
 
 //get the number of digits in a number
@@ -89,4 +108,21 @@ inline unsigned GetDigit(unsigned number, unsigned digit) {
 		divisor *= 10;
 
 	return (number / divisor % 10);
+}
+
+//interpolation parameter for the wave complete pass by lerp
+inline float waveCompleteLerpParamter(float t) {
+	float paramater = 0;
+
+	if (t < 0.3f) {
+		paramater = TTN_Interpolation::ReMap(0.0f, 0.3f, 0.0f, 0.5f, t);
+	}
+	else if (t >= 0.3f && t <= 0.7f) {
+		paramater = 0.5f;
+	}
+	else {
+		paramater = TTN_Interpolation::ReMap(0.7f, 1.0f, 0.5f, 1.0f, t);
+	}
+
+	return paramater;
 }
