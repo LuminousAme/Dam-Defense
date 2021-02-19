@@ -21,7 +21,7 @@ void PrepareAssetLoading();
 //main function, runs the program
 int main() { 
 	Logger::Init(); //initliaze otter's base logging system
-	TTN_Application::Init("Dam Defense", 1920, 1080); //initliaze titan's application
+	TTN_Application::Init("Dam Defense", 1920, 1080, true); //initliaze titan's application
 
 	//data to track loading progress
 	bool set1Loaded = false;
