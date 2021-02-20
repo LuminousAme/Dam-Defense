@@ -828,13 +828,26 @@ void Game::RestartData()
 	//delete all boats in scene
 	std::vector<entt::entity>::iterator it = boats.begin();
 	while (it != boats.end()) {
-		if (Get<TTN_Transform>(*it).GetPos().z >= 300.0f) {
-			it++;
+		//add a countdown until it deletes
+		TTN_DeleteCountDown countdown = TTN_DeleteCountDown(0.1f);
+		TTN_DeleteCountDown cannonCountdown = TTN_DeleteCountDown(0.08f);
+		AttachCopy(*it, countdown);
+		AttachCopy(Get<EnemyComponent>(*it).GetCannonEntity(), cannonCountdown);
+		Get<TTN_MorphAnimator>(Get<EnemyComponent>(*it).GetCannonEntity()).SetActiveAnim(0);
+		//mark it as dead
+		Get<EnemyComponent>(*it).SetAlive(false);
+
+		//and remove it from the list of boats as it will be deleted soon
+		std::vector<entt::entity>::iterator itt = enemyCannons.begin();
+		while (itt != enemyCannons.end()) {
+			if (*itt == Get<EnemyComponent>(*it).GetCannonEntity()) {
+				itt = enemyCannons.erase(itt);
+			}
+			else
+				itt++;
 		}
-		else {
-			DeleteEntity(*it);
-			it = boats.erase(it);
-		}
+
+		it = boats.erase(it);
 	}
 
 	//sets the buses to not be paused
