@@ -177,4 +177,3 @@ private:
 	bool shouldPlay;
 	bool shouldMenu;
 };
-

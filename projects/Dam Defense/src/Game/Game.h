@@ -50,6 +50,17 @@ public:
 
 	float GetDamHealth() { return Dam_health; }
 
+	float GetFlameThrowerCoolDownTime() {
+		if (Flaming)
+			return std::clamp(TTN_Interpolation::ReMap(FlameActiveTime, 0.0f, FlameThrowerCoolDown, FlameActiveTime, FlameAnim), 0.0f, FlameTimer);
+
+		return std::clamp(FlameTimer, 0.0f, FlameThrowerCoolDown);
+	}
+	float GetRealFlameThrowerCoolDownTime() {
+		return std::clamp(FlameTimer, 0.0f, FlameThrowerCoolDown);
+	}
+	float GetFlameThrowerMaxCoolDownTime() { return FlameThrowerCoolDown; }
+
 	float GetWaveProgress() {
 		if (m_firstWave)
 			return 0.0f;
@@ -188,7 +199,7 @@ protected:
 	float water_waveLenghtMultiplier;//how long the waves should be
 
 	//////// DAM AND FLAMETHROWER CONTROL DATA ///////
-	float FlameThrowerCoolDown = 10.0f; //how long the player has to wait between flamethrower uses
+	float FlameThrowerCoolDown = 30.0f; //how long the player has to wait between flamethrower uses
 	float FlameActiveTime = 3.0f; //how long the flamethrower lasts
 	const float Dam_MaxHealth = 100; //the maximum health of the dam
 
