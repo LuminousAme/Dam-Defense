@@ -281,6 +281,20 @@ namespace Titan {
 		ReconstructScenegraph();
 	}
 
+	//overload for physics
+	template<>
+	inline void TTN_Scene::Attach<TTN_Physics>(entt::entity entity) {
+		//assign the component to the entity
+		m_Registry->emplace<TTN_Physics>(entity);
+		//reconstruct scenegraph as entt was shuffled
+		ReconstructScenegraph();
+
+		//add it to the physics world
+		Get<TTN_Physics>(entity).SetEntity(entity);
+		m_physicsWorld->addRigidBody(Get<TTN_Physics>(entity).GetRigidBody());
+		Get<TTN_Physics>(entity).SetIsInWorld(true);
+	}
+
 	//function to attach a copy of an object to an entity as a component
 	template<typename T>
 	inline void TTN_Scene::AttachCopy(entt::entity entity, const T& copy)
@@ -289,6 +303,20 @@ namespace Titan {
 		m_Registry->emplace_or_replace<T>(entity, copy);
 		//reconstruct scenegraph as entt was shuffled
 		ReconstructScenegraph();
+	}
+
+	//overload for physics
+	template<>
+	inline void TTN_Scene::AttachCopy<TTN_Physics>(entt::entity entity, const TTN_Physics& copy) {
+		//assign the component to the entity 
+		m_Registry->emplace_or_replace<TTN_Physics>(entity, copy);
+		//reconstruct scenegraph as entt was shuffled
+		ReconstructScenegraph();
+		
+		//add it to the physics world
+		Get<TTN_Physics>(entity).SetEntity(entity);
+		m_physicsWorld->addRigidBody(Get<TTN_Physics>(entity).GetRigidBody());
+		Get<TTN_Physics>(entity).SetIsInWorld(true);
 	}
 
 	//function to get a reference to a given component from an entity

@@ -937,13 +937,12 @@ void Game::CreateCannonball()
 
 		//attach that physics body to the entity
 		AttachCopy(cannonBalls[cannonBalls.size() - 1].first, cannonBallPhysBod);
+		//get the physics body and apply a force along the player's direction
+		Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1].first).AddForce((cannonBallForce * playerDir));
 
 		TTN_Tag ballTag = TTN_Tag("Ball"); //sets boat path number to ttn_tag
 		AttachCopy<TTN_Tag>(cannonBalls[cannonBalls.size() - 1].first, ballTag);
 	}
-
-	//after the cannonball has been created, get the physics body and apply a force along the player's direction
-	Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1].first).AddForce((cannonBallForce * playerDir));
 }
 
 //function that will check the positions of the cannonballs each frame and delete any that're too low
