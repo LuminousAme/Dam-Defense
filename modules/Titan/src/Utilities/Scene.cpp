@@ -425,7 +425,7 @@ namespace Titan {
 				}
 			}
 
-			//if it's not the skybox shader, set some uniforms for lighting
+			//if it's not the skybox shader or a default shader, set some uniforms for lighting
 			if (shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX
 				&& shader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
 				//sets some uniforms
@@ -584,6 +584,85 @@ namespace Titan {
 			renderer.Render(transform.GetGlobal(), vp);
 		});
 
+		/*
+		TTN_Shader::sshptr currentShader = nullptr;
+		TTN_Material::smatptr currentMatieral = nullptr;
+		TTN_Mesh::smptr currentMesh = nullptr;
+			m_RenderGroup->each([&](entt::entity entity, TTN_Transform& transform, TTN_Renderer& renderer) {
+				//if the shader has changed
+				if (currentShader != renderer.GetShader()) {
+					//update to the current shader
+					currentShader = renderer.GetShader();
+					//and bind it 
+					currentShader->Bind();
+
+					if (currentShader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX
+						&& currentShader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
+						//sets some uniforms
+						//scene level ambient lighting
+						currentShader->SetUniform("u_AmbientCol", m_AmbientColor);
+						currentShader->SetUniform("u_AmbientStrength", m_AmbientStrength);
+
+						//stuff from the light
+						glm::vec3 lightPositions[16];
+						glm::vec3 lightColor[16];
+						float lightAmbientStr[16];
+						float lightSpecStr[16];
+						float lightAttenConst[16];
+						float lightAttenLinear[16];
+						float lightAttenQuadartic[16];
+
+						for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
+							auto& light = Get<TTN_Light>(m_Lights[i]);
+							auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
+							lightPositions[i] = lightTrans.GetGlobalPos();
+							lightColor[i] = light.GetColor();
+							lightAmbientStr[i] = light.GetAmbientStrength();
+							lightSpecStr[i] = light.GetSpecularStrength();
+							lightAttenConst[i] = light.GetConstantAttenuation();
+							lightAttenLinear[i] = light.GetConstantAttenuation();
+							lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
+						}
+
+						//send all the data about the lights to glsl
+						currentShader->SetUniform("u_LightPos", lightPositions[0], 16);
+						currentShader->SetUniform("u_LightCol", lightColor[0], 16);
+						currentShader->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
+						currentShader->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
+						currentShader->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
+						currentShader->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
+						currentShader->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
+
+						//and tell it how many lights there actually are
+						currentShader->SetUniform("u_NumOfLights", (int)m_Lights.size());
+
+						//stuff from the camera
+						currentShader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetPos());
+
+
+						//if it has a material send some lighting and shading data from that material
+						if (renderer.GetMat() != nullptr) {
+							//set this material to the current material
+							currentMatieral = renderer.GetMat();
+							//and material details about the lighting and shading
+							currentShader->SetUniform("u_hasAmbientLighting", (int)(renderer.GetMat()->GetHasAmbient()));
+							currentShader->SetUniform("u_hasSpecularLighting", (int)(renderer.GetMat()->GetHasSpecular()));
+							//the ! is because it has to be reversed in the shader
+							currentShader->SetUniform("u_hasOutline", (int)(!renderer.GetMat()->GetHasOutline()));
+							currentShader->SetUniform("u_OutlineSize", renderer.GetMat()->GetOutlineSize());
+
+							//wheter or not ramps for toon shading should be used
+							currentShader->SetUniform("u_useDiffuseRamp", (int)renderer.GetMat()->GetUseDiffuseRamp());
+							currentShader->SetUniform("u_useSpecularRamp", (int)renderer.GetMat()->GetUseSpecularRamp());
+
+							//bind the ramps as textures
+							renderer.GetMat()->GetDiffuseRamp()->Bind(10);
+							renderer.GetMat()->GetSpecularRamp()->Bind(11);
+						}
+					}
+				}
+		});*/
+
 		//2D sprite rendering
 		//make a vector to store all the entities to render
 		std::vector<entt::entity> tempSpriteEntitiesToRender = std::vector<entt::entity>();
@@ -596,6 +675,8 @@ namespace Titan {
 		//sort the entities by their z positions
 		mergeSortEntitiesZ(tempSpriteEntitiesToRender, 0, tempSpriteEntitiesToRender.size() - 1);
 
+		//bind their shader
+		TTN_Renderer2D::BindShader();
 		//and loop through, rendering them in reverse order
 		for (int i = tempSpriteEntitiesToRender.size() - 1; i >= 0; i--)
 			Get<TTN_Renderer2D>(tempSpriteEntitiesToRender[i]).Render(Get<TTN_Transform>(tempSpriteEntitiesToRender[i]).GetGlobal(), vp);

@@ -49,6 +49,9 @@ namespace Titan {
 		//set up for rendering (called on engine side)
 		static void InitRenderer2D();
 
+		//binds the shader for rendering
+		static void BindShader();
+
 		//gets the texture
 		const TTN_Texture2D::st2dptr GetTexture() const { return m_sprite; }
 		//gets the render layer

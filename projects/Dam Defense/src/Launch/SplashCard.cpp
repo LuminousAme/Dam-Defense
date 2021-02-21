@@ -41,7 +41,7 @@ void SplashCard::InitScene()
 		logo = CreateEntity();
 
 		//create a transform for the logo, placing it in the center of the screen, covering the whole thing
-		TTN_Transform logoTrans = TTN_Transform(glm::vec3(0.0f, 0.0f, 3.5f), glm::vec3(0.0f), glm::vec3(-500.0f, 500.0f, 1.0f));
+		TTN_Transform logoTrans = TTN_Transform(glm::vec3(0.0f, 0.0f, 3.5f), glm::vec3(0.0f), glm::vec3(500.0f, 500.0f, 1.0f));
 		AttachCopy(logo, logoTrans);
 
 		//create a sprite renderer for the logo
