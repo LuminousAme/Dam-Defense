@@ -67,7 +67,7 @@ namespace Titan {
 
 		//enable cull faces so only the front faces are rendered, this will improve performance and model back faces shouldn't be
 		//visible anyways
-		//glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 
 		//enable the depth function for skyboxes
 		glDepthFunc(GL_LEQUAL);

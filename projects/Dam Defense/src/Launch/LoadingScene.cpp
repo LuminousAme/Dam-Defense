@@ -39,7 +39,7 @@ void LoadingScene::InitScene()
 		loadingText = CreateEntity();
 
 		//create a transform for the logo, placing it in the center of the screen, covering the whole thing
-		TTN_Transform textTrans = TTN_Transform(glm::vec3(90.0f, -180.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f, 150.0f, 1.0f));
+		TTN_Transform textTrans = TTN_Transform(glm::vec3(90.0f, -180.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f, 150.0f, 1.0f));
 		AttachCopy(loadingText, textTrans);
 
 		//create a sprite renderer for the logo
@@ -53,7 +53,7 @@ void LoadingScene::InitScene()
 		loadingCircle = CreateEntity();
 
 		//create a transform for the logo, placing it in the center of the screen, covering the whole thing
-		TTN_Transform circleTrans = TTN_Transform(glm::vec3(90.0f - 285.0f - 80.0f, -180.0f, 2.0f), glm::vec3(0.0f), glm::vec3(-160.0f, 160.0f, 1.0f));
+		TTN_Transform circleTrans = TTN_Transform(glm::vec3(90.0f - 285.0f - 80.0f, -180.0f, 2.0f), glm::vec3(0.0f), glm::vec3(160.0f, 160.0f, 1.0f));
 		AttachCopy(loadingCircle, circleTrans);
 
 		//create a sprite renderer for the logo

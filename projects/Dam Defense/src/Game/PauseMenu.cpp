@@ -45,7 +45,7 @@ void PauseMenu::InitScene()
 		entt::entity paused = CreateEntity();
 
 		//create a transform for the text
-		TTN_Transform textTrans = TTN_Transform(glm::vec3(0.0f, 360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f, 150.0f, 1.0f));
+		TTN_Transform textTrans = TTN_Transform(glm::vec3(0.0f, 360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f, 150.0f, 1.0f));
 		AttachCopy(paused, textTrans);
 
 		//create a 2D renderer for the button
@@ -62,9 +62,9 @@ void PauseMenu::InitScene()
 
 		//create a transform for the text
 		TTN_Transform textTrans;
-		if (i == 0) textTrans = TTN_Transform(glm::vec3(500.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 1) textTrans = TTN_Transform(glm::vec3(0.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-500.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		if (i == 0) textTrans = TTN_Transform(glm::vec3(500.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		else if (i == 1) textTrans = TTN_Transform(glm::vec3(0.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-500.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
 		AttachCopy(temp, textTrans);
 
 		//create a 2D renderer for the button
@@ -84,9 +84,9 @@ void PauseMenu::InitScene()
 
 		//create a transform for the button
 		TTN_Transform buttonTrans;
-		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(500.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(-322.75f, 201.5, 1.0f));
-		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(0.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(-322.75f, 201.5, 1.0f));
-		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-500.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(-322.75f, 201.5, 1.0f));
+		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(500.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(0.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-500.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
 		AttachCopy(temp, buttonTrans);
 
 		//create a 2D renderer for the button

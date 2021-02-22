@@ -37,7 +37,7 @@ void GameUI::InitScene()
 		healthBar = CreateEntity();
 
 		//create a transform for the health bar overlay
-		TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 0.9f), glm::vec3(0.0f), glm::vec3(-1228.0f * healthScale, 239.0f * healthScale, 1.0f));
+		TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 0.9f), glm::vec3(0.0f), glm::vec3(1228.0f * healthScale, 239.0f * healthScale, 1.0f));
 		AttachCopy(healthBar, healthTrans);
 
 		//create a sprite renderer for the health bar overlay
@@ -51,7 +51,7 @@ void GameUI::InitScene()
 		healthDam = CreateEntity();
 
 		//create a transform for the health bar
-		TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-1228.0f * healthScale, 239.0f * healthScale, 1.0f));
+		TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1228.0f * healthScale, 239.0f * healthScale, 1.0f));
 		AttachCopy(healthDam, healthTrans);
 
 		//create a sprite renderer for the health bar
@@ -65,7 +65,7 @@ void GameUI::InitScene()
 		healthBarBg = CreateEntity();
 
 		//create a transform for the health bar background
-		TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 1.1f), glm::vec3(0.0f), glm::vec3(-1228.0f * healthScale, 239.0f * healthScale, 1.0f));
+		TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 1.1f), glm::vec3(0.0f), glm::vec3(1228.0f * healthScale, 239.0f * healthScale, 1.0f));
 		AttachCopy(healthBarBg, healthTrans);
 
 		//create a sprite renderer for the health bar background
@@ -79,7 +79,7 @@ void GameUI::InitScene()
 		progressBar = CreateEntity();
 
 		//create a transform for the progress bar overlay
-		TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 0.9f), glm::vec3(0.0f), glm::vec3(-1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
+		TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 0.9f), glm::vec3(0.0f), glm::vec3(1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
 		AttachCopy(progressBar, progressTrans);
 
 		//create a sprite renderer for the progress bar overlay
@@ -93,7 +93,7 @@ void GameUI::InitScene()
 		progressRepresentation = CreateEntity();
 
 		//create a transform for the progress bar
-		TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
+		TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
 		AttachCopy(progressRepresentation, progressTrans);
 
 		//create a sprite renderer for the progress bar
@@ -107,7 +107,7 @@ void GameUI::InitScene()
 		progressBarBg = CreateEntity();
 
 		//create a transform for the progress bar background
-		TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 1.1f), glm::vec3(0.0f), glm::vec3(-1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
+		TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 1.1f), glm::vec3(0.0f), glm::vec3(1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
 		AttachCopy(progressBarBg, progressTrans);
 
 		//create a sprite renderer for the progress bar background
@@ -122,7 +122,7 @@ void GameUI::InitScene()
 
 		//create a transform for the logo
 		TTN_Transform logoTrans = TTN_Transform(glm::vec3(825.0f, 480.0f, 1.0f), glm::vec3(0.0f), 
-			glm::vec3(-scoreTextScale * 550.0f, scoreTextScale * 150.0f, 1.0f));
+			glm::vec3(scoreTextScale * 550.0f, scoreTextScale * 150.0f, 1.0f));
 		AttachCopy(scoreText, logoTrans);
 
 		//create a sprite renderer for the logo
@@ -141,14 +141,14 @@ void GameUI::InitScene()
 		//create a transform 
 		TTN_Transform Trans;
 		if (i == 0)
-			Trans = TTN_Transform(glm::vec3(1500.0f, 0.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-200.0f * waveCompleteScale, 150.0f * waveCompleteScale, 1.0f));
+			Trans = TTN_Transform(glm::vec3(1500.0f, 0.0f, 1.0f), glm::vec3(0.0f), glm::vec3(200.0f * waveCompleteScale, 150.0f * waveCompleteScale, 1.0f));
 		else if (i == 1)
 			Trans = TTN_Transform(glm::vec3(Get<TTN_Transform>(waveText).GetGlobalPos().x - 0.5f * std::abs(Get<TTN_Transform>(waveText).GetScale().x) - 0.5f * waveCompleteScale * 150.0f, 0.0f, 1.0f),
-				glm::vec3(0.0f), glm::vec3(-100.0f * waveCompleteScale, 100.0f * waveCompleteScale, 1.0f));
+				glm::vec3(0.0f), glm::vec3(100.0f * waveCompleteScale, 100.0f * waveCompleteScale, 1.0f));
 		else if (i == 2) 
 			Trans = TTN_Transform(glm::vec3(Get<TTN_Transform>(waveNums[waveNums.size()-1]).GetGlobalPos().x - 
 				0.5f * std::abs(Get<TTN_Transform>(waveNums[waveNums.size() - 1]).GetScale().x) - 0.5f * waveCompleteScale * 350.0f, 0.0f, 1.0f),
-				glm::vec3(0.0f), glm::vec3(-350.0f * waveCompleteScale, 150.0f * waveCompleteScale, 1.0f));
+				glm::vec3(0.0f), glm::vec3(350.0f * waveCompleteScale, 150.0f * waveCompleteScale, 1.0f));
 		AttachCopy(entity, Trans);
 
 		//create a sprite renderer for the logo
@@ -168,7 +168,7 @@ void GameUI::InitScene()
 		flameThrowerBG = CreateEntity();
 
 		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 1.2f), glm::vec3(0.0f), glm::vec3(-1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 1.2f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
 		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f, 1.1f));
 		AttachCopy(flameThrowerBG, Trans);
 
@@ -201,7 +201,7 @@ void GameUI::InitScene()
 		flameThrowerOverlay = CreateEntity();
 
 		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.9f), glm::vec3(0.0f), glm::vec3(-1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.9f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
 		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f, 1.1f));
 		AttachCopy(flameThrowerOverlay, Trans);
 
@@ -216,7 +216,7 @@ void GameUI::InitScene()
 		flameThrowerIcon = CreateEntity();
 
 		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.8f), glm::vec3(0.0f), glm::vec3(-1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.8f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
 		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f, 1.1f));
 		AttachCopy(flameThrowerIcon, Trans);
 
@@ -426,7 +426,7 @@ void GameUI::MakeScoreNumEntity()
 	//setup a transform for the new entity
 	TTN_Transform numTrans = TTN_Transform(glm::vec3(scoreTrans.GetGlobalPos().x - 0.3f * std::abs(scoreTrans.GetScale().x) - 
 		(float)scoreNums.size() * 0.5f * scoreTextScale * 150.0f, scoreTrans.GetGlobalPos().y, scoreTrans.GetGlobalPos().z),
-		glm::vec3(0.0f), glm::vec3(-scoreTextScale * 150.0f, scoreTextScale * 150.0f, 1.0f));
+		glm::vec3(0.0f), glm::vec3(scoreTextScale * 150.0f, scoreTextScale * 150.0f, 1.0f));
 	AttachCopy(scoreNums[scoreNums.size() - 1], numTrans);
 
 	//setup a 2D renderer for the new entity
@@ -445,7 +445,7 @@ void GameUI::MakeHealthNumEntity()
 	//setup a transform for the new entity
 	TTN_Transform numTrans = TTN_Transform(glm::vec3(healthTrans.GetGlobalPos().x + 0.3f * std::abs(healthTrans.GetScale().x)  -
 		(float)healthNums.size() * 0.5f * healthTextScale * 150.0f, healthTrans.GetGlobalPos().y, healthTrans.GetGlobalPos().z),
-		glm::vec3(0.0f), glm::vec3(-healthTextScale * 150.0f, healthTextScale * 150.0f, 1.0f));
+		glm::vec3(0.0f), glm::vec3(healthTextScale * 150.0f, healthTextScale * 150.0f, 1.0f));
 	AttachCopy(healthNums[healthNums.size() - 1], numTrans);
 
 	//setup a 2D renderer for the new entity
@@ -464,7 +464,7 @@ void GameUI::MakeWaveNumEntity()
 	//setup a transform for the new entity
 	TTN_Transform numTrans = TTN_Transform(glm::vec3(Trans.GetGlobalPos().x + 0.5f * std::abs(Trans.GetScale().x) -
 		(float)waveNums.size() * 0.5f * waveCompleteScale * 150.0f, Trans.GetGlobalPos().y, Trans.GetGlobalPos().z),
-		glm::vec3(0.0f), glm::vec3(-waveCompleteScale * 100.0f, waveCompleteScale * 100.0f, 1.0f));
+		glm::vec3(0.0f), glm::vec3(waveCompleteScale * 100.0f, waveCompleteScale * 100.0f, 1.0f));
 	AttachCopy(waveNums[waveNums.size() - 1], numTrans);
 
 	//setup a 2D renderer for the new entity
@@ -481,7 +481,7 @@ void GameUI::MakeFlamethrowerNumEntity()
 	TTN_Transform& Trans = Get<TTN_Transform>(flameThrowerIcon);
 
 	//setup a transform for the new entity
-	TTN_Transform numTrans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(-150.0f * scoreTextScale, 150.0f * scoreTextScale, 1.0f));
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(150.0f * scoreTextScale, 150.0f * scoreTextScale, 1.0f));
 	AttachCopy(flamethrowerNums[flamethrowerNums.size() - 1], numTrans);
 
 	//setup a 2D renderer for the new entity

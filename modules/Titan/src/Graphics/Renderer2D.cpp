@@ -34,9 +34,6 @@ namespace Titan {
 	{
 		//make sure there's acutally a sprite to bind and things are set up first 
 		if (m_sprite != nullptr && s_shader != nullptr) {
-			//bind the sprite shader
-			s_shader->Bind();
-
 			//send the uniforms to openGL 
 			s_shader->SetUniformMatrix("MVP", VP * model);
 			s_shader->SetUniform("u_Color", m_color);
@@ -62,19 +59,19 @@ namespace Titan {
 		glm::vec2 textCords[6];
 
 		//fill the arrays with data
-		positions[0] = glm::vec3(-0.5f, 0.5f, 0.0f); //0.0, 1.0
-		positions[1] = glm::vec3(0.5f, -0.5f, 0.0f); //1.0, 0.0
-		positions[2] = glm::vec3(-0.5f, -0.5f, 0.0f); //0.0, 0.0
-		positions[3] = glm::vec3(-0.5f, 0.5f, 0.0f); //0.0, 1.0
-		positions[4] = glm::vec3(0.5f, 0.5f, 0.0f); //1.0, 1.0
-		positions[5] = glm::vec3(0.5f, -0.5f, 0.0f); //1.0, 0.0
+		positions[0] = glm::vec3(-0.5f, 0.5f, 0.0f);
+		positions[1] = glm::vec3(0.5f, -0.5f, 0.0f); 
+		positions[2] = glm::vec3(-0.5f, -0.5f, 0.0f); 
+		positions[3] = glm::vec3(-0.5f, 0.5f, 0.0f); 
+		positions[4] = glm::vec3(0.5f, 0.5f, 0.0f); 
+		positions[5] = glm::vec3(0.5f, -0.5f, 0.0f);
 
-		textCords[0] = glm::vec2(0.0f, 1.0f);
-		textCords[1] = glm::vec2(1.0f, 0.0f);
-		textCords[2] = glm::vec2(0.0f, 0.0f);
-		textCords[3] = glm::vec2(0.0f, 1.0f);
-		textCords[4] = glm::vec2(1.0f, 1.0f);
-		textCords[5] = glm::vec2(1.0f, 0.0f);
+		textCords[0] = glm::vec2(1.0f, 1.0f);
+		textCords[1] = glm::vec2(0.0f, 0.0f);
+		textCords[2] = glm::vec2(1.0f, 0.0f);
+		textCords[3] = glm::vec2(1.0f, 1.0f);
+		textCords[4] = glm::vec2(0.0f, 1.0f);
+		textCords[5] = glm::vec2(0.0f, 0.0f);
 
 		//create vbo and load them with the arrays
 		s_vertPos = TTN_VertexBuffer::Create();
@@ -92,5 +89,11 @@ namespace Titan {
 		s_shader->LoadShaderStageFromFile("shaders/ttn_sprite_vert.glsl", GL_VERTEX_SHADER);
 		s_shader->LoadShaderStageFromFile("shaders/ttn_sprite_frag.glsl", GL_FRAGMENT_SHADER);
 		s_shader->Link();
+	}
+
+	//binds the shader so it can be rendered
+	void TTN_Renderer2D::BindShader()
+	{
+		s_shader->Bind();
 	}
 }

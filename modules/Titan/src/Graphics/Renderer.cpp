@@ -78,8 +78,6 @@ namespace Titan {
 			//if it isn't, then stop then return so the later code doesn't break the entire program
 			return;
 
-		//bind the shader this model uses
-		m_Shader->Bind();
 		//send the uniforms to openGL 
 		if (m_Shader->GetVertexShaderDefaultStatus() != (int)TTN_DefaultShaders::VERT_SKYBOX && 
 			m_Shader->GetVertexShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
@@ -89,7 +87,5 @@ namespace Titan {
 		}
 		//render the VAO
 		m_mesh->GetVAOPointer()->Render();
-		//unbind the shader
-		m_Shader->UnBind();
 	}
 }

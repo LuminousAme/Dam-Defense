@@ -42,14 +42,14 @@ void Game::Update(float deltaTime)
 	GameSounds(deltaTime);
 
 	if (!m_paused) {
-		//allow the player to rotate
-		PlayerRotate(deltaTime);
-
-		//switch to the cannon's normal static animation if it's firing animation has ended
-		StopFiring();
-
-		//if a cannonball has passed the water plane but not yet splashed, play the splash effect
+		//look through all of the cannonballs updating them
 		for (int i = 0; i < cannonBalls.size(); i++) {
+			//if the cannonball is just falling, make it move the way it should
+			if (glm::normalize(Get<TTN_Physics>(cannonBalls[i].first).GetLinearVelocity()) == glm::vec3(0.0f, -1.0f, 0.0f)) {
+				Get<TTN_Physics>(cannonBalls[i].first).AddForce(cannonBallForce * playerDir);
+			}
+
+			//if a cannonball has passed the water plane but not yet splashed, play the splash effect
 			if (!cannonBalls[i].second && Get<TTN_Transform>(cannonBalls[i].first).GetGlobalPos().y <=
 				Get<TTN_Transform>(water).GetGlobalPos().y) {
 				//sets the position where the sound should play
@@ -67,6 +67,12 @@ void Game::Update(float deltaTime)
 
 		//delete any cannonballs that're way out of range
 		DeleteCannonballs();
+
+		//allow the player to rotate
+		PlayerRotate(deltaTime);
+
+		//switch to the cannon's normal static animation if it's firing animation has ended
+		StopFiring();
 
 		//if the player is on shoot cooldown, decrement the time remaining on the cooldown
 		if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
@@ -264,7 +270,6 @@ void Game::KeyDownChecks()
 		TTN_Scene::SetPaused(m_paused);
 	}
 
-	/*
 	//just some temp controls to let us access the mouse for ImGUI, remeber to remove these in the final game
 	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::P)) {
 		TTN_Application::TTN_Input::SetCursorLocked(true);
@@ -272,13 +277,12 @@ void Game::KeyDownChecks()
 
 	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::O)) {
 		TTN_Application::TTN_Input::SetCursorLocked(false);
-	}*/
+	}
 }
 
 //function to cehck for when a key is being pressed
 void Game::KeyChecks()
 {
-	/*
 	auto& a = Get<TTN_Transform>(camera);
 	/// CAMERA MOVEMENT FOR A2 ///
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
@@ -301,7 +305,7 @@ void Game::KeyChecks()
 	}
 	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Space)) {
 		a.SetPos(glm::vec3(a.GetPos().x - 2.0f, a.GetPos().y + 2.0f, a.GetPos().z));
-	}*/
+	}
 }
 
 //function to check for when a key has been released
@@ -531,7 +535,7 @@ void Game::SetUpEntities()
 
 	//entity for the cannon
 	{
-		cannon = CreateEntity();
+		cannon = CreateEntity("Cannon");
 
 		//setup a mesh renderer for the cannon
 		TTN_Renderer cannonRenderer = TTN_Renderer(cannonMesh, shaderProgramAnimatedTextured, cannonMat);
@@ -937,14 +941,12 @@ void Game::CreateCannonball()
 
 		//attach that physics body to the entity
 		AttachCopy(cannonBalls[cannonBalls.size() - 1].first, cannonBallPhysBod);
+		//get the physics body and apply a force along the player's direction
+		Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1].first).AddForce((cannonBallForce * playerDir));
 
 		TTN_Tag ballTag = TTN_Tag("Ball"); //sets boat path number to ttn_tag
 		AttachCopy<TTN_Tag>(cannonBalls[cannonBalls.size() - 1].first, ballTag);
 	}
-	//TTN_Physics& tt = Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1]);
-
-	//after the cannonball has been created, get the physics body and apply a force along the player's direction
-	Get<TTN_Physics>(cannonBalls[cannonBalls.size() - 1].first).AddForce((cannonBallForce * playerDir));
 }
 
 //function that will check the positions of the cannonballs each frame and delete any that're too low
@@ -1677,9 +1679,40 @@ void Game::ImGui()
 
 	ImGui::End();
 
-	/*
 	//ImGui controller for the camera
 	ImGui::Begin("Editor");
+
+	if (ImGui::CollapsingHeader("Cannon controls")) {
+		TTN_Transform& cannonTrans = Get<TTN_Transform>(cannon);
+		ImGui::Text("Position\n");
+
+		//position
+		glm::vec3 globalPos = cannonTrans.GetGlobalPos();
+		float pos[3];
+		pos[0] = cannonTrans.GetPos().x;
+		pos[1] = cannonTrans.GetPos().y;
+		pos[2] = cannonTrans.GetPos().z;
+
+		if (ImGui::SliderFloat3("Position", pos, -5.0f, 5.0f)) {
+			cannonTrans.SetPos(glm::vec3(pos[0], pos[1], pos[2]));
+			globalPos = cannonTrans.GetGlobalPos();
+		}
+
+		std::string newText = "Global Pos. X: " + std::to_string(globalPos.x) + " Y: " + std::to_string(globalPos.y) + " Z: " + std::to_string(globalPos.z);
+		ImGui::Text(newText.c_str());
+
+		ImGui::Text("\n\nScale\n");
+
+		//scale
+		float scale[3];
+		scale[0] = cannonTrans.GetScale().x;
+		scale[1] = cannonTrans.GetScale().y;
+		scale[2] = cannonTrans.GetScale().z;
+
+		if (ImGui::SliderFloat3("Scale", scale, -1.0f, 1.0f)) {
+			cannonTrans.SetScale(glm::vec3(scale[0], scale[1], scale[2]));
+		}
+	}
 
 	if (ImGui::CollapsingHeader("Light Controls")) {
 		ImGui::Text("Maximum number of lights: 16");
@@ -1980,5 +2013,4 @@ void Game::ImGui()
 	}
 
 	ImGui::End();
-	*/
 }

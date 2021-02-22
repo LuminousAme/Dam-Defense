@@ -28,7 +28,7 @@ void MainMenu::Update(float deltaTime)
 	time += deltaTime;
 
 	//call imgui's update for this scene
-	//ImGui();
+	ImGui();
 
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
@@ -758,7 +758,7 @@ void MainMenuUI::InitScene()
 		gameLogo = CreateEntity();
 
 		//create a transform for the logo
-		TTN_Transform logoTrans = TTN_Transform(glm::vec3(0.0f, 360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-1603.0f, 185.5f, 1.0f));
+		TTN_Transform logoTrans = TTN_Transform(glm::vec3(0.0f, 360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1603.0f, 185.5f, 1.0f));
 		AttachCopy(gameLogo, logoTrans);
 
 		//create a sprite renderer for the logo
@@ -776,10 +776,10 @@ void MainMenuUI::InitScene()
 
 		//create a transform for the text
 		TTN_Transform textTrans;
-		if (i == 0) textTrans = TTN_Transform(glm::vec3(657.75f, -180.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 1) textTrans = TTN_Transform(glm::vec3(254.75, -360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-148.25, -180.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 3) textTrans = TTN_Transform(glm::vec3(-551.25, -360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(-550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		if (i == 0) textTrans = TTN_Transform(glm::vec3(657.75f, -180.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		else if (i == 1) textTrans = TTN_Transform(glm::vec3(254.75, -360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-148.25, -180.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		else if (i == 3) textTrans = TTN_Transform(glm::vec3(-551.25, -360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
 		AttachCopy(temp, textTrans);
 
 		//create a 2D renderer for the button
@@ -802,10 +802,10 @@ void MainMenuUI::InitScene()
 
 		//create a transform for the button
 		TTN_Transform buttonTrans;
-		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(657.75f, -180.0f, 2.0f), glm::vec3(0.0f), glm::vec3(-322.75f, 201.5, 1.0f));
-		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(254.75, -360.0f, 2.0f), glm::vec3(0.0f), glm::vec3(-322.75f, 201.5, 1.0f));
-		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-148.25, -180.0f, 2.0f), glm::vec3(0.0f), glm::vec3(-322.75f, 201.5, 1.0f));
-		else if (i == 3) buttonTrans = TTN_Transform(glm::vec3(-551.25, -360.0f, 2.0f), glm::vec3(0.0f), glm::vec3(-322.75f, 201.5, 1.0f));
+		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(657.75f, -180.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(254.75, -360.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-148.25, -180.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		else if (i == 3) buttonTrans = TTN_Transform(glm::vec3(-551.25, -360.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
 		AttachCopy(temp, buttonTrans);
 
 		//create a 2D renderer for the button
@@ -878,7 +878,6 @@ void MainMenuUI::Update(float deltaTime)
 		Get<TTN_Renderer2D>(quitButton).SetSprite(textureButton1);
 	}
 
-	/*
 	ImGui::Begin("Ui Editor");
 
 	if (ImGui::CollapsingHeader("Sprite Masking Testing")) {
@@ -906,7 +905,7 @@ void MainMenuUI::Update(float deltaTime)
 		}
 	}
 
-	ImGui::End();*/
+	ImGui::End();
 }
 
 void MainMenuUI::MouseButtonDownChecks()
