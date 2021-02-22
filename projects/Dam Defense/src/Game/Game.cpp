@@ -531,7 +531,7 @@ void Game::SetUpEntities()
 
 	//entity for the cannon
 	{
-		cannon = CreateEntity();
+		cannon = CreateEntity("Cannon");
 
 		//setup a mesh renderer for the cannon
 		TTN_Renderer cannonRenderer = TTN_Renderer(cannonMesh, shaderProgramAnimatedTextured, cannonMat);

@@ -81,7 +81,7 @@ namespace Titan {
 
 		//attach a name compoment
 		TTN_Name entityName = TTN_Name(name);
-		AttachCopy(entity, name);
+		AttachCopy(entity, entityName);
 
 		//reconstruct scenegraph as entt was shuffled
 		ReconstructScenegraph();
@@ -99,6 +99,9 @@ namespace Titan {
 		//attach a countdown component
 		TTN_DeleteCountDown entityCountDown = TTN_DeleteCountDown(lifeTime);
 		AttachCopy(entity, entityCountDown);
+
+		//reconstruct scenegraph as entt was shuffled
+		ReconstructScenegraph();
 
 		//return the entity id
 		return entity;
@@ -420,7 +423,7 @@ namespace Titan {
 					//set this material to the current material
 					currentMatieral = renderer.GetMat();
 					//set the shinniness
-					currentShader->SetUniform("u_Shininess ", currentMatieral->GetShininess());
+					currentShader->SetUniform("u_Shininess", currentMatieral->GetShininess());
 					//and material details about the lighting and shading
 					currentShader->SetUniform("u_hasAmbientLighting", (int)(currentMatieral->GetHasAmbient()));
 					currentShader->SetUniform("u_hasSpecularLighting", (int)(currentMatieral->GetHasSpecular()));
@@ -479,7 +482,7 @@ namespace Titan {
 				}
 				//otherwise just set a default shinnines
 				else if (currentShader != nullptr) {
-					currentShader->SetUniform("u_Shininess ", 128.0f);
+					currentShader->SetUniform("u_Shininess", 128.0f);
 				}
 
 				//if it is on a morph animated shader, set the interpolation parameter uniform
