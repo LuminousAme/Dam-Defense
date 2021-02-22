@@ -83,9 +83,6 @@ namespace Titan {
 		TTN_Name entityName = TTN_Name(name);
 		AttachCopy(entity, entityName);
 
-		//reconstruct scenegraph as entt was shuffled
-		ReconstructScenegraph();
-
 		//return the entity id
 		return entity;
 	}
@@ -99,9 +96,6 @@ namespace Titan {
 		//attach a countdown component
 		TTN_DeleteCountDown entityCountDown = TTN_DeleteCountDown(lifeTime);
 		AttachCopy(entity, entityCountDown);
-
-		//reconstruct scenegraph as entt was shuffled
-		ReconstructScenegraph();
 
 		//return the entity id
 		return entity;
