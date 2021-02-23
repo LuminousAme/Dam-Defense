@@ -85,7 +85,7 @@ void Game::Update(float deltaTime)
 			//sets gravity to 0
 			Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 		}
-
+	
 		//go through all the entities with enemy compontents
 		auto enemyView = GetScene()->view<EnemyComponent>();
 		for (auto entity : enemyView) {
@@ -665,9 +665,11 @@ void Game::SetUpEntities()
 		AttachCopy(water, waterTrans);
 	}
 
+	birds = std::vector<entt::entity>();
 	//birds
 	for (int i = 0; i < 3; i++) {
-		birds[i] = CreateEntity();
+		//birds[i] = CreateEntity();
+		birds.push_back(CreateEntity());
 
 		//create a renderer
 		TTN_Renderer birdRenderer = TTN_Renderer(birdMesh, shaderProgramAnimatedTextured, birdMat);
@@ -684,7 +686,6 @@ void Game::SetUpEntities()
 		birdAnimator.SetActiveAnim(0);
 
 		//attach that animator to the entity
-
 		AttachCopy(birds[i], birdAnimator);
 
 		//create a transform
@@ -695,6 +696,19 @@ void Game::SetUpEntities()
 
 		//attach that transform to the entity
 		AttachCopy(birds[i], birdTrans);
+
+		//set up a physics body for the bird
+		TTN_Physics birdPhysBod = TTN_Physics(birdTrans.GetPos(), glm::vec3(0.0f), birdTrans.GetScale()*2.5f, birds[i], TTN_PhysicsBodyType::DYNAMIC);
+		birdPhysBod.SetLinearVelocity(glm::vec3(-25.0f, 0.0f, -20.0f));
+		//attach the physics body to the entity
+		AttachCopy(birds[i], birdPhysBod);
+
+		TTN_Tag birdTag = TTN_Tag("Bird"); //sets bird to ttn_tag
+		AttachCopy<TTN_Tag>(birds[i], birdTag);
+
+		EnemyComponent en = EnemyComponent(birds[i], this, -1, -1, 0.0f);
+		en.SetBird(true);
+		AttachCopy(birds[i], en);
 	}
 
 	//prepare the vector of cannonballs
@@ -702,7 +716,7 @@ void Game::SetUpEntities()
 	//vector of boats
 	boats = std::vector<entt::entity>();
 
-	//vector of enemy cannons
+	//vector of enemy cannons	q
 	enemyCannons = std::vector<entt::entity>();
 
 	//vector for flamethrower models and flame particles
@@ -812,7 +826,7 @@ void Game::RestartData()
 
 	//bird data setup
 	birdTimer = 0.0f;
-
+	
 	//scene data setup
 	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));
 	m_paused = false;
@@ -833,8 +847,8 @@ void Game::RestartData()
 	std::vector<entt::entity>::iterator it = boats.begin();
 	while (it != boats.end()) {
 		//add a countdown until it deletes
-		TTN_DeleteCountDown countdown = TTN_DeleteCountDown(0.1f);
-		TTN_DeleteCountDown cannonCountdown = TTN_DeleteCountDown(0.08f);
+		TTN_DeleteCountDown countdown = TTN_DeleteCountDown(0.01f);
+		TTN_DeleteCountDown cannonCountdown = TTN_DeleteCountDown(0.008f);
 		AttachCopy(*it, countdown);
 		AttachCopy(Get<EnemyComponent>(*it).GetCannonEntity(), cannonCountdown);
 		Get<TTN_MorphAnimator>(Get<EnemyComponent>(*it).GetCannonEntity()).SetActiveAnim(0);
@@ -1405,7 +1419,6 @@ void Game::WaveUpdate(float deltaTime)
 				SpawnBoatLeft();
 			
 			Get<TTN_Transform>(enemyCannons[enemyCannons.size() - 1]).SetParent(&Get<TTN_Transform>(boats[boats.size() - 1]), boats[boats.size() - 1]);
->>>>>>>>> Temporary merge branch 2
 
 			m_rightSideSpawn = !m_rightSideSpawn;
 			m_timeUntilNextSpawn = m_timeBetweenEnemySpawns;
@@ -1496,6 +1509,45 @@ void Game::Collisions()
 						}
 					}
 				}
+
+
+				//if one is a bird and the other is a cannonball
+				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball") ||
+					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird"))) {
+
+					//then iterate through the list of cannonballs until you find the one that's collided
+					std::vector<std::pair<entt::entity, bool>>::iterator it = cannonBalls.begin();
+					while (it != cannonBalls.end()) {
+						if (entity1Ptr == (*it).first || entity2Ptr == (*it).first) {
+							//and delete it
+							DeleteEntity((*it).first);
+							it = cannonBalls.erase(it);
+						}
+						else {
+							it++;
+						}
+					}
+
+					std::vector<entt::entity>::iterator btt = birds.begin();
+					while (btt != birds.end()) {
+
+						if (entity1Ptr == *btt || entity2Ptr == *btt) {
+							//CreateExpolsion(Get<TTN_Transform>(*btt).GetPos());
+							Get<TTN_Physics>(*btt).GetRigidBody()->setGravity(btVector3(0.0f, -9.0f, 0.0f));
+							//Get<TTN_Physics>(*btt).GetRigidBody()->setAngularVelocity(btVector3(0.0f, -1.0f, 0.0f));
+							//Remove<TTN_Physics>(*btt);
+							TTN_DeleteCountDown countdown = TTN_DeleteCountDown(1.5f);
+							AttachCopy(*btt, countdown);
+							Get<EnemyComponent>(*btt).SetAlive(false);
+							btt = birds.erase(btt);
+						}
+						else {
+							btt++;
+						}
+
+					}
+				}
+
 			}
 		}
 	}
@@ -1519,7 +1571,6 @@ void Game::Damage(float deltaTime) {
 	while (can != enemyCannons.end()) {
 
 		if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetAttacking()) {
->>>>>>>>> Temporary merge branch 2
 			Get<TTN_MorphAnimator>(*can).SetActiveAnim(1);
 		}
 		can++;
@@ -1656,16 +1707,72 @@ void Game::BirdUpate(float deltaTime)
 	//move the birds
 	birdTimer += deltaTime;
 	birdTimer = fmod(birdTimer, 20);
-	float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
-	for (int i = 0; i < 3; i++) {
-		if (i == 0) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp(birdBase, birdTarget, t));
+	std::cout <<(fmod(birdTimer, 20)) <<std::endl;
+	//float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
 
-		if (i == 1) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
-		(birdBase + glm::vec3(3.0f, -3.0f, 3.0f), birdTarget + glm::vec3(3.0f, -3.0f, 3.0f), t));
+	if (birdTimer >= 19.0f) {
+		birdTimer = 0.0f;
+		std::vector<entt::entity>::iterator btt = birds.begin();
+		while (btt != birds.end()) {
+			TTN_DeleteCountDown countdown = TTN_DeleteCountDown(0.1f);
+			AttachCopy(*btt, countdown);
+			Get<EnemyComponent>(*btt).SetAlive(false);
+			btt = birds.erase(btt);
+		}
 
-		if (i == 2) Get<TTN_Transform>(birds[i]).SetPos(TTN_Interpolation::Lerp
-		(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f), birdTarget + glm::vec3(-3.0f, -3.0f, -3.0f), t));
+		for (int i = 0; i < 3; i++) {
+			//birds[i] = CreateEntity();
+			birds.push_back(CreateEntity());
+
+			//create a renderer
+			TTN_Renderer birdRenderer = TTN_Renderer(birdMesh, shaderProgramAnimatedTextured, birdMat);
+
+			//attach that renderer to the entity
+			AttachCopy(birds[i], birdRenderer);
+
+			//create an animator
+			TTN_MorphAnimator birdAnimator = TTN_MorphAnimator();
+
+			//create an animation for the bird flying
+			TTN_MorphAnimation flyingAnim = TTN_MorphAnimation({ 0, 1 }, { 10.0f / 24.0f, 10.0f / 24.0f }, true); //anim 0
+			birdAnimator.AddAnim(flyingAnim);
+			birdAnimator.SetActiveAnim(0);
+
+			//attach that animator to the entity
+			AttachCopy(birds[i], birdAnimator);
+
+			//create a transform
+			TTN_Transform birdTrans = TTN_Transform(birdBase, glm::vec3(0.0f), glm::vec3(1.0f));
+			if (i == 1) birdTrans.SetPos(birdBase + glm::vec3(3.0f, -3.0f, 3.0f));
+			if (i == 2) birdTrans.SetPos(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f));
+			birdTrans.RotateFixed(glm::vec3(0.0f, -45.0f + 180.0f, 0.0f));
+
+			//attach that transform to the entity
+			AttachCopy(birds[i], birdTrans);
+
+			//set up a physics body for the bird
+			TTN_Physics birdPhysBod = TTN_Physics(birdTrans.GetPos(), glm::vec3(0.0f), birdTrans.GetScale() * 2.5f, birds[i], TTN_PhysicsBodyType::DYNAMIC);
+			birdPhysBod.SetLinearVelocity(glm::vec3(-25.0f, 0.0f, -20.0f));
+			//attach the physics body to the entity
+			AttachCopy(birds[i], birdPhysBod);
+
+			TTN_Tag birdTag = TTN_Tag("Bird"); //sets bird to ttn_tag
+			AttachCopy<TTN_Tag>(birds[i], birdTag);
+
+			EnemyComponent en = EnemyComponent(birds[i], this, -1, -1, 0.0f);
+			en.SetBird(true);
+			AttachCopy(birds[i], en);
+		}
 	}
+
+	std::vector<entt::entity>::iterator btt = birds.begin();
+	while (btt != birds.end()) {
+		Get<TTN_Physics>(*btt).GetRigidBody()->setLinearVelocity(btVector3(-12.0f, 0.0f, -12.0f));
+		Get<TTN_Physics>(*btt).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+		btt++;
+	}
+
+
 }
 
 void Game::ImGui()

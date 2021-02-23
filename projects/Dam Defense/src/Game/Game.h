@@ -165,7 +165,8 @@ protected:
 	entt::entity smokePS;
 	entt::entity terrain;
 	entt::entity water;
-	entt::entity birds[3];
+	//entt::entity birds[3];
+	std::vector<entt::entity> birds;
 	entt::entity dam;
 
 	std::vector<entt::entity> flamethrowers;
@@ -186,7 +187,6 @@ protected:
 	//////// GAMEPLAY DATA ////////////
 	int lastWave = 3; //the wave the player needs to reach and beat to win
 	float damage = 2.0f; //damage of boats (dam health is 100.f)
-
 	unsigned m_score = 0;
 
 	/////// Terrain and water control data ////////
@@ -212,6 +212,7 @@ protected:
 	glm::vec3 birdBase = glm::vec3(100, 15, 135); //starting position
 	glm::vec3 birdTarget = glm::vec3(-100, 15, -65); //lerps to this position
 	float birdTimer;//timer to track how far through the lerp they are
+//	int birdNum=3; //number of birds
 
 	///////////SCENE CONTROL DATA///////////
 	bool m_paused; //wheter or not the scene is paused
