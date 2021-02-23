@@ -123,6 +123,8 @@ void Game::Update(float deltaTime)
 	//call the update on ImGui
 	ImGui();
 
+	//get fps
+	std::cout << "FPS: " << std::to_string(1.0f / deltaTime) << std::endl;
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
 }
@@ -260,7 +262,7 @@ void Game::PostRender()
 void Game::KeyDownChecks()
 {
 	//if the game is not paused and the input delay is over
-	if (!m_paused && m_InputDelay <= 0.0f) {
+	if (!m_paused && m_InputDelay <= 0.0f && !firstFrame) {
 		//and they press the 2 key, try to activate the flamethrower
 		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::One)) {
 			Flamethrower();
