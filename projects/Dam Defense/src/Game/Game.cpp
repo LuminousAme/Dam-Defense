@@ -42,6 +42,9 @@ void Game::Update(float deltaTime)
 	GameSounds(deltaTime);
 
 	if (!m_paused) {
+		//subtract from the input delay
+		if (m_InputDelay >= 0.0f) m_InputDelay -= deltaTime;
+
 		//look through all of the cannonballs updating them
 		for (int i = 0; i < cannonBalls.size(); i++) {
 			//if the cannonball is just falling, make it move the way it should
@@ -256,8 +259,8 @@ void Game::PostRender()
 //function to use to check for when a key is being pressed down for the first frame
 void Game::KeyDownChecks()
 {
-	//if the game is not paused
-	if (!m_paused) {
+	//if the game is not paused and the input delay is over
+	if (!m_paused && m_InputDelay <= 0.0f) {
 		//and they press the 2 key, try to activate the flamethrower
 		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::One)) {
 			Flamethrower();
@@ -266,6 +269,7 @@ void Game::KeyDownChecks()
 
 	//if they try to press the escape key, pause or unpause the game
 	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc)) {
+		m_InputDelay = m_InputDelayTime;
 		m_paused = !m_paused;
 		TTN_Scene::SetPaused(m_paused);
 	}
@@ -321,8 +325,8 @@ void Game::MouseButtonDownChecks()
 //function to check for when a mouse button is being pressed
 void Game::MouseButtonChecks()
 {
-	//if the game is not paused
-	if (!m_paused) {
+	//if the game is not paused and the input delay is over
+	if (!m_paused && m_InputDelay <= 0.0f) {
 		//if the cannon is not in the middle of firing, fire when the player is pressing the left mouse button
 		if (Get<TTN_MorphAnimator>(cannon).getActiveAnim() == 0 && playerShootCooldownTimer <= 0.0f &&
 			TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left)) {
@@ -792,10 +796,11 @@ void Game::RestartData()
 {
 	//player data
 	rotAmmount = glm::vec2(0.0f);
-	mousePos = TTN_Application::TTN_Input::GetMousePosition();
+
 	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
 	playerShootCooldownTimer = playerShootCooldown;
 	m_score = 0;
+	m_InputDelay = m_InputDelayTime;
 
 	//water and terrain data setup
 	water_time = 0.0f;
@@ -873,6 +878,9 @@ void Game::RestartData()
 	//and play the music
 	m_music->SetNextPostion(glm::vec3(0.0f));
 	m_music->PlayFromQueue();
+
+	mousePos = TTN_Application::TTN_Input::GetMousePosition();
+	firstFrame = true;
 }
 
 #pragma endregion
@@ -884,26 +892,30 @@ void Game::PlayerRotate(float deltaTime)
 	//get the mouse position
 	glm::vec2 tempMousePos = TTN_Application::TTN_Input::GetMousePosition();
 
-	//figure out how much the cannon and camera should be rotated
-	rotAmmount += (tempMousePos - mousePos) * 5.0f * deltaTime;
+	if (m_InputDelay <= 0.0f && !firstFrame) {
+		//figure out how much the cannon and camera should be rotated
+		glm::vec2 addAmmount = (tempMousePos - mousePos) * mouseSensetivity * deltaTime;
+		rotAmmount += addAmmount;
 
-	//clamp the rotation to within 85 degrees of the base rotation in all the directions
-	if (rotAmmount.x > 85.0f) rotAmmount.x = 85.0f;
-	else if (rotAmmount.x < -85.0f) rotAmmount.x = -85.0f;
-	if (rotAmmount.y > 85.0f) rotAmmount.y = 85.0f;
-	else if (rotAmmount.y < -85.0f) rotAmmount.y = -85.0f;
+		//clamp the rotation to within 85 degrees of the base rotation in all the directions
+		if (rotAmmount.x > 85.0f) rotAmmount.x = 85.0f;
+		else if (rotAmmount.x < -85.0f) rotAmmount.x = -85.0f;
+		if (rotAmmount.y > 85.0f) rotAmmount.y = 85.0f;
+		else if (rotAmmount.y < -85.0f) rotAmmount.y = -85.0f;
 
-	//reset the rotation
-	Get<TTN_Transform>(camera).LookAlong(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	//and rotate it by the ammount it should be rotated
-	Get<TTN_Transform>(camera).RotateFixed(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
-	//clear the direction the player is facing, and rotate it to face the same along
-	playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
-	playerDir = glm::vec3(glm::toMat4(glm::quat(glm::radians(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f)))) * glm::vec4(playerDir, 1.0f));
-	playerDir = glm::normalize(playerDir);
+		//reset the rotation
+		Get<TTN_Transform>(camera).LookAlong(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		//and rotate it by the ammount it should be rotated
+		Get<TTN_Transform>(camera).RotateFixed(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
+		//clear the direction the player is facing, and rotate it to face the same along
+		playerDir = glm::vec3(0.0f, 0.0f, 1.0f);
+		playerDir = glm::vec3(glm::toMat4(glm::quat(glm::radians(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f)))) * glm::vec4(playerDir, 1.0f));
+		playerDir = glm::normalize(playerDir);
+	}
 
 	//save the next position to rotate properly next frame
 	mousePos = tempMousePos;
+	firstFrame = false;
 }
 
 //called by update, makes the cannon switch back to it's not firing animation when it's firing animation has ended
