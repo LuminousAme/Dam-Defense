@@ -183,6 +183,8 @@ protected:
 	glm::vec2 rotAmmount;//the ammount the main player should be rotated
 	glm::vec3 playerDir;//the direction the cannon is currently facing
 	float playerShootCooldownTimer;//how much time until the player can shoot again
+	float mouseSensetivity = 5.0f; //the mouse senestivity for the player
+	bool firstFrame; //if it's the first frame of the game
 
 	//////// GAMEPLAY DATA ////////////
 	int lastWave = 3; //the wave the player needs to reach and beat to win
@@ -220,6 +222,8 @@ protected:
 	bool m_gameWin = false;//wheter or not the player has won
 	bool m_restart;//wheter or not the game is restarting
 	bool m_arcade = false; //wheter or not the game is in arcade mode
+	float m_InputDelayTime = 0.3f; //the ammount of time before it accepts player input, used when hte player is moving in and out of the scene
+	float m_InputDelay; //the time remaining before it accepts player input, used when the player is moving in and out of the scene
 
 	/////////////ENEMY AND WAVE CONTROLS//////////////////
 	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves

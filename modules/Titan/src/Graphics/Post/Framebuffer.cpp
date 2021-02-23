@@ -284,7 +284,7 @@ namespace Titan {
 		//Check the framebuffer status
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		{
-			printf("Framebuffer is not vibing\n");
+			LOG_ERROR("Framebuffer is not correctly set up");
 			return false;
 		}
 		return true;

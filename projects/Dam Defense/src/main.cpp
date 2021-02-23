@@ -115,8 +115,6 @@ int main() {
 			TTN_Application::TTN_Input::SetCursorLocked(true);
 			gameScene->SetArcade(titleScreenUI->GetShouldArcade());
 			titleScreenUI->SetShouldArcade(false);
-			gameScene->InitScene();
-			gameSceneUI->InitScene();
 			paused->InitScene();
 			gameOver->InitScene();
 			gameOverUI->InitScene();
@@ -129,6 +127,8 @@ int main() {
 			gameScene->SetShouldRender(true);
 			gameSceneUI->SetShouldRender(true);
 			firstTime = true;
+			gameSceneUI->InitScene();
+			gameScene->InitScene();
 		}
 
 		//for if it should be going to the game from the main menu and the player has already played the game in this session
