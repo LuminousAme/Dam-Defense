@@ -263,6 +263,7 @@ protected:
 	TTN_ParticleTemplate smokeParticle;//smoke burst particles
 	TTN_ParticleTemplate fireParticle;//fire particles
 	TTN_ParticleTemplate expolsionParticle;//expolsion particles
+	TTN_ParticleTemplate birdParticle;//bird expolsion particles
 
 	//set up functions, called by InitScene()
 protected:
@@ -298,6 +299,7 @@ protected:
 	void DeleteCannonballs();
 
 	void CreateExpolsion(glm::vec3 location);
+	void CreateBirdExpolsion(glm::vec3 location);
 
 	//CG assingment 2 stuff
 protected:

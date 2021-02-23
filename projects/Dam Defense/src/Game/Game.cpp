@@ -30,7 +30,7 @@ void Game::InitScene()
 void Game::Update(float deltaTime)
 {
 	engine.GetListener();
-	float normalizedMasterVolume = (float)masterVolume / 100.0f; 
+	float normalizedMasterVolume = (float)masterVolume / 100.0f;
 	float normalizedMusicVolume = (float)musicVolume / 100.0f;
 	float musicvol = TTN_Interpolation::ReMap(0.0, 1.0, 0.0, 50.0, normalizedMusicVolume * normalizedMasterVolume);
 	float normalizedSFXVolume = (float)sfxVolume / 100.0f;
@@ -88,7 +88,7 @@ void Game::Update(float deltaTime)
 			//sets gravity to 0
 			Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 		}
-	
+
 		//go through all the entities with enemy compontents
 		auto enemyView = GetScene()->view<EnemyComponent>();
 		for (auto entity : enemyView) {
@@ -704,7 +704,7 @@ void Game::SetUpEntities()
 		AttachCopy(birds[i], birdTrans);
 
 		//set up a physics body for the bird
-		TTN_Physics birdPhysBod = TTN_Physics(birdTrans.GetPos(), glm::vec3(0.0f), birdTrans.GetScale()*2.5f, birds[i], TTN_PhysicsBodyType::DYNAMIC);
+		TTN_Physics birdPhysBod = TTN_Physics(birdTrans.GetPos(), glm::vec3(0.0f), birdTrans.GetScale() * 3.5f, birds[i], TTN_PhysicsBodyType::DYNAMIC);
 		birdPhysBod.SetLinearVelocity(glm::vec3(-25.0f, 0.0f, -20.0f));
 		//attach the physics body to the entity
 		AttachCopy(birds[i], birdPhysBod);
@@ -781,6 +781,20 @@ void Game::SetUpOtherData()
 		expolsionParticle.SetOneStartSpeed(4.5f);
 	}
 
+	//bird particle template
+	{
+		birdParticle = TTN_ParticleTemplate();
+		birdParticle.SetMat(smokeMat);
+		birdParticle.SetMesh(sphereMesh);
+		birdParticle.SetTwoEndColors(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), glm::vec4(1.0f, 1.0f, 1.0f, 0.2f));
+		birdParticle.SetOneEndSize(0.5f);
+		birdParticle.SetOneEndSpeed(0.5f);
+		birdParticle.SetTwoLifetimes(0.85f, 1.10f);
+		birdParticle.SetTwoStartColors(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		birdParticle.SetOneStartSize(0.01f);
+		birdParticle.SetOneStartSpeed(10.2f);
+	}
+
 	//setup up the color correction effect
 	glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 	m_colorCorrectEffect = TTN_ColorCorrect::Create();
@@ -832,8 +846,8 @@ void Game::RestartData()
 	Dam_health = Dam_MaxHealth;
 
 	//bird data setup
-	birdTimer = 0.0f;
-	
+	birdTimer = 19.0f;
+
 	//scene data setup
 	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));
 	m_paused = false;
@@ -1019,6 +1033,34 @@ void Game::CreateExpolsion(glm::vec3 location)
 	//get a reference to that particle system and burst it
 	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(500);
 }
+
+void Game::CreateBirdExpolsion(glm::vec3 location)
+{
+	//we don't really need to save the entity number for any reason, so we just make the variable local
+	entt::entity newExpolsion = CreateEntity(2.0f);
+
+	//setup a transfrom for the particle system
+	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f));
+	//attach that transform to the entity
+	AttachCopy(newExpolsion, PSTrans);
+	glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
+
+	//setup a particle system for the particle system
+	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(420, 0, birdParticle, 0.0f, false);
+	//ps->MakeCircleEmitter(glm::vec3(0.0f));
+	ps->MakeSphereEmitter();
+	ps->VelocityReadGraphCallback(FastStart);
+	ps->ColorReadGraphCallback(SlowStart);
+	ps->ScaleReadGraphCallback(ZeroOneZero);
+	//setup a particle system component
+	TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
+	//attach the particle system component to the entity
+	AttachCopy(newExpolsion, psComponent);
+
+	//get a reference to that particle system and burst it
+	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(420);
+}
+
 
 //creates the flames for the flamethrower
 void Game::Flamethrower() {
@@ -1256,7 +1298,7 @@ void Game::SpawnBoatLeft()
 		//attach that animator to the entity
 		AttachCopy(enemyCannons[enemyCannons.size() - 1], cannonAnimator);
 	}
-	
+
 	Get<EnemyComponent>(boats[boats.size() - 1]).SetCannonEntity(enemyCannons[enemyCannons.size() - 1]);
 }
 
@@ -1431,7 +1473,7 @@ void Game::WaveUpdate(float deltaTime)
 				SpawnBoatRight();
 			else
 				SpawnBoatLeft();
-			
+
 			Get<TTN_Transform>(enemyCannons[enemyCannons.size() - 1]).SetParent(&Get<TTN_Transform>(boats[boats.size() - 1]), boats[boats.size() - 1]);
 
 			m_rightSideSpawn = !m_rightSideSpawn;
@@ -1524,11 +1566,9 @@ void Game::Collisions()
 					}
 				}
 
-
 				//if one is a bird and the other is a cannonball
 				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball") ||
 					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird"))) {
-
 					//then iterate through the list of cannonballs until you find the one that's collided
 					std::vector<std::pair<entt::entity, bool>>::iterator it = cannonBalls.begin();
 					while (it != cannonBalls.end()) {
@@ -1544,9 +1584,9 @@ void Game::Collisions()
 
 					std::vector<entt::entity>::iterator btt = birds.begin();
 					while (btt != birds.end()) {
-
 						if (entity1Ptr == *btt || entity2Ptr == *btt) {
 							//CreateExpolsion(Get<TTN_Transform>(*btt).GetPos());
+							CreateBirdExpolsion(Get<TTN_Transform>(*btt).GetPos());
 							Get<TTN_Physics>(*btt).GetRigidBody()->setGravity(btVector3(0.0f, -9.0f, 0.0f));
 							//Get<TTN_Physics>(*btt).GetRigidBody()->setAngularVelocity(btVector3(0.0f, -1.0f, 0.0f));
 							//Remove<TTN_Physics>(*btt);
@@ -1558,10 +1598,8 @@ void Game::Collisions()
 						else {
 							btt++;
 						}
-
 					}
 				}
-
 			}
 		}
 	}
@@ -1574,7 +1612,7 @@ void Game::Damage(float deltaTime) {
 	while (it != boats.end()) {
 		//check if the boat is close enough to the dam to damage it
 		if (Get<TTN_Transform>(*it).GetPos().z <= EnemyComponent::GetZTarget() + 2.0f * EnemyComponent::GetZTargetDistance())
-			//if it is, damage it	
+			//if it is, damage it
 			Dam_health = Dam_health - damage * deltaTime;
 		//and move onto the next boat
 		it++;
@@ -1583,7 +1621,6 @@ void Game::Damage(float deltaTime) {
 	//attack anim
 	std::vector<entt::entity>::iterator can = enemyCannons.begin(); //enemy cannon vector
 	while (can != enemyCannons.end()) {
-
 		if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetAttacking()) {
 			Get<TTN_MorphAnimator>(*can).SetActiveAnim(1);
 		}
@@ -1720,11 +1757,11 @@ void Game::BirdUpate(float deltaTime)
 {
 	//move the birds
 	birdTimer += deltaTime;
-	birdTimer = fmod(birdTimer, 20);
-	std::cout <<(fmod(birdTimer, 20)) <<std::endl;
+	//birdTimer = fmod(birdTimer, 20);
+	//std::cout << (fmod(birdTimer, 20)) << std::endl;
 	//float t = TTN_Interpolation::InverseLerp(0.0f, 20.0f, birdTimer);
 
-	if (birdTimer >= 19.0f) {
+	if (birdTimer >= 9.0f) {
 		birdTimer = 0.0f;
 		std::vector<entt::entity>::iterator btt = birds.begin();
 		while (btt != birds.end()) {
@@ -1765,7 +1802,7 @@ void Game::BirdUpate(float deltaTime)
 			AttachCopy(birds[i], birdTrans);
 
 			//set up a physics body for the bird
-			TTN_Physics birdPhysBod = TTN_Physics(birdTrans.GetPos(), glm::vec3(0.0f), birdTrans.GetScale() * 2.5f, birds[i], TTN_PhysicsBodyType::DYNAMIC);
+			TTN_Physics birdPhysBod = TTN_Physics(birdTrans.GetPos(), glm::vec3(0.0f), birdTrans.GetScale() * 3.5f, birds[i], TTN_PhysicsBodyType::DYNAMIC);
 			birdPhysBod.SetLinearVelocity(glm::vec3(-25.0f, 0.0f, -20.0f));
 			//attach the physics body to the entity
 			AttachCopy(birds[i], birdPhysBod);
@@ -1781,12 +1818,10 @@ void Game::BirdUpate(float deltaTime)
 
 	std::vector<entt::entity>::iterator btt = birds.begin();
 	while (btt != birds.end()) {
-		Get<TTN_Physics>(*btt).GetRigidBody()->setLinearVelocity(btVector3(-12.0f, 0.0f, -12.0f));
+		Get<TTN_Physics>(*btt).GetRigidBody()->setLinearVelocity(btVector3(-19.0f, 0.0f, -19.0f));
 		Get<TTN_Physics>(*btt).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 		btt++;
 	}
-
-
 }
 
 void Game::ImGui()
