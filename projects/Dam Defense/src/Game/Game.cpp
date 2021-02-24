@@ -889,6 +889,19 @@ void Game::RestartData()
 		it = boats.erase(it);
 	}
 
+	std::vector<entt::entity>::iterator itt = birds.begin();
+	while (itt != birds.end()) {
+		//add a countdown until it deletes
+		TTN_DeleteCountDown countdown = TTN_DeleteCountDown(0.001f);
+		AttachCopy(*itt, countdown);
+		
+		//mark it as dead
+		Get<EnemyComponent>(*itt).SetAlive(false);
+
+		itt = birds.erase(itt);
+	}
+
+
 	//sets the buses to not be paused
 	engine.GetBus("Music").SetPaused(false);
 	engine.GetBus("SFX").SetPaused(false);

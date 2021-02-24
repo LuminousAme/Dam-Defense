@@ -27,7 +27,10 @@ public:
 
 	bool GetShouldQuit() { return shouldQuit; }
 	bool GetShouldResume() { return shouldResume; }
+	bool GetShouldMenu() { return shouldMenu; }
+
 	void SetShouldResume(bool resume) { shouldResume = resume; }
+	void SetShouldMenu(bool menu) { shouldMenu = menu; }
 
 private:
 	//entities
@@ -42,6 +45,9 @@ private:
 	//quit
 	entt::entity quitButton;
 	entt::entity quitText;
+	//main menu
+	entt::entity menuButton;
+	entt::entity menuText;
 
 	//assets
 	TTN_Texture2D::st2dptr textureBackground;
@@ -51,8 +57,12 @@ private:
 	TTN_Texture2D::st2dptr textureResume;
 	TTN_Texture2D::st2dptr textureOptions;
 	TTN_Texture2D::st2dptr textureQuit;
+	TTN_Texture2D::st2dptr textureMainMenu;
+ 
 
 	//should quit the game
 	bool shouldQuit;
 	bool shouldResume;
+	bool shouldMenu;
+
 };
