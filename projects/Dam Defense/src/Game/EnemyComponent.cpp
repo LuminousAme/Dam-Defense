@@ -12,13 +12,17 @@ EnemyComponent::EnemyComponent()
 	m_ypos = 7.5f;
 	m_alive = true;
 	m_attacking = false;
+	m_bird = false;
 }
 
 EnemyComponent::EnemyComponent(entt::entity boat, TTN_Scene* scene, int boatType, int path, float damageCooldown)
-	: m_entityNumber(boat), m_scene(scene), m_boatType(boatType), m_path(path), m_damageCooldown(damageCooldown), m_ypos(0.0f), m_alive(true), m_attacking(false)
+	: m_entityNumber(boat), m_scene(scene), m_boatType(boatType), m_path(path), m_damageCooldown(damageCooldown), m_ypos(0.0f), m_alive(true), m_attacking(false), m_bird(false)
 {
 	//set the y position as approriate based on ship model
 	switch (m_boatType) {
+	case -1:
+		m_ypos = -3.0f;
+		break;
 	case 0:
 		m_ypos = -8.5f;
 		break;
@@ -272,6 +276,10 @@ void EnemyComponent::Update(float deltaTime)
 
 		//sink the ship
 		tBoat.SetPos(tBoat.GetPos() + glm::vec3(0.0f, -2.0f * deltaTime, 0.0f));
+
+		if (m_bird) {
+			tBoat.RotateFixed(glm::vec3(0.0f, 0.0f, -90.0f * 0.5f * deltaTime));
+		}
 	}
 
 }

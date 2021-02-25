@@ -10,6 +10,7 @@ PauseMenu::PauseMenu()
 {
 	shouldQuit = false;
 	shouldResume = false;
+	shouldMenu = false;
 }
 
 void PauseMenu::InitScene()
@@ -22,6 +23,7 @@ void PauseMenu::InitScene()
 	textureResume = TTN_AssetSystem::GetTexture2D("Resume-Text");
 	textureOptions = TTN_AssetSystem::GetTexture2D("Options-Text");
 	textureQuit = TTN_AssetSystem::GetTexture2D("Quit-Text");
+	textureMainMenu = TTN_AssetSystem::GetTexture2D("Main Menu");
 
 	//setup the entities
 	//main camera
@@ -54,39 +56,54 @@ void PauseMenu::InitScene()
 	}
 
 	//text
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 4; i++) {
 		entt::entity temp = CreateEntity();
 		if (i == 0) resumeText = temp;
 		else if (i == 1) optionsText = temp;
-		else if (i == 2) quitText = temp;
+		else if (i == 2) menuText = temp;
+		else if (i == 3) quitText = temp;
 
 		//create a transform for the text
 		TTN_Transform textTrans;
-		if (i == 0) textTrans = TTN_Transform(glm::vec3(500.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+	/*	if (i == 0) textTrans = TTN_Transform(glm::vec3(300.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
 		else if (i == 1) textTrans = TTN_Transform(glm::vec3(0.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-500.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-300.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		else if (i == 3) textTrans = TTN_Transform(glm::vec3(-600.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));*/
+
+		if (i == 0) textTrans = TTN_Transform(glm::vec3(657.75f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		else if (i == 1) textTrans = TTN_Transform(glm::vec3(254.75, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-148.25, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		else if (i == 3) textTrans = TTN_Transform(glm::vec3(-551.25, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
 		AttachCopy(temp, textTrans);
 
 		//create a 2D renderer for the button
 		TTN_Renderer2D textRenderer;
 		if (i == 0) textRenderer = TTN_Renderer2D(textureResume);
 		else if (i == 1) textRenderer = TTN_Renderer2D(textureOptions);
-		else if (i == 2) textRenderer = TTN_Renderer2D(textureQuit);
+		else if (i == 2) textRenderer = TTN_Renderer2D(textureMainMenu);
+		else if (i == 3) textRenderer = TTN_Renderer2D(textureQuit);
 		AttachCopy(temp, textRenderer);
 	}
 
 	//buttons
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 4; i++) {
 		entt::entity temp = CreateEntity();
 		if (i == 0) resumeButton = temp;
 		else if (i == 1) optionsButton = temp;
-		else if (i == 2) quitButton = temp;
+		else if (i == 2) menuButton = temp;
+		else if (i == 3) quitButton = temp;
 
 		//create a transform for the button
 		TTN_Transform buttonTrans;
-		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(500.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		/*if (i == 0) buttonTrans = TTN_Transform(glm::vec3(300.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
 		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(0.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
-		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-500.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-300.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		else if (i == 3) buttonTrans = TTN_Transform(glm::vec3(-600.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));*/
+		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(657.75f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(254.75, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-148.25, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		else if (i == 3) buttonTrans = TTN_Transform(glm::vec3(-551.25, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+
 		AttachCopy(temp, buttonTrans);
 
 		//create a 2D renderer for the button
@@ -149,6 +166,18 @@ void PauseMenu::Update(float deltaTime)
 		Get<TTN_Renderer2D>(optionsButton).SetSprite(textureButton1);
 	}
 
+	//get options buttons transform
+	TTN_Transform menuButtonTrans = Get<TTN_Transform>(menuButton);
+	if (mousePosWorldSpace.x < menuButtonTrans.GetPos().x + 0.5f * abs(menuButtonTrans.GetScale().x) &&
+		mousePosWorldSpace.x > menuButtonTrans.GetPos().x - 0.5f * abs(menuButtonTrans.GetScale().x) &&
+		mousePosWorldSpace.y < menuButtonTrans.GetPos().y + 0.5f * abs(menuButtonTrans.GetScale().y) &&
+		mousePosWorldSpace.y > menuButtonTrans.GetPos().y - 0.5f * abs(menuButtonTrans.GetScale().y)) {
+		Get<TTN_Renderer2D>(menuButton).SetSprite(textureButton2);
+	}
+	else {
+		Get<TTN_Renderer2D>(menuButton).SetSprite(textureButton1);
+	}
+
 	//get quit buttons transform
 	TTN_Transform quitButtonTrans = Get<TTN_Transform>(quitButton);
 	if (mousePosWorldSpace.x < quitButtonTrans.GetPos().x + 0.5f * abs(quitButtonTrans.GetScale().x) &&
@@ -195,6 +224,16 @@ void PauseMenu::MouseButtonDownChecks()
 			mousePosWorldSpace.y < optionsButtonTrans.GetPos().y + 0.5f * abs(optionsButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > optionsButtonTrans.GetPos().y - 0.5f * abs(optionsButtonTrans.GetScale().y)) {
 			//do something
+		}
+
+		//get menu buttons transform
+		TTN_Transform menuButtonTrans = Get<TTN_Transform>(menuButton);
+		if (mousePosWorldSpace.x < menuButtonTrans.GetPos().x + 0.5f * abs(menuButtonTrans.GetScale().x) &&
+			mousePosWorldSpace.x > menuButtonTrans.GetPos().x - 0.5f * abs(menuButtonTrans.GetScale().x) &&
+			mousePosWorldSpace.y < menuButtonTrans.GetPos().y + 0.5f * abs(menuButtonTrans.GetScale().y) &&
+			mousePosWorldSpace.y > menuButtonTrans.GetPos().y - 0.5f * abs(menuButtonTrans.GetScale().y)) {
+			//do something
+			shouldMenu = true;
 		}
 
 		//get quit buttons transform

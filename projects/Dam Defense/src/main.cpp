@@ -145,8 +145,11 @@ int main() {
 			gameWin->SetShouldRender(false);
 			gameWinUI->SetShouldRender(false);
 			gameScene->SetShouldRender(true);
+			gameScene->SetPaused(false);
 			gameSceneUI->SetShouldRender(true);
 			gameScene->RestartData();
+			paused->SetShouldRender(false);
+
 		}
 
 		//check if the game should quit
@@ -174,6 +177,21 @@ int main() {
 			gameScene->SetPaused(false);
 			paused->SetShouldResume(false);
 			paused->SetShouldRender(false);
+		}
+
+		//if the menu has appeared and the player has pressesd the menu button from the menu button
+		else if (gameScene->GetShouldRender() && paused->GetShouldRender() && paused->GetShouldMenu()) {
+			TTN_Application::TTN_Input::SetCursorLocked(false);
+			gameScene->SetGameIsPaused(false);
+			gameScene->SetShouldRender(false);
+			gameSceneUI->SetShouldRender(false);
+			paused->SetShouldRender(false);
+			//paused->SetShouldResume(true);
+			paused->SetShouldMenu(false);
+			audioEngine.GetBus("Music").SetPaused(true);
+			audioEngine.GetBus("SFX").SetPaused(true);
+			titleScreen->SetShouldRender(true);
+			titleScreenUI->SetShouldRender(true);
 		}
 
 		//if the game is over
@@ -204,6 +222,7 @@ int main() {
 			gameScene->SetGameIsOver(false);
 			gameScene->RestartData();
 		}
+		
 		//game over go to menu
 		if (gameOverUI->GetShouldRender() && gameOverUI->GetShouldMenu() && gameOver->GetShouldRender()) {
 			gameOver->SetShouldRender(false);
