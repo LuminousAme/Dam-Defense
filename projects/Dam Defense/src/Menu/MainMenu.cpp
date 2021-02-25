@@ -757,7 +757,7 @@ void MainMenuUI::InitScene()
 		gameLogo = CreateEntity();
 
 		//create a transform for the logo
-		TTN_Transform logoTrans = TTN_Transform(glm::vec3(0.0f, 360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1603.0f, 185.5f, 1.0f));
+		TTN_Transform logoTrans = TTN_Transform(glm::vec3(0.0f, 310.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1714.0f * 0.8f, 435.0f * 0.8f, 1.0f));
 		AttachCopy(gameLogo, logoTrans);
 
 		//create a sprite renderer for the logo
