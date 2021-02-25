@@ -1606,6 +1606,14 @@ void Game::Collisions()
 							AttachCopy(*btt, countdown);
 							Get<EnemyComponent>(*btt).SetAlive(false);
 							btt = birds.erase(btt);
+							//subtract score
+							if (m_score > 50) {
+								m_score= m_score - 50;
+							}
+							else {
+								//do nothing
+							}
+
 						}
 						else {
 							btt++;
