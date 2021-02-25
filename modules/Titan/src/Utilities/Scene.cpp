@@ -408,7 +408,7 @@ namespace Titan {
 						currentShader->SetUniform("u_NumOfLights", (int)m_Lights.size());
 
 						//stuff from the camera
-						currentShader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetPos());
+						currentShader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetGlobalPos());
 					}
 				}
 
