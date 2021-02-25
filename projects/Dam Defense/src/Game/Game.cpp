@@ -787,12 +787,12 @@ void Game::SetUpOtherData()
 		birdParticle.SetMat(smokeMat);
 		birdParticle.SetMesh(sphereMesh);
 		birdParticle.SetTwoEndColors(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), glm::vec4(1.0f, 1.0f, 1.0f, 0.2f));
-		birdParticle.SetOneEndSize(0.5f);
-		birdParticle.SetOneEndSpeed(0.5f);
+		birdParticle.SetOneEndSize(0.65f);
+		birdParticle.SetOneEndSpeed(0.13f);
 		birdParticle.SetTwoLifetimes(0.85f, 1.10f);
 		birdParticle.SetTwoStartColors(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 		birdParticle.SetOneStartSize(0.01f);
-		birdParticle.SetOneStartSpeed(10.2f);
+		birdParticle.SetOneStartSpeed(10.9f);
 	}
 
 	//setup up the color correction effect
@@ -1059,8 +1059,8 @@ void Game::CreateBirdExpolsion(glm::vec3 location)
 	glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
 
 	//setup a particle system for the particle system
-	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(420, 0, birdParticle, 0.0f, false);
-	//ps->MakeCircleEmitter(glm::vec3(0.0f));
+	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(25, 0, birdParticle, 0.0f, false);
+	//ps->MakeCircleEmitter(glm::vec3(0.01f));
 	ps->MakeSphereEmitter();
 	ps->VelocityReadGraphCallback(FastStart);
 	ps->ColorReadGraphCallback(SlowStart);
@@ -1071,9 +1071,8 @@ void Game::CreateBirdExpolsion(glm::vec3 location)
 	AttachCopy(newExpolsion, psComponent);
 
 	//get a reference to that particle system and burst it
-	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(420);
+	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(25);
 }
-
 
 //creates the flames for the flamethrower
 void Game::Flamethrower() {
@@ -1510,7 +1509,7 @@ void Game::Collisions()
 		//grab the entity numbers of the colliding entities
 		entt::entity entity1Ptr = collisionsThisFrame[i]->GetBody1();
 		entt::entity entity2Ptr = collisionsThisFrame[i]->GetBody2();
-
+		 
 		//check if both entities still exist
 		if (TTN_Scene::GetScene()->valid(entity1Ptr) && TTN_Scene::GetScene()->valid(entity2Ptr)) {
 			bool cont = true;
