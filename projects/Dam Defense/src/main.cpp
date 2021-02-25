@@ -149,7 +149,6 @@ int main() {
 			gameSceneUI->SetShouldRender(true);
 			gameScene->RestartData();
 			paused->SetShouldRender(false);
-
 		}
 
 		//check if the game should quit
