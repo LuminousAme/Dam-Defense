@@ -38,7 +38,6 @@ void PauseMenu::InitScene()
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		Get<TTN_Camera>(cam).CalcOrtho(-960.0f, 960.0f, -540.0f, 540.0f, 0.0f, 10.0f);
-		//Get<TTN_Camera>(cam).CalcPerspective(60.0f, 1.78f, 0.01f, 1000.f);
 		Get<TTN_Camera>(cam).View();
 	}
 
@@ -65,14 +64,10 @@ void PauseMenu::InitScene()
 
 		//create a transform for the text
 		TTN_Transform textTrans;
-	/*	if (i == 0) textTrans = TTN_Transform(glm::vec3(300.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 1) textTrans = TTN_Transform(glm::vec3(0.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-300.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 3) textTrans = TTN_Transform(glm::vec3(-600.0f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));*/
 
 		if (i == 0) textTrans = TTN_Transform(glm::vec3(657.75f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
 		else if (i == 1) textTrans = TTN_Transform(glm::vec3(254.75, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-148.25, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-148.25, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.0f, 150.0f / 2.0f, 1.0f));
 		else if (i == 3) textTrans = TTN_Transform(glm::vec3(-551.25, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
 		AttachCopy(temp, textTrans);
 

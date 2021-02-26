@@ -279,7 +279,6 @@ void MainMenu::SetUpEntities()
 
 		//setup a transform for the cannon
 		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(0.0f, -0.4f, -0.25f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
-		cannonTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
 		//attach that transform to the entity
 		AttachCopy(cannon, cannonTrans);
 
@@ -758,7 +757,7 @@ void MainMenuUI::InitScene()
 		gameLogo = CreateEntity();
 
 		//create a transform for the logo
-		TTN_Transform logoTrans = TTN_Transform(glm::vec3(0.0f, 360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1603.0f, 185.5f, 1.0f));
+		TTN_Transform logoTrans = TTN_Transform(glm::vec3(0.0f, 310.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1714.0f * 0.8f, 435.0f * 0.8f, 1.0f));
 		AttachCopy(gameLogo, logoTrans);
 
 		//create a sprite renderer for the logo

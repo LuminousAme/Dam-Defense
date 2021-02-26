@@ -29,7 +29,6 @@ namespace Titan {
 		//parent
 		void SetParent(TTN_Transform* parent, entt::entity parentEntity);
 
-
 		//GETTERS
 		//position
 		glm::vec3 GetPos();

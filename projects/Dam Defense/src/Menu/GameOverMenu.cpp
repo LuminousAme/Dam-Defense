@@ -278,7 +278,6 @@ void GameOverMenu::SetUpEntities()
 
 		//setup a transform for the cannon
 		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(0.0f, -0.4f, -0.25f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
-		cannonTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
 		//attach that transform to the entity
 		AttachCopy(cannon, cannonTrans);
 
