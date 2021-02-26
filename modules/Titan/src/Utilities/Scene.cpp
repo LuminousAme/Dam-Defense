@@ -216,6 +216,18 @@ namespace Titan {
 				Get<TTN_MorphAnimator>(entity).getActiveAnimRef().Update(deltaTime);
 			}
 
+			//run through all of the entities with a 2D animatior and update it
+			auto v_2DanimatorView = m_Registry->view<TTN_2DAnimator>();
+			for (auto entity : v_2DanimatorView) {
+				//update the active animation
+				Get<TTN_2DAnimator>(entity).GetActiveAnimRef().Update(deltaTime);
+
+				//if it also has a sprite renderer update the sprite it should be rendering
+				if (Has<TTN_Renderer2D>(entity)) {
+					Get<TTN_Renderer2D>(entity).SetSprite(Get<TTN_2DAnimator>(entity).GetActiveAnimRef().GetCurrentFrame());
+				}
+			}
+
 			//run through all the of the entities with a particle system and run their updates
 			auto psView = m_Registry->view<TTN_ParticeSystemComponent>();
 			for (auto entity : psView) {

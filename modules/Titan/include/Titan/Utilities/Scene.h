@@ -15,6 +15,7 @@
 #include "Titan/Utilities/Tag.h"
 #include "Titan/Systems/Physics.h"
 #include "Titan/Systems/MAnimator.h"
+#include "Titan/Systems/2DAnimator.h"
 #include "Titan/Systems/Particle.h"
 //include all the graphics features we need
 #include "Titan/Graphics/Shader.h"

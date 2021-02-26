@@ -289,29 +289,6 @@ void Game::KeyDownChecks()
 //function to cehck for when a key is being pressed
 void Game::KeyChecks()
 {
-	auto& a = Get<TTN_Transform>(camera);
-	/// CAMERA MOVEMENT FOR A2 ///
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
-		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y, a.GetPos().z + 2.0f));
-	}
-
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
-		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y, a.GetPos().z - 2.0f));
-	}
-
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
-		a.SetPos(glm::vec3(a.GetPos().x + 2.0f, a.GetPos().y, a.GetPos().z));
-	}
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
-		a.SetPos(glm::vec3(a.GetPos().x - 2.0f, a.GetPos().y, a.GetPos().z));
-	}
-
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::LeftControl)) {
-		a.SetPos(glm::vec3(a.GetPos().x - 2.0f, a.GetPos().y - 2.0f, a.GetPos().z));
-	}
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Space)) {
-		a.SetPos(glm::vec3(a.GetPos().x - 2.0f, a.GetPos().y + 2.0f, a.GetPos().z));
-	}
 }
 
 //function to check for when a key has been released

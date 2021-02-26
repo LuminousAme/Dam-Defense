@@ -16,8 +16,9 @@ namespace Titan {
 
 	//constructor that takes in data
 	TTN_MorphAnimator::TTN_MorphAnimator(std::vector<TTN_MorphAnimation> anims, int activeAnim)
-		: m_CurrentAnim(activeAnim), m_Anims(anims)
+		: m_Anims(anims)
 	{
+		SetActiveAnim(activeAnim);
 	}
 
 	//Adds a morph target animation to this animator
