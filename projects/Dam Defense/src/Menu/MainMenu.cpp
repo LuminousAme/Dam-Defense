@@ -951,6 +951,7 @@ void MainMenuUI::MouseButtonDownChecks()
 			mousePosWorldSpace.y < optionsButtonTrans.GetPos().y + 0.5f * abs(optionsButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > optionsButtonTrans.GetPos().y - 0.5f * abs(optionsButtonTrans.GetScale().y)) {
 			//do something
+			shouldOptions = true;
 		}
 
 		//get quit buttons transform

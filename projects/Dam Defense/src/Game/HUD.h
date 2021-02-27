@@ -51,6 +51,7 @@ private:
 	//health numbers
 	std::vector<entt::entity> healthNums;
 	float healthTextScale = 0.4f;
+
 	//score text
 	entt::entity scoreText;
 	float scoreTextScale = 0.5f;

@@ -1,5 +1,5 @@
 //Dam Defense, by Atlas X Games
-//PauseMenu.h, the header file for the class that represents the main menu
+//PauseMenu.h, the header file for the class that represents the pause menu
 #pragma once
 
 //include required features from titan
@@ -28,9 +28,11 @@ public:
 	bool GetShouldQuit() { return shouldQuit; }
 	bool GetShouldResume() { return shouldResume; }
 	bool GetShouldMenu() { return shouldMenu; }
+	bool GetShouldOptions() { return shouldOptions; }
 
 	void SetShouldResume(bool resume) { shouldResume = resume; }
 	void SetShouldMenu(bool menu) { shouldMenu = menu; }
+	void SetShouldOptions(bool option) { shouldOptions = option; }
 
 private:
 	//entities
@@ -59,10 +61,9 @@ private:
 	TTN_Texture2D::st2dptr textureQuit;
 	TTN_Texture2D::st2dptr textureMainMenu;
  
-
 	//should quit the game
 	bool shouldQuit;
 	bool shouldResume;
 	bool shouldMenu;
-
+	bool shouldOptions;
 };

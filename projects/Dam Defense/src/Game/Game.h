@@ -50,6 +50,11 @@ public:
 
 	float GetDamHealth() { return Dam_health; }
 
+	float GetMouseSensitivity() { return mouseSensetivity; }
+	void SetMouseSensitivity(float sensitivity) { mouseSensetivity = sensitivity; }
+
+	void SetMasterVolume(float vol) { masterVolume = (int)vol; }
+
 	float GetFlameThrowerCoolDownTime() {
 		if (Flaming)
 			return std::clamp(TTN_Interpolation::ReMap(FlameActiveTime, 0.0f, FlameThrowerCoolDown, FlameActiveTime, FlameAnim), 0.0f, FlameTimer);
@@ -74,7 +79,7 @@ public:
 
 	unsigned GetWave() { return m_currentWave; }
 	bool GetWaveOver() { return playJingle; }
-	
+
 	void SetArcade(bool arcade) { m_arcade = arcade; }
 	bool GetArcade() { return m_arcade; }
 
@@ -144,7 +149,7 @@ public:
 
 	//sound
 	TTN_AudioEngine& engine = TTN_AudioEngine::Instance();
-	
+
 	TTN_AudioEventHolder::saehptr m_cannonFiringSounds;
 	TTN_AudioEventHolder::saehptr m_splashSounds;
 	TTN_AudioEventHolder::saehptr m_music;
@@ -183,7 +188,7 @@ protected:
 	glm::vec2 rotAmmount;//the ammount the main player should be rotated
 	glm::vec3 playerDir;//the direction the cannon is currently facing
 	float playerShootCooldownTimer;//how much time until the player can shoot again
-	float mouseSensetivity = 5.0f; //the mouse senestivity for the player
+	float mouseSensetivity = 50.0f; //the mouse senestivity for the player
 	bool firstFrame; //if it's the first frame of the game
 
 	//////// GAMEPLAY DATA ////////////

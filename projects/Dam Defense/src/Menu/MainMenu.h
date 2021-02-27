@@ -145,12 +145,14 @@ public:
 	void SetShouldPlay(bool play) { shouldPlay = play; }
 	void SetShouldQuit(bool quit) { shouldQuit = quit; }
 	void SetShouldArcade(bool arcade) { shouldArcade = arcade; }
+	void SetShouldOptions(bool options) { shouldOptions = options; }
 
 	bool GetFirstTime() { return firstTime; }
 
 	bool GetShouldPlay() { return shouldPlay; }
 	bool GetShouldQuit() { return shouldQuit; }
 	bool GetShouldArcade() { return shouldArcade; }
+	bool GetShouldOptions() { return shouldOptions; }
 
 private:
 	//entities
@@ -182,4 +184,5 @@ private:
 	bool shouldPlay;
 	bool firstTime;
 	bool shouldArcade;
+	bool shouldOptions;
 };

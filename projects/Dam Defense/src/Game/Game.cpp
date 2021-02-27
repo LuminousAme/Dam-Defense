@@ -124,7 +124,7 @@ void Game::Update(float deltaTime)
 	ImGui();
 
 	//get fps
-	std::cout << "FPS: " << std::to_string(1.0f / deltaTime) << std::endl;
+	//std::cout << "FPS: " << std::to_string(1.0f / deltaTime) << std::endl;
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
 }
@@ -271,6 +271,7 @@ void Game::KeyDownChecks()
 
 	//if they try to press the escape key, pause or unpause the game
 	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc)) {
+		
 		m_InputDelay = m_InputDelayTime;
 		m_paused = !m_paused;
 		TTN_Scene::SetPaused(m_paused);
@@ -323,6 +324,7 @@ void Game::MouseButtonChecks()
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
 			m_cannonFiringSounds->SetNextPostion(glm::vec3(0.0f));
 			m_cannonFiringSounds->PlayFromQueue();
+			std::cout << "GAMEEEEEEEEEEEE : " <<mouseSensetivity << std::endl;
 		}
 	}
 }
@@ -869,7 +871,6 @@ void Game::RestartData()
 		itt = birds.erase(itt);
 	}
 
-
 	//sets the buses to not be paused
 	engine.GetBus("Music").SetPaused(false);
 	engine.GetBus("SFX").SetPaused(false);
@@ -905,7 +906,7 @@ void Game::PlayerRotate(float deltaTime)
 
 	if (m_InputDelay <= 0.0f && !firstFrame) {
 		//figure out how much the cannon and camera should be rotated
-		glm::vec2 addAmmount = (tempMousePos - mousePos) * mouseSensetivity * deltaTime;
+		glm::vec2 addAmmount = (tempMousePos - mousePos) * (mouseSensetivity/5.f) * deltaTime;
 		rotAmmount += addAmmount;
 
 		//clamp the rotation to within 85 degrees of the base rotation in all the directions
@@ -1811,6 +1812,7 @@ void Game::ImGui()
 	ImGui::SliderInt("Master", &masterVolume, 0, 100);
 	ImGui::SliderInt("Music", &musicVolume, 0, 100);
 	ImGui::SliderInt("Sound Effects", &sfxVolume, 0, 100);
+	ImGui::SliderFloat("Mouse", &mouseSensetivity, 0.0f, 100.0f);
 
 	ImGui::End();
 
