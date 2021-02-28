@@ -54,6 +54,8 @@ public:
 	void SetMouseSensitivity(float sensitivity) { mouseSensetivity = sensitivity; }
 
 	void SetMasterVolume(float vol) { masterVolume = (int)vol; }
+	void SetMusicVolume(float vol) { musicVolume = (int)vol; }
+	void SetSFXVolume(float vol) { sfxVolume = (int)vol; }
 
 	float GetFlameThrowerCoolDownTime() {
 		if (Flaming)
@@ -219,7 +221,6 @@ protected:
 	glm::vec3 birdBase = glm::vec3(100, 15, 135); //starting position
 	glm::vec3 birdTarget = glm::vec3(-100, 15, -65); //lerps to this position
 	float birdTimer;//timer to track how far through the lerp they are
-//	int birdNum=3; //number of birds
 
 	///////////SCENE CONTROL DATA///////////
 	bool m_paused; //wheter or not the scene is paused

@@ -33,6 +33,11 @@ public:
 	float GetVolume() { return volume; }
 	void SetVolume(float vol) { volume = vol; }
 
+	float GetVolumeMusic() { return volumeMusic; }
+	void SetVolumeMusic(float vol) { volumeMusic = vol; }
+
+	float GetVolumeSFX() { return volumeSFX; }
+	void SetVolumeSFX(float vol) { volumeSFX = vol; }
 
 	bool GetShouldBack() { return shouldBack; }
 	//bool GetShouldResume() { return shouldResume; }
@@ -59,52 +64,47 @@ private:
 
 	float mouse_sen;
 
-	//mouse sensitivity bar border and bg
+	//master volume bar border and bg
 	entt::entity volumeBarBorder;
 	entt::entity volumeBarBg;
-	//mouse sensitivity bar
+	//master volume bar
 	entt::entity volumeBar;
-	float volumeScale = 0.3f;
-	//mouse sensitivity numbers
+	float volumeScale = 0.3f;//scale of bar
+	//master volume numbers
 	std::vector<entt::entity> volumeNums;
 	float volumeNumScale = 0.4f;
 
-	float volume;
+	//sfx volume bar border and bg
+	entt::entity SFXvolumeBarBorder;
+	entt::entity SFXvolumeBarBg;
+	//sfx volume bar
+	entt::entity SFXvolumeBar;
+	//sfx volume numbers
+	std::vector<entt::entity> SFXvolumeNums;
 
+	//music volume bar border and bg
+	entt::entity MusicVolumeBarBorder;
+	entt::entity MusicVolumeBarBg;
+	//music volume bar
+	entt::entity MusicVolumeBar;
+	//music volume numbers
+	std::vector<entt::entity> MusicVolumeNums;
+
+	//volume controls
+	float volume;
+	float volumeSFX;
+	float volumeMusic;
 
 	//assets
-	TTN_Texture2D::st2dptr textureOptions;
-	//TTN_Texture2D::st2dptr texturePaused;
-	//TTN_Texture2D::st2dptr textureSensitivity;
-
+	TTN_Texture2D::st2dptr textureOptions;//options text/title
+	
 	void MakeMouseNumEntity();
 	void MakeVolumeNumEntity();
-
+	void MakeMusicNumEntity();
+	void MakeSFXNumEntity();
 
 	//should go back to pause
 	bool shouldBack;
 	//should go back to mainmenu
 	bool shouldMenu;
 };
-
-//
-////get the number of digits in a number
-//inline unsigned GetNumOfDigits(unsigned int number) {
-//	//if we're on the last digit, return 1
-//	if (number < 10) {
-//		return 1;
-//	}
-//	//otherwise add 1, remove a digit, and call the function recursively
-//	else
-//		return GetNumOfDigits(number / 10) + 1;
-//}
-//
-////gets a given digit from a number
-//inline unsigned GetDigit(unsigned number, unsigned digit) {
-//	unsigned divisor = 1;
-//
-//	for (unsigned i = 0; i < digit; i++)
-//		divisor *= 10;
-//
-//	return (number / divisor % 10);
-//}

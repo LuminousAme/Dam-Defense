@@ -134,7 +134,6 @@ int main() {
 			firstTime = true;
 			gameSceneUI->InitScene();
 			gameScene->InitScene();
-
 		}
 
 		//for if it should be going to the game from the main menu and the player has already played the game in this session
@@ -342,9 +341,11 @@ int main() {
 			gameSceneUI->SetFlameThrowerMaxCoolDown(gameScene->GetFlameThrowerMaxCoolDownTime());
 			gameSceneUI->SetFlameThrowerCoolDownTime(gameScene->GetFlameThrowerCoolDownTime());
 			gameSceneUI->SetFlameThrowerRealCoolDown(gameScene->GetRealFlameThrowerCoolDownTime());
-			//options->SetMouseSen(gameScene->GetMouseSensitivity());
+			//options
 			gameScene->SetMouseSensitivity(options->GetMouseSen());
-			gameScene->SetMasterVolume (options->GetVolume());
+			gameScene->SetMasterVolume(options->GetVolume());
+			gameScene->SetMusicVolume(options->GetVolumeMusic());
+			gameScene->SetSFXVolume(options->GetVolumeSFX());
 		}
 
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)
