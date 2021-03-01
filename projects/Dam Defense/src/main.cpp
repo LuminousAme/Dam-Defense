@@ -107,6 +107,8 @@ int main() {
 			titleScreen->SetShouldRender(true);
 			titleScreenUI->InitScene();
 			titleScreenUI->SetShouldRender(true);
+			options->InitScene();
+			options->SetShouldRender(false);
 		}
 
 		/// PLAY ///
@@ -166,7 +168,6 @@ int main() {
 			titleScreenUI->SetShouldOptions(false);
 			TTN_Application::TTN_Input::SetCursorLocked(false);
 			titleScreenUI->SetShouldArcade(false);
-			options->InitScene();
 			options->SetShouldRender(true);
 		}
 
@@ -242,7 +243,7 @@ int main() {
 			paused->SetShouldRender(false);
 			paused->SetShouldOptions(false);
 		}
-		//if player has pressed the B lkey to go back to the pause menu
+		//if player has pressed the B key to go back to the pause menu
 		else if (!paused->GetShouldRender() && gameScene->GetPaused() && options->GetShouldBack() && options->GetShouldRender()) {
 			TTN_Application::TTN_Input::SetCursorLocked(false);
 			options->SetShouldRender(false);
@@ -346,6 +347,9 @@ int main() {
 			gameScene->SetMasterVolume(options->GetVolume());
 			gameScene->SetMusicVolume(options->GetVolumeMusic());
 			gameScene->SetSFXVolume(options->GetVolumeSFX());
+			gameScene->SetNoLut(options->GetOff());
+			gameScene->SetWarmLut(options->GetColor());
+			gameScene->SetDiff(options->GetDiff());
 		}
 
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)

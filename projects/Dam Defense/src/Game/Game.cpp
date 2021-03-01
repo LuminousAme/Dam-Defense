@@ -87,6 +87,8 @@ void Game::Update(float deltaTime)
 		for (int i = 0; i < boats.size(); i++) {
 			//sets gravity to 0
 			Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+			Get<EnemyComponent>(boats[i]).SetDifficulty(difficulty);
+
 		}
 
 		//go through all the entities with enemy compontents
@@ -115,6 +117,18 @@ void Game::Update(float deltaTime)
 	}
 	if (m_currentWave > lastWave && !m_arcade) {
 		m_gameWin = true;
+	}
+
+	if (m_applyWarmLut) {
+		m_colorCorrectEffect->SetShouldApply(true);
+		m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
+		//and make sure the cool and customs luts are set not to render
+		m_applyCoolLut = false;
+		m_applyCustomLut = false;
+	}
+	else {
+		//if it's been turned of set the effect not to render
+		m_colorCorrectEffect->SetShouldApply(false);
 	}
 
 	//update the sound
@@ -271,7 +285,6 @@ void Game::KeyDownChecks()
 
 	//if they try to press the escape key, pause or unpause the game
 	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc)) {
-		
 		m_InputDelay = m_InputDelayTime;
 		m_paused = !m_paused;
 		TTN_Scene::SetPaused(m_paused);
@@ -324,7 +337,7 @@ void Game::MouseButtonChecks()
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
 			m_cannonFiringSounds->SetNextPostion(glm::vec3(0.0f));
 			m_cannonFiringSounds->PlayFromQueue();
-			std::cout << "GAMEEEEEEEEEEEE : " <<mouseSensetivity << std::endl;
+			std::cout << "GAMEEEEEEEEEEEE : " << mouseSensetivity << std::endl;
 		}
 	}
 }
@@ -906,7 +919,7 @@ void Game::PlayerRotate(float deltaTime)
 
 	if (m_InputDelay <= 0.0f && !firstFrame) {
 		//figure out how much the cannon and camera should be rotated
-		glm::vec2 addAmmount = (tempMousePos - mousePos) * (mouseSensetivity/5.f) * deltaTime;
+		glm::vec2 addAmmount = (tempMousePos - mousePos) * (mouseSensetivity / 5.f) * deltaTime;
 		rotAmmount += addAmmount;
 
 		//clamp the rotation to within 85 degrees of the base rotation in all the directions
@@ -1293,8 +1306,7 @@ void Game::SpawnBoatRight()
 		boats.push_back(CreateEntity());
 		//gets the type of boat
 		int randomBoat = rand() % 3;
-		//int randomBoat = 0;
-
+		
 		//create a renderer
 		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
 		//set up renderer for green boat
@@ -1481,7 +1493,7 @@ void Game::Collisions()
 		//grab the entity numbers of the colliding entities
 		entt::entity entity1Ptr = collisionsThisFrame[i]->GetBody1();
 		entt::entity entity2Ptr = collisionsThisFrame[i]->GetBody2();
-		 
+
 		//check if both entities still exist
 		if (TTN_Scene::GetScene()->valid(entity1Ptr) && TTN_Scene::GetScene()->valid(entity2Ptr)) {
 			bool cont = true;
@@ -1577,7 +1589,7 @@ void Game::Collisions()
 							btt = birds.erase(btt);
 							//subtract score
 							if (m_score > 50) {
-								m_score= m_score - 50;
+								m_score = m_score - 50;
 							}
 						}
 						else {
@@ -2069,7 +2081,6 @@ void Game::ImGui()
 		}
 
 		//Ramp controls
-
 		//diffuse ramp
 		if (ImGui::Checkbox("Use Diffuse Ramp", &m_useDiffuseRamp)) {
 			for (int i = 0; i < m_mats.size(); i++) {

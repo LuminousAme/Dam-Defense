@@ -12,6 +12,13 @@ void OptionsMenu::InitScene()
 	volume = 100.f;
 	volumeMusic = 20.f;
 	volumeSFX = 5.0f;
+	textureButton1 = TTN_AssetSystem::GetTexture2D("Button Base");
+	textureButton2 = TTN_AssetSystem::GetTexture2D("Button Hovering");
+	diff = 100.0f; //difficulty multiplier
+
+	//color correction bools
+	Off = true;
+	color = false;
 
 	//main camera
 	{
@@ -198,7 +205,7 @@ void OptionsMenu::InitScene()
 			SFXvolumeBarBorder = CreateEntity();
 
 			//create a transform for the mouse sensitivity bar overlay
-			TTN_Transform healthTrans = TTN_Transform(glm::vec3(0.0f, 20.0f, 0.9f), glm::vec3(0.0f), glm::vec3(4200.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+			TTN_Transform healthTrans = TTN_Transform(glm::vec3(0.0f, 120.0f, 0.9f), glm::vec3(0.0f), glm::vec3(4200.0f * mouseScale, 239.0f * mouseScale, 1.0f));
 			AttachCopy(SFXvolumeBarBorder, healthTrans);
 
 			//create a sprite renderer for the mouse sensitivity bar overlay
@@ -212,7 +219,7 @@ void OptionsMenu::InitScene()
 			SFXvolumeBar = CreateEntity();
 
 			//create a transform for the health bar
-			TTN_Transform healthTrans = TTN_Transform(glm::vec3(0.0f, 20.0f, 1.0f), glm::vec3(0.0f), glm::vec3(4200.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+			TTN_Transform healthTrans = TTN_Transform(glm::vec3(0.0f, 120.0f, 1.0f), glm::vec3(0.0f), glm::vec3(4200.0f * mouseScale, 239.0f * mouseScale, 1.0f));
 			AttachCopy(SFXvolumeBar, healthTrans);
 
 			//create a sprite renderer for the health bar
@@ -228,7 +235,7 @@ void OptionsMenu::InitScene()
 			SFXvolumeBarBg = CreateEntity();
 
 			//create a transform for the mouse bar background
-			TTN_Transform healthTrans = TTN_Transform(glm::vec3(0.0f, 20.0f, 1.1f), glm::vec3(0.0f), glm::vec3(4200.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+			TTN_Transform healthTrans = TTN_Transform(glm::vec3(0.0f, 120.0f, 1.1f), glm::vec3(0.0f), glm::vec3(4200.0f * mouseScale, 239.0f * mouseScale, 1.0f));
 			AttachCopy(SFXvolumeBarBg, healthTrans);
 
 			//create a sprite renderer for the mouse bar background
@@ -236,6 +243,131 @@ void OptionsMenu::InitScene()
 
 			AttachCopy(SFXvolumeBarBg, healthRenderer);
 		}
+	}
+
+#pragma endregion
+
+	//indicator for no color correction
+	{
+		for (int i = 0; i < 2; i++) {
+			//button border
+			{
+				//create an entity in the scene for the bar border
+				entt::entity temp = CreateEntity();
+				if (i == 0) OffBarBorder = temp;
+				else if (i == 1) ColorBarBorder = temp;
+
+				//create a transform for the mouse sensitivity bar overlay
+				TTN_Transform buttonTrans;
+				if (i == 0) buttonTrans = TTN_Transform(glm::vec3(450.0f, 20.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+				else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(50.0f, 20.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+				AttachCopy(temp, buttonTrans);
+
+				//create a sprite renderer for the bar overlay
+				TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar Border"));
+				AttachCopy(temp, healthRenderer);
+			}
+
+			// off button
+			{
+				//create an entity in the scene for off bar
+				entt::entity temp = CreateEntity();
+				if (i == 0) OffBar = temp;
+				else if (i == 1) ColorBar = temp;
+
+				//create a transform for the off button
+				TTN_Transform buttonTrans;
+				if (i == 0) buttonTrans = TTN_Transform(glm::vec3(450.0f, 20.0f, 0.1f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+				else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(50.0f, 20.0f, 0.1f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+				AttachCopy(temp, buttonTrans);
+
+				//create a sprite renderer for the health bar
+				TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar"), glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+				AttachCopy(temp, healthRenderer);
+			}
+
+			// off button background
+			{
+				entt::entity temp = CreateEntity();
+				if (i == 0) OffBarBg = temp;
+				else if (i == 1) ColorBarBg = temp;
+
+				//create a transform for the off button
+				TTN_Transform buttonTrans;
+				if (i == 0) buttonTrans = TTN_Transform(glm::vec3(450.0f, 20.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+				else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(50.0f, 20.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+				AttachCopy(temp, buttonTrans);
+
+				//create a sprite renderer for the mouse bar background
+				TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar BG"), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
+				AttachCopy(temp, healthRenderer);
+			}
+		}
+	}
+
+	//actual button
+	for (int i = 0; i < 2; i++) {
+		entt::entity temp = CreateEntity();
+		if (i == 0) buttonOff = temp;
+		else if (i == 1) buttonColor1 = temp;
+
+		//create a transform for the button
+		TTN_Transform buttonTrans;
+		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(650.0f, 0.0f, 2.0f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(250.0, 0.0f, 2.0f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		AttachCopy(temp, buttonTrans);
+
+		//create a 2D renderer for the button
+		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureButton1);
+		AttachCopy(temp, buttonRenderer);
+	}
+
+#pragma region DIFFICULTY
+
+	//difficulty bar border
+	{
+		//create an entity in the scene for the mouse sensitivity bar overlay
+		diffBarBorder = CreateEntity();
+
+		//create a transform for the mouse sensitivity bar overlay
+		TTN_Transform healthTrans = TTN_Transform(glm::vec3(0.0f, -120.0f, 0.9f), glm::vec3(0.0f), glm::vec3(4200.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+		AttachCopy(diffBarBorder, healthTrans);
+
+		//create a sprite renderer for the mouse sensitivity bar overlay
+		TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar Border"));
+		AttachCopy(diffBarBorder, healthRenderer);
+	}
+
+	// difficulty bar
+	{
+		//create an entity for the health bar
+		diffBar = CreateEntity();
+
+		//create a transform for the health bar
+		TTN_Transform healthTrans = TTN_Transform(glm::vec3(0.0f, -120.0f, 1.0f), glm::vec3(0.0f), glm::vec3(4200.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+		AttachCopy(diffBar, healthTrans);
+
+		//create a sprite renderer for the health bar
+		TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar"), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		float normalizedDiff = diff / 200.f;
+		healthRenderer.SetHoriMask(normalizedDiff);
+		AttachCopy(diffBar, healthRenderer);
+	}
+
+	// difficulty bar background
+	{
+		//create an entity for the mouse bar background
+		diffBarBg = CreateEntity();
+
+		//create a transform for the mouse bar background
+		TTN_Transform healthTrans = TTN_Transform(glm::vec3(0.0f, -120.0f, 1.1f), glm::vec3(0.0f), glm::vec3(4200.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+		AttachCopy(diffBarBg, healthTrans);
+
+		//create a sprite renderer for the mouse bar background
+		TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar BG"), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
+		AttachCopy(diffBarBg, healthRenderer);
 	}
 
 #pragma endregion
@@ -321,6 +453,58 @@ void OptionsMenu::Update(float deltaTime)
 		}
 	}
 
+	//update the difficulty number
+	{
+		unsigned difficult = std::ceil(diff);
+		while (GetNumOfDigits(difficult) < diffNums.size()) {
+			DeleteEntity(diffNums[diffNums.size() - 1]);
+			diffNums.pop_back();
+		}
+
+		if (GetNumOfDigits(difficult) > diffNums.size())
+			MakeDiffNumEntity();
+
+		for (int i = 0; i < diffNums.size(); i++) {
+			Get<TTN_Renderer2D>(diffNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(difficult, diffNums.size() - i - 1)) + "-Text"));
+		}
+	}
+
+	//get buttons transform
+	TTN_Transform buttonOffTrans = Get<TTN_Transform>(buttonOff);
+	if (mousePosWorldSpace.x < buttonOffTrans.GetPos().x + 0.5f * abs(buttonOffTrans.GetScale().x) &&
+		mousePosWorldSpace.x > buttonOffTrans.GetPos().x - 0.5f * abs(buttonOffTrans.GetScale().x) &&
+		mousePosWorldSpace.y < buttonOffTrans.GetPos().y + 0.5f * abs(buttonOffTrans.GetScale().y) &&
+		mousePosWorldSpace.y > buttonOffTrans.GetPos().y - 0.5f * abs(buttonOffTrans.GetScale().y)) {
+		Get<TTN_Renderer2D>(buttonOff).SetSprite(textureButton2);
+	}
+	else {
+		Get<TTN_Renderer2D>(buttonOff).SetSprite(textureButton1);
+	}
+
+	//get buttons transform
+	TTN_Transform buttonColor1Trans = Get<TTN_Transform>(buttonColor1);
+	if (mousePosWorldSpace.x < buttonColor1Trans.GetPos().x + 0.5f * abs(buttonColor1Trans.GetScale().x) &&
+		mousePosWorldSpace.x > buttonColor1Trans.GetPos().x - 0.5f * abs(buttonColor1Trans.GetScale().x) &&
+		mousePosWorldSpace.y < buttonColor1Trans.GetPos().y + 0.5f * abs(buttonColor1Trans.GetScale().y) &&
+		mousePosWorldSpace.y > buttonColor1Trans.GetPos().y - 0.5f * abs(buttonColor1Trans.GetScale().y)) {
+		Get<TTN_Renderer2D>(buttonColor1).SetSprite(textureButton2);
+	}
+	else {
+		Get<TTN_Renderer2D>(buttonColor1).SetSprite(textureButton1);
+	}
+
+	if (Off) {
+		Get<TTN_Renderer2D>(OffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		Get<TTN_Renderer2D>(ColorBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+		//std::cout << "OFFFFFFF" << std::endl;
+	}
+
+	if (color) {
+		Get<TTN_Renderer2D>(OffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+		Get<TTN_Renderer2D>(ColorBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		//std::cout << "COLOR" << std::endl;
+	}
+	//std::cout << "Diff" << diff << std::endl;
 
 	//update the base scene
 	TTN_Scene::Update(deltaTime);
@@ -328,7 +512,6 @@ void OptionsMenu::Update(float deltaTime)
 
 void OptionsMenu::MouseButtonDownChecks()
 {
-
 	if (TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left)) {
 		//get the mouse position
 		glm::vec2 mousePos = TTN_Application::TTN_Input::GetMousePosition();
@@ -344,7 +527,7 @@ void OptionsMenu::MouseButtonDownChecks()
 			mousePosWorldSpace = glm::vec3(newX, newY, 2.0f);
 		}
 
-		//get play buttons transform
+		///// BARS /////
 		TTN_Transform playButtonTrans = Get<TTN_Transform>(mouseSensitivity);
 		if (mousePosWorldSpace.x < playButtonTrans.GetPos().x + 0.5f * abs(playButtonTrans.GetScale().x) &&
 			mousePosWorldSpace.x > playButtonTrans.GetPos().x - 0.5f * abs(playButtonTrans.GetScale().x) &&
@@ -426,10 +609,10 @@ void OptionsMenu::MouseButtonDownChecks()
 				normalizedSFX = 0.5f;
 
 			else if (mousePosWorldSpace.x > 0.0f)
-				normalizedSFX = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / MusicVolumeBarTrans.GetScale().x) * 100.f)) - 0.5f);
+				normalizedSFX = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / SFXVolumeBarTrans.GetScale().x) * 100.f)) - 0.5f);
 
 			else if (mousePosWorldSpace.x < 0.0f)
-				normalizedSFX = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / MusicVolumeBarTrans.GetScale().x) * 100.f)) + 0.5f);
+				normalizedSFX = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / SFXVolumeBarTrans.GetScale().x) * 100.f)) + 0.5f);
 			else
 				float normalizedSFX = volumeSFX / 100.f;
 
@@ -437,9 +620,64 @@ void OptionsMenu::MouseButtonDownChecks()
 			volumeSFX = normalizedSFX * 100.f;
 		}
 
+		// buttons
+		//get buttons transform
+		TTN_Transform buttonOffTrans = Get<TTN_Transform>(buttonOff);
+		if (mousePosWorldSpace.x < buttonOffTrans.GetPos().x + 0.5f * abs(buttonOffTrans.GetScale().x) &&
+			mousePosWorldSpace.x > buttonOffTrans.GetPos().x - 0.5f * abs(buttonOffTrans.GetScale().x) &&
+			mousePosWorldSpace.y < buttonOffTrans.GetPos().y + 0.5f * abs(buttonOffTrans.GetScale().y) &&
+			mousePosWorldSpace.y > buttonOffTrans.GetPos().y - 0.5f * abs(buttonOffTrans.GetScale().y)) {
+			Off = true;
+			color = false;
+			//	std::cout << "OFFFF " << std::endl;
+		}
 
+		//get buttons transform
+		TTN_Transform buttonColor1Trans = Get<TTN_Transform>(buttonColor1);
+		if (mousePosWorldSpace.x < buttonColor1Trans.GetPos().x + 0.5f * abs(buttonColor1Trans.GetScale().x) &&
+			mousePosWorldSpace.x > buttonColor1Trans.GetPos().x - 0.5f * abs(buttonColor1Trans.GetScale().x) &&
+			mousePosWorldSpace.y < buttonColor1Trans.GetPos().y + 0.5f * abs(buttonColor1Trans.GetScale().y) &&
+			mousePosWorldSpace.y > buttonColor1Trans.GetPos().y - 0.5f * abs(buttonColor1Trans.GetScale().y)) {
+			color = true;
+			Off = false;
+			//			std::cout << "COLOR" << std::endl;
+		}
+
+		TTN_Transform diffBarTrans = Get<TTN_Transform>(diffBar);
+		if (mousePosWorldSpace.x < diffBarTrans.GetPos().x + 0.5f * abs(diffBarTrans.GetScale().x) &&
+			mousePosWorldSpace.x > diffBarTrans.GetPos().x - 0.5f * abs(diffBarTrans.GetScale().x) &&
+			mousePosWorldSpace.y < diffBarTrans.GetPos().y + 0.5f * abs(diffBarTrans.GetScale().y) &&
+			mousePosWorldSpace.y > diffBarTrans.GetPos().y - 0.5f * abs(diffBarTrans.GetScale().y)) {
+			float normalizedDiff = diff / 200.f;
+			if (mousePosWorldSpace.x == 0.0f) {
+				normalizedDiff = 0.5f;
+				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
+			}
+
+			else if (mousePosWorldSpace.x > 0.0f) {
+				normalizedDiff = abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) - 0.5f);
+				//std::cout << (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f) - 0.5f << std::endl;
+				std::cout << abs(TTN_Interpolation::ReMap(00.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) - 0.5f) << std::endl;
+				std::cout << abs(TTN_Interpolation::ReMap(10.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) - 0.5f) << "  SEP "<< std::endl;
+				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
+			}
+
+			else if (mousePosWorldSpace.x < 0.0f) {
+				normalizedDiff = abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) + 0.5f);
+				//std::cout << (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f) + 0.5f << std::endl;
+				std::cout << abs(TTN_Interpolation::ReMap(00.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) + 0.5f) << std::endl;
+				std::cout << abs(TTN_Interpolation::ReMap(10.0f, 200.0f, 0.0f, 1.0f, (abs( (mousePosWorldSpace.x-10.f) / diffBarTrans.GetScale().x) * 200.f)) + 0.5f) << "  SEP 1" << std::endl;
+				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
+			}
+			else {
+				float normalizedDiff = diff / 200.f;
+				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
+			}
+
+			diff = normalizedDiff * 200.f;
+			std::cout << diff << " difficulty " << std::endl;
+		}
 	}
-
 }
 
 void OptionsMenu::KeyDownChecks()
@@ -510,6 +748,25 @@ void OptionsMenu::MakeMusicNumEntity()
 	AttachCopy(MusicVolumeNums[MusicVolumeNums.size() - 1], numRenderer);
 }
 
+void OptionsMenu::MakeDiffNumEntity()
+{
+	diffNums.push_back(CreateEntity());
+
+	//reference to the health bar's transform
+	TTN_Transform& volumeTrans = Get<TTN_Transform>(diffBar);
+
+	//setup a transform for the new entity
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(volumeTrans.GetGlobalPos().x + 0.3f * std::abs(volumeTrans.GetScale().x) -
+		(float)diffNums.size() * 0.5f * numScale * 150.0f, volumeTrans.GetGlobalPos().y, volumeTrans.GetGlobalPos().z),
+		glm::vec3(0.0f), glm::vec3(numScale * 150.0f, numScale * 150.0f, 1.0f));
+	AttachCopy(diffNums[diffNums.size() - 1], numTrans);
+
+	//setup a 2D renderer for the new entity
+	//create a sprite renderer for the logo
+	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
+	AttachCopy(diffNums[diffNums.size() - 1], numRenderer);
+}
+
 void OptionsMenu::MakeSFXNumEntity()
 {
 	SFXvolumeNums.push_back(CreateEntity());
@@ -519,8 +776,8 @@ void OptionsMenu::MakeSFXNumEntity()
 
 	//setup a transform for the new entity
 	TTN_Transform numTrans = TTN_Transform(glm::vec3(volumeTrans.GetGlobalPos().x + 0.3f * std::abs(volumeTrans.GetScale().x) -
-		(float)SFXvolumeNums.size() * 0.5f * volumeNumScale * 150.0f, volumeTrans.GetGlobalPos().y, volumeTrans.GetGlobalPos().z),
-		glm::vec3(0.0f), glm::vec3(volumeNumScale * 150.0f, volumeNumScale * 150.0f, 1.0f));
+		(float)SFXvolumeNums.size() * 0.5f * numScale * 150.0f, volumeTrans.GetGlobalPos().y, volumeTrans.GetGlobalPos().z),
+		glm::vec3(0.0f), glm::vec3(numScale * 150.0f, numScale * 150.0f, 1.0f));
 	AttachCopy(SFXvolumeNums[SFXvolumeNums.size() - 1], numTrans);
 
 	//setup a 2D renderer for the new entity
@@ -528,4 +785,3 @@ void OptionsMenu::MakeSFXNumEntity()
 	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
 	AttachCopy(SFXvolumeNums[SFXvolumeNums.size() - 1], numRenderer);
 }
-

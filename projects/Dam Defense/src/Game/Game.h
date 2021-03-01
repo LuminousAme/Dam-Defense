@@ -57,6 +57,23 @@ public:
 	void SetMusicVolume(float vol) { musicVolume = (int)vol; }
 	void SetSFXVolume(float vol) { sfxVolume = (int)vol; }
 
+	void SetDiff(float diff) { difficulty = diff; }
+	float GetDiff() { return difficulty; }
+
+	void SetNoLut(bool lut) {
+		if (lut) {
+			m_applyWarmLut = false;
+			m_applyCoolLut = false;
+			m_applyCustomLut = false;
+		}
+	}
+
+	void SetWarmLut(bool lut) { m_applyWarmLut = lut; }
+
+	//m_applyWarmLut;
+	//bool m_applyCoolLut;
+	//bool m_applyCustomLut;
+
 	float GetFlameThrowerCoolDownTime() {
 		if (Flaming)
 			return std::clamp(TTN_Interpolation::ReMap(FlameActiveTime, 0.0f, FlameThrowerCoolDown, FlameActiveTime, FlameAnim), 0.0f, FlameTimer);
@@ -244,6 +261,7 @@ protected:
 	bool m_rightSideSpawn = true; //wheter or not it should be using the right (true) or left (false) spawner
 	bool m_waveInProgress;
 	bool m_firstWave = true;
+	float difficulty = 100.0f;
 
 	/////////// SOUND CONTROL///////////////
 	//control melody

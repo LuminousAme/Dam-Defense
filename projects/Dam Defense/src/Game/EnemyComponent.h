@@ -25,8 +25,10 @@ public:
 	void SetAlive(bool alive) { m_alive = alive; }
 	void SetAttacking(bool attacking) { m_attacking = attacking; }
 	void SetCannonEntity(entt::entity entity) { m_cannonEntityRef = entity; }
+	void SetDifficulty(float d) { m_diff = d; }
 	//getters
 	int GetBoatType() { return m_boatType; }
+	int GetDifficulty() { return m_diff; }
 	int GetPath() { return m_path; }
 	float GetCooldown() { return m_damageCooldown; }
 	bool GetAlive() { return m_alive; }
@@ -48,6 +50,8 @@ protected:
 	int m_boatType; // 0 is green, 1 is red, 2 is yellow
 	int m_path; //which path the boat is taking, 0 left side middle, 1 left side far, 2 left side close, 3 right side middle, 4 right side far, 5 right side close
 	float m_damageCooldown; //cooldown between the shots from the enemy ships
+
+	float m_diff;// how fast ships go
 
 	float m_ypos; //the y position of the boat, determined by the boat type
 	inline static float m_ztarget = 10.0f; //the target z position near the dam that the enemy ship seeks
