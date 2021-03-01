@@ -120,13 +120,13 @@ private:
 	entt::entity ColorBar;
 
 	/// buttons /////
-	//arcade
+	//off color correction
 	entt::entity buttonOff;
 	entt::entity OffText;
-	//options
+	//color blind 1
 	entt::entity buttonColor1;
 	entt::entity colorText;
-	//quit
+	// other colorblind/color correction
 	entt::entity buttonColor2;
 	entt::entity colorText2;
 
@@ -140,8 +140,44 @@ private:
 	entt::entity diffBar;
 	//nums representation
 	std::vector<entt::entity> diffNums;
-
+	//difficulty value for speed 
 	float diff;
+
+
+	//easy border and bg
+	entt::entity EasyDiffBorder;
+	entt::entity EasyDiffBarBg;
+	// easy inidicator
+	entt::entity EasyDiffBar;
+
+	//regular diff. border and bg
+	entt::entity RegDiffBorder;
+	entt::entity RegDiffBarBg;
+	// regular diff inidicator
+	entt::entity RegDiffBar;
+
+	//hard border and bg
+	entt::entity HardDiffBorder;
+	entt::entity HardDiffBarBg;
+	// hard inidicator
+	entt::entity HardDiffBar;
+
+	/// difficulty buttons /////
+	//off color correction
+	entt::entity buttonEasy;
+	entt::entity EasyText;
+	//color blind 1
+	entt::entity buttonReg;
+	entt::entity RegText;
+	// other colorblind/color correction
+	entt::entity buttonHard;
+	entt::entity HardText;
+
+	//difficulty bools
+	bool easy;
+	bool reg;
+	bool hard;
+
 
 	//assets
 	TTN_Texture2D::st2dptr textureOptions;//options text/title
@@ -158,4 +194,5 @@ private:
 	bool shouldBack;
 	//should go back to mainmenu
 	bool shouldMenu;
+
 };

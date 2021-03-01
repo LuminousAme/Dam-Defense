@@ -20,6 +20,11 @@ void OptionsMenu::InitScene()
 	Off = true;
 	color = false;
 
+	//difficulty bools
+	easy = false;
+	reg = true;
+	hard = false;
+
 	//main camera
 	{
 		//create an entity in the scene for the camera
@@ -323,7 +328,7 @@ void OptionsMenu::InitScene()
 		AttachCopy(temp, buttonRenderer);
 	}
 
-#pragma region DIFFICULTY
+#pragma region DIFFICULTY BAR
 
 	//difficulty bar border
 	{
@@ -371,6 +376,89 @@ void OptionsMenu::InitScene()
 	}
 
 #pragma endregion
+
+	//indicator for difficulty
+	{
+		for (int i = 0; i < 3; i++) {
+			//button border
+			{
+				//create an entity in the scene for the bar border
+				entt::entity temp = CreateEntity();
+				if (i == 0) EasyDiffBorder = temp;
+				else if (i == 1) RegDiffBorder = temp;
+				else if (i == 2) HardDiffBorder = temp;
+
+				//create a transform for the mouse sensitivity bar overlay
+				TTN_Transform buttonTrans;
+				if (i == 0) buttonTrans = TTN_Transform(glm::vec3(450.0f, -220.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * buttonScale, 239.0f * buttonScale, 1.0f));
+				else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(50.0f, -220.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * buttonScale, 239.0f * buttonScale, 1.0f));
+				else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-450.0f, -220.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * buttonScale, 239.0f * buttonScale, 1.0f));
+				AttachCopy(temp, buttonTrans);
+
+				//create a sprite renderer for the bar overlay
+				TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar Border"));
+				AttachCopy(temp, healthRenderer);
+			}
+
+			// bar indicator
+			{
+				//create an entity in the scene for off bar
+				entt::entity temp = CreateEntity();
+				if (i == 0) EasyDiffBar = temp;
+				else if (i == 1) RegDiffBar = temp;
+				else if (i == 2) HardDiffBar = temp;
+
+				//create a transform for the off button
+				TTN_Transform buttonTrans;
+				if (i == 0) buttonTrans = TTN_Transform(glm::vec3(450.0f, -220.0f, 0.1f), glm::vec3(0.0f), glm::vec3(249.0f * buttonScale, 239.0f * buttonScale, 1.0f));
+				else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(50.0f, -220.0f, 0.1f), glm::vec3(0.0f), glm::vec3(249.0f * buttonScale, 239.0f * buttonScale, 1.0f));
+				else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-450.0f, -220.0f, 0.1f), glm::vec3(0.0f), glm::vec3(249.0f * buttonScale, 239.0f * buttonScale, 1.0f));
+				AttachCopy(temp, buttonTrans);
+
+				//create a sprite renderer for the health bar
+				TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar"), glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+				AttachCopy(temp, healthRenderer);
+			}
+
+			// off button background
+			{
+				entt::entity temp = CreateEntity();
+				if (i == 0) EasyDiffBarBg = temp;
+				else if (i == 1) RegDiffBarBg = temp;
+				else if (i == 2) HardDiffBarBg = temp;
+
+				//create a transform for the off button
+				TTN_Transform buttonTrans;
+				if (i == 0) buttonTrans = TTN_Transform(glm::vec3(450.0f, -220.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * buttonScale, 239.0f * buttonScale, 1.0f));
+				else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(50.0f, -220.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * buttonScale, 239.0f * buttonScale, 1.0f));
+				else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-450.0f, -220.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * buttonScale, 239.0f * buttonScale, 1.0f));
+				AttachCopy(temp, buttonTrans);
+
+				//create a sprite renderer for the mouse bar background
+				TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar BG"), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+				AttachCopy(temp, healthRenderer);
+			}
+		}
+	}
+
+	//actual button
+	for (int i = 0; i < 3; i++) {
+		entt::entity temp = CreateEntity();
+		if (i == 0) buttonEasy = temp;
+		else if (i == 1) buttonReg = temp;
+		else if (i == 2) buttonHard = temp;
+
+		//create a transform for the button
+		TTN_Transform buttonTrans;
+		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(650.0f, -220.0f, 0.9f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(250.0f, -220.0f, 0.9f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-250.0f, -220.0f, 0.9f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		AttachCopy(temp, buttonTrans);
+
+		//create a 2D renderer for the button
+		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureButton1);
+		AttachCopy(temp, buttonRenderer);
+	}
 }
 
 void OptionsMenu::Update(float deltaTime)
@@ -504,8 +592,62 @@ void OptionsMenu::Update(float deltaTime)
 		Get<TTN_Renderer2D>(ColorBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 		//std::cout << "COLOR" << std::endl;
 	}
-	//std::cout << "Diff" << diff << std::endl;
 
+	//button hovering update
+	{
+		TTN_Transform buttonEasyTrans = Get<TTN_Transform>(buttonEasy);
+		if (mousePosWorldSpace.x < buttonEasyTrans.GetPos().x + 0.5f * abs(buttonEasyTrans.GetScale().x) &&
+			mousePosWorldSpace.x > buttonEasyTrans.GetPos().x - 0.5f * abs(buttonEasyTrans.GetScale().x) &&
+			mousePosWorldSpace.y < buttonEasyTrans.GetPos().y + 0.5f * abs(buttonEasyTrans.GetScale().y) &&
+			mousePosWorldSpace.y > buttonEasyTrans.GetPos().y - 0.5f * abs(buttonEasyTrans.GetScale().y)) {
+			Get<TTN_Renderer2D>(buttonEasy).SetSprite(textureButton2);
+		}
+		else {
+			Get<TTN_Renderer2D>(buttonEasy).SetSprite(textureButton1);
+		}
+
+		TTN_Transform buttonRegTrans = Get<TTN_Transform>(buttonReg);
+		if (mousePosWorldSpace.x < buttonRegTrans.GetPos().x + 0.5f * abs(buttonRegTrans.GetScale().x) &&
+			mousePosWorldSpace.x > buttonRegTrans.GetPos().x - 0.5f * abs(buttonRegTrans.GetScale().x) &&
+			mousePosWorldSpace.y < buttonRegTrans.GetPos().y + 0.5f * abs(buttonRegTrans.GetScale().y) &&
+			mousePosWorldSpace.y > buttonRegTrans.GetPos().y - 0.5f * abs(buttonRegTrans.GetScale().y)) {
+			Get<TTN_Renderer2D>(buttonReg).SetSprite(textureButton2);
+		}
+		else {
+			Get<TTN_Renderer2D>(buttonReg).SetSprite(textureButton1);
+		}
+
+		TTN_Transform buttonHardTrans = Get<TTN_Transform>(buttonHard);
+		if (mousePosWorldSpace.x < buttonHardTrans.GetPos().x + 0.5f * abs(buttonHardTrans.GetScale().x) &&
+			mousePosWorldSpace.x > buttonHardTrans.GetPos().x - 0.5f * abs(buttonHardTrans.GetScale().x) &&
+			mousePosWorldSpace.y < buttonHardTrans.GetPos().y + 0.5f * abs(buttonHardTrans.GetScale().y) &&
+			mousePosWorldSpace.y > buttonHardTrans.GetPos().y - 0.5f * abs(buttonHardTrans.GetScale().y)) {
+			Get<TTN_Renderer2D>(buttonHard).SetSprite(textureButton2);
+		}
+		else {
+			Get<TTN_Renderer2D>(buttonHard).SetSprite(textureButton1);
+		}
+	}
+
+	if (easy) {
+		Get<TTN_Renderer2D>(EasyDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		Get<TTN_Renderer2D>(RegDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+		Get<TTN_Renderer2D>(HardDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+	}
+
+	if (reg) {
+		Get<TTN_Renderer2D>(EasyDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+		Get<TTN_Renderer2D>(RegDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		Get<TTN_Renderer2D>(HardDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+	}
+
+	if (hard) {
+		Get<TTN_Renderer2D>(EasyDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+		Get<TTN_Renderer2D>(RegDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+		Get<TTN_Renderer2D>(HardDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	}
+
+	//std::cout << "Diff" << diff << std::endl;
 	//update the base scene
 	TTN_Scene::Update(deltaTime);
 }
@@ -643,6 +785,7 @@ void OptionsMenu::MouseButtonDownChecks()
 			//			std::cout << "COLOR" << std::endl;
 		}
 
+		//difficulty bar
 		TTN_Transform diffBarTrans = Get<TTN_Transform>(diffBar);
 		if (mousePosWorldSpace.x < diffBarTrans.GetPos().x + 0.5f * abs(diffBarTrans.GetScale().x) &&
 			mousePosWorldSpace.x > diffBarTrans.GetPos().x - 0.5f * abs(diffBarTrans.GetScale().x) &&
@@ -651,31 +794,70 @@ void OptionsMenu::MouseButtonDownChecks()
 			float normalizedDiff = diff / 200.f;
 			if (mousePosWorldSpace.x == 0.0f) {
 				normalizedDiff = 0.5f;
-				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
 			}
 
 			else if (mousePosWorldSpace.x > 0.0f) {
-				normalizedDiff = abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) - 0.5f);
-				//std::cout << (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f) - 0.5f << std::endl;
-				std::cout << abs(TTN_Interpolation::ReMap(00.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) - 0.5f) << std::endl;
-				std::cout << abs(TTN_Interpolation::ReMap(10.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) - 0.5f) << "  SEP "<< std::endl;
-				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
+				normalizedDiff = abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs((mousePosWorldSpace.x - 10.f) / diffBarTrans.GetScale().x) * 200.f)) - 0.5f);
+				std::cout << normalizedDiff << std::endl;
+				/*std::cout << abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) - 0.5f + 0.1f) << std::endl;
+				std::cout << abs(TTN_Interpolation::ReMap(10.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) - 0.5f) << "  SEP " << std::endl;*/
+				if (normalizedDiff < 0.050f) {
+					normalizedDiff = 0.05f;
+				}
 			}
 
 			else if (mousePosWorldSpace.x < 0.0f) {
-				normalizedDiff = abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) + 0.5f);
-				//std::cout << (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f) + 0.5f << std::endl;
-				std::cout << abs(TTN_Interpolation::ReMap(00.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) + 0.5f) << std::endl;
-				std::cout << abs(TTN_Interpolation::ReMap(10.0f, 200.0f, 0.0f, 1.0f, (abs( (mousePosWorldSpace.x-10.f) / diffBarTrans.GetScale().x) * 200.f)) + 0.5f) << "  SEP 1" << std::endl;
-				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
+				normalizedDiff = abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs((mousePosWorldSpace.x) / diffBarTrans.GetScale().x) * 200.f)) + 0.5f);
+				/*	std::cout << abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) + 0.5f - 0.1f) << std::endl;
+					std::cout << abs(TTN_Interpolation::ReMap(10.0f, 200.0f, 0.0f, 1.0f, (abs((mousePosWorldSpace.x - 10.f) / diffBarTrans.GetScale().x) * 200.f)) + 0.5f) << "  SEP 1" << std::endl;*/
 			}
 			else {
 				float normalizedDiff = diff / 200.f;
-				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
 			}
 
+			Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
 			diff = normalizedDiff * 200.f;
-			std::cout << diff << " difficulty " << std::endl;
+			//std::cout << diff << " difficulty " << std::endl;
+		}
+
+		///// difficulty buttons  /////
+		TTN_Transform buttonEasyTrans = Get<TTN_Transform>(buttonEasy);
+		if (mousePosWorldSpace.x < buttonEasyTrans.GetPos().x + 0.5f * abs(buttonEasyTrans.GetScale().x) &&
+			mousePosWorldSpace.x > buttonEasyTrans.GetPos().x - 0.5f * abs(buttonEasyTrans.GetScale().x) &&
+			mousePosWorldSpace.y < buttonEasyTrans.GetPos().y + 0.5f * abs(buttonEasyTrans.GetScale().y) &&
+			mousePosWorldSpace.y > buttonEasyTrans.GetPos().y - 0.5f * abs(buttonEasyTrans.GetScale().y)) {
+			easy = true;
+			reg = false;
+			hard = false;
+			diff = 50.f;
+			float normalizedDiff = diff / 200.f;
+			Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
+		}
+
+		TTN_Transform buttonRegTrans = Get<TTN_Transform>(buttonReg);
+		if (mousePosWorldSpace.x < buttonRegTrans.GetPos().x + 0.5f * abs(buttonRegTrans.GetScale().x) &&
+			mousePosWorldSpace.x > buttonRegTrans.GetPos().x - 0.5f * abs(buttonRegTrans.GetScale().x) &&
+			mousePosWorldSpace.y < buttonRegTrans.GetPos().y + 0.5f * abs(buttonRegTrans.GetScale().y) &&
+			mousePosWorldSpace.y > buttonRegTrans.GetPos().y - 0.5f * abs(buttonRegTrans.GetScale().y)) {
+			easy = false;
+			reg = true;
+			hard = false;
+			diff = 100.0f;
+			float normalizedDiff = diff / 200.f;
+			Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
+		}
+
+		TTN_Transform buttonHardTrans = Get<TTN_Transform>(buttonHard);
+		if (mousePosWorldSpace.x < buttonHardTrans.GetPos().x + 0.5f * abs(buttonHardTrans.GetScale().x) &&
+			mousePosWorldSpace.x > buttonHardTrans.GetPos().x - 0.5f * abs(buttonHardTrans.GetScale().x) &&
+			mousePosWorldSpace.y < buttonHardTrans.GetPos().y + 0.5f * abs(buttonHardTrans.GetScale().y) &&
+			mousePosWorldSpace.y > buttonHardTrans.GetPos().y - 0.5f * abs(buttonHardTrans.GetScale().y)) {
+			easy = false;
+			reg = false;
+			hard = true;
+			diff = 150.f;
+			float normalizedDiff = diff / 200.f;
+			Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
 		}
 	}
 }
