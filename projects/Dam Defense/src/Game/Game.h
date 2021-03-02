@@ -241,7 +241,7 @@ protected:
 	//////// BIRD CONTROL DATA ///////////////
 	float birdNeighbourHoodDistance = 10.0f;
 	float birdBaseSpeed = 5.0f;
-	float birdDiveSpeed = 15.0f;
+	float birdDiveSpeed = 25.0f;
 	float birdAligmentWeight = 0.5f;
 	float birdCohensionWeight = 0.75f;
 	float birdSeperationWeight = 1.25f;

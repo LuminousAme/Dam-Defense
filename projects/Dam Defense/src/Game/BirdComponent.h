@@ -54,9 +54,13 @@ private:
 	std::vector<entt::entity> m_allBirds; //vector of all the birds in the scene
 	float m_neighborhoodDistance; //the distance of the bird's neighbourhood
 	entt::entity m_target = entt::null; //the target boat the birds are dive bombing
-	float m_speed; //the speed of the bird
-	float m_diveSpeed; //the speed of the bird when it's dive bombing an enemy ship
 
+	float m_AcutalSpeed; //the real speed of the bird based on the base and dive speeds
+	bool m_currentlyBombing; //wheter or not the bird is currently dive bombing a ship
+	float m_timeSinceStateChange; //the time since the last time it changed between bombing or not bombing, used to control acutal speed
+
+	float m_speed; //the speed of the bird
+	float m_diveSpeed; //the speed of the bird when it's dive bombing an enemy shit
 	float m_AlignmentWeight; //a multiplier for the allignment component of the boid behavoir
 	float m_CohesionWeight; //a multiplier for the cohension component of the boid behavoir
 	float m_SeperationWeight; //a multiplier for the separation of the boid behavoir
