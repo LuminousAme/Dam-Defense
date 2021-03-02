@@ -441,7 +441,7 @@ void OptionsMenu::InitScene()
 		}
 	}
 
-	//actual button
+	//actual buttons for diffixulty
 	for (int i = 0; i < 3; i++) {
 		entt::entity temp = CreateEntity();
 		if (i == 0) buttonEasy = temp;

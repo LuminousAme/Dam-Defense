@@ -688,7 +688,7 @@ void Game::SetUpEntities()
 		TTN_Transform birdTrans = TTN_Transform(birdBase, glm::vec3(0.0f), glm::vec3(1.0f));
 		if (i == 1) birdTrans.SetPos(birdBase + glm::vec3(3.0f, -3.0f, 3.0f));
 		if (i == 2) birdTrans.SetPos(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f));
-		birdTrans.RotateFixed(glm::vec3(0.0f, -45.0f + 180.0f, 0.0f));
+		birdTrans.RotateFixed(glm::vec3(0.0f, -90.0f + 180.0f, 0.0f));
 
 		//attach that transform to the entity
 		AttachCopy(birds[i], birdTrans);
@@ -1792,7 +1792,7 @@ void Game::BirdUpate(float deltaTime)
 			TTN_Transform birdTrans = TTN_Transform(birdBase, glm::vec3(0.0f), glm::vec3(1.0f));
 			if (i == 1) birdTrans.SetPos(birdBase + glm::vec3(3.0f, -3.0f, 3.0f));
 			if (i == 2) birdTrans.SetPos(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f));
-			birdTrans.RotateFixed(glm::vec3(0.0f, -45.0f + 180.0f, 0.0f));
+			birdTrans.RotateFixed(glm::vec3(0.0f, -135.0f + 180.0f, 0.0f));
 
 			//attach that transform to the entity
 			AttachCopy(birds[i], birdTrans);
