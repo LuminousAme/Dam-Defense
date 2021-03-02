@@ -342,7 +342,9 @@ int main() {
 			gameSceneUI->SetFlameThrowerMaxCoolDown(gameScene->GetFlameThrowerMaxCoolDownTime());
 			gameSceneUI->SetFlameThrowerCoolDownTime(gameScene->GetFlameThrowerCoolDownTime());
 			gameSceneUI->SetFlameThrowerRealCoolDown(gameScene->GetRealFlameThrowerCoolDownTime());
-			//options
+			gameSceneUI->SetBirdBombMaxCoolDown(gameScene->GetBirdBombMaxCoolDown());
+			gameSceneUI->SetBirdBombCoolDownTime(gameScene->GetBirdCoolDownTime());
+			gameSceneUI->SetBirdBombRealCoolDown(gameScene->GetRealBirdCoolDownTime());
 			gameScene->SetMouseSensitivity(options->GetMouseSen());
 			gameScene->SetMasterVolume(options->GetVolume());
 			gameScene->SetMusicVolume(options->GetVolumeMusic());
@@ -350,6 +352,7 @@ int main() {
 			gameScene->SetNoLut(options->GetOff());
 			gameScene->SetWarmLut(options->GetColor());
 			gameScene->SetDiff(options->GetDiff());
+			//options
 		}
 
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)
