@@ -284,6 +284,9 @@ int main() {
 			gameSceneUI->SetFlameThrowerMaxCoolDown(gameScene->GetFlameThrowerMaxCoolDownTime());
 			gameSceneUI->SetFlameThrowerCoolDownTime(gameScene->GetFlameThrowerCoolDownTime());
 			gameSceneUI->SetFlameThrowerRealCoolDown(gameScene->GetRealFlameThrowerCoolDownTime());
+			gameSceneUI->SetBirdBombMaxCoolDown(gameScene->GetBirdBombMaxCoolDown());
+			gameSceneUI->SetBirdBombCoolDownTime(gameScene->GetBirdCoolDownTime());
+			gameSceneUI->SetBirdBombRealCoolDown(gameScene->GetRealBirdCoolDownTime());
 		}
 
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)

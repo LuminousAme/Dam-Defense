@@ -62,6 +62,17 @@ public:
 	}
 	float GetFlameThrowerMaxCoolDownTime() { return FlameThrowerCoolDown; }
 
+	float GetBirdCoolDownTime() {
+		if (BombTimer > (BirdBombCooldown - FlameActiveTime))
+			return std::clamp(TTN_Interpolation::ReMap(FlameActiveTime, 0.0f, BirdBombCooldown, FlameActiveTime, BirdBombCooldown - BombTimer), 0.0f, BombTimer);
+
+		return std::clamp(BombTimer, 0.0f, BirdBombCooldown);
+	}
+	float GetRealBirdCoolDownTime() {
+		return std::clamp(BombTimer, 0.0f, BirdBombCooldown);
+	}
+	float GetBirdBombMaxCoolDown() { return BirdBombCooldown; }
+
 	float GetWaveProgress() {
 		if (m_firstWave)
 			return 0.0f;

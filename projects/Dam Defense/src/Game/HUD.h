@@ -33,6 +33,9 @@ public:
 	void SetFlameThrowerCoolDownTime(float cooldownRemaining) { flameThrowerCoolDownTime = cooldownRemaining; }
 	void SetFlameThrowerMaxCoolDown(float cooldown) { flameThrowerMaxCoolDownTime = cooldown; }
 	void SetFlameThrowerRealCoolDown(float realCoolDownTime) { flameThrowerRealCoolDownTime = realCoolDownTime; }
+	void SetBirdBombCoolDownTime(float cooldownRemaining) { birdBombCoolDownTime = cooldownRemaining; }
+	void SetBirdBombMaxCoolDown(float cooldown) { birdBombMaxCoolDownTime = cooldown; }
+	void SetBirdBombRealCoolDown(float realCoolDownTime) { birdBombRealCoolDownTime = realCoolDownTime; }
 	//getters
 	unsigned GetScore() { return m_score; }
 	float GetDamHealth() { return m_DamHealth; }
@@ -73,6 +76,14 @@ private:
 	entt::entity flameThrowerIcon;
 	entt::entity flameThrowerKey;
 	std::vector<entt::entity> flamethrowerNums;
+	//bird bomb
+	entt::entity birdBombBG;
+	entt::entity birdBombOverlay;
+	entt::entity birdBombBar;
+	entt::entity birdBombIcon;
+	entt::entity birdBombKey;
+	std::vector<entt::entity> birdBombNums;
+	//special ability general data
 	float specialAbilityScale = 0.2f;
 
 	//assets
@@ -96,15 +107,22 @@ private:
 	bool waveDone = false;
 
 	//special ability variables
+	//flamethrower
 	float flameThrowerCoolDownTime = 0.0f;
 	float flameThrowerRealCoolDownTime = 0.0f;
 	float flameThrowerMaxCoolDownTime;
 	float flameThrowerCoolDownPercent = 1.0f;
+	//bird bomb
+	float birdBombCoolDownTime = 0.0f;
+	float birdBombRealCoolDownTime = 0.0f;
+	float birdBombMaxCoolDownTime;
+	float birdBombCoolDownPercent = 1.0f;
 
 	void MakeScoreNumEntity();
 	void MakeHealthNumEntity();
 	void MakeWaveNumEntity();
 	void MakeFlamethrowerNumEntity();
+	void MakeBirdBombNumEntity();
 };
 
 //get the number of digits in a number

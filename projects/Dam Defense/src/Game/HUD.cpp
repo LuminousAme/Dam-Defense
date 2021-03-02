@@ -243,6 +243,54 @@ void GameUI::InitScene()
 		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Flamethrower Key"));
 		AttachCopy(flameThrowerKey, Renderer);
 	}
+
+	//bird bomb background
+	{
+		//create an entity
+		birdBombBG = CreateEntity();
+
+		//create a transform 
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 1.2f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f + 0.75 * 1000.0f * specialAbilityScale, 1.1f));
+		AttachCopy(birdBombBG, Trans);
+
+		//create a sprite renderer 
+		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Background"));
+		AttachCopy(birdBombBG, Renderer);
+	}
+
+	//bird bomb bar
+	{
+		//create an entity
+		birdBombBar = CreateEntity();
+
+		//get a copy of the background's transform
+		TTN_Transform bgTrans = Get<TTN_Transform>(birdBombBG);
+
+		//create a transform 
+		TTN_Transform Trans = TTN_Transform(glm::vec3(bgTrans.GetPos().x - 0.175f * std::abs(bgTrans.GetScale().x), bgTrans.GetPos().y - 0.25f * bgTrans.GetScale().y, 1.1f),
+			glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.65f, bgTrans.GetScale().y * 0.1f, 1.0f));
+		AttachCopy(birdBombBar, Trans);
+
+		//create a sprite renderer 
+		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Bar"), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+		AttachCopy(birdBombBar, Renderer);
+	}
+
+	//bird bomb overlay
+	{
+		//create an entity
+		birdBombOverlay = CreateEntity();
+
+		//create a transform 
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.9f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f + 0.75 * 1000.0f * specialAbilityScale, 1.1f));
+		AttachCopy(birdBombOverlay, Trans);
+
+		//create a sprite renderer 
+		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Overlay"));
+		AttachCopy(birdBombOverlay, Renderer);
+	}
 }
 
 void GameUI::Update(float deltaTime)
@@ -410,6 +458,73 @@ void GameUI::Update(float deltaTime)
 			//set the ammount the bar should render
 			Get<TTN_Renderer2D>(flameThrowerBar).SetHoriMask(flameThrowerCoolDownPercent);
 		}
+
+		//update the bird bomb
+		{
+			//normalized cooldown
+			birdBombCoolDownPercent = TTN_Interpolation::ReMap(birdBombMaxCoolDownTime, 0.0f, 0.0f, 1.0f, birdBombCoolDownTime);
+
+			//if there is no more cooldown but the numbers are still displayed, delete all the numbers
+			while (birdBombRealCoolDownTime <= 0.0f && birdBombNums.size() > 0) {
+				DeleteEntity(birdBombNums[birdBombNums.size() - 1]);
+				birdBombNums.pop_back();
+			}
+			if (birdBombRealCoolDownTime > 0.0f) {
+				//get the time as an int
+				unsigned time = std::ceil(birdBombRealCoolDownTime);
+				//make sure there are the correct number of digits
+				while (GetNumOfDigits(birdBombRealCoolDownTime) < birdBombNums.size()) {
+					DeleteEntity(birdBombNums[birdBombNums.size() - 1]);
+					birdBombNums.pop_back();
+				}
+
+				if (GetNumOfDigits(time) > birdBombNums.size())
+					MakeBirdBombNumEntity();
+
+				//update each digit approriately
+				TTN_Transform bgTrans = Get<TTN_Transform>(birdBombBG);
+				glm::vec3 centerPos = glm::vec3(bgTrans.GetPos().x - 0.15f * std::abs(bgTrans.GetScale().x),
+					bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 0.5f);
+				int offset = std::ceil((float)birdBombNums.size() / 2.0f);
+				for (int i = 0; i < birdBombNums.size(); i++) {
+					//update position
+					TTN_Transform& trans = Get<TTN_Transform>(birdBombNums[i]);
+					if (i < offset) {
+						//places the numbers to the left of the center
+						trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+					}
+					else {
+						//places the numbers on and to the right of the center
+						trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+					}
+
+					//update renderer
+					Get<TTN_Renderer2D>(birdBombNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(time, birdBombNums.size() - i - 1)) + "-Text"));
+
+					//make the renderers of the icon, overlay, and backdrop darker
+					Get<TTN_Renderer2D>(birdBombBG).SetColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+					Get<TTN_Renderer2D>(birdBombOverlay).SetColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+					//set the colour of the bar
+					glm::vec3 color = glm::vec3(1.0f);
+					if (birdBombCoolDownPercent <= 0.75) {
+						color = TTN_Interpolation::Lerp(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f), TTN_Interpolation::ReMap(0.0f, 0.75f, 0.0f, 1.0f, birdBombCoolDownPercent));
+					}
+					else {
+						color = TTN_Interpolation::Lerp(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), TTN_Interpolation::ReMap(0.75f, 1.0f, 0.0f, 1.0f, birdBombCoolDownPercent));
+					}
+					Get<TTN_Renderer2D>(birdBombBar).SetColor(glm::vec4(color, 1.0f));
+				}
+			}
+			else {
+				//make the renderers of the icon, overlay, bar and backdrop to their regular color
+				Get<TTN_Renderer2D>(birdBombBG).SetColor(glm::vec4(1.0f));
+				Get<TTN_Renderer2D>(birdBombOverlay).SetColor(glm::vec4(1.0f));
+				Get<TTN_Renderer2D>(birdBombBar).SetColor(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+			}
+
+			//set the ammount the bar should render
+			Get<TTN_Renderer2D>(birdBombBar).SetHoriMask(birdBombCoolDownPercent);
+		}
 	}
 		
 	//update the base scene
@@ -488,4 +603,21 @@ void GameUI::MakeFlamethrowerNumEntity()
 			//create a sprite renderer for the logo
 	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
 	AttachCopy(flamethrowerNums[flamethrowerNums.size() - 1], numRenderer);
+}
+
+void GameUI::MakeBirdBombNumEntity()
+{
+	birdBombNums.push_back(CreateEntity());
+
+	//reference to the bf's transform
+	TTN_Transform& Trans = Get<TTN_Transform>(birdBombBG);
+
+	//setup a transform for the new entity
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(150.0f * scoreTextScale, 150.0f * scoreTextScale, 1.0f));
+	AttachCopy(birdBombNums[birdBombNums.size() - 1], numTrans);
+
+	//setup a 2D renderer for the new entity
+			//create a sprite renderer for the logo
+	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
+	AttachCopy(birdBombNums[birdBombNums.size() - 1], numRenderer);
 }
