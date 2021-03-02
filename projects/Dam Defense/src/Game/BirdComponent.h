@@ -14,7 +14,7 @@ public:
 	//default constructor
 	BirdComponent();
 	//default destructor
-	~BirdComponent();
+	~BirdComponent() = default;
 	//constructor with data
 	BirdComponent(entt::entity bird, TTN_Scene* scene, float neighborhood, float speed, float diveSpeed, float aliWeight, float cohWeight, float sepWeight, float corWeight, float DiveWeight);
 

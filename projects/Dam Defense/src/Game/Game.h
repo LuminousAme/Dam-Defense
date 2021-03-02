@@ -6,6 +6,7 @@
 #include "Titan/Application.h"
 #include "Titan/Systems/Sound.h"
 #include "EnemyComponent.h"
+#include "BirdComponent.h"
 
 using namespace Titan;
 
@@ -200,21 +201,30 @@ protected:
 	float water_waveHeightMultiplier;//how much the waves should grow
 	float water_waveLenghtMultiplier;//how long the waves should be
 
-	//////// DAM AND FLAMETHROWER CONTROL DATA ///////
+	//////// DAM FLAMETHROWER, AND BIRD BOMB CONTROL DATA ///////
 	float FlameThrowerCoolDown = 30.0f; //how long the player has to wait between flamethrower uses
 	float FlameActiveTime = 3.0f; //how long the flamethrower lasts
+	float BirdBombCooldown = 15.0f; //how long the player has to wait between bird bomb uses
 	const float Dam_MaxHealth = 100; //the maximum health of the dam
 
 	bool Flaming; //if flamethrowers are active right now
 	float FlameTimer; //flamethrower cooldown
 	float FlameAnim; //flamethrower duration
+	bool Bombing; //if the birds are currently seeking after a boat
+	float BombTimer; //bird bomb cooldown
 	float Dam_health;//the current health on the dam
 
 	//////// BIRD CONTROL DATA ///////////////
-	glm::vec3 birdBase = glm::vec3(100, 15, 135); //starting position
-	glm::vec3 birdTarget = glm::vec3(-100, 15, -65); //lerps to this position
-	float birdTimer;//timer to track how far through the lerp they are
-//	int birdNum=3; //number of birds
+	float birdNeighbourHoodDistance = 10.0f;
+	float birdBaseSpeed = 5.0f;
+	float birdDiveSpeed = 15.0f;
+	float birdAligmentWeight = 0.5f;
+	float birdCohensionWeight = 0.75f;
+	float birdSeperationWeight = 1.25f;
+	float birdCorrectionWeight = 0.05f;
+	float birdDiveWeight = 2.0f;
+
+	int birdNum = 20; //number of birds
 
 	///////////SCENE CONTROL DATA///////////
 	bool m_paused; //wheter or not the scene is paused
@@ -290,6 +300,8 @@ protected:
 	//sounds
 	void GameSounds(float dt);
 	//misc
+	void BirdBomb();
+	void MakeABird();
 	void BirdUpate(float deltaTime);
 	void ImGui();
 
