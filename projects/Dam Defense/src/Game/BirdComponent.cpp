@@ -80,6 +80,9 @@ void BirdComponent::Update(float deltaTime)
 		separationComponent = glm::normalize(-1.0f * (separationComponent / (float)neighbourCount));
 	}
 
+	//get the current velocity and sum the steering behaviours into it
+	glm::vec3 currentVelo = thisPhyiscs.GetLinearVelocity();
+
 	//now that we have the components for the basic boid behaviour, let's also do the seek behaviour
 
 	//if the bird has a target to bird bomb, then seek that target
@@ -98,11 +101,11 @@ void BirdComponent::Update(float deltaTime)
 		}
 		
 		//if it's too far in the positive y direction, start moving it towards the negative y direction
-		if (thisTrans.GetGlobalPos().y >= 30.0f) {
+		if (thisTrans.GetGlobalPos().y >= 35.0f && currentVelo.y > -0.6f) {
 			seekingComponent.y += -1.0f;
 		}
 		//if it's too far in the negative y direction, start moving it towards the positive y direction
-		else if (thisTrans.GetGlobalPos().y <= 15.0f) {
+		else if (thisTrans.GetGlobalPos().y <= 15.0f && currentVelo.y < 0.6f) {
 			seekingComponent.y += 1.0f;
 		}
 
@@ -116,17 +119,14 @@ void BirdComponent::Update(float deltaTime)
 		}
 
 		//and normalize the seeking component
-		seekingComponent = glm::normalize(seekingComponent);
+		if(seekingComponent != glm::vec3(0.0f)) seekingComponent = glm::normalize(seekingComponent);
 	}
-
-	//get the current velocity and sum the steering behaviours into it
-	glm::vec3 currentVelo = thisPhyiscs.GetLinearVelocity();
 
 	//add in the boid behaviour
 	currentVelo += m_AlignmentWeight * alignmentComponent + m_CohesionWeight * cohensionComponent + m_SeperationWeight * separationComponent;
 	//add in the seeking behvaiour, normalize, and multiply by approriate speed
 	if (m_target != entt::null) {
-		currentVelo += m_DiveWeight * seekingComponent;
+		currentVelo -= m_DiveWeight * seekingComponent;
 		currentVelo = m_diveSpeed * glm::normalize(currentVelo);
 	}
 	else {
@@ -138,7 +138,7 @@ void BirdComponent::Update(float deltaTime)
 	if (glm::normalize(currentVelo) == glm::vec3(0.0f, 1.0f, 0.0f)) currentVelo += glm::vec3(0.1f, 0.0f, 0.1f);
 
 	//rotate the bird to be facing along the angle it is travelling 
-	thisTrans.LookAlong(currentVelo, glm::vec3(0.0f, 1.0f, 0.0f));
+	thisTrans.LookAlong(glm::normalize(currentVelo), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	//and set the velocity inside of the physics body
 	thisPhyiscs.SetLinearVelocity(currentVelo);
