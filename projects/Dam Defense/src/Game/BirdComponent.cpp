@@ -17,6 +17,9 @@ BirdComponent::BirdComponent()
 	m_SeperationWeight = 0.0f;
 	m_CorrectionWeight = 0.0f;
 	m_DiveWeight = 0.0f;
+	m_AcutalSpeed = m_speed;
+	m_currentlyBombing = false;
+	m_timeSinceStateChange = 10.0f;
 }
 
 //constructor with data
@@ -26,11 +29,17 @@ BirdComponent::BirdComponent(entt::entity bird, TTN_Scene* scene, float neighbor
 {
 	m_target = entt::null;
 	m_allBirds = std::vector<entt::entity>();
+	m_AcutalSpeed = m_speed;
+	m_currentlyBombing = false;
+	m_timeSinceStateChange = 10.0f;
 }
 
 //update the bird every frame
 void BirdComponent::Update(float deltaTime)
 {
+	//update time since state change
+	m_timeSinceStateChange += deltaTime;
+
 	//Get the physics and transform of this bird
 	TTN_Transform& thisTrans = m_scene->Get<TTN_Transform>(m_entityNumber);
 	TTN_Physics& thisPhyiscs = m_scene->Get<TTN_Physics>(m_entityNumber);
@@ -45,13 +54,19 @@ void BirdComponent::Update(float deltaTime)
 	//the number of neighbours nearby
 	int neighbourCount = 0;
 
+	//the neighbourhood distance
+	float neighbourhood = m_neighborhoodDistance;
+	if (!m_currentlyBombing && m_timeSinceStateChange < 3.0f) {
+		neighbourhood *= 10.0f;
+	}
+
 	//loop through every other bird
 	for (auto bird : m_allBirds) {
 		//if the bird is not this bird
 		if (m_entityNumber != bird) {
 			//and if the bird is in the neighbour hood
 			TTN_Transform& birdTrans = m_scene->Get<TTN_Transform>(bird);
-			if (glm::distance(thisTrans.GetGlobalPos(), birdTrans.GetGlobalPos()) <= m_neighborhoodDistance) {
+			if (glm::distance(thisTrans.GetGlobalPos(), birdTrans.GetGlobalPos()) <= neighbourhood) {
 				//increase the neighbour count
 				neighbourCount++;
 				
@@ -87,10 +102,26 @@ void BirdComponent::Update(float deltaTime)
 
 	//if the bird has a target to bird bomb, then seek that target
 	if (m_target != entt::null) {
+		//reset timer
+		if (!m_currentlyBombing)
+			m_timeSinceStateChange = 0.0f;
+		//reset flag
+		m_currentlyBombing = true;
+		//seek
 		seekingComponent = NormalizedSeek(m_scene->Get<TTN_Transform>(m_target).GetGlobalPos(), thisPhyiscs.GetLinearVelocity(), thisTrans.GetGlobalPos(), m_diveSpeed);
 	}
 	//otherwise see if it has to correct for it's current position
 	else {
+		//reset timer
+		if (m_currentlyBombing) {
+			m_timeSinceStateChange = 0.0f;
+		}
+			
+		//reset flag
+		m_currentlyBombing = false;
+		
+		//correct for position
+
 		//if it's too far in the positive x direction, start moving it towards the negative x direction
 		if (thisTrans.GetGlobalPos().x >= 80.0f) {
 			seekingComponent.x += -1.0f;
@@ -108,6 +139,9 @@ void BirdComponent::Update(float deltaTime)
 		else if (thisTrans.GetGlobalPos().y <= 15.0f && currentVelo.y < 0.6f) {
 			seekingComponent.y += 1.0f;
 		}
+		else if (thisTrans.GetGlobalPos().y > 15.0f && thisTrans.GetGlobalPos().y < 35.0f && std::abs(currentVelo.y) > 0.6f) {
+			seekingComponent -= glm::normalize(currentVelo).y;
+		}
 
 		//if it's too far in the positve z direction, start moving it towards the negative z direction
 		if (thisTrans.GetGlobalPos().z >= 110.0f) {
@@ -122,16 +156,39 @@ void BirdComponent::Update(float deltaTime)
 		if(seekingComponent != glm::vec3(0.0f)) seekingComponent = glm::normalize(seekingComponent);
 	}
 
+	//if it is too low force it to come back up
+	if (thisTrans.GetGlobalPos().y < 0.0f) {
+		if (m_currentlyBombing && thisTrans.GetGlobalPos().y < -8.0f)
+			currentVelo.y = 0.0f;
+
+		thisTrans.SetPos(glm::vec3(thisTrans.GetGlobalPos().x, std::clamp(thisTrans.GetGlobalPos().y, -8.0f, 35.0f) , thisTrans.GetGlobalPos().z));
+	}
+
+	//if it's not bombing and has only been a few seconds since last bombing, turn off the allignment and cohension components and clamp the y value of the velocity
+	if (!m_currentlyBombing && m_timeSinceStateChange < 1.0f) {
+		alignmentComponent = glm::vec3(0.0f);
+		cohensionComponent = glm::vec3(0.0f);
+	}
+
 	//add in the boid behaviour
 	currentVelo += m_AlignmentWeight * alignmentComponent + m_CohesionWeight * cohensionComponent + m_SeperationWeight * separationComponent;
+
 	//add in the seeking behvaiour, normalize, and multiply by approriate speed
 	if (m_target != entt::null) {
 		currentVelo -= m_DiveWeight * seekingComponent;
-		currentVelo = m_diveSpeed * glm::normalize(currentVelo);
+		m_AcutalSpeed = TTN_Interpolation::Lerp(m_speed, m_diveSpeed, TTN_Interpolation::ReMap(0.0f, 0.1f, 0.0f, 1.0f, std::clamp(m_timeSinceStateChange, 0.0f, 0.1f)));
 	}
 	else {
 		currentVelo += m_CorrectionWeight * seekingComponent;
-		currentVelo = m_speed * glm::normalize(currentVelo);
+		m_AcutalSpeed = TTN_Interpolation::Lerp(m_diveSpeed, m_speed, TTN_Interpolation::ReMap(0.0f, 3.0f, 0.0f, 1.0f, std::clamp(m_timeSinceStateChange, 0.0f, 3.0f)));
+	}
+
+	currentVelo = m_AcutalSpeed * glm::normalize(currentVelo);
+
+	//have it go up further if it's right after the dive bombing
+	if (!m_currentlyBombing && m_timeSinceStateChange < 2.0f) {
+		currentVelo += m_SeperationWeight * separationComponent * 2.0f;
+		currentVelo.y = 1.0f * m_diveSpeed * (1.0f - TTN_Interpolation::ReMap(0.0f, 2.0f, 0.0f, 1.0f, m_timeSinceStateChange));
 	}
 
 	//handle if it's looking straight up
