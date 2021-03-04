@@ -726,7 +726,6 @@ void MainMenuUI::InitScene()
 	shouldArcade = false;
 
 	//grab the textures
-	textureGameLogo = TTN_AssetSystem::GetTexture2D("Game logo");
 	textureButton1 = TTN_AssetSystem::GetTexture2D("Button Base");
 	textureButton2 = TTN_AssetSystem::GetTexture2D("Button Hovering");
 	texturePlay = TTN_AssetSystem::GetTexture2D("Play-Text");
@@ -756,12 +755,35 @@ void MainMenuUI::InitScene()
 		//create an entity in the scene for the logo
 		gameLogo = CreateEntity();
 
+		//create the animations
+		std::vector<TTN_Texture2D::st2dptr> start;
+		std::vector<float> startLenghts;
+		std::vector<TTN_Texture2D::st2dptr> loop;
+		std::vector<float> loopLenghts;
+		for (int i = 0; i < 23; i++) {
+			if (i < 17) {
+				start.push_back(TTN_AssetSystem::GetTexture2D("Game logo " + std::to_string(i)));
+				startLenghts.push_back(1.0f / 18.0f);
+			}
+			if (i > 16) {
+				loop.push_back(TTN_AssetSystem::GetTexture2D("Game logo " + std::to_string(i)));
+				loopLenghts.push_back(1.0f / 18.0f + 0.1f);
+			}
+		}
+
+		TTN_2DAnimation startAnim = TTN_2DAnimation(start, startLenghts, false);
+		TTN_2DAnimation loopAnim = TTN_2DAnimation(loop, loopLenghts, true);
+
+		//create an 2d animator for the logo
+		TTN_2DAnimator logoAnimator = TTN_2DAnimator({startAnim, loopAnim}, 0);
+		AttachCopy(gameLogo, logoAnimator);
+
 		//create a transform for the logo
 		TTN_Transform logoTrans = TTN_Transform(glm::vec3(0.0f, 310.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1714.0f * 0.8f, 435.0f * 0.8f, 1.0f));
 		AttachCopy(gameLogo, logoTrans);
 
 		//create a sprite renderer for the logo
-		TTN_Renderer2D logoRenderer = TTN_Renderer2D(textureGameLogo);
+		TTN_Renderer2D logoRenderer = TTN_Renderer2D(start[0]);
 		AttachCopy(gameLogo, logoRenderer);
 	}
 
@@ -815,6 +837,11 @@ void MainMenuUI::InitScene()
 
 void MainMenuUI::Update(float deltaTime)
 {
+	//if the starting animation is done, enter the looping animation
+	if (Get<TTN_2DAnimator>(gameLogo).GetActiveAnim() == 0 && Get<TTN_2DAnimator>(gameLogo).GetActiveAnimRef().GetIsDone()) {
+		Get<TTN_2DAnimator>(gameLogo).SetActiveAnim(1);
+	}
+
 	//get the mouse position
 	glm::vec2 mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	//convert it to worldspace
@@ -905,6 +932,8 @@ void MainMenuUI::Update(float deltaTime)
 	}
 
 	ImGui::End();
+
+	TTN_Scene::Update(deltaTime);
 }
 
 void MainMenuUI::MouseButtonDownChecks()
