@@ -357,7 +357,9 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Quit-Text", "textures/text/Quit.png", 1); //rendered text of word Quit
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Main Menu", "textures/text/Main Menu.png", 1); //rendered text of word main menu
 
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Game logo", "textures/Dam Defense logo.png", 1); //logo for the game
+	for (int i = 0; i < 23; i++) {
+		TTN_AssetSystem::AddTexture2DToBeLoaded("Game logo " + std::to_string(i), "textures/logo/Game Logo" + std::to_string(i+1) + ".png", 1); //logo for the game
+	}
 	TTN_AssetSystem::AddMeshToBeLoaded("Sphere", "models/IcoSphereMesh.obj", 1);
 
 	//set 2, the game (excluding things already loaded into set 1)
@@ -379,10 +381,12 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Resume-Text", "textures/text/Resume.png", 2); //rendered text of the word resume
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Score-Text", "textures/text/Score.png", 2); //rendered text of the word Score
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Flamethrower Icon", "textures/Fire_Icon.png", 2); //icon of the fire
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Bird Bomb Icon", "textures/Bird_Icon.png", 2); //icon of the bird bomb
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Overlay", "textures/Special_Ability_Border.png", 2); //overlay for special abilities
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Background", "textures/Special_Ability_BG.png", 2); //background for the special abilities
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Bar", "textures/Special_Ability_Bar.png", 2); //bar for the special abilities cooldown
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Flamethrower Key", "textures/text/flamethrower-key.png", 2); //the key the player needs to press to use the flamethrower
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Bird Bomb Key", "textures/text/bird-key.png", 2); //the key the player needs to press to use the bird bomb
 	
 	//set 3, win/lose screen
 	//TTN_AssetSystem::AddTexture2DToBeLoaded("You Win-Text", "textures/text/You win.png", 3); //rendered text of the pharse "You Win!" 

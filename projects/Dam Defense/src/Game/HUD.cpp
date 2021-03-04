@@ -291,6 +291,40 @@ void GameUI::InitScene()
 		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Overlay"));
 		AttachCopy(birdBombOverlay, Renderer);
 	}
+
+	//bird bomb icon
+	{
+		//create an entity
+		birdBombIcon = CreateEntity();
+
+		//create a transform 
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.8f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f + 0.75 * 1000.0f * specialAbilityScale, 1.1f));
+		AttachCopy(birdBombIcon, Trans);
+
+		//create a sprite renderer 
+		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bird Bomb Icon"));
+		AttachCopy(birdBombIcon, Renderer);
+	}
+
+	//bird bomb key
+	{
+		//create an entity
+		birdBombKey = CreateEntity();
+
+		//get a copy of the background's transform
+		TTN_Transform bgTrans = Get<TTN_Transform>(birdBombBG);
+
+		//create a transform 
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.25f, bgTrans.GetScale().y * 0.25f, 1.0f));
+		Trans.SetPos(glm::vec3(bgTrans.GetPos().x + 0.4f * std::abs(bgTrans.GetScale().x) + 0.5f * std::abs(Trans.GetScale().x),
+			bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 0.5f));
+		AttachCopy(birdBombKey, Trans);
+
+		//create a sprite renderer 
+		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bird Bomb Key"));
+		AttachCopy(birdBombKey, Renderer);
+	}
 }
 
 void GameUI::Update(float deltaTime)
@@ -504,6 +538,7 @@ void GameUI::Update(float deltaTime)
 					//make the renderers of the icon, overlay, and backdrop darker
 					Get<TTN_Renderer2D>(birdBombBG).SetColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 					Get<TTN_Renderer2D>(birdBombOverlay).SetColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+					Get<TTN_Renderer2D>(birdBombIcon).SetColor(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
 					//set the colour of the bar
 					glm::vec3 color = glm::vec3(1.0f);
 					if (birdBombCoolDownPercent <= 0.75) {
@@ -519,6 +554,7 @@ void GameUI::Update(float deltaTime)
 				//make the renderers of the icon, overlay, bar and backdrop to their regular color
 				Get<TTN_Renderer2D>(birdBombBG).SetColor(glm::vec4(1.0f));
 				Get<TTN_Renderer2D>(birdBombOverlay).SetColor(glm::vec4(1.0f));
+				Get<TTN_Renderer2D>(birdBombIcon).SetColor(glm::vec4(1.0f));
 				Get<TTN_Renderer2D>(birdBombBar).SetColor(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 			}
 
