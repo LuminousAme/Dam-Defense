@@ -36,6 +36,12 @@ namespace Titan {
 		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 		m_emptyEffect = TTN_PostEffect::Create();
 		m_emptyEffect->Init(windowSize.x, windowSize.y);
+
+		//shadow buffer
+		shadowBuffer = TTN_Framebuffer::Create();
+		shadowBuffer->AddDepthTarget();
+		shadowBuffer->Init(shadowWidth, shadowHeight);
+		shaderDepth = TTN_AssetSystem::GetShader("Depth shader");
 	}
 
 	//construct with lightning data
@@ -65,6 +71,14 @@ namespace Titan {
 		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 		m_emptyEffect = TTN_PostEffect::Create();
 		m_emptyEffect->Init(windowSize.x, windowSize.y);
+
+		//shadow buffer
+		int shadowWidth = 1024;
+		int shadowHeight = 1024;
+		shadowBuffer = TTN_Framebuffer::Create();
+		shadowBuffer->AddDepthTarget();
+		shadowBuffer->Init(shadowWidth, shadowHeight);
+		shaderDepth = TTN_AssetSystem::GetShader("Depth shader");
 	}
 
 	//destructor
@@ -322,6 +336,9 @@ namespace Titan {
 		for (int i = 0; i < m_PostProcessingEffects.size(); i++)
 			m_PostProcessingEffects[i]->Clear();
 
+		shadowBuffer->Clear();
+		shaderDepth = TTN_AssetSystem::GetShader("Depth shader");
+
 		//get the view and projection martix
 		glm::mat4 vp;
 		//update the camera for the scene
@@ -331,6 +348,12 @@ namespace Titan {
 		vp = Get<TTN_Camera>(m_Cam).GetProj();
 		glm::mat4 viewMat = glm::inverse(Get<TTN_Transform>(m_Cam).GetGlobal());
 		vp *= viewMat;
+
+		//set up light space matrix
+		glm::vec4 _lightDirection = glm::vec4(0.f, -3.f, -5.0f, 0.0f);
+		glm::mat4 lightProjectionMatrix = glm::ortho(-20.f, 20.0f, -20.0f, 20.0f, -30.0f, 30.0f);
+		glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(_lightDirection), glm::vec3(), glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::mat4 lightSpaceViewProj = lightProjectionMatrix * lightViewMatrix;
 
 		//sort our render group
 		m_RenderGroup->sort<TTN_Renderer>([](const TTN_Renderer& l, const TTN_Renderer& r) {
@@ -349,181 +372,201 @@ namespace Titan {
 
 		ReconstructScenegraph();
 
-		//before going through see if it needs to render another scene as the background first 
+		//before going through see if it needs to render another scene as the background first
 		if (TTN_Backend::GetLastEffect() != nullptr) {
 			//if it does, apply the buffer from that scene before drawing
 			m_emptyEffect->ApplyEffect(TTN_Backend::GetLastEffect());
 		}
 
+		glViewport(0, 0, shadowWidth, shadowHeight);
+		shadowBuffer->Bind();
+
+		m_RenderGroup->each([&](entt::entity entity, TTN_Transform& transform, TTN_Renderer& renderer) {
+			// Render the mesh
+			if (renderer.GetCastShadows()) {
+				TTN_Shader::sshptr temp = renderer.GetShader();
+				renderer.SetShader(shaderDepth);
+				renderer.Render(transform.GetGlobal(), vp, lightSpaceViewProj);
+				renderer.SetShader(temp);
+			}
+		});
+
+		shadowBuffer->Unbind();
+
+		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
+		glViewport(0, 0, windowSize.x, windowSize.y);
+
 		//bind the empty effect
 		m_emptyEffect->BindBuffer(0); //this gets unbound in postRender
-		
+
 		TTN_Shader::sshptr currentShader = nullptr;
 		TTN_Material::smatptr currentMatieral = nullptr;
 		TTN_Mesh::smptr currentMesh = nullptr;
 		bool morphAnimatedLastMesh = false;
-			m_RenderGroup->each([&](entt::entity entity, TTN_Transform& transform, TTN_Renderer& renderer) {
-				//bool to track if uniforms have been reset
-				bool shaderChanged = false;
-				//texture slot to dynamically send textures across different types of shaders
-				int textureSlot = 0;
+		m_RenderGroup->each([&](entt::entity entity, TTN_Transform& transform, TTN_Renderer& renderer) {
+			//bool to track if uniforms have been reset
+			bool shaderChanged = false;
+			//texture slot to dynamically send textures across different types of shaders
+			int textureSlot = 0;
 
-				//if the shader has changed
-				if (currentShader != renderer.GetShader() && renderer.GetShader() != nullptr) {
-					//unbind the old shader
-					if(currentShader != nullptr) currentShader->UnBind();
-					//mark that all the uniforms have been reset this frame 
-					shaderChanged = true;
-					//update to the current shader
-					currentShader = renderer.GetShader();
-					//and bind it 
-					currentShader->Bind();
+			//if the shader has changed
+			if (currentShader != renderer.GetShader() && renderer.GetShader() != nullptr) {
+				//unbind the old shader
+				if (currentShader != nullptr) currentShader->UnBind();
+				//mark that all the uniforms have been reset this frame
+				shaderChanged = true;
+				//update to the current shader
+				currentShader = renderer.GetShader();
+				//and bind it
+				currentShader->Bind();
 
-					if (currentShader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX
-						&& currentShader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
-						//sets some uniforms
-						//scene level ambient lighting
-						currentShader->SetUniform("u_AmbientCol", m_AmbientColor);
-						currentShader->SetUniform("u_AmbientStrength", m_AmbientStrength);
+				if (currentShader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX
+					&& currentShader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
+					//sets some uniforms
+					//scene level ambient lighting
+					currentShader->SetUniform("u_AmbientCol", m_AmbientColor);
+					currentShader->SetUniform("u_AmbientStrength", m_AmbientStrength);
 
-						//stuff from the light
-						glm::vec3 lightPositions[16];
-						glm::vec3 lightColor[16];
-						float lightAmbientStr[16];
-						float lightSpecStr[16];
-						float lightAttenConst[16];
-						float lightAttenLinear[16];
-						float lightAttenQuadartic[16];
+					//stuff from the light
+					glm::vec3 lightPositions[16];
+					glm::vec3 lightColor[16];
+					float lightAmbientStr[16];
+					float lightSpecStr[16];
+					float lightAttenConst[16];
+					float lightAttenLinear[16];
+					float lightAttenQuadartic[16];
 
-						for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
-							auto& light = Get<TTN_Light>(m_Lights[i]);
-							auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
-							lightPositions[i] = lightTrans.GetGlobalPos();
-							lightColor[i] = light.GetColor();
-							lightAmbientStr[i] = light.GetAmbientStrength();
-							lightSpecStr[i] = light.GetSpecularStrength();
-							lightAttenConst[i] = light.GetConstantAttenuation();
-							lightAttenLinear[i] = light.GetConstantAttenuation();
-							lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
-						}
-
-						//send all the data about the lights to glsl
-						currentShader->SetUniform("u_LightPos", lightPositions[0], 16);
-						currentShader->SetUniform("u_LightCol", lightColor[0], 16);
-						currentShader->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
-						currentShader->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
-						currentShader->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
-						currentShader->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
-						currentShader->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
-
-						//and tell it how many lights there actually are
-						currentShader->SetUniform("u_NumOfLights", (int)m_Lights.size());
-
-						//stuff from the camera
-						currentShader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetGlobalPos());
+					for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
+						auto& light = Get<TTN_Light>(m_Lights[i]);
+						auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
+						lightPositions[i] = lightTrans.GetGlobalPos();
+						lightColor[i] = light.GetColor();
+						lightAmbientStr[i] = light.GetAmbientStrength();
+						lightSpecStr[i] = light.GetSpecularStrength();
+						lightAttenConst[i] = light.GetConstantAttenuation();
+						lightAttenLinear[i] = light.GetConstantAttenuation();
+						lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
 					}
+
+					//send all the data about the lights to glsl
+					currentShader->SetUniform("u_LightPos", lightPositions[0], 16);
+					currentShader->SetUniform("u_LightCol", lightColor[0], 16);
+					currentShader->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
+					currentShader->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
+					currentShader->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
+					currentShader->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
+					currentShader->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
+
+					//and tell it how many lights there actually are
+					currentShader->SetUniform("u_NumOfLights", (int)m_Lights.size());
+
+					//stuff from the camera
+					currentShader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetGlobalPos());
+				}
+			}
+
+			//if the material, or shader has changed, and is not nullptr set some data from
+			if (((shaderChanged || currentMatieral != renderer.GetMat()) && renderer.GetMat() != nullptr)) {
+				//set this material to the current material
+				currentMatieral = renderer.GetMat();
+				//set the shinniness
+				currentShader->SetUniform("u_Shininess", currentMatieral->GetShininess());
+				//and material details about the lighting and shading
+				currentShader->SetUniform("u_hasAmbientLighting", (int)(currentMatieral->GetHasAmbient()));
+				currentShader->SetUniform("u_hasSpecularLighting", (int)(currentMatieral->GetHasSpecular()));
+				//the ! is because it has to be reversed in the shader
+				currentShader->SetUniform("u_hasOutline", (int)(!currentMatieral->GetHasOutline()));
+				currentShader->SetUniform("u_OutlineSize", currentMatieral->GetOutlineSize());
+
+				//wheter or not ramps for toon shading should be used
+				currentShader->SetUniform("u_useDiffuseRamp", currentMatieral->GetUseDiffuseRamp());
+				currentShader->SetUniform("u_useSpecularRamp", currentMatieral->GetUseSpecularRamp());
+
+				//bind the ramps as textures
+				currentMatieral->GetDiffuseRamp()->Bind(10);
+				currentMatieral->GetSpecularRamp()->Bind(11);
+
+				//if this is a height map shader
+				//if they're using a displacement map
+				if (currentShader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_COLOR_HEIGHTMAP
+					|| currentShader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_NO_COLOR_HEIGHTMAP)
+				{
+					//bind it to the slot
+					renderer.GetMat()->GetHeightMap()->Bind(textureSlot);
+					//update the texture slot for future textures to use
+					textureSlot++;
+					//and pass in the influence
+					currentShader->SetUniform("u_influence", renderer.GetMat()->GetHeightInfluence());
 				}
 
-				//if the material, or shader has changed, and is not nullptr set some data from 
-				if (((shaderChanged || currentMatieral != renderer.GetMat()) && renderer.GetMat() != nullptr)) {
-					//set this material to the current material
-					currentMatieral = renderer.GetMat();
-					//set the shinniness
-					currentShader->SetUniform("u_Shininess", currentMatieral->GetShininess());
-					//and material details about the lighting and shading
-					currentShader->SetUniform("u_hasAmbientLighting", (int)(currentMatieral->GetHasAmbient()));
-					currentShader->SetUniform("u_hasSpecularLighting", (int)(currentMatieral->GetHasSpecular()));
-					//the ! is because it has to be reversed in the shader
-					currentShader->SetUniform("u_hasOutline", (int)(!currentMatieral->GetHasOutline()));
-					currentShader->SetUniform("u_OutlineSize", currentMatieral->GetOutlineSize());
-
-					//wheter or not ramps for toon shading should be used
-					currentShader->SetUniform("u_useDiffuseRamp", currentMatieral->GetUseDiffuseRamp());
-					currentShader->SetUniform("u_useSpecularRamp", currentMatieral->GetUseSpecularRamp());
-
-					//bind the ramps as textures
-					currentMatieral->GetDiffuseRamp()->Bind(10);
-					currentMatieral->GetSpecularRamp()->Bind(11);
-
-					//if this is a height map shader
-					//if they're using a displacement map
-					if (currentShader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_COLOR_HEIGHTMAP
-						|| currentShader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_NO_COLOR_HEIGHTMAP)
-					{
-						//bind it to the slot
-						renderer.GetMat()->GetHeightMap()->Bind(textureSlot);
-						//update the texture slot for future textures to use
-						textureSlot++;
-						//and pass in the influence
-						currentShader->SetUniform("u_influence", renderer.GetMat()->GetHeightInfluence());
-					}
-
-					//if it's a shader with albedo
-					if (currentShader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR ||
-						currentShader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY) {
-						//set wheter or not it should use it's albedo texture
-						currentShader->SetUniform("u_UseDiffuse", (int)currentMatieral->GetUseAlbedo());
-						//and bind that albedo
-						currentMatieral->GetAlbedo()->Bind(textureSlot);
-						textureSlot++;
-					}
-
-					//if it's a shader with a specular map
-					if (currentShader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR) {
-						//bind that specular map
-						currentMatieral->GetSpecularMap()->Bind(textureSlot);
-						textureSlot++;
-					}
-
-					//if it's a skybox
-					if (currentShader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_SKYBOX) {
-						//bind the skybox texture
-						currentMatieral->GetSkybox()->Bind(textureSlot);
-						textureSlot++;
-						//set the rotation matrix uniform
-						currentShader->SetUniformMatrix("u_EnvironmentRotation", glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(1, 0, 0))));
-						//set the skybox matrix uniform
-						currentShader->SetUniformMatrix("u_SkyboxMatrix", Get<TTN_Camera>(m_Cam).GetProj()* glm::mat4(glm::mat3(viewMat)));
-					}
-				}
-				//otherwise just set a default shinnines
-				else if (currentShader != nullptr) {
-					currentShader->SetUniform("u_Shininess", 128.0f);
+				//if it's a shader with albedo
+				if (currentShader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR ||
+					currentShader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY) {
+					//set wheter or not it should use it's albedo texture
+					currentShader->SetUniform("u_UseDiffuse", (int)currentMatieral->GetUseAlbedo());
+					//and bind that albedo
+					currentMatieral->GetAlbedo()->Bind(textureSlot);
+					textureSlot++;
 				}
 
-				//if it is on a morph animated shader, set the interpolation parameter uniform
-				if (currentShader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR ||
-					currentShader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_COLOR) {
-					//try to get an animator component
-					if (Has<TTN_MorphAnimator>(entity)) {
-						currentShader->SetUniform("t", Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getInterpolationParameter());
-					}
-					else
-						currentShader->SetUniform("t", 0.0f);
+				//if it's a shader with a specular map
+				if (currentShader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_AND_SPECULAR) {
+					//bind that specular map
+					currentMatieral->GetSpecularMap()->Bind(textureSlot);
+					textureSlot++;
 				}
 
-				//if the entity has an animator
+				//if it's a skybox
+				if (currentShader->GetFragShaderDefaultStatus() == (int)TTN_DefaultShaders::FRAG_SKYBOX) {
+					//bind the skybox texture
+					currentMatieral->GetSkybox()->Bind(textureSlot);
+					textureSlot++;
+					//set the rotation matrix uniform
+					currentShader->SetUniformMatrix("u_EnvironmentRotation", glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(1, 0, 0))));
+					//set the skybox matrix uniform
+					currentShader->SetUniformMatrix("u_SkyboxMatrix", Get<TTN_Camera>(m_Cam).GetProj() * glm::mat4(glm::mat3(viewMat)));
+				}
+			}
+			//otherwise just set a default shinnines
+			else if (currentShader != nullptr) {
+				currentShader->SetUniform("u_Shininess", 128.0f);
+			}
+
+			//if it is on a morph animated shader, set the interpolation parameter uniform
+			if (currentShader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR ||
+				currentShader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_MORPH_ANIMATION_COLOR) {
+				//try to get an animator component
 				if (Has<TTN_MorphAnimator>(entity)) {
-					currentMesh = renderer.GetMesh();
-					//set up the vao on the mesh properly
-					currentMesh->SetUpVao(Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getCurrentMeshIndex(),
-						Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getNextMeshIndex());
-					//set the last mesh as having been animated
-					morphAnimatedLastMesh = true;
+					currentShader->SetUniform("t", Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getInterpolationParameter());
 				}
-				//if it doesn't
-				else if (currentMesh != renderer.GetMesh() || !morphAnimatedLastMesh) {
-					//save the mesh
-					currentMesh = renderer.GetMesh();
-					//set up the vao with both mesh indices on zero
-					currentMesh->SetUpVao();
-					//set the last mesh as having not been animated
-					morphAnimatedLastMesh = false;
-				}
+				else
+					currentShader->SetUniform("t", 0.0f);
+			}
 
-				//and finish by rendering the mesh
-				renderer.Render(transform.GetGlobal(), vp);
+			//if the entity has an animator
+			if (Has<TTN_MorphAnimator>(entity)) {
+				currentMesh = renderer.GetMesh();
+				//set up the vao on the mesh properly
+				currentMesh->SetUpVao(Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getCurrentMeshIndex(),
+					Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getNextMeshIndex());
+				//set the last mesh as having been animated
+				morphAnimatedLastMesh = true;
+			}
+			//if it doesn't
+			else if (currentMesh != renderer.GetMesh() || !morphAnimatedLastMesh) {
+				//save the mesh
+				currentMesh = renderer.GetMesh();
+				//set up the vao with both mesh indices on zero
+				currentMesh->SetUpVao();
+				//set the last mesh as having not been animated
+				morphAnimatedLastMesh = false;
+			}
+
+			shadowBuffer->BindDepthAsTexture(30);
+			//and finish by rendering the mesh
+			renderer.Render(transform.GetGlobal(), vp, lightSpaceViewProj);
 		});
+
 
 		//2D sprite rendering
 		//make a vector to store all the entities to render
@@ -625,7 +668,7 @@ namespace Titan {
 					const btVector3& location2 = point.getPositionWorldOnB();
 					glm::vec3 collisionLocation = (glm::vec3(location.getX(), location.getY(), location.getZ())
 						+ glm::vec3(location2.getX(), location2.getY(), location2.getZ())) * 0.5f;
-					
+
 					//and make a collision object
 					TTN_Collision::scolptr newCollision = TTN_Collision::Create();
 					newCollision->SetBody1(static_cast<entt::entity>(reinterpret_cast<uint32_t>(b0->getUserPointer())));

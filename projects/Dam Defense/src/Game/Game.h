@@ -126,6 +126,7 @@ public:
 	TTN_Shader::sshptr shaderProgramAnimatedTextured;
 	TTN_Shader::sshptr shaderProgramWater;
 	TTN_Shader::sshptr shaderProgramTerrain;
+	TTN_Shader::sshptr shaderDepth;
 
 	//meshes
 	TTN_Mesh::smptr cannonMesh;

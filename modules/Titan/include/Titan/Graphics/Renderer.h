@@ -34,6 +34,8 @@ namespace Titan {
 		void SetMat(TTN_Material::smatptr mat);
 		//sets the renderlayer
 		void SetRenderLayer(int renderLayer);
+		//set csat shadows
+		void SetCastShadows(bool castShadows) { m_castShadows = castShadows; }
 
 		//gets the mesh
 		const TTN_Mesh::smptr GetMesh() const { return m_mesh; }
@@ -43,8 +45,11 @@ namespace Titan {
 		const TTN_Material::smatptr GetMat() const { return m_Mat; }
 		//gets the render layer
 		const int GetRenderLayer() const { return m_RenderLayer; }
+//get should cast shadows or not
+		const int GetCastShadows() const { return m_castShadows; }
+				
 
-		void Render(glm::mat4 model, glm::mat4 VP);
+		void Render(glm::mat4 model, glm::mat4 VP, glm::mat4 lightSpaceMat);
 
 	private:
 		//a pointer to the shader that should be used to render this object
@@ -55,5 +60,8 @@ namespace Titan {
 		TTN_Material::smatptr m_Mat;
 		//the render layer, to help control the order things should render
 		int m_RenderLayer;
+		//should cast shadows or not
+		bool m_castShadows = true;
+
 	};
 }

@@ -380,6 +380,7 @@ void Game::SetUpAssets()
 	shaderProgramTerrain = TTN_AssetSystem::GetShader("Terrain shader");
 	shaderProgramWater = TTN_AssetSystem::GetShader("Water shader");
 	shaderProgramAnimatedTextured = TTN_AssetSystem::GetShader("Animated textured shader");
+	shaderDepth = TTN_AssetSystem::GetShader("Depth shader");
 
 	////MESHES////
 	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
@@ -526,6 +527,7 @@ void Game::SetUpEntities()
 		TTN_Renderer skyboxRenderer = TTN_Renderer(skyboxMesh, shaderProgramSkybox);
 		skyboxRenderer.SetMat(skyboxMat);
 		skyboxRenderer.SetRenderLayer(100);
+		skyboxRenderer.SetCastShadows(false);
 		//attach that renderer to the entity
 		AttachCopy<TTN_Renderer>(skybox, skyboxRenderer);
 
@@ -666,46 +668,6 @@ void Game::SetUpEntities()
 		AttachCopy(water, waterTrans);
 	}
 
-	birds = std::vector<entt::entity>();
-	//birds
-	for (int i = 0; i < 3; i++) {
-		birds.push_back(CreateEntity());
-
-		//create a renderer
-		TTN_Renderer birdRenderer = TTN_Renderer(birdMesh, shaderProgramAnimatedTextured, birdMat);
-
-		//attach that renderer to the entity
-		AttachCopy(birds[i], birdRenderer);
-
-		//create an animator
-		TTN_MorphAnimator birdAnimator = TTN_MorphAnimator();
-
-		//create an animation for the bird flying
-		TTN_MorphAnimation flyingAnim = TTN_MorphAnimation({ 0, 1 }, { 10.0f / 24.0f, 10.0f / 24.0f }, true); //anim 0
-		birdAnimator.AddAnim(flyingAnim);
-		birdAnimator.SetActiveAnim(0);
-
-		//attach that animator to the entity
-		AttachCopy(birds[i], birdAnimator);
-
-		//create a transform
-		TTN_Transform birdTrans = TTN_Transform(birdBase, glm::vec3(0.0f), glm::vec3(1.0f));
-		if (i == 1) birdTrans.SetPos(birdBase + glm::vec3(3.0f, -3.0f, 3.0f));
-		if (i == 2) birdTrans.SetPos(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f));
-		birdTrans.RotateFixed(glm::vec3(0.0f, -45.0f + 180.0f, 0.0f));
-
-		//attach that transform to the entity
-		AttachCopy(birds[i], birdTrans);
-
-		//set up a physics body for the bird
-		TTN_Physics birdPhysBod = TTN_Physics(birdTrans.GetPos(), glm::vec3(0.0f), birdTrans.GetScale() * 3.5f, birds[i], TTN_PhysicsBodyType::DYNAMIC);
-		birdPhysBod.SetLinearVelocity(glm::vec3(-25.0f, 0.0f, -20.0f));
-		//attach the physics body to the entity
-		AttachCopy(birds[i], birdPhysBod);
-
-		TTN_Tag birdTag = TTN_Tag("Bird"); //sets bird to ttn_tag
-		AttachCopy<TTN_Tag>(birds[i], birdTag);
-	}
 
 	//prepare the vector of cannonballs
 	cannonBalls = std::vector<std::pair<entt::entity, bool>>();
@@ -886,6 +848,8 @@ void Game::RestartData()
 		itt = birds.erase(itt);
 	}
 
+	for (int i = 0; i < birdNum; i++)
+		MakeABird();
 
 	//sets the buses to not be paused
 	engine.GetBus("Music").SetPaused(false);
@@ -1907,11 +1871,13 @@ void Game::MakeABird()
 	//attach that animator to the entity
 	AttachCopy(birds[birds.size() - 1], birdAnimator);
 
-			//create a transform
-			TTN_Transform birdTrans = TTN_Transform(birdBase, glm::vec3(0.0f), glm::vec3(1.0f));
-			if (i == 1) birdTrans.SetPos(birdBase + glm::vec3(3.0f, -3.0f, 3.0f));
-			if (i == 2) birdTrans.SetPos(birdBase + glm::vec3(-3.0f, -3.0f, -3.0f));
-			birdTrans.RotateFixed(glm::vec3(0.0f, -45.0f + 180.0f, 0.0f));
+	//create a transform
+	float randX = TTN_Random::RandomFloat(-60.0f, 60.0f);
+	float randY = TTN_Random::RandomFloat(20.0f, 30.0f);
+	float randZ = TTN_Random::RandomFloat(20.0f, 100.0f);
+	TTN_Transform birdTrans = TTN_Transform(glm::vec3(randX, randY, randZ), glm::vec3(0.0f), glm::vec3(1.0f));
+	//attach that transform to the entity
+	AttachCopy(birds[birds.size() - 1], birdTrans);
 
 	//set up a physics body for the bird
 	TTN_Physics birdPhysBod = TTN_Physics(birdTrans.GetPos(), glm::vec3(0.0f), birdTrans.GetScale() * 3.5f, birds[birds.size() - 1], TTN_PhysicsBodyType::DYNAMIC);

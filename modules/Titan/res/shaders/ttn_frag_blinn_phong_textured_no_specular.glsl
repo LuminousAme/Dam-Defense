@@ -5,6 +5,7 @@ layout(location = 0) in vec3 inPos;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inUV;
 layout(location = 3) in vec3 inColor;
+layout(location = 4) in vec4 inFragPosLightSpace;
 
 //material data
 uniform sampler2D s_Diffuse;
@@ -38,6 +39,9 @@ uniform float u_LightAttenuationQuadratic[16];
 
 uniform int u_NumOfLights;
 
+layout (binding = 30) uniform sampler2D s_ShadowMap;
+uniform float shadowBias=0.005f;
+
 //camera data
 uniform vec3  u_CamPos;
 
@@ -46,8 +50,8 @@ out vec4 frag_color;
 
 //functions 
 //vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst, float attenLine, float attenQuad, vec3 norm, vec3 viewDir, float textSpec);
-vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst, float attenLine, float attenQuad, vec3 norm, vec3 viewDir, float textSpec);
-
+vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst, float attenLine, float attenQuad, vec3 norm, vec3 viewDir, float textSpec, float shadow);
+float ShadowCalculation(vec4 FragPosLightSpace);
 
 // https://learnopengl.com/Advanced-Lighting/Advanced-Lighting
 void main() {
@@ -63,11 +67,13 @@ void main() {
 	//combine everything
 	vec3 result = u_AmbientCol * u_AmbientStrength * u_hasAmbientLighting; // global ambient light
 
+		float shadow = ShadowCalculation(inFragPosLightSpace);
+
 	//add the results from all the lights
 	for(int i = 0; i < u_NumOfLights; i++) {
 		result = result + CalcLight(u_LightPos[i], u_LightCol[i], u_AmbientLightStrength[i], u_SpecularLightStrength[i], 
 					u_LightAttenuationConstant[i], u_LightAttenuationLinear[i], u_LightAttenuationQuadratic[i], 
-					N, viewDir, 1.0);
+					N, viewDir, 1.0, shadow);
 	}
 
 	//add that to the texture color if the texture color should be applied
@@ -80,7 +86,7 @@ void main() {
 	frag_color = vec4(result, textureColor.a) * vec4(vec3(edge), 1.0);
 }
 
-vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst, float attenLine, float attenQuad, vec3 norm, vec3 viewDir, float textSpec) {
+vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst, float attenLine, float attenQuad, vec3 norm, vec3 viewDir, float textSpec, float shadow) {
 	//ambient 
 	vec3 ambient = ambStr * col * u_hasAmbientLighting;
 
@@ -105,5 +111,36 @@ vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst
 	specular = mix(specular, (texture(s_specularRamp, vec2(spec, spec)).xyz), u_useSpecularRamp);
 	specular = specular * u_hasSpecularLighting;
 	
-	return ((ambient + diffuse + specular) * attenuation);
+	return ((1.0-shadow)*(ambient + diffuse + specular) * attenuation);
+}
+
+float ShadowCalculation(vec4 FragPosLightSpace)
+{
+	// perspective division 
+	vec3 projectionCoordinates = FragPosLightSpace.xyz / FragPosLightSpace.w;
+
+	//transform values into [0,1] rnage
+	projectionCoordinates = projectionCoordinates * 0.5 + 0.5;
+
+	//get the closest dpeth value
+	float closestDepth = texture(s_ShadowMap, projectionCoordinates.xy).r;
+
+	//get current depth
+	float currentDepth = projectionCoordinates.z;
+
+	//check whether's theres a shadow 
+	float shadow = currentDepth -shadowBias > closestDepth ? 1.0 : 0.0;
+
+	vec2 texelSize = 1.0 / textureSize(s_ShadowMap, 0);
+	for(int x = -1; x <= 1; ++x){
+			for(int y = -1; y <= 1; ++y){
+					float pcfDepth = texture(s_ShadowMap, projectionCoordinates.xy + vec2(x, y) * texelSize).r; 
+					shadow += currentDepth - shadowBias > pcfDepth ? 1.0 : 0.0;        
+				}    
+		}
+	shadow /= 2.0;
+
+	//shadow =(0.5 + (shadow / 18.0));
+
+	return shadow;
 }

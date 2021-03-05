@@ -156,7 +156,7 @@ int main() {
 		}
 
 		/// OPTIONS ////
-		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldOptions() && set2Loaded && (!firstTime))
+		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldOptions()  && (!firstTime))
 		{
 			//if it is, go to the options
 			titleScreen->SetShouldRender(false);
@@ -169,7 +169,7 @@ int main() {
 		}
 
 		//for if it should be going to the options from the main menu and the player has already played the game in this session
-		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldOptions() && set2Loaded && (firstTime)) {
+		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldOptions() && (firstTime)) {
 			//if it is, go to the options
 			titleScreen->SetShouldRender(false);
 			titleScreenUI->SetShouldRender(false);
@@ -354,8 +354,8 @@ int main() {
 
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)
 			set1Loaded = true;
-		if (!set2Loaded && TTN_AssetSystem::GetSetLoaded(2) && TTN_AssetSystem::GetCurrentSet() == 2)
-			set2Loaded = true;
+		/*if (!set2Loaded && TTN_AssetSystem::GetSetLoaded(2) && TTN_AssetSystem::GetCurrentSet() == 2)
+			set2Loaded = true;*/
 		
 
 		//update the scenes and render the screen
@@ -396,6 +396,8 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddDefaultShaderToBeLoaded("Animated textured shader", TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR, TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY, 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Terrain shader", "shaders/terrain_vert.glsl", "shaders/terrain_frag.glsl", 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Water shader", "shaders/water_vert.glsl", "shaders/water_frag.glsl", 1);
+	TTN_AssetSystem::AddShaderToBeLoaded("Depth shader", "shaders/simple_depth_vert.glsl", "shaders/simple_depth_frag.glsl", 1);
+
 
 	TTN_AssetSystem::AddLUTTobeLoaded("Warm LUT", "Warm_LUT.cube", 1);
 	TTN_AssetSystem::AddLUTTobeLoaded("Cool LUT", "Cool_LUT.cube", 1);
@@ -427,29 +429,31 @@ void PrepareAssetLoading() {
 
 	//set 2, the game (excluding things already loaded into set 1)
 	for(int i = 0; i < 10; i++)
-		TTN_AssetSystem::AddTexture2DToBeLoaded(std::to_string(i) + "-Text", "textures/text/" + std::to_string(i) + ".png", 2); //numbers for health and score
+		TTN_AssetSystem::AddTexture2DToBeLoaded(std::to_string(i) + "-Text", "textures/text/" + std::to_string(i) + ".png", 1); //numbers for health and score
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Wave-Text", "textures/text/Wave.png");
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Complete-Text", "textures/text/Complete.png");
 
 	for (int i = 1; i < 4; i++) {
-		TTN_AssetSystem::AddMeshToBeLoaded("Boat " + std::to_string(i), "models/Boat " + std::to_string(i) + ".obj", 2); //enemy boat meshes
-		TTN_AssetSystem::AddTexture2DToBeLoaded("Boat texture " + std::to_string(i), "textures/Boat " + std::to_string(i) + " Texture.png", 2); //enemy boat textures 
+		TTN_AssetSystem::AddMeshToBeLoaded("Boat " + std::to_string(i), "models/Boat " + std::to_string(i) + ".obj", 1); //enemy boat meshes
+		TTN_AssetSystem::AddTexture2DToBeLoaded("Boat texture " + std::to_string(i), "textures/Boat " + std::to_string(i) + " Texture.png", 1); //enemy boat textures 
 	}
-	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Bird mesh", "models/bird/bird", 2, 2); //bird mesh
-	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Enemy Cannon mesh", "models/Enemy Cannon/e_cannon", 17, 2); //mesh for the enemy cannons
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Enemy Cannon texture", "textures/Enemy_Cannon_Texture.png", 2); //enemy cannon texture
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Bird texture", "textures/BirdTexture.png", 2); //bird texture
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Paused-Text", "textures/text/Paused.png", 2); //rendered text of the word paused
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Resume-Text", "textures/text/Resume.png", 2); //rendered text of the word resume
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Score-Text", "textures/text/Score.png", 2); //rendered text of the word Score
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Flamethrower Icon", "textures/Fire_Icon.png", 2); //icon of the fire
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Overlay", "textures/Special_Ability_Border.png", 2); //overlay for special abilities
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Background", "textures/Special_Ability_BG.png", 2); //background for the special abilities
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Bar", "textures/Special_Ability_Bar.png", 2); //bar for the special abilities cooldown
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Flamethrower Key", "textures/text/flamethrower-key.png", 2); //the key the player needs to press to use the flamethrower
+	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Bird mesh", "models/bird/bird", 2, 1); //bird mesh
+	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Enemy Cannon mesh", "models/Enemy Cannon/e_cannon", 17, 1); //mesh for the enemy cannons
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Enemy Cannon texture", "textures/Enemy_Cannon_Texture.png", 1); //enemy cannon texture
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Bird texture", "textures/BirdTexture.png", 1); //bird texture
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Paused-Text", "textures/text/Paused.png", 1); //rendered text of the word paused
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Resume-Text", "textures/text/Resume.png", 1); //rendered text of the word resume
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Score-Text", "textures/text/Score.png", 1); //rendered text of the word Score
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Flamethrower Icon", "textures/Fire_Icon.png", 1); //icon of the fire
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Bird Bomb Icon", "textures/Bird_Icon.png", 1); //icon of the bird bomb
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Overlay", "textures/Special_Ability_Border.png", 1); //overlay for special abilities
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Background", "textures/Special_Ability_BG.png", 1); //background for the special abilities
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Bar", "textures/Special_Ability_Bar.png", 1); //bar for the special abilities cooldown
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Flamethrower Key", "textures/text/flamethrower-key.png", 1); //the key the player needs to press to use the flamethrower
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Bird Bomb Key", "textures/text/bird-key.png", 1); //the key the player needs to press to use the bird bomb
 	
-	//set 3, win/lose screen
+																							   //set 3, win/lose screen
 	//TTN_AssetSystem::AddTexture2DToBeLoaded("You Win-Text", "textures/text/You win.png", 3); //rendered text of the pharse "You Win!"
 	//TTN_AssetSystem::AddTexture2DToBeLoaded("Game Over-Text", "textures/text/Game over.png", 3); //rendered text of the phrase "Game Over..."
 	//TTN_AssetSystem::AddTexture2DToBeLoaded("Play Again-Text", "textures/text/Play again.png", 3); //rendered text of the phrase "Play Again"
