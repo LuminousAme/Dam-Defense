@@ -31,8 +31,10 @@ namespace Titan {
 	//unloads all the color targets
 	void TTN_ColorTarget::Unload()
 	{
-		//delete all the color target textures
-		glDeleteTextures(m_numAttachments, &m_textures[0]->GetHandle());
+		if (m_numAttachments > 0) {
+			//delete all the color target textures
+			glDeleteTextures(m_numAttachments, &m_textures[0]->GetHandle());
+		}
 	}
 
 	//constructor for framebuffer
