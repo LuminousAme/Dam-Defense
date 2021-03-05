@@ -26,7 +26,6 @@ int main() {
 
 	//data to track loading progress
 	bool set1Loaded = false;
-	bool set2Loaded = false;
 
 	//reference to the audio engine (used to pause game audio while the game isn't running)
 	TTN_AudioEngine& audioEngine = TTN_AudioEngine::Instance();
@@ -95,8 +94,6 @@ int main() {
 			loadingScreen->SetShouldRender(true);
 			//and start up the queue to load the main menu assets in
 			TTN_AssetSystem::LoadSetInBackground(1);
-			TTN_AssetSystem::LoadSetInBackground(2);
-			TTN_AssetSystem::LoadSetInBackground(3);
 		}
 
 		//check if the loading is done
@@ -113,7 +110,7 @@ int main() {
 
 		/// PLAY ///
 		//check if the loading is done and the menu should be going to the game
-		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldPlay() && set2Loaded && (!firstTime)) {
+		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldPlay() && (!firstTime) ) {
 			//if it is, go to the game
 			titleScreen->SetShouldRender(false);
 			titleScreenUI->SetShouldRender(false);
@@ -139,7 +136,7 @@ int main() {
 		}
 
 		//for if it should be going to the game from the main menu and the player has already played the game in this session
-		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldPlay() && set2Loaded && (firstTime)) {
+		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldPlay() && (firstTime)) {
 			//if it is, go to the game
 			titleScreen->SetShouldRender(false);
 			titleScreenUI->SetShouldRender(false);
@@ -359,6 +356,7 @@ int main() {
 			set1Loaded = true;
 		if (!set2Loaded && TTN_AssetSystem::GetSetLoaded(2) && TTN_AssetSystem::GetCurrentSet() == 2)
 			set2Loaded = true;
+		
 
 		//update the scenes and render the screen
 		TTN_Application::Update();
@@ -422,11 +420,13 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Quit-Text", "textures/text/Quit.png", 1); //rendered text of word Quit
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Main Menu", "textures/text/Main Menu.png", 1); //rendered text of word main menu
 
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Game logo", "textures/Dam Defense logo.png", 1); //logo for the game
+	for (int i = 0; i < 23; i++) {
+		TTN_AssetSystem::AddTexture2DToBeLoaded("Game logo " + std::to_string(i), "textures/logo/Game Logo " + std::to_string(i+1) + ".png", 1); //logo for the game
+	}
 	TTN_AssetSystem::AddMeshToBeLoaded("Sphere", "models/IcoSphereMesh.obj", 1);
 
 	//set 2, the game (excluding things already loaded into set 1)
-	for (int i = 0; i < 10; i++)
+	for(int i = 0; i < 10; i++)
 		TTN_AssetSystem::AddTexture2DToBeLoaded(std::to_string(i) + "-Text", "textures/text/" + std::to_string(i) + ".png", 2); //numbers for health and score
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Wave-Text", "textures/text/Wave.png");
@@ -434,7 +434,7 @@ void PrepareAssetLoading() {
 
 	for (int i = 1; i < 4; i++) {
 		TTN_AssetSystem::AddMeshToBeLoaded("Boat " + std::to_string(i), "models/Boat " + std::to_string(i) + ".obj", 2); //enemy boat meshes
-		TTN_AssetSystem::AddTexture2DToBeLoaded("Boat texture " + std::to_string(i), "textures/Boat " + std::to_string(i) + " Texture.png", 2); //enemy boat textures
+		TTN_AssetSystem::AddTexture2DToBeLoaded("Boat texture " + std::to_string(i), "textures/Boat " + std::to_string(i) + " Texture.png", 2); //enemy boat textures 
 	}
 	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Bird mesh", "models/bird/bird", 2, 2); //bird mesh
 	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Enemy Cannon mesh", "models/Enemy Cannon/e_cannon", 17, 2); //mesh for the enemy cannons
@@ -448,7 +448,7 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Background", "textures/Special_Ability_BG.png", 2); //background for the special abilities
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Bar", "textures/Special_Ability_Bar.png", 2); //bar for the special abilities cooldown
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Flamethrower Key", "textures/text/flamethrower-key.png", 2); //the key the player needs to press to use the flamethrower
-
+	
 	//set 3, win/lose screen
 	//TTN_AssetSystem::AddTexture2DToBeLoaded("You Win-Text", "textures/text/You win.png", 3); //rendered text of the pharse "You Win!"
 	//TTN_AssetSystem::AddTexture2DToBeLoaded("Game Over-Text", "textures/text/Game over.png", 3); //rendered text of the phrase "Game Over..."

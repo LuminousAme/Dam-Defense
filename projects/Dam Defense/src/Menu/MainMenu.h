@@ -172,7 +172,6 @@ private:
 	entt::entity quitText;
 
 	//assets
-	TTN_Texture2D::st2dptr textureGameLogo;
 	TTN_Texture2D::st2dptr textureButton1;
 	TTN_Texture2D::st2dptr textureButton2;
 	TTN_Texture2D::st2dptr texturePlay;
