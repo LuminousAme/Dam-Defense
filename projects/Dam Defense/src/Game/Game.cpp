@@ -87,6 +87,8 @@ void Game::Update(float deltaTime)
 		for (int i = 0; i < boats.size(); i++) {
 			//sets gravity to 0
 			Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+			Get<EnemyComponent>(boats[i]).SetDifficulty(difficulty);
+
 		}
 
 		//go through all the entities with enemy compontents
@@ -116,6 +118,18 @@ void Game::Update(float deltaTime)
 		m_gameWin = true;
 	}
 
+	if (m_applyWarmLut) {
+		m_colorCorrectEffect->SetShouldApply(true);
+		m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
+		//and make sure the cool and customs luts are set not to render
+		m_applyCoolLut = false;
+		m_applyCustomLut = false;
+	}
+	else {
+		//if it's been turned of set the effect not to render
+		m_colorCorrectEffect->SetShouldApply(false);
+	}
+
 	//update the sound
 	engine.Update();
 
@@ -123,7 +137,7 @@ void Game::Update(float deltaTime)
 	ImGui();
 
 	//get fps
-	std::cout << "FPS: " << std::to_string(1.0f / deltaTime) << std::endl;
+	//std::cout << "FPS: " << std::to_string(1.0f / deltaTime) << std::endl;
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
 }
@@ -327,6 +341,7 @@ void Game::MouseButtonChecks()
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
 			m_cannonFiringSounds->SetNextPostion(glm::vec3(0.0f));
 			m_cannonFiringSounds->PlayFromQueue();
+			std::cout << "GAMEEEEEEEEEEEE : " << mouseSensetivity << std::endl;
 		}
 	}
 }
@@ -365,6 +380,7 @@ void Game::SetUpAssets()
 	shaderProgramTerrain = TTN_AssetSystem::GetShader("Terrain shader");
 	shaderProgramWater = TTN_AssetSystem::GetShader("Water shader");
 	shaderProgramAnimatedTextured = TTN_AssetSystem::GetShader("Animated textured shader");
+	shaderDepth = TTN_AssetSystem::GetShader("Depth shader");
 
 	////MESHES////
 	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
@@ -511,6 +527,7 @@ void Game::SetUpEntities()
 		TTN_Renderer skyboxRenderer = TTN_Renderer(skyboxMesh, shaderProgramSkybox);
 		skyboxRenderer.SetMat(skyboxMat);
 		skyboxRenderer.SetRenderLayer(100);
+		skyboxRenderer.SetCastShadows(false);
 		//attach that renderer to the entity
 		AttachCopy<TTN_Renderer>(skybox, skyboxRenderer);
 
@@ -650,6 +667,7 @@ void Game::SetUpEntities()
 		//attach that transform to the entity
 		AttachCopy(water, waterTrans);
 	}
+
 
 	//prepare the vector of cannonballs
 	cannonBalls = std::vector<std::pair<entt::entity, bool>>();
@@ -868,7 +886,7 @@ void Game::PlayerRotate(float deltaTime)
 
 	if (m_InputDelay <= 0.0f && !firstFrame) {
 		//figure out how much the cannon and camera should be rotated
-		glm::vec2 addAmmount = (tempMousePos - mousePos) * mouseSensetivity * deltaTime;
+		glm::vec2 addAmmount = (tempMousePos - mousePos) * (mouseSensetivity / 5.f) * deltaTime;
 		rotAmmount += addAmmount;
 
 		//clamp the rotation to within 85 degrees of the base rotation in all the directions
@@ -1254,8 +1272,7 @@ void Game::SpawnBoatRight() {
 		boats.push_back(CreateEntity());
 		//gets the type of boat
 		int randomBoat = rand() % 3;
-		//int randomBoat = 0;
-
+		
 		//create a renderer
 		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
 		//set up renderer for green boat
@@ -1440,7 +1457,7 @@ void Game::Collisions() {
 		//grab the entity numbers of the colliding entities
 		entt::entity entity1Ptr = collisionsThisFrame[i]->GetBody1();
 		entt::entity entity2Ptr = collisionsThisFrame[i]->GetBody2();
-		 
+
 		//check if both entities still exist
 		if (TTN_Scene::GetScene()->valid(entity1Ptr) && TTN_Scene::GetScene()->valid(entity2Ptr)) {
 			bool cont = true;
@@ -1617,7 +1634,9 @@ void Game::Collisions() {
 							Get<BirdComponent>(birds[birds.size() -1]).SetTarget(Get<BirdComponent>(birds[0]).GetTarget());
 
 							//subtract score
-							m_score = std::clamp((int)m_score - 50, 0, INT_MAX);
+							if (m_score > 50) {
+								m_score= m_score - 50;
+							}
 						}
 						else {
 							btt++;
@@ -1910,6 +1929,7 @@ void Game::ImGui()
 	ImGui::SliderInt("Master", &masterVolume, 0, 100);
 	ImGui::SliderInt("Music", &musicVolume, 0, 100);
 	ImGui::SliderInt("Sound Effects", &sfxVolume, 0, 100);
+	ImGui::SliderFloat("Mouse", &mouseSensetivity, 0.0f, 100.0f);
 
 	ImGui::End();
 
@@ -2166,7 +2186,6 @@ void Game::ImGui()
 		}
 
 		//Ramp controls
-
 		//diffuse ramp
 		if (ImGui::Checkbox("Use Diffuse Ramp", &m_useDiffuseRamp)) {
 			for (int i = 0; i < m_mats.size(); i++) {

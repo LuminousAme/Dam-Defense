@@ -18,6 +18,8 @@ namespace Titan {
 		m_Mat = nullptr;
 		//set the renderlayer to zero
 		m_RenderLayer = 0;
+		//set shadow cast
+		m_castShadows = true;
 	}
 
 	TTN_Renderer::TTN_Renderer(TTN_Mesh::smptr mesh, TTN_Shader::sshptr shader, TTN_Material::smatptr material, int Renderlayer)
@@ -30,6 +32,8 @@ namespace Titan {
 		m_Mat = material;
 		//sets the render layer
 		m_RenderLayer = Renderlayer;
+		//set shadow cast
+		m_castShadows = true;
 	}
 
 	//default constructor
@@ -39,6 +43,8 @@ namespace Titan {
 		m_Shader = nullptr;
 		m_Mat = nullptr;
 		m_RenderLayer = 0;
+		//set shadow cast
+		m_castShadows = true;
 	}
 
 	//destructor, destroys the object
@@ -71,7 +77,7 @@ namespace Titan {
 	}
 
 	//function that will send the uniforms with how to draw the object arounding to the camera to openGL
-	void TTN_Renderer::Render(glm::mat4 model, glm::mat4 VP)
+	void TTN_Renderer::Render(glm::mat4 model, glm::mat4 VP, glm::mat4 lightSpaceMat)
 	{
 		//make sure the vao is acutally set up before continuing
 		if (m_mesh->GetVAOPointer() == nullptr)
@@ -84,6 +90,7 @@ namespace Titan {
 			m_Shader->SetUniformMatrix("MVP", VP * model);
 			m_Shader->SetUniformMatrix("Model", model);
 			m_Shader->SetUniformMatrix("NormalMat", glm::mat3(glm::transpose(glm::inverse(model))));
+			m_Shader->SetUniformMatrix("u_LightSpaceMatrix", lightSpaceMat);
 		}
 		//render the VAO
 		m_mesh->GetVAOPointer()->Render();

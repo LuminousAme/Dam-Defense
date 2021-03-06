@@ -11,6 +11,7 @@ PauseMenu::PauseMenu()
 	shouldQuit = false;
 	shouldResume = false;
 	shouldMenu = false;
+	shouldOptions = false;
 }
 
 void PauseMenu::InitScene()
@@ -119,6 +120,9 @@ void PauseMenu::InitScene()
 		TTN_Renderer2D bgRenderer2D = TTN_Renderer2D(textureBackground, glm::vec4(1.0f, 1.0f, 1.0f, 0.5f), 1);
 		AttachCopy(background, bgRenderer2D);
 	}
+
+
+
 }
 
 void PauseMenu::Update(float deltaTime)
@@ -219,6 +223,7 @@ void PauseMenu::MouseButtonDownChecks()
 			mousePosWorldSpace.y < optionsButtonTrans.GetPos().y + 0.5f * abs(optionsButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > optionsButtonTrans.GetPos().y - 0.5f * abs(optionsButtonTrans.GetScale().y)) {
 			//do something
+			shouldOptions = true;
 		}
 
 		//get menu buttons transform

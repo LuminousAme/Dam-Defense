@@ -12,11 +12,12 @@ EnemyComponent::EnemyComponent()
 	m_ypos = 7.5f;
 	m_alive = true;
 	m_attacking = false;
+	m_diff = 1.0f;
 	m_cannonEntityRef = entt::null;
 }
 
 EnemyComponent::EnemyComponent(entt::entity boat, TTN_Scene* scene, int boatType, int path, float damageCooldown)
-	: m_entityNumber(boat), m_scene(scene), m_boatType(boatType), m_path(path), m_damageCooldown(damageCooldown), m_ypos(0.0f), m_alive(true), m_attacking(false),
+	: m_entityNumber(boat), m_scene(scene), m_boatType(boatType), m_path(path), m_damageCooldown(damageCooldown), m_ypos(0.0f), m_alive(true), m_attacking(false), m_diff(1.0f),
 	m_cannonEntityRef(entt::null)
 {
 	//set the y position as approriate based on ship model
@@ -275,15 +276,14 @@ void EnemyComponent::Update(float deltaTime)
 		//sink the ship
 		tBoat.SetPos(tBoat.GetPos() + glm::vec3(0.0f, -2.0f * deltaTime, 0.0f));
 	}
-
 }
 
 //function to seek a targetted position, returns a velocity towards that position
 glm::vec3 EnemyComponent::Seek(glm::vec3 target, glm::vec3 currentVelocity, glm::vec3 currentPosition)
 {
 	//base restriction (-10, 0 ,-10)
-	//glm::vec3 maxVelo(-25.0f, 0.0f, -65.0f); //fast version
-	glm::vec3 maxVelo(-10.0f, 0.0f, -12.0f);
+	//glm::vec3 maxVelo(-20.0f, 0.0f, -24.0f); //fast version
+	glm::vec3 maxVelo(-10.0f * (m_diff / 100.f), 0.0f, -12.0f * (m_diff / 100.f));
 
 	//gets the desired vector
 	glm::vec3 desired = (currentPosition - target);

@@ -17,6 +17,8 @@
 #include "Titan/Systems/MAnimator.h"
 #include "Titan/Systems/2DAnimator.h"
 #include "Titan/Systems/Particle.h"
+#include "Titan/Systems/AssetSystem.h"
+//#include "Titan/Application.h"
 //include all the graphics features we need
 #include "Titan/Graphics/Shader.h"
 #include "Titan/Graphics/Post/ColorCorrect.h"
@@ -190,6 +192,11 @@ namespace Titan {
 		TTN_PostEffect::spostptr m_emptyEffect;
 		//color correct effect
 		TTN_PostEffect::spostptr m_colorCorrectEffect;
+
+		TTN_Framebuffer::sfboptr shadowBuffer;
+		int shadowWidth = 1024;
+		int shadowHeight = 1024;
+		TTN_Shader::sshptr shaderDepth;
 
 		//constructs the TTN_Collision objects
 		void ConstructCollisions();
