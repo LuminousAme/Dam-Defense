@@ -365,6 +365,9 @@ int main() {
 	//clean up all the application data
 	TTN_Application::Closing();
 
+	//and clean up the logger data
+	Logger::Uninitialize();
+
 	//when the application has ended, exit the program with no errors
 	return 0;
 }
@@ -452,6 +455,10 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Special Ability Bar", "textures/Special_Ability_Bar.png", 1); //bar for the special abilities cooldown
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Flamethrower Key", "textures/text/flamethrower-key.png", 1); //the key the player needs to press to use the flamethrower
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Bird Bomb Key", "textures/text/bird-key.png", 1); //the key the player needs to press to use the bird bomb
+
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Cross", "textures/crosshair/crosshair cross.png", 1); //the cross at the top of the crosshair
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Hori Line", "textures/crosshair/crosshair hori.png", 1); //the horiztonal lines dropping down on the crosshair
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Vert Line", "textures/crosshair/crosshair vert dotted.png", 1); //the vertical line 
 	
 																							   //set 3, win/lose screen
 	//TTN_AssetSystem::AddTexture2DToBeLoaded("You Win-Text", "textures/text/You win.png", 3); //rendered text of the pharse "You Win!"

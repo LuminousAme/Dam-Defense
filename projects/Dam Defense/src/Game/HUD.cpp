@@ -115,6 +115,62 @@ void GameUI::InitScene()
 		AttachCopy(progressBarBg, progressRenderer);
 	}
 
+	//crosshair
+	{
+		//create an entity
+		crosshairCross = CreateEntity();
+
+		//make a transform for it 
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f), glm::vec3(60.0f * crosshairScale, 60.0f * crosshairScale, 1.0f));
+		AttachCopy(crosshairCross, Trans);
+
+		//make a 2D renderer for it 
+		TTN_Renderer2D renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Crosshair Cross"), crosshairColor);
+		AttachCopy(crosshairCross, renderer);
+	}
+
+	for (int i = 0; i < 4; i++) {	
+		//create an entity
+		crosshairHoriLines.push_back(std::pair(CreateEntity(), 1.0f));
+
+		//make a transform for it 
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f), glm::vec3(40.0f * crosshairScale, 40.0f * crosshairScale, 1.0f));
+		if (i == 0) {
+			Trans.SetPos(glm::vec3(0.0f, -22.5f, 2.0f));
+			Trans.SetScale(Trans.GetScale() * glm::vec3(0.8f, 1.0f, 1.0f));
+		}
+		if (i == 1) {
+			Trans.SetPos(glm::vec3(0.0f, -45.0f, 2.0f));
+			Trans.SetScale(Trans.GetScale() * glm::vec3(0.6f, 1.0f, 1.0f));
+		}		
+		if (i == 2) {
+			Trans.SetPos(glm::vec3(0.0f, -67.5f, 2.0f));
+			Trans.SetScale(Trans.GetScale() * glm::vec3(0.4f, 1.0f, 1.0f));
+		}		
+		if (i == 3) {
+			Trans.SetPos(glm::vec3(0.0f, -90.0f, 2.0f));
+			Trans.SetScale(Trans.GetScale() * glm::vec3(0.2f, 1.0f, 1.0f));
+		}
+		
+		AttachCopy(crosshairHoriLines[crosshairHoriLines.size() - 1].first, Trans);
+
+		//make a 2D renderer for it 
+		TTN_Renderer2D renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Crosshair Hori Line"), crosshairColor);
+		AttachCopy(crosshairHoriLines[crosshairHoriLines.size() - 1].first, renderer);
+	}
+
+	{
+		crosshairVertLine = CreateEntity();
+
+		//make a transform for it 
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, -56.25, 2.5f), glm::vec3(0.0f), glm::vec3(60.0f * crosshairScale, 75.0f, 1.0f));
+		AttachCopy(crosshairVertLine, Trans);
+
+		//make a 2D renderer for it 
+		TTN_Renderer2D renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Crosshair Vert Line"), crosshairColor);
+		AttachCopy(crosshairVertLine, renderer);
+	}
+
 	//score
 	{
 		//create an entity in the scene for the logo
@@ -562,7 +618,21 @@ void GameUI::Update(float deltaTime)
 			Get<TTN_Renderer2D>(birdBombBar).SetHoriMask(birdBombCoolDownPercent);
 		}
 	}
-		
+	
+	//Imgui stuff
+	ImGui::Begin("Crosshair control");
+
+	//color of the crosshair
+	if (ImGui::ColorPicker4("Crosshair color", glm::value_ptr(crosshairColor))) {
+		Get<TTN_Renderer2D>(crosshairCross).SetColor(crosshairColor);
+		Get<TTN_Renderer2D>(crosshairVertLine).SetColor(crosshairColor);
+		for (auto line : crosshairHoriLines) {
+			Get<TTN_Renderer2D>(line.first).SetColor(crosshairColor);
+		}
+	}
+
+	ImGui::End();
+
 	//update the base scene
 	TTN_Scene::Update(deltaTime);
 }

@@ -341,7 +341,6 @@ void Game::MouseButtonChecks()
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
 			m_cannonFiringSounds->SetNextPostion(glm::vec3(0.0f));
 			m_cannonFiringSounds->PlayFromQueue();
-			std::cout << "GAMEEEEEEEEEEEE : " << mouseSensetivity << std::endl;
 		}
 	}
 }
@@ -547,7 +546,7 @@ void Game::SetUpEntities()
 		AttachCopy(cannon, cannonRenderer);
 
 		//setup a transform for the cannon
-		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(0.0f, -0.4f, -0.25f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
+		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(0.0f, -0.4f, -0.25f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.3375f, 0.3375f, 0.2875f));
 		//attach that transform to the entity
 		AttachCopy(cannon, cannonTrans);
 
@@ -668,6 +667,8 @@ void Game::SetUpEntities()
 		AttachCopy(water, waterTrans);
 	}
 
+	//set the camera as the cannon's parent
+	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), camera);
 
 	//prepare the vector of cannonballs
 	cannonBalls = std::vector<std::pair<entt::entity, bool>>();
@@ -679,9 +680,6 @@ void Game::SetUpEntities()
 
 	//vector for flamethrower models and flame particles
 	flames = std::vector<entt::entity>();
-
-	//set the cannon to be a child of the camera
-	Get<TTN_Transform>(cannon).SetParent(&Get<TTN_Transform>(camera), camera);
 }
 
 //sets up any other data the game needs to store

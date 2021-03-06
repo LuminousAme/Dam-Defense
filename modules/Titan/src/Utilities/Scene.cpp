@@ -207,6 +207,11 @@ namespace Titan {
 				//make sure the physics body are active on every frame
 				Get<TTN_Physics>(entity).GetRigidBody()->setActivationState(true);
 
+				//make sure those that shouldn't have gravity don't
+				if (Get<TTN_Physics>(entity).GetHasGravity() == false) {
+					Get<TTN_Physics>(entity).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+				}
+
 				//call the physics body's update
 				Get<TTN_Physics>(entity).Update(deltaTime);
 			}
