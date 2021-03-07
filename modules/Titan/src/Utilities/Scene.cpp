@@ -127,9 +127,10 @@ namespace Titan {
 			delete body;
 		}
 
-		//remove any parents
+		//remove any parents and children
 		if (m_Registry->has<TTN_Transform>(entity)) {
 			Get<TTN_Transform>(entity).SetParent(nullptr, entt::null);
+			Get<TTN_Transform>(entity).RemoveAllChildren();
 		}
 
 		//delete the entity from the registry
@@ -184,6 +185,9 @@ namespace Titan {
 		//reconstruct any scenegraph relationships
 		auto transView = m_Registry->view<TTN_Transform>();
 		for (auto entity : transView) {
+			//reset it's children
+			Get<TTN_Transform>(entity).ResetChildren();
+
 			//if it should have a parent
 			if (Get<TTN_Transform>(entity).GetParentEntity() != entt::null) {
 				//then reatach that parent

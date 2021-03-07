@@ -1205,14 +1205,14 @@ void Game::SpawnBoatLeft()
 		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(4.0f, 3.0f, -14.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 
 		if (Get<EnemyComponent>(boats[boats.size() - 1]).GetBoatType() == 0) {//green
-			cannonTrans.SetPos(glm::vec3(16.0f, 7.0f, 1.35f));  // x and z axis flipped ?
-			cannonTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
+			cannonTrans.SetPos(glm::vec3(1.35f, 7.5f, -17.5f));
+			cannonTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
 			cannonTrans.SetScale(glm::vec3(0.35f));
 		}
 
 		else if (Get<EnemyComponent>(boats[boats.size() - 1]).GetBoatType() == 1) {//ac carrier /red
-			cannonTrans.SetPos(glm::vec3(-28.0f, 18.0f, -10.0f));
-			cannonTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
+			cannonTrans.SetPos(glm::vec3(8.0f, 18.0f, 40.0f));
+			cannonTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
 			cannonTrans.SetScale(glm::vec3(1.95f));
 		}
 
@@ -1342,14 +1342,14 @@ void Game::SpawnBoatRight() {
 		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(4.0f, 2.0f, -18.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 
 		if (Get<EnemyComponent>(boats[boats.size() - 1]).GetBoatType() == 0) {//green
-			cannonTrans.SetPos(glm::vec3(16.0f, 7.0f, 1.35f));  // x and z axis flipped ?
-			cannonTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
+			cannonTrans.SetPos(glm::vec3(1.35f, 7.5f, -17.5f));
+			cannonTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
 			cannonTrans.SetScale(glm::vec3(0.35f));
 		}
 
 		else if (Get<EnemyComponent>(boats[boats.size() - 1]).GetBoatType() == 1) {//ac carrier /red
-			cannonTrans.SetPos(glm::vec3(-28.0f, 18.0f, -10.0f));
-			cannonTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
+			cannonTrans.SetPos(glm::vec3(8.0f, 18.0f, 40.0f));
+			cannonTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
 			cannonTrans.SetScale(glm::vec3(1.95f));
 		}
 
@@ -1486,6 +1486,9 @@ void Game::Collisions() {
 							//play an expolsion at it's location
 							glm::vec3 loc = Get<TTN_Transform>(*itt).GetGlobalPos();
 							CreateExpolsion(loc);
+							//make sure it's facing the direction it's moving
+							if(Get<TTN_Physics>(*itt).GetLinearVelocity() != glm::vec3(0.0f)) Get<TTN_Transform>(*itt).LookAlong(
+								glm::normalize(Get<TTN_Physics>(*itt).GetLinearVelocity()), glm::vec3(0.0f, 1.0f, 0.0f));
 							//remove the physics from it
 							Remove<TTN_Physics>(*itt);
 							//add a countdown until it deletes
@@ -1664,10 +1667,16 @@ void Game::Damage(float deltaTime) {
 	//attack anim
 	std::vector<entt::entity>::iterator can = enemyCannons.begin(); //enemy cannon vector
 	while (can != enemyCannons.end()) {
-		if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetAttacking()) {
-			Get<TTN_MorphAnimator>(*can).SetActiveAnim(1);
+		if (Get<TTN_Transform>(*can).GetParentEntity() != entt::null) {
+			if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetAttacking()) {
+				Get<TTN_MorphAnimator>(*can).SetActiveAnim(1);
+			}
+			can++;
 		}
-		can++;
+		else {
+			DeleteEntity(*can);
+			can = enemyCannons.erase(can);
+		}
 	}
 }
 

@@ -352,6 +352,19 @@ namespace Titan {
 		ReconstructScenegraph();
 	}
 
+	//overload for when removing specfically a transform component
+	template<>
+	inline void TTN_Scene::Remove<TTN_Transform>(entt::entity entity) {
+		//remove any parents and childrens
+		Get<TTN_Transform>(entity).SetParent(nullptr, entt::null);
+		Get<TTN_Transform>(entity).RemoveAllChildren();
+
+		//remove the component from the entity
+		m_Registry->remove<TTN_Transform>(entity);
+		//reconstruct scenegraph as entt was shuffled
+		ReconstructScenegraph();
+	}
+
 	//overload for when removing specfically a physics component
 	template<>
 	inline void TTN_Scene::Remove<TTN_Physics>(entt::entity entity) {

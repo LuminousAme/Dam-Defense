@@ -60,7 +60,7 @@ private:
 	entt::entity crosshairVertLine;
 	std::vector<std::pair<entt::entity, float>> crosshairHoriLines;
 	float crosshairScale = 1.25f;
-	glm::vec4 crosshairColor = glm::vec4(1.0f);
+	glm::vec4 crosshairColor = glm::vec4(glm::vec3(0.0f), 1.0f);
 	//score text
 	entt::entity scoreText;
 	float scoreTextScale = 0.5f;

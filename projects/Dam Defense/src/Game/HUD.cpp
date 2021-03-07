@@ -115,7 +115,7 @@ void GameUI::InitScene()
 		AttachCopy(progressBarBg, progressRenderer);
 	}
 
-	//crosshair
+	//crosshair top
 	{
 		//create an entity
 		crosshairCross = CreateEntity();
@@ -129,6 +129,7 @@ void GameUI::InitScene()
 		AttachCopy(crosshairCross, renderer);
 	}
 
+	//crosshair bars
 	for (int i = 0; i < 4; i++) {	
 		//create an entity
 		crosshairHoriLines.push_back(std::pair(CreateEntity(), 1.0f));
@@ -159,6 +160,7 @@ void GameUI::InitScene()
 		AttachCopy(crosshairHoriLines[crosshairHoriLines.size() - 1].first, renderer);
 	}
 
+	//crosshair vertical bar
 	{
 		crosshairVertLine = CreateEntity();
 
@@ -618,20 +620,6 @@ void GameUI::Update(float deltaTime)
 			Get<TTN_Renderer2D>(birdBombBar).SetHoriMask(birdBombCoolDownPercent);
 		}
 	}
-	
-	//Imgui stuff
-	ImGui::Begin("Crosshair control");
-
-	//color of the crosshair
-	if (ImGui::ColorPicker4("Crosshair color", glm::value_ptr(crosshairColor))) {
-		Get<TTN_Renderer2D>(crosshairCross).SetColor(crosshairColor);
-		Get<TTN_Renderer2D>(crosshairVertLine).SetColor(crosshairColor);
-		for (auto line : crosshairHoriLines) {
-			Get<TTN_Renderer2D>(line.first).SetColor(crosshairColor);
-		}
-	}
-
-	ImGui::End();
 
 	//update the base scene
 	TTN_Scene::Update(deltaTime);

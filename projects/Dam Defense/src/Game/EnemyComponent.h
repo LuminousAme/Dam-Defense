@@ -60,4 +60,10 @@ protected:
 	bool m_alive; //wheter or not a ship is alive
 	bool m_attacking; //whether or not a ship is attacking
 	entt::entity m_cannonEntityRef;
+
+	glm::vec3 direction; //current direction of the boat
+	glm::vec3 deathDirection; //direction the boat was facing when it died
+	bool wasAliveLastFrame; //a variable for if the ship was alive last frame
+	float timeSinceDeath; //the ammount of time that has passed since the ship died
+	float timeSinking = 2.5f; //the ammount of time it should be rotating while it sinks
 };
