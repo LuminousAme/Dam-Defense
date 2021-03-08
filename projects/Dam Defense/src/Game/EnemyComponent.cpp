@@ -14,11 +14,12 @@ EnemyComponent::EnemyComponent()
 	m_attacking = false;
 	m_diff = 1.0f;
 	m_cannonEntityRef = entt::null;
+	wasAliveLastFrame = true;
 }
 
 EnemyComponent::EnemyComponent(entt::entity boat, TTN_Scene* scene, int boatType, int path, float damageCooldown)
 	: m_entityNumber(boat), m_scene(scene), m_boatType(boatType), m_path(path), m_damageCooldown(damageCooldown), m_ypos(0.0f), m_alive(true), m_attacking(false), m_diff(1.0f),
-	m_cannonEntityRef(entt::null)
+	m_cannonEntityRef(entt::null), wasAliveLastFrame(true)
 {
 	//set the y position as approriate based on ship model
 	switch (m_boatType) {
@@ -45,24 +46,6 @@ void EnemyComponent::Update(float deltaTime)
 		//left side middle path
 		if (m_path == 0) {
 			if (tBoat.GetPos().x <= 65.f) {
-				//rotation for the green boats
-				if (m_boatType == 0) {
-					if (tBoat.GetRotation().y <= 75.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, -0.55f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//rotation for the red boats
-				else if (m_boatType == 1) {
-					if (tBoat.GetRotation().y <= -20.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, -0.55f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//rotation for the yellow boats
-				else if (m_boatType == 2) {
-					if (tBoat.GetRotation().y >= 20.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, -0.55f * 60.0f * deltaTime, 0.0f));
-				}
-
 				//boat movememnt
 				glm::vec3 tar = Arrive(glm::vec3(8.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
 				(tar == glm::vec3(0.0f)) ? pBoat.SetLinearVelocity(glm::vec3(0.0f)) : pBoat.AddForce(tar);
@@ -72,24 +55,6 @@ void EnemyComponent::Update(float deltaTime)
 		//far left path
 		if (m_path == 1) {
 			if (tBoat.GetPos().x <= 75.f) {
-				//green boat rotation
-				if (m_boatType == 0) {
-					if (tBoat.GetRotation().y <= 83.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, -0.75f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//red boat rotation
-				else if (m_boatType == 1) {
-					if (tBoat.GetRotation().y <= -1.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, -0.7f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//yellow boat rotation
-				else if (m_boatType == 2) {
-					if (tBoat.GetRotation().y >= 1.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, -0.7f * 60.0f * deltaTime, 0.0f));
-				}
-
 				//boat movememnet
 				glm::vec3 tar = Arrive(glm::vec3(40.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
 				(tar == glm::vec3(0.0f)) ? pBoat.SetLinearVelocity(glm::vec3(0.0f)) : pBoat.AddForce(tar);
@@ -99,49 +64,13 @@ void EnemyComponent::Update(float deltaTime)
 		//center left
 		if (m_path == 2) {
 			//first part
-			if (tBoat.GetPos().x <= 65.f && !(tBoat.GetPos().x <= 5.f)) {
-				//green boat rotation
-				if (m_boatType == 0) {
-					if (tBoat.GetRotation().y <= 65.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, -0.6f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//red boat rotation
-				else if (m_boatType == 1) {
-					if (tBoat.GetRotation().y <= 15.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, -0.15f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//yellow boat rotation
-				else if (m_boatType == 2) {
-					if (tBoat.GetRotation().y >= 15.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, -0.15f * 60.0f * deltaTime, 0.0f));
-				}
-
+			if (tBoat.GetPos().x <= 65.f && !(tBoat.GetPos().x <= 7.5f)) {
 				//boat movement
 				pBoat.AddForce(Seek(glm::vec3(5.0f, m_ypos, 55.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 			}
 
 			//second part
-			if (tBoat.GetPos().x <= 5.f) {
-				//green boat rotation
-				if (m_boatType == 0) {
-					if (tBoat.GetRotation().y <= 89.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, -0.95f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//red boat rotation
-				else if (m_boatType == 1) {
-					if (tBoat.GetRotation().y <= 15.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, -0.08f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//yellow boat rotation
-				else if (m_boatType == 2) {
-					if (tBoat.GetRotation().y >= 1.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, -0.08f * 60.0f * deltaTime, 0.0f));
-				}
-
+			if (tBoat.GetPos().x <= 7.5f) {
 				glm::vec3 tar = Arrive(glm::vec3(4.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
 				(tar == glm::vec3(0.0f)) ? pBoat.SetLinearVelocity(glm::vec3(0.0f)) : pBoat.AddForce(tar);
 			}
@@ -150,24 +79,6 @@ void EnemyComponent::Update(float deltaTime)
 		//right middle path
 		if (m_path == 3) {
 			if (tBoat.GetPos().x >= -65.F) {
-				//green boat rotation
-				if (m_boatType == 0) {
-					if (tBoat.GetRotation().y <= 69.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, 0.5f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//red boat rotation
-				else if (m_boatType == 1) {
-					if (tBoat.GetRotation().y >= 20.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, 0.55f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//yellow boat rotation
-				else if (m_boatType == 2) {
-					if (tBoat.GetRotation().y <= -20.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, 0.55f * 60.0f * deltaTime, 0.0f));
-				}
-
 				//boat movement
 				glm::vec3 tar = Arrive(glm::vec3(-8.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
 				(tar == glm::vec3(0.0f)) ? pBoat.SetLinearVelocity(glm::vec3(0.0f)) : pBoat.AddForce(tar);
@@ -177,24 +88,6 @@ void EnemyComponent::Update(float deltaTime)
 		//far right path
 		if (m_path == 4) {
 			if (tBoat.GetPos().x >= -75.f) {
-				//green boat rotation
-				if (m_boatType == 0) {
-					if (tBoat.GetRotation().y <= 83.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, 0.75f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//red boat rotation
-				else if (m_boatType == 1) {
-					if (tBoat.GetRotation().y >= 1.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, 0.7f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//yellow boat rotation
-				else if (m_boatType == 2) {
-					if (tBoat.GetRotation().y <= -1.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, 0.7f * 60.0f * deltaTime, 0.0f));
-				}
-
 				//boat movement
 				glm::vec3 tar = Arrive(glm::vec3(-40.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
 				(tar == glm::vec3(0.0f)) ? pBoat.SetLinearVelocity(glm::vec3(0.0f)) : pBoat.AddForce(tar);
@@ -204,53 +97,24 @@ void EnemyComponent::Update(float deltaTime)
 		//right center path
 		if (m_path == 5) {
 			//part 1
-			if (tBoat.GetPos().x >= -65.f && !(tBoat.GetPos().x >= -5.F)) {
-				//green boat rotation
-				if (m_boatType == 0) {
-					if (tBoat.GetRotation().y <= 65.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, 0.6f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//red boat rotation
-				else if (m_boatType == 1) {
-					if (tBoat.GetRotation().y >= 15.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, 0.20f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//yellow boat rotation
-				else if (m_boatType == 2) {
-					if (tBoat.GetRotation().y <= -15.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, 0.15f * 60.0f * deltaTime, 0.0f));
-				}
-
+			if (tBoat.GetPos().x >= -65.f && !(tBoat.GetPos().x >= -7.5f)) {
 				//boat movement
 				pBoat.AddForce(Seek(glm::vec3(-5.0f, m_ypos, 55.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 			}
 
 			//part 2
-			if (tBoat.GetPos().x >= -5.f) {
-				//green boat rotation
-				if (m_boatType == 0) {
-					if (tBoat.GetRotation().y <= 89.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, 0.95f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//red boat rotation
-				else if (m_boatType == 1) {
-					if (tBoat.GetRotation().y <= 15.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, 0.08f * 60.0f * deltaTime, 0.0f));
-				}
-
-				//yellow boat rotation
-				else if (m_boatType == 2) {
-					if (tBoat.GetRotation().y <= -1.0f)
-						tBoat.RotateFixed(glm::vec3(0.0f, 0.08f * 60.0f * deltaTime, 0.0f));
-				}
-
+			if (tBoat.GetPos().x >= -7.5f) {
 				//boat movement
 				glm::vec3 tar = Arrive(glm::vec3(-4.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
 				(tar == glm::vec3(0.0f)) ? pBoat.SetLinearVelocity(glm::vec3(0.0f)) : pBoat.AddForce(tar);
 			}
+		}
+
+		glm::vec3 linearVelocity = pBoat.GetLinearVelocity();
+		if (linearVelocity != glm::vec3(0.0f, 0.0f, 0.0f)) {
+			direction = glm::normalize(linearVelocity);
+			deathDirection = direction;
+			tBoat.LookAlong(direction, glm::vec3(0.0f, 1.0f, 0.0f));
 		}
 	}
 	//otherwise sink the ship
@@ -258,23 +122,23 @@ void EnemyComponent::Update(float deltaTime)
 		//grab a refernece to it's transform
 		auto& tBoat = m_scene->Get<TTN_Transform>(m_entityNumber);
 
-		//if the enemy is on the left
-		if (m_path < 3) {
-			//rotate the enemy ship
-			if (tBoat.GetRotation().z < 75.0f) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.0f, 90.0f * 0.4f * deltaTime));
-			}
+		/*
+		//if it was alive last frame, set the death direction
+		if (wasAliveLastFrame) {
+			deathDirection = direction;
+			wasAliveLastFrame = false;
 		}
-		//otherwise they must be on the right
-		else {
-			//rotate the enemy ship
-			if (tBoat.GetRotation().z > -75.0f) {
-				tBoat.RotateFixed(glm::vec3(0.0f, 0.0f, -90.0f * 0.4f * deltaTime));
-			}
-		}
+
+		//rotate the ship up
+		direction = glm::normalize(TTN_Interpolation::Lerp(deathDirection, glm::vec3(0.0f, 1.0f, 0.0f), 
+			std::clamp(TTN_Interpolation::ReMap(0.0f, timeSinking, 0.0f, 1.0f, timeSinceDeath), 0.0f, 0.85f)));*/
+
+		//tBoat.LookAlong(deathDirection, glm::vec3(0.0f, 1.0f, 0.0f));
 
 		//sink the ship
 		tBoat.SetPos(tBoat.GetPos() + glm::vec3(0.0f, -2.0f * deltaTime, 0.0f));
+
+		timeSinceDeath += deltaTime;
 	}
 }
 

@@ -47,6 +47,17 @@ namespace Titan {
 		m_castShadows = true;
 	}
 
+	//initliazes the shader that renders the depth pass for shadow mapping
+	void TTN_Renderer::InitShadowRendering()
+	{
+		s_simpleShadowShader = TTN_Shader::Create();
+		s_simpleShadowShader->LoadShaderStageFromFile("shaders/ttn_simple_depth_vert.glsl", GL_VERTEX_SHADER);
+		s_simpleShadowShader->LoadShaderStageFromFile("shaders/ttn_simple_depth_frag.glsl", GL_FRAGMENT_SHADER);
+		s_simpleShadowShader->Link();
+
+		s_shaderRenderingIsInit = true;
+	}
+
 	//destructor, destroys the object
 	TTN_Renderer::~TTN_Renderer()
 	{

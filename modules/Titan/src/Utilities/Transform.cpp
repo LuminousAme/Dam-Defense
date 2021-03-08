@@ -35,6 +35,7 @@ namespace Titan {
 
 	TTN_Transform::~TTN_Transform()
 	{
+		//set this transforms parent to null so it's parent doesn't try to access it in the future
 		SetParent(nullptr, entt::null);
 	}
 
@@ -186,7 +187,16 @@ namespace Titan {
 			if (m_Children[i] == child) {
 				//when it's found erase it from the vector and break
 				m_Children.erase(m_Children.begin() + i);
+				break;
 			}
 		}
+	}
+
+	//sets the parent to null
+	void TTN_Transform::SetParentNull()
+	{
+		//set the new parent
+		m_Parent = nullptr;
+		m_parentEntity = entt::null;
 	}
 }

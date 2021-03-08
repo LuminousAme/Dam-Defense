@@ -55,6 +55,17 @@ namespace Titan {
 		//rotates to look towards along a certain direction
 		void LookAlong(glm::vec3 direction, glm::vec3 up);
 
+		//function to remove parent from all children, called when a transform is destroyed
+		void RemoveAllChildren() {
+			for (int i = 0; i < m_Children.size(); i++) {
+				m_Children[i]->SetParentNull();
+			}
+		}
+
+		void ResetChildren() {
+			m_Children.clear();
+		}
+
 	protected:
 		//function that will recalculate the transformation matrix, call from the setters (so whenever a change is made to the object) 
 		void Recompute();
@@ -62,6 +73,9 @@ namespace Titan {
 		//functions to add or remove children (handled by setParent)
 		void AddChild(TTN_Transform* child);
 		void RemoveChild(TTN_Transform* child);
+
+		//function to set parent to null when the parent is being deleted
+		void SetParentNull();
 
 	private:
 		/// Hierararchy ///

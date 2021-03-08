@@ -79,6 +79,9 @@ namespace Titan {
 		//set up the shader program for the particle system
 		TTN_ParticleSystem::InitParticleShader();
 
+		//set up the shader program for shadow mapping
+		TTN_Renderer::InitShadowRendering();
+
 		//set up the shader and vaos for the sprite rendering system
 		TTN_Renderer2D::InitRenderer2D();
 

@@ -52,4 +52,24 @@ namespace Titan {
 		float m_LinearAttenuation;
 		float m_QuadraticAttenuation;
 	};
+
+	//struct that contains data for a directional light
+	struct TTN_DirectionalLight {
+		//same types should be grouped together
+		//always use vec4s with a uniform buffer
+		glm::vec4 m_lightDirection = glm::vec4(0.0f, -3.0f, -5.0f, 0.0f);
+		glm::vec4 m_lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+		glm::vec4 m_ambientColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+
+		//floats
+		float m_ambientPower = 0.02f;
+		float m_lightAmbientPower = 0.05f;
+		float m_lightSpecularPower = 1.0f;
+
+		float m_minShadowBias = 0.0f; 
+		float m_maxShadowBias = 0.001f;
+
+		//ints
+		int m_pcfFilterSamples = 3;
+	};
 }
