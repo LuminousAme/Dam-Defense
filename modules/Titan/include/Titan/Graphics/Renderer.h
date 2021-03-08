@@ -70,9 +70,9 @@ namespace Titan {
 		//the render layer, to help control the order things should render
 		int m_RenderLayer;
 		//should cast shadows or not
-		bool m_castShadows = true;
+		bool m_castShadows = false;
 
-		static TTN_Shader::sshptr s_simpleShadowShader;
+		inline static TTN_Shader::sshptr s_simpleShadowShader = nullptr;
 		inline static bool s_shaderRenderingIsInit = false;
 	};
 }

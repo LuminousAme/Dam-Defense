@@ -32,8 +32,9 @@ void main() {
 	outNormal = NormalMat * inNormal;
 	outUV = inUV;
 	outColor = vec3(1.0, 1.0, 1.0);
+
 	//pass out the light space fragment pos
-	outFragPosLightSpace = u_LightSpaceMatrix* vec4(outPos,1.0);
+	outFragPosLightSpace = u_LightSpaceMatrix* vec4(outPos, 1.0);
 
 	//set the position of the vertex
 	gl_Position = newPos;

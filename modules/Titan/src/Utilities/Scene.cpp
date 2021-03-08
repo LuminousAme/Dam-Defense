@@ -448,6 +448,7 @@ namespace Titan {
 				//and bind it
 				currentShader->Bind();
 
+				//if the fragment shader is a default shader other than the skybox
 				if (currentShader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX
 					&& currentShader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
 					//sets some uniforms
@@ -490,6 +491,13 @@ namespace Titan {
 
 					//stuff from the camera
 					currentShader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetGlobalPos());
+				}
+
+				//if the vertex shader is a default shader other than the skybox
+				if (currentShader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::FRAG_SKYBOX
+					&& currentShader->GetFragShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
+					//send in the lightspace view projection matrix so it can recieve shadows correctly
+					currentShader->SetUniformMatrix("u_LightSpaceMatrix", lightSpaceViewProj);
 				}
 			}
 
