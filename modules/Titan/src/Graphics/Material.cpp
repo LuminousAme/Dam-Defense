@@ -129,4 +129,10 @@ namespace Titan {
 	{
 		m_useSpecularRamp = useRamp;
 	}
+
+	//sets wheter or not this material recieves shadows while shadow mapping
+	void TTN_Material::SetRecievesShadows(bool recievesShadows)
+	{
+		m_recievesShadows = recievesShadows;
+	}
 }

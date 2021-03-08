@@ -21,6 +21,7 @@
 //#include "Titan/Application.h"
 //include all the graphics features we need
 #include "Titan/Graphics/Shader.h"
+#include "Titan/Graphics/UniformBuffer.h"
 #include "Titan/Graphics/Post/ColorCorrect.h"
 #include "Titan/Graphics/Post/BloomEffect.h"
 //include ImGui stuff
@@ -109,7 +110,7 @@ namespace Titan {
 
 #pragma region Graphics_functions_dec
 		//renders all the entities with meshes and transforms in the scene 
-		void Render(); 
+		virtual void Render(); 
 
 		//sets wheter or not the scene should be rendered 
 		void SetShouldRender(bool _shouldRender);
@@ -147,9 +148,22 @@ namespace Titan {
 		//get wheter or not the scene is paused
 		bool GetPaused() { return m_Paused; }
 
+		//set the sun for the scene
+		void SetSun(TTN_DirectionalLight newSun);
+
 	protected:
 		//vector to store the entities of the lights
 		std::vector<entt::entity> m_Lights;
+
+		//direction light for the scene
+		TTN_DirectionalLight m_Sun;
+
+		TTN_Framebuffer::sfboptr shadowBuffer;
+		int shadowWidth = 1024;
+		int shadowHeight = 1024;
+		float shadowOrthoXY = 100.0f;
+		float shadowOrthoZ = 500.0f;
+		TTN_UniformBuffer sunBuffer;
 
 		//vector to store the post processing effects
 		std::vector<TTN_PostEffect::spostptr> m_PostProcessingEffects;
@@ -190,13 +204,6 @@ namespace Titan {
 
 		//empty post processing effect that just draws to a framebuffer
 		TTN_PostEffect::spostptr m_emptyEffect;
-		//color correct effect
-		TTN_PostEffect::spostptr m_colorCorrectEffect;
-
-		TTN_Framebuffer::sfboptr shadowBuffer;
-		int shadowWidth = 1024;
-		int shadowHeight = 1024;
-		TTN_Shader::sshptr shaderDepth;
 
 		//constructs the TTN_Collision objects
 		void ConstructCollisions();

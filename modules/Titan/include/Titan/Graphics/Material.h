@@ -47,6 +47,7 @@ namespace Titan {
 		void SetUseDiffuseRamp(bool useRamp);
 		void SetSpecularRamp(TTN_Texture2D::st2dptr ramp);
 		void SetUseSpecularRamp(bool useRamp);
+		void SetRecievesShadows(bool recievesShadows);
 		
 		//getters
 		TTN_Texture2D::st2dptr GetAlbedo() { return m_Albedo; }
@@ -64,6 +65,7 @@ namespace Titan {
 		bool GetUseDiffuseRamp() { return m_useDiffuseRamp; }
 		TTN_Texture2D::st2dptr GetSpecularRamp() { return m_specularRamp; }
 		bool GetUseSpecularRamp() { return m_useSpecularRamp; }
+		bool GetRecievesShadows() { return m_recievesShadows; }
 
 	private:
 		//albedo 
@@ -85,6 +87,7 @@ namespace Titan {
 		bool m_hasSpecularLighting;
 		bool m_hasOutline;
 		float m_outlineSize;
+		bool m_recievesShadows;
 
 		//toon shading ramps
 		TTN_Texture2D::st2dptr m_diffuseRamp;

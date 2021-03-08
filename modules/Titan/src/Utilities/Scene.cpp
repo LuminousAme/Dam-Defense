@@ -38,10 +38,15 @@ namespace Titan {
 		m_emptyEffect->Init(windowSize.x, windowSize.y);
 
 		//shadow buffer
+		shadowWidth = 1024;
+		shadowHeight = 1024;
 		shadowBuffer = TTN_Framebuffer::Create();
 		shadowBuffer->AddDepthTarget();
 		shadowBuffer->Init(shadowWidth, shadowHeight);
-		shaderDepth = TTN_AssetSystem::GetShader("Depth shader");
+
+		//directional light buffer
+		sunBuffer.AllocateMemory(sizeof(TTN_DirectionalLight));
+		sunBuffer.SendData(reinterpret_cast<void*>(&m_Sun), sizeof(TTN_DirectionalLight));
 	}
 
 	//construct with lightning data
@@ -73,12 +78,15 @@ namespace Titan {
 		m_emptyEffect->Init(windowSize.x, windowSize.y);
 
 		//shadow buffer
-		int shadowWidth = 1024;
-		int shadowHeight = 1024;
+		shadowWidth = 1024;
+		shadowHeight = 1024;
 		shadowBuffer = TTN_Framebuffer::Create();
 		shadowBuffer->AddDepthTarget();
 		shadowBuffer->Init(shadowWidth, shadowHeight);
-		shaderDepth = TTN_AssetSystem::GetShader("Depth shader");
+
+		//directional light buffer
+		sunBuffer.AllocateMemory(sizeof(TTN_DirectionalLight));
+		sunBuffer.SendData(reinterpret_cast<void*>(&m_Sun), sizeof(TTN_DirectionalLight));
 	}
 
 	//destructor
@@ -200,6 +208,9 @@ namespace Titan {
 	//update the scene, running physics simulation, animations, and particle systems
 	void TTN_Scene::Update(float deltaTime)
 	{
+		//bind the sun buffer
+		sunBuffer.Bind(0);
+
 		//only run the updates if the scene is not paused
 		if (!m_Paused) {
 			//call the step simulation for bullet
@@ -335,6 +346,9 @@ namespace Titan {
 			//and save it as the last effect played
 			TTN_Backend::SetLastEffect(m_emptyEffect);
 		}
+
+		//unbind the sun buffer
+		sunBuffer.Unbind(0);
 	}
 
 	//renders all the messes in our game
@@ -344,9 +358,6 @@ namespace Titan {
 		m_emptyEffect->Clear();
 		for (int i = 0; i < m_PostProcessingEffects.size(); i++)
 			m_PostProcessingEffects[i]->Clear();
-
-		shadowBuffer->Clear();
-		shaderDepth = TTN_AssetSystem::GetShader("Depth shader");
 
 		//get the view and projection martix
 		glm::mat4 vp;
@@ -359,9 +370,8 @@ namespace Titan {
 		vp *= viewMat;
 
 		//set up light space matrix
-		glm::vec4 _lightDirection = glm::vec4(0.f, -3.f, -5.0f, 0.0f);
-		glm::mat4 lightProjectionMatrix = glm::ortho(-20.f, 20.0f, -20.0f, 20.0f, -30.0f, 30.0f);
-		glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(_lightDirection), glm::vec3(), glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::mat4 lightProjectionMatrix = glm::ortho(-shadowOrthoXY, shadowOrthoXY, -shadowOrthoXY, shadowOrthoXY, -shadowOrthoZ, shadowOrthoZ);
+		glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(-m_Sun.m_lightDirection), glm::vec3(), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 lightSpaceViewProj = lightProjectionMatrix * lightViewMatrix;
 
 		//sort our render group
@@ -387,20 +397,29 @@ namespace Titan {
 			m_emptyEffect->ApplyEffect(TTN_Backend::GetLastEffect());
 		}
 
-		glViewport(0, 0, shadowWidth, shadowHeight);
-		shadowBuffer->Bind();
+		//shadow depth pass
 
+		//set the viewport
+		glViewport(0, 0, shadowWidth, shadowHeight); 
+		//bind the framebuffer
+		shadowBuffer->Bind();
+		//bind the basic depth shader
+		TTN_Renderer::BindShadowShader();
+
+		//loop through all of the meshes
 		m_RenderGroup->each([&](entt::entity entity, TTN_Transform& transform, TTN_Renderer& renderer) {
-			// Render the mesh
+			// Render the mesh if it should be casting shadows
 			if (renderer.GetCastShadows()) {
-				TTN_Shader::sshptr temp = renderer.GetShader();
-				renderer.SetShader(shaderDepth);
 				renderer.Render(transform.GetGlobal(), vp, lightSpaceViewProj);
-				renderer.SetShader(temp);
 			}
 		});
 
+		//unbind the basic depth shader
+		TTN_Renderer::UnBindShadowShader();
+		//unbind the shadow framebuffer
 		shadowBuffer->Unbind();
+
+		//normal render pass
 
 		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 		glViewport(0, 0, windowSize.x, windowSize.y);
@@ -495,6 +514,11 @@ namespace Titan {
 				currentMatieral->GetDiffuseRamp()->Bind(10);
 				currentMatieral->GetSpecularRamp()->Bind(11);
 
+				//bind the shadow map as a texture
+				shadowBuffer->BindDepthAsTexture(30);
+				//set if the current material should use shadows or not
+				currentShader->SetUniform("u_recievesShadows", (int)currentMatieral->GetRecievesShadows());
+
 				//if this is a height map shader
 				//if they're using a displacement map
 				if (currentShader->GetVertexShaderDefaultStatus() == (int)TTN_DefaultShaders::VERT_COLOR_HEIGHTMAP
@@ -571,7 +595,6 @@ namespace Titan {
 				morphAnimatedLastMesh = false;
 			}
 
-			shadowBuffer->BindDepthAsTexture(30);
 			//and finish by rendering the mesh
 			renderer.Render(transform.GetGlobal(), vp, lightSpaceViewProj);
 		});
@@ -644,6 +667,15 @@ namespace Titan {
 	{
 		btVector3 grav = m_physicsWorld->getGravity();
 		return glm::vec3((float)grav.getX(), (float)grav.getY(), (float)grav.getZ());
+	}
+
+	//sets the directional light for the scene
+	void TTN_Scene::SetSun(TTN_DirectionalLight newSun)
+	{
+		//save the sun data
+		m_Sun = newSun;
+		//and update the sun buffer
+		sunBuffer.SendData(reinterpret_cast<void*>(&m_Sun), sizeof(TTN_DirectionalLight));
 	}
 
 	//makes all the collision objects by going through all the overalapping manifolds in bullet
