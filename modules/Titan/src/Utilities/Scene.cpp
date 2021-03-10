@@ -371,7 +371,7 @@ namespace Titan {
 
 		//set up light space matrix
 		glm::mat4 lightProjectionMatrix = glm::ortho(-shadowOrthoXY, shadowOrthoXY, -shadowOrthoXY, shadowOrthoXY, -shadowOrthoZ, shadowOrthoZ);
-		glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(-m_Sun.m_lightDirection), glm::vec3(), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(-m_Sun.m_lightDirection), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 lightSpaceViewProj = lightProjectionMatrix * lightViewMatrix;
 
 		//sort our render group
@@ -391,16 +391,10 @@ namespace Titan {
 
 		ReconstructScenegraph();
 
-		//before going through see if it needs to render another scene as the background first
-		if (TTN_Backend::GetLastEffect() != nullptr) {
-			//if it does, apply the buffer from that scene before drawing
-			m_emptyEffect->ApplyEffect(TTN_Backend::GetLastEffect());
-		}
-
 		//shadow depth pass
 
 		//set the viewport
-		glViewport(0, 0, shadowWidth, shadowHeight); 
+		glViewport(0, 0, shadowWidth, shadowHeight);
 		//bind the framebuffer
 		shadowBuffer->Bind();
 		//bind the basic depth shader
@@ -412,7 +406,9 @@ namespace Titan {
 			if (renderer.GetCastShadows()) {
 				renderer.Render(transform.GetGlobal(), vp, lightSpaceViewProj);
 			}
+
 		});
+
 
 		//unbind the basic depth shader
 		TTN_Renderer::UnBindShadowShader();
@@ -423,6 +419,13 @@ namespace Titan {
 
 		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 		glViewport(0, 0, windowSize.x, windowSize.y);
+
+
+		//before going through see if it needs to render another scene as the background first
+		if (TTN_Backend::GetLastEffect() != nullptr) {
+			//if it does, apply the buffer from that scene before drawing
+			m_emptyEffect->ApplyEffect(TTN_Backend::GetLastEffect());
+		}
 
 		//bind the empty effect
 		m_emptyEffect->BindBuffer(0); //this gets unbound in postRender

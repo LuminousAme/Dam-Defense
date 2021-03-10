@@ -153,7 +153,7 @@ vec3 CalcDirLight(vec3 norm, vec3 viewDir, float textSpec, float shadow) {
 	//difuse
 	vec3 lightDir = normalize(-sun.m_lightDirection.xyz);
 	float dif = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse = dif * sun.m_lightDirection.xyz;
+	vec3 diffuse = dif * sun.m_lightColor.xyz;
 	diffuse = mix(diffuse, texture(s_diffuseRamp, vec2(dif, dif)).xyz, u_useDiffuseRamp);
 	diffuse = diffuse * u_hasAmbientLighting * u_hasSpecularLighting;
 
@@ -161,7 +161,7 @@ vec3 CalcDirLight(vec3 norm, vec3 viewDir, float textSpec, float shadow) {
 	vec3 halfWay =  normalize(lightDir + viewDir);
 	float spec = pow(max(dot(norm, halfWay), 0.0), u_Shininess); 
 	vec3 specular = sun.m_lightSpecularPower * textSpec * spec * sun.m_lightColor.xyz;
-	specular = mix(specular, (texture(s_specularRamp, vec2(spec, spec)).xyz), u_useSpecularRamp);
+	specular = mix(specular, texture(s_specularRamp, vec2(spec, spec)).xyz, u_useSpecularRamp);
 	specular = specular * u_hasSpecularLighting;
 
 	//add them together and return

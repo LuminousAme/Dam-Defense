@@ -499,6 +499,7 @@ void Game::SetUpEntities()
 		Get<TTN_Camera>(camera).View();
 	}
 
+	/*
 	//entity for the light
 	{
 		//create an entity in the scene for a light
@@ -516,7 +517,7 @@ void Game::SetUpEntities()
 		TTN_Light lightLight = TTN_Light(glm::vec3(1.0f), 0.6f, 2.0f, 0.3f, 0.3f, 0.3f);
 		//attach that light to the light entity
 		AttachCopy<TTN_Light>(light, lightLight);
-	}
+	}*/
 
 	//entity for the skybox
 	{
@@ -1975,7 +1976,59 @@ void Game::ImGui()
 		}
 	}
 
-	if (ImGui::CollapsingHeader("Light Controls")) {
+	if (ImGui::CollapsingHeader("Directional Light Controls")) {
+		TTN_DirectionalLight tempSun = m_Sun;
+		/*
+		glm::vec3 direction = tempSun.m_lightDirection;
+		glm::vec3 color = tempSun.m_lightColor;
+		glm::vec3 ambientColor = tempSun.m_ambientColor;
+		float ambientPower = tempSun.m_ambientPower;
+		float lightAmbientPower = tempSun.m_lightAmbientPower;
+		float lightSpecularPower = tempSun.m_lightSpecularPower;
+		float minShadowBias = tempSun.m_minShadowBias;
+		float maxShadowBias = tempSun.m_maxShadowBias;
+		int pcfPasses = tempSun.m_pcfFilterSamples;
+		*/
+
+		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -1.0f, 1.0f)) {
+			SetSun(tempSun);
+		}
+
+		if (ImGui::ColorPicker3("Directional Light Color", glm::value_ptr(tempSun.m_lightColor))) {
+			SetSun(tempSun);
+		}
+
+		if (ImGui::ColorPicker3("Directional Light Ambient Color", glm::value_ptr(tempSun.m_ambientColor))) {
+			SetSun(tempSun);
+		}
+
+		if (ImGui::SliderFloat("Directional Light Ambient Power", &tempSun.m_ambientPower, 0.0f, 5.0f)) {
+			SetSun(tempSun);
+		}
+
+		if (ImGui::SliderFloat("Directional Light - Light Ambient Power", &tempSun.m_lightAmbientPower, 0.0f, 5.0f)) {
+			SetSun(tempSun);
+		}
+
+		if (ImGui::SliderFloat("Directional Light - Light Specular Power", &tempSun.m_lightSpecularPower, 0.0f, 5.0f)) {
+			SetSun(tempSun);
+		}
+
+		if (ImGui::SliderFloat("Directional Light Min Shadow Bias", &tempSun.m_minShadowBias, 0.0f, 1.0f)) {
+			SetSun(tempSun);
+		}
+
+		if (ImGui::SliderFloat("Directional Light Max Shadow Bias", &tempSun.m_maxShadowBias, 0.0f, 1.0f)) {
+			SetSun(tempSun);
+		}
+
+		if (ImGui::SliderInt("Directional Light PCF Filter Passes", &tempSun.m_pcfFilterSamples, 1, 20)) {
+			SetSun(tempSun);
+		}
+	}
+
+
+	if (ImGui::CollapsingHeader("Point and SceneLight Controls")) {
 		ImGui::Text("Maximum number of lights: 16");
 
 		//scene level lighting

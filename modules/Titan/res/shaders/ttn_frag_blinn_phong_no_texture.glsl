@@ -145,7 +145,7 @@ vec3 CalcDirLight(vec3 norm, vec3 viewDir, float textSpec, float shadow) {
 	//difuse
 	vec3 lightDir = normalize(-sun.m_lightDirection.xyz);
 	float dif = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse = dif * sun.m_lightDirection.xyz;
+	vec3 diffuse = dif * sun.m_lightColor.xyz;
 	diffuse = mix(diffuse, texture(s_diffuseRamp, vec2(dif, dif)).xyz, u_useDiffuseRamp);
 	diffuse = diffuse * u_hasAmbientLighting * u_hasSpecularLighting;
 
