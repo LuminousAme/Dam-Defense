@@ -27,26 +27,26 @@ public:
 	void MouseButtonDownChecks();
 	void KeyDownChecks();
 
-	float GetMouseSen() { return mouse_sen; }
+	float GetMouseSen() { return acutal_mouse_sen; }
 	void SetMouseSen(float sensitive) { mouse_sen = sensitive; }
 
-	float GetVolume() { return volume; }
+	float GetVolume() { return acutal_volume; }
 	void SetVolume(float vol) { volume = vol; }
 
-	float GetVolumeMusic() { return volumeMusic; }
+	float GetVolumeMusic() { return acutal_volumeMuisc; }
 	void SetVolumeMusic(float vol) { volumeMusic = vol; }
 
-	float GetVolumeSFX() { return volumeSFX; }
+	float GetVolumeSFX() { return acutal_volumeSFX; }
 	void SetVolumeSFX(float vol) { volumeSFX = vol; }
 
 	void SetNoLut(bool lut) { Off = lut; }
 	void SetColor1(bool lut) { color = lut; }
 
-	bool GetOff() { return Off; }
-	bool GetColor() { return color; }
+	bool GetOff() { return acutal_Off; }
+	bool GetColor() { return acutal_color; }
 
 	void SetDiff(float d) { diff = d; }
-	float GetDiff() { return diff; }
+	float GetDiff() { return acutal_Diff; }
 
 	bool GetShouldBack() { return shouldBack; }
 	//bool GetShouldResume() { return shouldResume; }
@@ -72,8 +72,6 @@ private:
 	//mouse sensitivity numbers
 	std::vector<entt::entity> mouseNums;
 	float mouseNumScale = 0.4f;
-
-	float mouse_sen;
 
 	//master volume bar border and bg
 	entt::entity volumeBarBorder;
@@ -101,11 +99,6 @@ private:
 	//music volume numbers
 	std::vector<entt::entity> MusicVolumeNums;
 
-	//volume controls
-	float volume;
-	float volumeSFX;
-	float volumeMusic;
-
 	float buttonScale = 0.3f;//scale of button
 	//color correction border and bg
 	entt::entity OffBarBorder;
@@ -130,9 +123,6 @@ private:
 	entt::entity buttonColor2;
 	entt::entity colorText2;
 
-	bool Off;//off
-	bool color;//color
-
 	//color correction border and bg
 	entt::entity diffBarBorder;
 	entt::entity diffBarBg;
@@ -140,9 +130,6 @@ private:
 	entt::entity diffBar;
 	//nums representation
 	std::vector<entt::entity> diffNums;
-	//difficulty value for speed 
-	float diff;
-
 
 	//easy border and bg
 	entt::entity EasyDiffBorder;
@@ -173,11 +160,10 @@ private:
 	entt::entity buttonHard;
 	entt::entity HardText;
 
-	//difficulty bools
-	bool easy;
-	bool reg;
-	bool hard;
-
+	//buttons for applying, undoing, and setting default
+	entt::entity buttonApply;
+	entt::entity buttonDefault;
+	entt::entity buttonUndo;
 
 	//assets
 	TTN_Texture2D::st2dptr textureOptions;//options text/title
@@ -190,9 +176,38 @@ private:
 	void MakeSFXNumEntity();
 	void MakeDiffNumEntity();
 
+	void WriteToFile();
+	void ReadFromFile();
+
+	//settings
+	int mouse_sen;
+	int volume;
+	int volumeSFX;
+	int volumeMusic;
+	int diff;
+	bool Off;
+	bool color;
+	bool easy;
+	bool reg;
+	bool hard;
+
+	//acutal settings
+	int acutal_mouse_sen;
+	int acutal_volume;
+	int acutal_volumeSFX;
+	int acutal_volumeMuisc;
+	int acutal_Diff;
+	bool acutal_Off;
+	bool acutal_color;
+	bool acutal_easy;
+	bool acutal_reg;
+	bool acutal_hard;
+
 	//should go back to pause
 	bool shouldBack;
 	//should go back to mainmenu
 	bool shouldMenu;
 
+	//the time remaining before it accepts player input, used when the player is moving in and out of the scene
+	float m_InputDelay; 
 };

@@ -211,6 +211,9 @@ namespace Titan {
 		//bind the sun buffer
 		sunBuffer.Bind(0);
 
+		//clear the shadow buffer
+		shadowBuffer->Clear();
+
 		//only run the updates if the scene is not paused
 		if (!m_Paused) {
 			//call the step simulation for bullet
@@ -392,7 +395,6 @@ namespace Titan {
 		ReconstructScenegraph();
 
 		//shadow depth pass
-
 		//set the viewport
 		glViewport(0, 0, shadowWidth, shadowHeight);
 		//bind the framebuffer

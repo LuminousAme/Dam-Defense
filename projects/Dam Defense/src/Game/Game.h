@@ -71,10 +71,6 @@ public:
 
 	void SetWarmLut(bool lut) { m_applyWarmLut = lut; }
 
-	//m_applyWarmLut;
-	//bool m_applyCoolLut;
-	//bool m_applyCustomLut;
-
 	float GetFlameThrowerCoolDownTime() {
 		if (Flaming)
 			return std::clamp(TTN_Interpolation::ReMap(FlameActiveTime, 0.0f, FlameThrowerCoolDown, FlameActiveTime, FlameAnim), 0.0f, FlameTimer);
