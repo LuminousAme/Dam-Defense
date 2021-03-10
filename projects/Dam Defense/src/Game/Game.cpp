@@ -81,14 +81,17 @@ void Game::Update(float deltaTime)
 		if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
 		//update the enemy wave spawning
-		WaveUpdate(deltaTime);
+		WaveUpdate(deltaTime);	
+		//collision check
+		Collisions();
+		//damage function, contains cooldoown
+		Damage(deltaTime); 
 
 		//goes through the boats vector
 		for (int i = 0; i < boats.size(); i++) {
 			//sets gravity to 0
 			Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 			Get<EnemyComponent>(boats[i]).SetDifficulty(difficulty);
-
 		}
 
 		//go through all the entities with enemy compontents
@@ -101,9 +104,6 @@ void Game::Update(float deltaTime)
 		//update the special abilities
 		BirdUpate(deltaTime);
 		FlamethrowerUpdate(deltaTime);
-
-		Collisions(); //collision check
-		Damage(deltaTime); //damage function, contains cooldoown
 
 		//increase the total time of the scene to make the water animated correctly
 		water_time += deltaTime;
