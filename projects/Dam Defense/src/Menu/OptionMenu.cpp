@@ -25,7 +25,7 @@ static inline void trim(std::string& s) {
 	rtrim(s);
 }
 
-#pragma endregion 
+#pragma endregion
 
 OptionsMenu::OptionsMenu() : TTN_Scene()
 {
@@ -474,7 +474,6 @@ void OptionsMenu::InitScene()
 		AttachCopy(temp, buttonRenderer);
 	}
 
-
 	//buttons for apply, undo, and default
 	for (int i = 0; i < 3; i++) {
 		entt::entity temp = CreateEntity();
@@ -493,7 +492,6 @@ void OptionsMenu::InitScene()
 		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureButton1);
 		AttachCopy(temp, buttonRenderer);
 	}
-
 
 	ReadFromFile();
 }
@@ -630,7 +628,7 @@ void OptionsMenu::Update(float deltaTime)
 			Get<TTN_Renderer2D>(ColorBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 		}
 	}
-	
+
 	//difficulty buttons
 	{
 		//button hovering update
@@ -723,7 +721,7 @@ void OptionsMenu::Update(float deltaTime)
 		else
 			Get<TTN_Renderer2D>(buttonDefault).SetSprite(textureButton1);
 	}
-	
+
 	//update the input delay
 	if (m_InputDelay >= 0.0f) {
 		m_InputDelay -= deltaTime;
@@ -770,14 +768,13 @@ void OptionsMenu::MouseButtonDownChecks()
 				//normalize it
 				float normalizedMouseSen = tempMouseSen / 100.f;
 
-				//if it's on the center than the mouse senestivity is 50% 
+				//if it's on the center than the mouse senestivity is 50%
 				if (mousePosWorldSpace.x == 0.0f)
 					normalizedMouseSen = 0.5f;
 
 				//if it's to the left than find the percentage
 				else if (mousePosWorldSpace.x > 0.0f)
 					normalizedMouseSen = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / playButtonTrans.GetScale().x) * 100.f)) - 0.5f);
-
 
 				//if it's to the right than find the percentage
 				else if (mousePosWorldSpace.x < 0.0f)
@@ -806,7 +803,6 @@ void OptionsMenu::MouseButtonDownChecks()
 				mousePosWorldSpace.x > volumeBarTrans.GetPos().x - 0.5f * abs(volumeBarTrans.GetScale().x) &&
 				mousePosWorldSpace.y < volumeBarTrans.GetPos().y + 0.5f * abs(volumeBarTrans.GetScale().y) &&
 				mousePosWorldSpace.y > volumeBarTrans.GetPos().y - 0.5f * abs(volumeBarTrans.GetScale().y)) {
-
 				//get a temp float for the volume
 				float tempVolume = volume;
 				//normalize it
@@ -819,7 +815,6 @@ void OptionsMenu::MouseButtonDownChecks()
 				//if it's too the left find the percetange
 				else if (mousePosWorldSpace.x > 0.0f)
 					normalizedVolume = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / volumeBarTrans.GetScale().x) * 100.f)) - 0.5f);
-
 
 				//if it's too the right find the percetange
 				else if (mousePosWorldSpace.x < 0.0f)
@@ -838,7 +833,7 @@ void OptionsMenu::MouseButtonDownChecks()
 				volume = std::round(tempVolume);
 			}
 		}
-		
+
 		//music volume bar
 		{
 			//get the bar's transform
@@ -848,21 +843,20 @@ void OptionsMenu::MouseButtonDownChecks()
 				mousePosWorldSpace.x > MusicVolumeBarTrans.GetPos().x - 0.5f * abs(MusicVolumeBarTrans.GetScale().x) &&
 				mousePosWorldSpace.y < MusicVolumeBarTrans.GetPos().y + 0.5f * abs(MusicVolumeBarTrans.GetScale().y) &&
 				mousePosWorldSpace.y > MusicVolumeBarTrans.GetPos().y - 0.5f * abs(MusicVolumeBarTrans.GetScale().y)) {
-
 				//get a temp float for the volume
 				float tempMusic = volumeMusic;
 				//normalize it
 				float normalizedMusic = tempMusic / 100.f;
 
-				//if it's at the center than the volume is 50% 
+				//if it's at the center than the volume is 50%
 				if (mousePosWorldSpace.x == 0.0f)
 					normalizedMusic = 0.5f;
 
-				//if it's too the left, figure out what percentage the volume is 
+				//if it's too the left, figure out what percentage the volume is
 				else if (mousePosWorldSpace.x > 0.0f)
 					normalizedMusic = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / MusicVolumeBarTrans.GetScale().x) * 100.f)) - 0.5f);
 
-				//if it's too the right, figure out what percentage the volume is 
+				//if it's too the right, figure out what percentage the volume is
 				else if (mousePosWorldSpace.x < 0.0f)
 					normalizedMusic = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / MusicVolumeBarTrans.GetScale().x) * 100.f)) + 0.5f);
 
@@ -872,7 +866,7 @@ void OptionsMenu::MouseButtonDownChecks()
 
 				//set the mask to the normalized value
 				Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalizedMusic);
-				
+
 				//take it out of mormalized space
 				tempMusic = normalizedMusic * 100.f;
 				//and round it back to an integer
@@ -891,7 +885,7 @@ void OptionsMenu::MouseButtonDownChecks()
 				mousePosWorldSpace.y > SFXVolumeBarTrans.GetPos().y - 0.5f * abs(SFXVolumeBarTrans.GetScale().y)) {
 				//make a temp float for the volume
 				float tempSFX = volumeSFX;
-				//normalize it 
+				//normalize it
 				float normalizedSFX = tempSFX / 100.f;
 
 				//if it's in the center than the volume is 50%
@@ -901,7 +895,6 @@ void OptionsMenu::MouseButtonDownChecks()
 				//if it's to the left then find out what percentage it is
 				else if (mousePosWorldSpace.x > 0.0f)
 					normalizedSFX = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / SFXVolumeBarTrans.GetScale().x) * 100.f)) - 0.5f);
-
 
 				//if it's to the right then find out what percentage it is
 				else if (mousePosWorldSpace.x < 0.0f)
@@ -930,13 +923,12 @@ void OptionsMenu::MouseButtonDownChecks()
 				mousePosWorldSpace.x > diffBarTrans.GetPos().x - 0.5f * abs(diffBarTrans.GetScale().x) &&
 				mousePosWorldSpace.y < diffBarTrans.GetPos().y + 0.5f * abs(diffBarTrans.GetScale().y) &&
 				mousePosWorldSpace.y > diffBarTrans.GetPos().y - 0.5f * abs(diffBarTrans.GetScale().y)) {
-
 				//get a temp float for the difficulty
 				float tempDiff = diff;
 				//normalize it
 				float normalizedDiff = tempDiff / 200.f;
 
-				//if it's on the center than it's 50% 
+				//if it's on the center than it's 50%
 				if (mousePosWorldSpace.x == 0.0f) {
 					normalizedDiff = 0.5f;
 				}
@@ -961,10 +953,10 @@ void OptionsMenu::MouseButtonDownChecks()
 
 				//set the mask to the normalized value
 				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
-				
+
 				//take it out of normalized space
 				tempDiff = normalizedDiff * 200.f;
-				//and round it back to an integer 
+				//and round it back to an integer
 				diff = std::round(tempDiff);
 			}
 		}
@@ -1032,7 +1024,7 @@ void OptionsMenu::MouseButtonDownChecks()
 				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
 			}
 
-			//get the transform for the hard difficultly button, and check if they are pressing it 
+			//get the transform for the hard difficultly button, and check if they are pressing it
 			TTN_Transform buttonHardTrans = Get<TTN_Transform>(buttonHard);
 			if (mousePosWorldSpace.x < buttonHardTrans.GetPos().x + 0.5f * abs(buttonHardTrans.GetScale().x) &&
 				mousePosWorldSpace.x > buttonHardTrans.GetPos().x - 0.5f * abs(buttonHardTrans.GetScale().x) &&
@@ -1057,7 +1049,6 @@ void OptionsMenu::MouseButtonDownChecks()
 				mousePosWorldSpace.x > buttonApplyTrans.GetPos().x - 0.5f * abs(buttonApplyTrans.GetScale().x) &&
 				mousePosWorldSpace.y < buttonApplyTrans.GetPos().y + 0.5f * abs(buttonApplyTrans.GetScale().y) &&
 				mousePosWorldSpace.y > buttonApplyTrans.GetPos().y - 0.5f * abs(buttonApplyTrans.GetScale().y)) {
-				
 				//if it is, apply the values and write them to the file
 				acutal_mouse_sen = mouse_sen;
 				acutal_volume = volume;
@@ -1079,7 +1070,6 @@ void OptionsMenu::MouseButtonDownChecks()
 				mousePosWorldSpace.x > buttonUndoTrans.GetPos().x - 0.5f * abs(buttonUndoTrans.GetScale().x) &&
 				mousePosWorldSpace.y < buttonUndoTrans.GetPos().y + 0.5f * abs(buttonUndoTrans.GetScale().y) &&
 				mousePosWorldSpace.y > buttonUndoTrans.GetPos().y - 0.5f * abs(buttonUndoTrans.GetScale().y)) {
-
 				//if it is, reset the values to their acutal numbers
 				mouse_sen = acutal_mouse_sen;
 				volume = acutal_volume;
@@ -1111,7 +1101,6 @@ void OptionsMenu::MouseButtonDownChecks()
 				mousePosWorldSpace.x > buttonDefaultTrans.GetPos().x - 0.5f * abs(buttonDefaultTrans.GetScale().x) &&
 				mousePosWorldSpace.y < buttonDefaultTrans.GetPos().y + 0.5f * abs(buttonDefaultTrans.GetScale().y) &&
 				mousePosWorldSpace.y > buttonDefaultTrans.GetPos().y - 0.5f * abs(buttonDefaultTrans.GetScale().y)) {
-
 				//if it is, reset the values to their default numbers
 				mouse_sen = 50;
 				volume = 100;
@@ -1266,7 +1255,6 @@ void OptionsMenu::MakeSFXNumEntity()
 	//create a sprite renderer for the logo
 	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
 	AttachCopy(SFXvolumeNums[SFXvolumeNums.size() - 1], numRenderer);
-
 }
 
 void OptionsMenu::WriteToFile()

@@ -705,20 +705,19 @@ void GameUI::Update(float deltaTime)
 			}
 
 			centerPos = TTN_Interpolation::Lerp(glm::vec3(1920.0f, 0.0f, 0.20f), glm::vec3(0.0f, 0.0f, 0.20f), t);
-			centerPosButton = TTN_Interpolation::Lerp(glm::vec3(1270.0f, 220.0f, 0.1f), glm::vec3(0.0f, 220.0f, 0.1f), t);
+			centerPosButton = TTN_Interpolation::Lerp(glm::vec3(1270.0f, 220.0f, 0.1f), glm::vec3(650.0f, 220.0f, 0.1f), t);
 
 			trans.SetPos(centerPos + glm::vec3(0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
 
-			if (buttonTrans.GetPos() == glm::vec3(510.0f, 220.0f, 0.10f)) {
-				buttonTrans.SetPos(glm::vec3(510.0f, 220.0f, 0.10f));
+			if (buttonTrans.GetPos() == glm::vec3(650.0f, 220.0f, 0.10f)) {
+				buttonTrans.SetPos(glm::vec3(650.0f, 220.0f, 0.10f));
 			}
 			else {
-				buttonTrans.SetPos(centerPosButton - glm::vec3(0.5f * std::abs(buttonTrans.GetScale().x), 0.0f, 0.0f));
+				buttonTrans.SetPos(centerPosButton - glm::vec3(std::abs(buttonTrans.GetScale().x), 0.0f, 0.0f));
+				buttonTrans.SetPos(centerPosButton);
 			}
 
 			std::cout << glm::to_string(buttonTrans.GetPos()) << std::endl;
-
-			//buttonTrans.SetPos(centerPos + glm::vec3(650.0f, 220.0f, 0.1f));
 		}
 
 		if ((m_currentWave > waveTracker) /*&& m_waveProgress == 1.0f*/ && shouldShop) {
