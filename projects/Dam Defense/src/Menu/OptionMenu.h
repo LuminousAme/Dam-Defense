@@ -56,6 +56,10 @@ public:
 	void SetShouldMenu(bool menu) { shouldMenu = menu; }
 	void SetShouldBack(bool back) { shouldBack = back; }
 
+	void SetInputDelay(float delay) { m_InputDelay = delay; }
+	void SetLastSceneWasMainMenu() { previousSceneMainMenu = true; }
+	void SetLastSceneWasPauseMenu() { previousSceneMainMenu = false; }
+
 private:
 	//entities
 	entt::entity cam;
@@ -207,6 +211,9 @@ private:
 	bool shouldBack;
 	//should go back to mainmenu
 	bool shouldMenu;
+
+	//the previous scene was the main menu
+	bool previousSceneMainMenu;
 
 	//the time remaining before it accepts player input, used when the player is moving in and out of the scene
 	float m_InputDelay; 

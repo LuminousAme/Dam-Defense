@@ -697,6 +697,7 @@ MainMenuUI::MainMenuUI()
 	shouldPlay = false;
 	shouldQuit = false;
 	shouldArcade = false;
+	shouldOptions = false;
 }
 
 void MainMenuUI::InitScene()
@@ -705,6 +706,7 @@ void MainMenuUI::InitScene()
 	shouldPlay = false;
 	shouldQuit = false;
 	shouldArcade = false;
+	shouldOptions = false;
 
 	//grab the textures
 	textureButton1 = TTN_AssetSystem::GetTexture2D("Button Base");
