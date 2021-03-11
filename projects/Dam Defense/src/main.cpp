@@ -12,6 +12,7 @@
 #include "Menu/GameOverMenu.h"
 #include "Menu/GameWinMenu.h"
 #include "Menu/OptionMenu.h"
+#include "Menu/ShopMenu.h"
 #include "Game/HUD.h"
 
 using namespace Titan;
@@ -52,6 +53,7 @@ int main() {
 	GameWinMenu* gameWin = new GameWinMenu;
 	GameWinMenuUI* gameWinUI = new GameWinMenuUI;
 	OptionsMenu* options = new OptionsMenu;
+	ShopMenu* shop = new ShopMenu;
 
 	//initliaze them
 	splash->InitScene();
@@ -67,6 +69,7 @@ int main() {
 	gameWin->SetShouldRender(false);
 	gameWinUI->SetShouldRender(false);
 	options->SetShouldRender(false);
+	shop->SetShouldRender(false);
 
 	//add them to the application
 	TTN_Application::scenes.push_back(splash);
@@ -81,6 +84,7 @@ int main() {
 	TTN_Application::scenes.push_back(gameWin);
 	TTN_Application::scenes.push_back(gameWinUI);
 	TTN_Application::scenes.push_back(options);
+	TTN_Application::scenes.push_back(shop);
 
 	// init's the configs and contexts for imgui
 	TTN_Application::InitImgui();
@@ -123,6 +127,8 @@ int main() {
 			gameOverUI->InitScene();
 			gameWin->InitScene();
 			gameWinUI->InitScene();
+			shop->InitScene();		
+			shop->SetShouldRender(false);
 			gameOver->SetShouldRender(false);
 			gameOverUI->SetShouldRender(false);
 			gameWin->SetShouldRender(false);
@@ -151,6 +157,7 @@ int main() {
 			gameScene->SetShouldRender(true);
 			gameScene->SetPaused(false);
 			gameSceneUI->SetShouldRender(true);
+			shop->SetShouldRender(false);
 			gameScene->RestartData();
 			paused->SetShouldRender(false);
 		}
@@ -247,6 +254,29 @@ int main() {
 			options->SetShouldBack(false);
 			paused->SetShouldRender(true);
 		}
+
+		///// SHOP ///////
+		//if in game and the player wnat sto go to the shop (not in pause menu of options menu)
+		if (gameScene->GetShouldRender() && gameScene->GetShouldShop() && !paused->GetShouldRender() && !options->GetShouldRender()) {
+			TTN_Application::TTN_Input::SetCursorLocked(false);
+			options->SetShouldRender(false);
+			paused->SetShouldRender(false);
+			//gameScene->SetShouldRender(false);
+			gameScene->SetPaused(true);
+			gameScene->SetShouldShop(false);
+			shop->SetShouldRender(true);
+		}
+
+		if (gameScene->GetShouldRender() && shop->GetShouldBack() && shop->GetShouldRender() && !paused->GetShouldRender() && !options->GetShouldRender()) {
+			TTN_Application::TTN_Input::SetCursorLocked(true);
+			options->SetShouldRender(false);
+			paused->SetShouldRender(false);
+			//gameScene->SetShouldRender(true);
+			gameScene->SetPaused(false);
+			shop->SetShouldRender(false);
+			shop->SetShouldBack(false);
+		}
+
 
 		//if the game is over
 		if (gameScene->GetGameIsOver()) {
@@ -399,8 +429,6 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddDefaultShaderToBeLoaded("Animated textured shader", TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR, TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY, 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Terrain shader", "shaders/terrain_vert.glsl", "shaders/terrain_frag.glsl", 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Water shader", "shaders/water_vert.glsl", "shaders/water_frag.glsl", 1);
-	TTN_AssetSystem::AddShaderToBeLoaded("Depth shader", "shaders/simple_depth_vert.glsl", "shaders/simple_depth_frag.glsl", 1);
-
 
 	TTN_AssetSystem::AddLUTTobeLoaded("Warm LUT", "Warm_LUT.cube", 1);
 	TTN_AssetSystem::AddLUTTobeLoaded("Cool LUT", "Cool_LUT.cube", 1);

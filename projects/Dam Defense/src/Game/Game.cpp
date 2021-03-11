@@ -88,7 +88,6 @@ void Game::Update(float deltaTime)
 			//sets gravity to 0
 			Get<TTN_Physics>(boats[i]).GetRigidBody()->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 			Get<EnemyComponent>(boats[i]).SetDifficulty(difficulty);
-
 		}
 
 		//go through all the entities with enemy compontents
@@ -285,6 +284,10 @@ void Game::KeyDownChecks()
 		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Two)) {
 			BirdBomb();
 		}
+
+		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::L)) {
+			shouldShop = true;
+		}
 	}
 
 	//if they try to press the escape key, pause or unpause the game
@@ -307,6 +310,29 @@ void Game::KeyDownChecks()
 //function to cehck for when a key is being pressed
 void Game::KeyChecks()
 {
+	auto& a = Get<TTN_Transform>(camera);
+	/// CAMERA MOVEMENT FOR A2 ///
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
+		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y, a.GetPos().z + 1.60f));
+	}
+
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
+		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y, a.GetPos().z - 1.60f));
+	}
+
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
+		a.SetPos(glm::vec3(a.GetPos().x + 1.60f, a.GetPos().y, a.GetPos().z));
+	}
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
+		a.SetPos(glm::vec3(a.GetPos().x - 1.60f, a.GetPos().y, a.GetPos().z));
+	}
+
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::LeftControl)) {
+		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y - 0.60f, a.GetPos().z));
+	}
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Space)) {
+		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y + 0.60f, a.GetPos().z));
+	}
 }
 
 //function to check for when a key has been released
@@ -745,6 +771,24 @@ void Game::SetUpOtherData()
 		birdParticle.SetOneStartSpeed(10.9f);
 	}
 
+	//muzzle flash particle template
+	{
+		gunParticle = TTN_ParticleTemplate();
+		gunParticle.SetMat(smokeMat);
+		gunParticle.SetMesh(sphereMesh);
+			//	gunParticle.SetTwoEndColors(glm::vec4(0.5f, 0.5f, 0.5f, 0.1f), glm::vec4(0.5f, 0.5f, 0.5f, 0.1f)); //orange
+		//gunParticle.SetTwoEndColors(glm::vec4(0.1f, 0.1f, 0.1f, 0.8f), glm::vec4(0.1f, 0.1f, 0.1f, 0.8f)); ///black
+		gunParticle.SetTwoEndColors(glm::vec4(1.0f, 0.50f, 0.0f, 0.50f), glm::vec4(1.0f, 0.50f, 0.0f, 0.50f)); ///yellow
+		gunParticle.SetOneEndSize(0.35f);
+		gunParticle.SetOneEndSpeed(0.35f);
+		gunParticle.SetTwoLifetimes(0.85f, 1.10f);
+		gunParticle.SetTwoStartColors(glm::vec4(1.0f, 0.50f, 0.0f, 1.0f), glm::vec4(1.0f, 0.50f, 0.0f, 1.0f)); //orange
+	//	gunParticle.SetTwoStartColors(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f)); //yellow
+		//gunParticle.SetTwoStartColors(glm::vec4(0.1f, 0.1f, 0.1f, 0.8f), glm::vec4(0.1f, 0.1f, 0.1f, 0.8f)); //black
+		gunParticle.SetOneStartSize(0.20f);
+		gunParticle.SetOneStartSpeed(10.0f);
+	}
+
 	//setup up the color correction effect
 	glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 	m_colorCorrectEffect = TTN_ColorCorrect::Create();
@@ -803,6 +847,7 @@ void Game::RestartData()
 	m_paused = false;
 	m_gameOver = false;
 	m_gameWin = false;
+	shouldShop = false;
 
 	//enemy and wave data setup
 	m_currentWave = 0;
@@ -974,10 +1019,10 @@ void Game::CreateExpolsion(glm::vec3 location)
 	entt::entity newExpolsion = CreateEntity(2.0f);
 
 	//setup a transfrom for the particle system
-	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f));
+	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(0.90f));
 	//attach that transform to the entity
 	AttachCopy(newExpolsion, PSTrans);
-	glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
+	//glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
 
 	//setup a particle system for the particle system
 	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(500, 0, expolsionParticle, 0.0f, false);
@@ -1003,7 +1048,7 @@ void Game::CreateBirdExpolsion(glm::vec3 location)
 	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f));
 	//attach that transform to the entity
 	AttachCopy(newExpolsion, PSTrans);
-	glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
+	//glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
 
 	//setup a particle system for the particle system
 	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(25, 0, birdParticle, 0.0f, false);
@@ -1019,6 +1064,56 @@ void Game::CreateBirdExpolsion(glm::vec3 location)
 
 	//get a reference to that particle system and burst it
 	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(25);
+}
+
+void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e)
+{
+	//we don't really need to save the entity number for any reason, so we just make the variable local
+	entt::entity newExpolsion = CreateEntity(2.5f);
+	// 0 green, 1 red, 2 yellow
+	//setup a transfrom for the particle system
+	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f));
+
+	int pos = rand() % 3;
+	if (pos == 0) {//regular
+		PSTrans.SetPos(glm::vec3(location.x, location.y, location.z));
+	}
+	if (pos == 1) {
+		PSTrans.SetPos(glm::vec3(location.x + 0.75f, location.y, location.z));
+	}
+	if (pos == 2) {
+		PSTrans.SetPos(glm::vec3(location.x - 0.75f, location.y, location.z));
+	}
+
+	//PSTrans.SetPos(Get<TTN_Transform>(e).GetGlobalPos());
+	//PSTrans.RotateFixed(Get<TTN_Transform>(e).GetRotation());
+	//PSTrans.SetRotationQuat(Get<TTN_Transform>(e).GetRotQuat());
+	glm::vec3 tempR = Get<TTN_Transform>(e).GetRotation();
+
+	/*glm::vec3 shipDir = glm::vec3(0.0f, 0.0f, 1.0f);
+	shipDir = glm::vec3(glm::toMat4(glm::quat(glm::radians(glm::vec3(-tempR.y, -tempR.x, tempR.z)))) * glm::vec4(shipDir, 1.0f));
+	shipDir = glm::normalize(shipDir);
+	PSTrans.SetPos(glm::vec3(0.0f, -0.0f, 0.0f) + shipDir);*/
+
+	//attach that transform to the entity
+	AttachCopy(newExpolsion, PSTrans);
+
+	//setup a particle system for the particle system
+	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(25, 0, gunParticle, 0.0f, false);
+
+	ps->MakeConeEmitter(10.0f, glm::vec3(-tempR.y, -tempR.x, tempR.z));//-75 x
+	ps->VelocityReadGraphCallback(FastStart);
+	ps->ColorReadGraphCallback(SlowStart);
+	ps->ScaleReadGraphCallback(ZeroOneZero);
+
+	//setup a particle system component
+	TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
+	//attach the particle system component to the entity
+	AttachCopy(newExpolsion, psComponent);
+
+	//get a reference to that particle system and burst it
+	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(30);
+	//Get<TTN_Transform>(newExpolsion).SetParent(&Get<TTN_Transform>(e),e);
 }
 
 //creates the flames for the flamethrower
@@ -1270,7 +1365,7 @@ void Game::SpawnBoatRight() {
 		boats.push_back(CreateEntity());
 		//gets the type of boat
 		int randomBoat = rand() % 3;
-		
+
 		//create a renderer
 		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
 		//set up renderer for green boat
@@ -1487,7 +1582,7 @@ void Game::Collisions() {
 							glm::vec3 loc = Get<TTN_Transform>(*itt).GetGlobalPos();
 							CreateExpolsion(loc);
 							//make sure it's facing the direction it's moving
-							if(Get<TTN_Physics>(*itt).GetLinearVelocity() != glm::vec3(0.0f)) Get<TTN_Transform>(*itt).LookAlong(
+							if (Get<TTN_Physics>(*itt).GetLinearVelocity() != glm::vec3(0.0f)) Get<TTN_Transform>(*itt).LookAlong(
 								glm::normalize(Get<TTN_Physics>(*itt).GetLinearVelocity()), glm::vec3(0.0f, 1.0f, 0.0f));
 							//remove the physics from it
 							Remove<TTN_Physics>(*itt);
@@ -1632,11 +1727,11 @@ void Game::Collisions() {
 							//make a new bird
 							MakeABird();
 							//and set it's target
-							Get<BirdComponent>(birds[birds.size() -1]).SetTarget(Get<BirdComponent>(birds[0]).GetTarget());
+							Get<BirdComponent>(birds[birds.size() - 1]).SetTarget(Get<BirdComponent>(birds[0]).GetTarget());
 
 							//subtract score
 							if (m_score > 50) {
-								m_score= m_score - 50;
+								m_score = m_score - 50;
 							}
 						}
 						else {
@@ -1670,6 +1765,27 @@ void Game::Damage(float deltaTime) {
 		if (Get<TTN_Transform>(*can).GetParentEntity() != entt::null) {
 			if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetAttacking()) {
 				Get<TTN_MorphAnimator>(*can).SetActiveAnim(1);
+				glm::vec3 temp = Get<TTN_Transform>(*can).GetGlobalPos();
+				glm::vec3 tempS = Get<TTN_Transform>(*can).GetScale();
+				glm::vec3 tempR = Get<TTN_Transform>(*can).GetRotation();
+
+				if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetMuzzleCD() <= 0.0f) {
+					Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).SetMuzzleCD(muzzleFlashCD);
+					if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetBoatType() == 1) { //red boat
+						CreateMuzzleFlash(glm::vec3(temp.x + (tempS.x) - 1.5f, temp.y + 0.30f, temp.z - 2.0f), *can);
+					}
+					else if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetBoatType() == 0) { //green boat
+						CreateMuzzleFlash(glm::vec3(temp.x - abs(tempS.x), temp.y + 0.30f, temp.z - 2.0f), *can);
+					}
+					else { //yellow boat
+						CreateMuzzleFlash(glm::vec3(temp.x - abs(tempS.x) + 0.f, temp.y + 0.30f, temp.z - 2.50f), *can);
+					}
+				}
+
+				else {
+					float temp = Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetMuzzleCD() - deltaTime;
+					Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).SetMuzzleCD(temp);
+				}
 			}
 			can++;
 		}
@@ -1805,12 +1921,12 @@ void Game::GameSounds(float deltaTime)
 	melodyTimeTracker += deltaTime;
 }
 
-//function for bird bomb, decides which ship to target and sends the birds after them 
+//function for bird bomb, decides which ship to target and sends the birds after them
 void Game::BirdBomb()
 {
 	//if the bird bomb is not active and isn't on cooldown
 	if (!Bombing && BombTimer <= 0.0f) {
-		//set bombing to true 
+		//set bombing to true
 		Bombing = true;
 
 		//get a streched out verison of the player's direction vector
@@ -1824,7 +1940,7 @@ void Game::BirdBomb()
 		for (auto entity : boats) {
 			//Get the position of the boat
 			glm::vec3 boatPos = Get<TTN_Transform>(entity).GetGlobalPos();
-			
+
 			//get the angle between the vectors
 			float newAngle = glm::degrees(std::abs(glm::acos(glm::dot(glm::normalize(bombingVector), glm::normalize(boatPos)))));
 
@@ -1837,7 +1953,7 @@ void Game::BirdBomb()
 			else if (newAngle == currentAngle) {
 				//project the new boat's position onto the player direction
 				glm::vec3 ProjNew = (glm::dot(boatPos, bombingVector) / glm::length(bombingVector) * glm::length(bombingVector)) * bombingVector;
-				
+
 				//project the old boat's position onto the player direction
 				glm::vec3 oldPos = Get<TTN_Transform>(currentTarget).GetGlobalPos();
 				glm::vec3 ProjOld = (glm::dot(oldPos, bombingVector) / glm::length(bombingVector) * glm::length(bombingVector)) * bombingVector;

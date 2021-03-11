@@ -37,6 +37,9 @@ public:
 	void MouseButtonChecks();
 	void MouseButtonUpChecks();
 
+	bool GetShouldShop() { return shouldShop; };
+	void SetShouldShop(bool menu) { shouldShop = menu; }
+
 	bool GetGameIsPaused() { return m_paused; }
 	void SetGameIsPaused(bool paused) { m_paused = paused; }
 
@@ -212,6 +215,7 @@ protected:
 	/////// OTHER DATA ///////////
 #pragma region Data
 protected:
+	bool shouldShop;
 	/////// Player control data/////////
 	float cannonBallForce = 3600.0f;;//a multiplier for the ammount of force should be applied to a cannonball when it is fired
 	float playerShootCooldown = 0.7f;//the ammount of time in seconds that the player has to wait between shots
@@ -272,6 +276,7 @@ protected:
 	float m_InputDelay; //the time remaining before it accepts player input, used when the player is moving in and out of the scene
 
 	/////////////ENEMY AND WAVE CONTROLS//////////////////
+	float muzzleFlashCD = 1.50f; // time for muzzle flash
 	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
 	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
 	int m_enemiesPerWave = 5; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
@@ -311,6 +316,7 @@ protected:
 	TTN_ParticleTemplate fireParticle;//fire particles
 	TTN_ParticleTemplate expolsionParticle;//expolsion particles
 	TTN_ParticleTemplate birdParticle;//bird expolsion particles
+	TTN_ParticleTemplate gunParticle;//enemy ship gun particles
 
 	//set up functions, called by InitScene()
 protected:
@@ -349,6 +355,7 @@ protected:
 
 	void CreateExpolsion(glm::vec3 location);
 	void CreateBirdExpolsion(glm::vec3 location);
+	void CreateMuzzleFlash(glm::vec3 location, entt::entity e);
 
 	//CG assingment 2 stuff
 protected:
