@@ -29,11 +29,6 @@ namespace Titan {
 		TTN_Renderer(TTN_Renderer&&) = default;
 		TTN_Renderer& operator=(TTN_Renderer&) = default;
 
-		//binds the shadow depth shader
-		static void BindShadowShader() { s_simpleShadowShader->Bind(); }
-		//unbinds the shadow depth shader
-		static void UnBindShadowShader() { s_simpleShadowShader->UnBind(); }
-
 		//sets a new mesh
 		void SetMesh(TTN_Mesh::smptr mesh);
 		//sets a shader
@@ -57,6 +52,8 @@ namespace Titan {
 		const int GetCastShadows() const { return m_castShadows; }
 		//gets if shadows are init for rendering or not
 		static bool GetShadowsAreInit() { return s_shaderRenderingIsInit; }
+		//gets the shadow shader
+		static TTN_Shader::sshptr GetSimpleShadowShader() { return s_simpleShadowShader; }
 
 		void Render(glm::mat4 model, glm::mat4 VP, glm::mat4 lightSpaceMat);
 

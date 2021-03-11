@@ -161,7 +161,7 @@ namespace Titan {
 		TTN_Framebuffer::sfboptr shadowBuffer;
 		int shadowWidth = 1024;
 		int shadowHeight = 1024;
-		float shadowOrthoXY = 20.0f;
+		float shadowOrthoXY = 5.0f;
 		float shadowOrthoZ = 30.0f;
 		TTN_UniformBuffer sunBuffer;
 

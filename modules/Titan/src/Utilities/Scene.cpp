@@ -400,20 +400,30 @@ namespace Titan {
 		//bind the framebuffer
 		shadowBuffer->Bind();
 		//bind the basic depth shader
-		TTN_Renderer::BindShadowShader();
+		TTN_Shader::sshptr simpleShadowShader = TTN_Renderer::GetSimpleShadowShader();
+		simpleShadowShader->Bind();
+
+		glCullFace(GL_FRONT);
 
 		//loop through all of the meshes
 		m_RenderGroup->each([&](entt::entity entity, TTN_Transform& transform, TTN_Renderer& renderer) {
 			// Render the mesh if it should be casting shadows
 			if (renderer.GetCastShadows()) {
+				simpleShadowShader->SetUniformMatrix("u_Model", transform.GetGlobal());
+				simpleShadowShader->SetUniformMatrix("u_LightSpaceMatrix", lightSpaceViewProj);
+				if (Has<TTN_MorphAnimator>(entity))
+					simpleShadowShader->SetUniform("t", Get<TTN_MorphAnimator>(entity).getActiveAnimRef().getInterpolationParameter());
+				else
+					simpleShadowShader->SetUniform("t", 0.0f);
 				renderer.Render(transform.GetGlobal(), vp, lightSpaceViewProj);
 			}
 
 		});
 
+		glCullFace(GL_BACK);
 
-		//unbind the basic depth shader
-		TTN_Renderer::UnBindShadowShader();
+		simpleShadowShader->UnBind();
+
 		//unbind the shadow framebuffer
 		shadowBuffer->Unbind();
 

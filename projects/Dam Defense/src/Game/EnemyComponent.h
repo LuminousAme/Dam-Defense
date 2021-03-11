@@ -55,8 +55,8 @@ protected:
 	float m_diff;// how fast ships go
 
 	float m_ypos; //the y position of the boat, determined by the boat type
-	inline static float m_ztarget = 10.0f; //the target z position near the dam that the enemy ship seeks
-	inline static float m_targetDistance = 5.0f; //how close it's allowed to get to that point
+	inline static float m_ztarget = 10.0f / 10.0f; //the target z position near the dam that the enemy ship seeks
+	inline static float m_targetDistance = 5.0f / 10.0f; //how close it's allowed to get to that point
 
 	bool m_alive; //wheter or not a ship is alive
 	bool m_attacking; //whether or not a ship is attacking

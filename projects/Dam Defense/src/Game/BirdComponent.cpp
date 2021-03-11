@@ -123,32 +123,32 @@ void BirdComponent::Update(float deltaTime)
 		//correct for position
 
 		//if it's too far in the positive x direction, start moving it towards the negative x direction
-		if (thisTrans.GetGlobalPos().x >= 80.0f) {
+		if (thisTrans.GetGlobalPos().x >= 80.0f / 10.0f) {
 			seekingComponent.x += -1.0f;
 		}
 		//if it's too far in the negative x direction, start moving it towards the positive x direction
-		else if (thisTrans.GetGlobalPos().x <= -80.0f) {
+		else if (thisTrans.GetGlobalPos().x <= -80.0f / 10.0f) {
 			seekingComponent.x += 1.0f;
 		}
 		
 		//if it's too far in the positive y direction, start moving it towards the negative y direction
-		if (thisTrans.GetGlobalPos().y >= 35.0f && currentVelo.y > -0.6f) {
+		if (thisTrans.GetGlobalPos().y >= 35.0f / 10.0f && currentVelo.y > -0.6f / 10.0f) {
 			seekingComponent.y += -1.0f;
 		}
 		//if it's too far in the negative y direction, start moving it towards the positive y direction
-		else if (thisTrans.GetGlobalPos().y <= 15.0f && currentVelo.y < 0.6f) {
+		else if (thisTrans.GetGlobalPos().y <= 15.0f / 10.0f && currentVelo.y < 0.6f / 10.0f) {
 			seekingComponent.y += 1.0f;
 		}
-		else if (thisTrans.GetGlobalPos().y > 15.0f && thisTrans.GetGlobalPos().y < 35.0f && std::abs(currentVelo.y) > 0.6f) {
+		else if (thisTrans.GetGlobalPos().y > 15.0f / 10.0f && thisTrans.GetGlobalPos().y < 35.0f / 10.0f && std::abs(currentVelo.y) > 0.6f / 10.0f) {
 			seekingComponent -= glm::normalize(currentVelo).y;
 		}
 
 		//if it's too far in the positve z direction, start moving it towards the negative z direction
-		if (thisTrans.GetGlobalPos().z >= 110.0f) {
+		if (thisTrans.GetGlobalPos().z >= 110.0f / 10.0f) {
 			seekingComponent.z += -1.0f;
 		}
 		//if it's too far in the negative z direction, start moving it towards the positive z direction
-		else if (thisTrans.GetGlobalPos().z <= 10.0f) {
+		else if (thisTrans.GetGlobalPos().z <= 10.0f / 10.0f) {
 			seekingComponent.z += 1.0f;
 		}
 
@@ -158,10 +158,10 @@ void BirdComponent::Update(float deltaTime)
 
 	//if it is too low force it to come back up
 	if (thisTrans.GetGlobalPos().y < 0.0f) {
-		if (m_currentlyBombing && thisTrans.GetGlobalPos().y < -8.0f)
+		if (m_currentlyBombing && thisTrans.GetGlobalPos().y < -8.0f / 10.0f)
 			currentVelo.y = 0.0f;
 
-		thisTrans.SetPos(glm::vec3(thisTrans.GetGlobalPos().x, std::clamp(thisTrans.GetGlobalPos().y, -8.0f, 35.0f) , thisTrans.GetGlobalPos().z));
+		thisTrans.SetPos(glm::vec3(thisTrans.GetGlobalPos().x, std::clamp(thisTrans.GetGlobalPos().y, -8.0f / 10.0f, 35.0f / 10.0f) , thisTrans.GetGlobalPos().z));
 	}
 
 	//if it's not bombing and has only been a few seconds since last bombing, turn off the allignment and cohension components and clamp the y value of the velocity
@@ -192,7 +192,7 @@ void BirdComponent::Update(float deltaTime)
 	}
 
 	//handle if it's looking straight up
-	if (glm::normalize(currentVelo) == glm::vec3(0.0f, 1.0f, 0.0f)) currentVelo += glm::vec3(0.1f, 0.0f, 0.1f);
+	if (glm::normalize(currentVelo) == glm::vec3(0.0f, 1.0f, 0.0f)) currentVelo += glm::vec3(0.1f / 10.0f, 0.0f, 0.1f / 10.0f);
 
 	//rotate the bird to be facing along the angle it is travelling 
 	thisTrans.LookAlong(glm::normalize(currentVelo), glm::vec3(0.0f, 1.0f, 0.0f));
