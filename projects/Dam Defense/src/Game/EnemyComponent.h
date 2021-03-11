@@ -35,6 +35,7 @@ public:
 	bool GetAlive() { return m_alive; }
 	bool GetAttacking() { return m_attacking; }
 	entt::entity GetCannonEntity() { return m_cannonEntityRef; }
+	glm::vec3 GetDirection() { return direction; }
 	static float GetZTarget() { return m_ztarget; }
 	static float GetZTargetDistance() { return m_targetDistance; }
 	float GetMuzzleCD() { return muzzleFlashCD; }

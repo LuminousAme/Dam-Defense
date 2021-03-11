@@ -8,22 +8,9 @@ OptionsMenu::OptionsMenu() : TTN_Scene()
 
 void OptionsMenu::InitScene()
 {
-	mouse_sen = 50.f;
-	volume = 100.f;
-	volumeMusic = 20.f;
-	volumeSFX = 5.0f;
 	textureButton1 = TTN_AssetSystem::GetTexture2D("Button Base");
 	textureButton2 = TTN_AssetSystem::GetTexture2D("Button Hovering");
-	diff = 100.0f; //difficulty multiplier
-
-	//color correction bools
-	Off = true;
-	color = false;
-
-	//difficulty bools
-	easy = false;
-	reg = true;
-	hard = false;
+	m_InputDelay = 0.3f;
 
 	//main camera
 	{
@@ -459,6 +446,29 @@ void OptionsMenu::InitScene()
 		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureButton1);
 		AttachCopy(temp, buttonRenderer);
 	}
+
+
+	//buttons for apply, undo, and default
+	for (int i = 0; i < 3; i++) {
+		entt::entity temp = CreateEntity();
+		if (i == 0) buttonApply = temp;
+		else if (i == 1) buttonUndo = temp;
+		else if (i == 2) buttonDefault = temp;
+
+		//create a transform for the button
+		TTN_Transform buttonTrans;
+		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(-850.0f, -450.0f, 2.0f), glm::vec3(0.0f), glm::vec3(250.0f / 2.0f, 150.0 / 2.0f, 1.0f));
+		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(700.0f, -450.0f, 2.0f), glm::vec3(0.0f), glm::vec3(250.0f / 2.0f, 150.0f / 2.0f, 1.0f));
+		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(850.0f, -450.0f, 2.0f), glm::vec3(0.0f), glm::vec3(250.0f / 2.0f, 150.0f / 2.0f, 1.0f));
+		AttachCopy(temp, buttonTrans);
+
+		//create a 2D renderer for the button
+		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureButton1);
+		AttachCopy(temp, buttonRenderer);
+	}
+
+
+	ReadFromFile();
 }
 
 void OptionsMenu::Update(float deltaTime)
@@ -479,7 +489,7 @@ void OptionsMenu::Update(float deltaTime)
 
 	//update the mouse sensitivity number
 	{
-		unsigned mouse = std::ceil(mouse_sen);
+		unsigned mouse = std::round(mouse_sen);
 		while (GetNumOfDigits(mouse) < mouseNums.size()) {
 			DeleteEntity(mouseNums[mouseNums.size() - 1]);
 			mouseNums.pop_back();
@@ -495,7 +505,7 @@ void OptionsMenu::Update(float deltaTime)
 
 	//update the volume number
 	{
-		unsigned volumeN = std::ceil(volume);
+		unsigned volumeN = std::round(volume);
 		while (GetNumOfDigits(volumeN) < volumeNums.size()) {
 			DeleteEntity(volumeNums[volumeNums.size() - 1]);
 			volumeNums.pop_back();
@@ -511,7 +521,7 @@ void OptionsMenu::Update(float deltaTime)
 
 	//update the music volume number
 	{
-		unsigned volumeM = std::ceil(volumeMusic);
+		unsigned volumeM = std::round(volumeMusic);
 		while (GetNumOfDigits(volumeM) < MusicVolumeNums.size()) {
 			DeleteEntity(MusicVolumeNums[MusicVolumeNums.size() - 1]);
 			MusicVolumeNums.pop_back();
@@ -527,7 +537,7 @@ void OptionsMenu::Update(float deltaTime)
 
 	//update the sfx volume number
 	{
-		unsigned volumeS = std::ceil(volumeSFX);
+		unsigned volumeS = std::round(volumeSFX);
 		while (GetNumOfDigits(volumeS) < SFXvolumeNums.size()) {
 			DeleteEntity(SFXvolumeNums[SFXvolumeNums.size() - 1]);
 			SFXvolumeNums.pop_back();
@@ -543,7 +553,7 @@ void OptionsMenu::Update(float deltaTime)
 
 	//update the difficulty number
 	{
-		unsigned difficult = std::ceil(diff);
+		unsigned difficult = std::round(diff);
 		while (GetNumOfDigits(difficult) < diffNums.size()) {
 			DeleteEntity(diffNums[diffNums.size() - 1]);
 			diffNums.pop_back();
@@ -557,221 +567,18 @@ void OptionsMenu::Update(float deltaTime)
 		}
 	}
 
-	//get buttons transform
-	TTN_Transform buttonOffTrans = Get<TTN_Transform>(buttonOff);
-	if (mousePosWorldSpace.x < buttonOffTrans.GetPos().x + 0.5f * abs(buttonOffTrans.GetScale().x) &&
-		mousePosWorldSpace.x > buttonOffTrans.GetPos().x - 0.5f * abs(buttonOffTrans.GetScale().x) &&
-		mousePosWorldSpace.y < buttonOffTrans.GetPos().y + 0.5f * abs(buttonOffTrans.GetScale().y) &&
-		mousePosWorldSpace.y > buttonOffTrans.GetPos().y - 0.5f * abs(buttonOffTrans.GetScale().y)) {
-		Get<TTN_Renderer2D>(buttonOff).SetSprite(textureButton2);
-	}
-	else {
-		Get<TTN_Renderer2D>(buttonOff).SetSprite(textureButton1);
-	}
-
-	//get buttons transform
-	TTN_Transform buttonColor1Trans = Get<TTN_Transform>(buttonColor1);
-	if (mousePosWorldSpace.x < buttonColor1Trans.GetPos().x + 0.5f * abs(buttonColor1Trans.GetScale().x) &&
-		mousePosWorldSpace.x > buttonColor1Trans.GetPos().x - 0.5f * abs(buttonColor1Trans.GetScale().x) &&
-		mousePosWorldSpace.y < buttonColor1Trans.GetPos().y + 0.5f * abs(buttonColor1Trans.GetScale().y) &&
-		mousePosWorldSpace.y > buttonColor1Trans.GetPos().y - 0.5f * abs(buttonColor1Trans.GetScale().y)) {
-		Get<TTN_Renderer2D>(buttonColor1).SetSprite(textureButton2);
-	}
-	else {
-		Get<TTN_Renderer2D>(buttonColor1).SetSprite(textureButton1);
-	}
-
-	if (Off) {
-		Get<TTN_Renderer2D>(OffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		Get<TTN_Renderer2D>(ColorBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-		//std::cout << "OFFFFFFF" << std::endl;
-	}
-
-	if (color) {
-		Get<TTN_Renderer2D>(OffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-		Get<TTN_Renderer2D>(ColorBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		//std::cout << "COLOR" << std::endl;
-	}
-
-	//button hovering update
+	//color correction buttons
 	{
-		TTN_Transform buttonEasyTrans = Get<TTN_Transform>(buttonEasy);
-		if (mousePosWorldSpace.x < buttonEasyTrans.GetPos().x + 0.5f * abs(buttonEasyTrans.GetScale().x) &&
-			mousePosWorldSpace.x > buttonEasyTrans.GetPos().x - 0.5f * abs(buttonEasyTrans.GetScale().x) &&
-			mousePosWorldSpace.y < buttonEasyTrans.GetPos().y + 0.5f * abs(buttonEasyTrans.GetScale().y) &&
-			mousePosWorldSpace.y > buttonEasyTrans.GetPos().y - 0.5f * abs(buttonEasyTrans.GetScale().y)) {
-			Get<TTN_Renderer2D>(buttonEasy).SetSprite(textureButton2);
-		}
-		else {
-			Get<TTN_Renderer2D>(buttonEasy).SetSprite(textureButton1);
-		}
-
-		TTN_Transform buttonRegTrans = Get<TTN_Transform>(buttonReg);
-		if (mousePosWorldSpace.x < buttonRegTrans.GetPos().x + 0.5f * abs(buttonRegTrans.GetScale().x) &&
-			mousePosWorldSpace.x > buttonRegTrans.GetPos().x - 0.5f * abs(buttonRegTrans.GetScale().x) &&
-			mousePosWorldSpace.y < buttonRegTrans.GetPos().y + 0.5f * abs(buttonRegTrans.GetScale().y) &&
-			mousePosWorldSpace.y > buttonRegTrans.GetPos().y - 0.5f * abs(buttonRegTrans.GetScale().y)) {
-			Get<TTN_Renderer2D>(buttonReg).SetSprite(textureButton2);
-		}
-		else {
-			Get<TTN_Renderer2D>(buttonReg).SetSprite(textureButton1);
-		}
-
-		TTN_Transform buttonHardTrans = Get<TTN_Transform>(buttonHard);
-		if (mousePosWorldSpace.x < buttonHardTrans.GetPos().x + 0.5f * abs(buttonHardTrans.GetScale().x) &&
-			mousePosWorldSpace.x > buttonHardTrans.GetPos().x - 0.5f * abs(buttonHardTrans.GetScale().x) &&
-			mousePosWorldSpace.y < buttonHardTrans.GetPos().y + 0.5f * abs(buttonHardTrans.GetScale().y) &&
-			mousePosWorldSpace.y > buttonHardTrans.GetPos().y - 0.5f * abs(buttonHardTrans.GetScale().y)) {
-			Get<TTN_Renderer2D>(buttonHard).SetSprite(textureButton2);
-		}
-		else {
-			Get<TTN_Renderer2D>(buttonHard).SetSprite(textureButton1);
-		}
-	}
-
-	if (easy) {
-		Get<TTN_Renderer2D>(EasyDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		Get<TTN_Renderer2D>(RegDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-		Get<TTN_Renderer2D>(HardDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-	}
-
-	if (reg) {
-		Get<TTN_Renderer2D>(EasyDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-		Get<TTN_Renderer2D>(RegDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		Get<TTN_Renderer2D>(HardDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-	}
-
-	if (hard) {
-		Get<TTN_Renderer2D>(EasyDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-		Get<TTN_Renderer2D>(RegDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-		Get<TTN_Renderer2D>(HardDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-	}
-
-	//std::cout << "Diff" << diff << std::endl;
-	//update the base scene
-	TTN_Scene::Update(deltaTime);
-}
-
-void OptionsMenu::MouseButtonDownChecks()
-{
-	if (TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left)) {
-		//get the mouse position
-		glm::vec2 mousePos = TTN_Application::TTN_Input::GetMousePosition();
-		//convert it to worldspace
-		glm::vec3 mousePosWorldSpace;
-		{
-			float tx = TTN_Interpolation::InverseLerp(0.0f, 1920.0f, mousePos.x);
-			float ty = TTN_Interpolation::InverseLerp(0.0f, 1080.0f, mousePos.y);
-
-			float newX = TTN_Interpolation::Lerp(960.0f, -960.0f, tx);
-			float newY = TTN_Interpolation::Lerp(540.0f, -540.0f, ty);
-
-			mousePosWorldSpace = glm::vec3(newX, newY, 2.0f);
-		}
-
-		///// BARS /////
-		TTN_Transform playButtonTrans = Get<TTN_Transform>(mouseSensitivity);
-		if (mousePosWorldSpace.x < playButtonTrans.GetPos().x + 0.5f * abs(playButtonTrans.GetScale().x) &&
-			mousePosWorldSpace.x > playButtonTrans.GetPos().x - 0.5f * abs(playButtonTrans.GetScale().x) &&
-			mousePosWorldSpace.y < playButtonTrans.GetPos().y + 0.5f * abs(playButtonTrans.GetScale().y) &&
-			mousePosWorldSpace.y > playButtonTrans.GetPos().y - 0.5f * abs(playButtonTrans.GetScale().y)) {
-			float normalizedMouseSen = mouse_sen / 100.f;;
-			if (mousePosWorldSpace.x == 0.0f)
-				normalizedMouseSen = 0.5f;
-
-			else if (mousePosWorldSpace.x > 0.0f)
-				normalizedMouseSen = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / playButtonTrans.GetScale().x) * 100.f)) - 0.5f);
-
-			else if (mousePosWorldSpace.x < 0.0f)
-				normalizedMouseSen = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / playButtonTrans.GetScale().x) * 100.f)) + 0.5f);
-			else
-				float normalizedMouseSen = mouse_sen / 100.f;
-
-			Get<TTN_Renderer2D>(mouseSensitivity).SetHoriMask(normalizedMouseSen);
-
-			mouse_sen = normalizedMouseSen * 100.f;
-			/*std::cout << "SNESE: " << mouse_sen << std::endl;
-			std::cout << normalizedMouseSen << std::endl;*/
-			//std::cout << "mouse: " << mousePosWorldSpace.x << std::endl;
-		}
-
-		TTN_Transform volumeBarTrans = Get<TTN_Transform>(volumeBar);
-		if (mousePosWorldSpace.x < volumeBarTrans.GetPos().x + 0.5f * abs(volumeBarTrans.GetScale().x) &&
-			mousePosWorldSpace.x > volumeBarTrans.GetPos().x - 0.5f * abs(volumeBarTrans.GetScale().x) &&
-			mousePosWorldSpace.y < volumeBarTrans.GetPos().y + 0.5f * abs(volumeBarTrans.GetScale().y) &&
-			mousePosWorldSpace.y > volumeBarTrans.GetPos().y - 0.5f * abs(volumeBarTrans.GetScale().y)) {
-			float normalizedVolume = volume / 100.f;;
-			if (mousePosWorldSpace.x == 0.0f)
-				normalizedVolume = 0.5f;
-
-			else if (mousePosWorldSpace.x > 0.0f)
-				normalizedVolume = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / volumeBarTrans.GetScale().x) * 100.f)) - 0.5f);
-
-			else if (mousePosWorldSpace.x < 0.0f)
-				normalizedVolume = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / volumeBarTrans.GetScale().x) * 100.f)) + 0.5f);
-			else
-				float normalizedVolume = volume / 100.f;
-
-			Get<TTN_Renderer2D>(volumeBar).SetHoriMask(normalizedVolume);
-
-			volume = normalizedVolume * 100.f;
-			std::cout << "SNESE: " << volume << std::endl;
-			std::cout << normalizedVolume << std::endl;
-			//std::cout << "mouse: " << mousePosWorldSpace.x << std::endl;
-		}
-
-		TTN_Transform MusicVolumeBarTrans = Get<TTN_Transform>(MusicVolumeBar);
-		if (mousePosWorldSpace.x < MusicVolumeBarTrans.GetPos().x + 0.5f * abs(MusicVolumeBarTrans.GetScale().x) &&
-			mousePosWorldSpace.x > MusicVolumeBarTrans.GetPos().x - 0.5f * abs(MusicVolumeBarTrans.GetScale().x) &&
-			mousePosWorldSpace.y < MusicVolumeBarTrans.GetPos().y + 0.5f * abs(MusicVolumeBarTrans.GetScale().y) &&
-			mousePosWorldSpace.y > MusicVolumeBarTrans.GetPos().y - 0.5f * abs(MusicVolumeBarTrans.GetScale().y)) {
-			float normalizedMusic = volumeMusic / 100.f;;
-			if (mousePosWorldSpace.x == 0.0f)
-				normalizedMusic = 0.5f;
-
-			else if (mousePosWorldSpace.x > 0.0f)
-				normalizedMusic = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / MusicVolumeBarTrans.GetScale().x) * 100.f)) - 0.5f);
-
-			else if (mousePosWorldSpace.x < 0.0f)
-				normalizedMusic = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / MusicVolumeBarTrans.GetScale().x) * 100.f)) + 0.5f);
-			else
-				float normalizedMusic = volumeMusic / 100.f;
-
-			Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalizedMusic);
-			volumeMusic = normalizedMusic * 100.f;
-		}
-
-		TTN_Transform SFXVolumeBarTrans = Get<TTN_Transform>(SFXvolumeBar);
-		if (mousePosWorldSpace.x < SFXVolumeBarTrans.GetPos().x + 0.5f * abs(SFXVolumeBarTrans.GetScale().x) &&
-			mousePosWorldSpace.x > SFXVolumeBarTrans.GetPos().x - 0.5f * abs(SFXVolumeBarTrans.GetScale().x) &&
-			mousePosWorldSpace.y < SFXVolumeBarTrans.GetPos().y + 0.5f * abs(SFXVolumeBarTrans.GetScale().y) &&
-			mousePosWorldSpace.y > SFXVolumeBarTrans.GetPos().y - 0.5f * abs(SFXVolumeBarTrans.GetScale().y)) {
-			float normalizedSFX = volumeSFX / 100.f;;
-			if (mousePosWorldSpace.x == 0.0f)
-				normalizedSFX = 0.5f;
-
-			else if (mousePosWorldSpace.x > 0.0f)
-				normalizedSFX = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / SFXVolumeBarTrans.GetScale().x) * 100.f)) - 0.5f);
-
-			else if (mousePosWorldSpace.x < 0.0f)
-				normalizedSFX = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / SFXVolumeBarTrans.GetScale().x) * 100.f)) + 0.5f);
-			else
-				float normalizedSFX = volumeSFX / 100.f;
-
-			Get<TTN_Renderer2D>(SFXvolumeBar).SetHoriMask(normalizedSFX);
-			volumeSFX = normalizedSFX * 100.f;
-		}
-
-		// buttons
 		//get buttons transform
 		TTN_Transform buttonOffTrans = Get<TTN_Transform>(buttonOff);
 		if (mousePosWorldSpace.x < buttonOffTrans.GetPos().x + 0.5f * abs(buttonOffTrans.GetScale().x) &&
 			mousePosWorldSpace.x > buttonOffTrans.GetPos().x - 0.5f * abs(buttonOffTrans.GetScale().x) &&
 			mousePosWorldSpace.y < buttonOffTrans.GetPos().y + 0.5f * abs(buttonOffTrans.GetScale().y) &&
 			mousePosWorldSpace.y > buttonOffTrans.GetPos().y - 0.5f * abs(buttonOffTrans.GetScale().y)) {
-			Off = true;
-			color = false;
-			//	std::cout << "OFFFF " << std::endl;
+			Get<TTN_Renderer2D>(buttonOff).SetSprite(textureButton2);
+		}
+		else {
+			Get<TTN_Renderer2D>(buttonOff).SetSprite(textureButton1);
 		}
 
 		//get buttons transform
@@ -780,84 +587,528 @@ void OptionsMenu::MouseButtonDownChecks()
 			mousePosWorldSpace.x > buttonColor1Trans.GetPos().x - 0.5f * abs(buttonColor1Trans.GetScale().x) &&
 			mousePosWorldSpace.y < buttonColor1Trans.GetPos().y + 0.5f * abs(buttonColor1Trans.GetScale().y) &&
 			mousePosWorldSpace.y > buttonColor1Trans.GetPos().y - 0.5f * abs(buttonColor1Trans.GetScale().y)) {
-			color = true;
-			Off = false;
-			//			std::cout << "COLOR" << std::endl;
+			Get<TTN_Renderer2D>(buttonColor1).SetSprite(textureButton2);
+		}
+		else {
+			Get<TTN_Renderer2D>(buttonColor1).SetSprite(textureButton1);
+		}
+
+		if (Off) {
+			Get<TTN_Renderer2D>(OffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+			Get<TTN_Renderer2D>(ColorBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+		}
+
+		if (color) {
+			Get<TTN_Renderer2D>(OffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+			Get<TTN_Renderer2D>(ColorBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		}
+	}
+	
+	//difficulty buttons
+	{
+		//button hovering update
+		{
+			TTN_Transform buttonEasyTrans = Get<TTN_Transform>(buttonEasy);
+			if (mousePosWorldSpace.x < buttonEasyTrans.GetPos().x + 0.5f * abs(buttonEasyTrans.GetScale().x) &&
+				mousePosWorldSpace.x > buttonEasyTrans.GetPos().x - 0.5f * abs(buttonEasyTrans.GetScale().x) &&
+				mousePosWorldSpace.y < buttonEasyTrans.GetPos().y + 0.5f * abs(buttonEasyTrans.GetScale().y) &&
+				mousePosWorldSpace.y > buttonEasyTrans.GetPos().y - 0.5f * abs(buttonEasyTrans.GetScale().y)) {
+				Get<TTN_Renderer2D>(buttonEasy).SetSprite(textureButton2);
+			}
+			else {
+				Get<TTN_Renderer2D>(buttonEasy).SetSprite(textureButton1);
+			}
+
+			TTN_Transform buttonRegTrans = Get<TTN_Transform>(buttonReg);
+			if (mousePosWorldSpace.x < buttonRegTrans.GetPos().x + 0.5f * abs(buttonRegTrans.GetScale().x) &&
+				mousePosWorldSpace.x > buttonRegTrans.GetPos().x - 0.5f * abs(buttonRegTrans.GetScale().x) &&
+				mousePosWorldSpace.y < buttonRegTrans.GetPos().y + 0.5f * abs(buttonRegTrans.GetScale().y) &&
+				mousePosWorldSpace.y > buttonRegTrans.GetPos().y - 0.5f * abs(buttonRegTrans.GetScale().y)) {
+				Get<TTN_Renderer2D>(buttonReg).SetSprite(textureButton2);
+			}
+			else {
+				Get<TTN_Renderer2D>(buttonReg).SetSprite(textureButton1);
+			}
+
+			TTN_Transform buttonHardTrans = Get<TTN_Transform>(buttonHard);
+			if (mousePosWorldSpace.x < buttonHardTrans.GetPos().x + 0.5f * abs(buttonHardTrans.GetScale().x) &&
+				mousePosWorldSpace.x > buttonHardTrans.GetPos().x - 0.5f * abs(buttonHardTrans.GetScale().x) &&
+				mousePosWorldSpace.y < buttonHardTrans.GetPos().y + 0.5f * abs(buttonHardTrans.GetScale().y) &&
+				mousePosWorldSpace.y > buttonHardTrans.GetPos().y - 0.5f * abs(buttonHardTrans.GetScale().y)) {
+				Get<TTN_Renderer2D>(buttonHard).SetSprite(textureButton2);
+			}
+			else {
+				Get<TTN_Renderer2D>(buttonHard).SetSprite(textureButton1);
+			}
+		}
+
+		if (easy) {
+			Get<TTN_Renderer2D>(EasyDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+			Get<TTN_Renderer2D>(RegDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+			Get<TTN_Renderer2D>(HardDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+		}
+
+		if (reg) {
+			Get<TTN_Renderer2D>(EasyDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+			Get<TTN_Renderer2D>(RegDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+			Get<TTN_Renderer2D>(HardDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+		}
+
+		if (hard) {
+			Get<TTN_Renderer2D>(EasyDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+			Get<TTN_Renderer2D>(RegDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+			Get<TTN_Renderer2D>(HardDiffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		}
+	}
+
+	//apply, undo, and default buttons
+	{
+		//get apply button transform and check if it's being hovered over
+		TTN_Transform buttonApplyTrans = Get<TTN_Transform>(buttonApply);
+		if (mousePosWorldSpace.x < buttonApplyTrans.GetPos().x + 0.5f * abs(buttonApplyTrans.GetScale().x) &&
+			mousePosWorldSpace.x > buttonApplyTrans.GetPos().x - 0.5f * abs(buttonApplyTrans.GetScale().x) &&
+			mousePosWorldSpace.y < buttonApplyTrans.GetPos().y + 0.5f * abs(buttonApplyTrans.GetScale().y) &&
+			mousePosWorldSpace.y > buttonApplyTrans.GetPos().y - 0.5f * abs(buttonApplyTrans.GetScale().y)) {
+			Get<TTN_Renderer2D>(buttonApply).SetSprite(textureButton2);
+		}
+		else
+			Get<TTN_Renderer2D>(buttonApply).SetSprite(textureButton1);
+
+		//get undo button transform and check if it's being hovered over
+		TTN_Transform buttonUndoTrans = Get<TTN_Transform>(buttonUndo);
+		if (mousePosWorldSpace.x < buttonUndoTrans.GetPos().x + 0.5f * abs(buttonUndoTrans.GetScale().x) &&
+			mousePosWorldSpace.x > buttonUndoTrans.GetPos().x - 0.5f * abs(buttonUndoTrans.GetScale().x) &&
+			mousePosWorldSpace.y < buttonUndoTrans.GetPos().y + 0.5f * abs(buttonUndoTrans.GetScale().y) &&
+			mousePosWorldSpace.y > buttonUndoTrans.GetPos().y - 0.5f * abs(buttonUndoTrans.GetScale().y)) {
+			Get<TTN_Renderer2D>(buttonUndo).SetSprite(textureButton2);
+		}
+		else
+			Get<TTN_Renderer2D>(buttonUndo).SetSprite(textureButton1);
+
+		//get default button transform and check if it's being hovered
+		TTN_Transform buttonDefaultTrans = Get<TTN_Transform>(buttonDefault);
+		if (mousePosWorldSpace.x < buttonDefaultTrans.GetPos().x + 0.5f * abs(buttonDefaultTrans.GetScale().x) &&
+			mousePosWorldSpace.x > buttonDefaultTrans.GetPos().x - 0.5f * abs(buttonDefaultTrans.GetScale().x) &&
+			mousePosWorldSpace.y < buttonDefaultTrans.GetPos().y + 0.5f * abs(buttonDefaultTrans.GetScale().y) &&
+			mousePosWorldSpace.y > buttonDefaultTrans.GetPos().y - 0.5f * abs(buttonDefaultTrans.GetScale().y)) {
+			Get<TTN_Renderer2D>(buttonDefault).SetSprite(textureButton2);
+		}
+		else
+			Get<TTN_Renderer2D>(buttonDefault).SetSprite(textureButton1);
+	}
+	
+	//update the input delay
+	if (m_InputDelay >= 0.0f) {
+		m_InputDelay -= deltaTime;
+		Off = acutal_Off;
+		color = acutal_color;
+		easy = acutal_easy;
+		reg = acutal_reg;
+		hard = acutal_hard;
+	}
+
+	//update the base scene
+	TTN_Scene::Update(deltaTime);
+}
+
+void OptionsMenu::MouseButtonDownChecks()
+{
+	//get the mouse position
+	glm::vec2 mousePos = TTN_Application::TTN_Input::GetMousePosition();
+	//convert it to worldspace
+	glm::vec3 mousePosWorldSpace;
+	{
+		float tx = TTN_Interpolation::InverseLerp(0.0f, 1920.0f, mousePos.x);
+		float ty = TTN_Interpolation::InverseLerp(0.0f, 1080.0f, mousePos.y);
+
+		float newX = TTN_Interpolation::Lerp(960.0f, -960.0f, tx);
+		float newY = TTN_Interpolation::Lerp(540.0f, -540.0f, ty);
+
+		mousePosWorldSpace = glm::vec3(newX, newY, 2.0f);
+	}
+
+	//if the user is left clicking
+	if (TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left) && m_InputDelay <= 0.0f) {
+		//mouse sensetivity bar
+		{
+			//grab the transform of the bar
+			TTN_Transform playButtonTrans = Get<TTN_Transform>(mouseSensitivity);
+			//if the player's mouse is over the bar
+			if (mousePosWorldSpace.x < playButtonTrans.GetPos().x + 0.5f * abs(playButtonTrans.GetScale().x) &&
+				mousePosWorldSpace.x > playButtonTrans.GetPos().x - 0.5f * abs(playButtonTrans.GetScale().x) &&
+				mousePosWorldSpace.y < playButtonTrans.GetPos().y + 0.5f * abs(playButtonTrans.GetScale().y) &&
+				mousePosWorldSpace.y > playButtonTrans.GetPos().y - 0.5f * abs(playButtonTrans.GetScale().y)) {
+				//make a temp float mouse sensetivity
+				float tempMouseSen = mouse_sen;
+				//normalize it
+				float normalizedMouseSen = tempMouseSen / 100.f;
+
+				//if it's on the center than the mouse senestivity is 50% 
+				if (mousePosWorldSpace.x == 0.0f)
+					normalizedMouseSen = 0.5f;
+
+				//if it's to the left than find the percentage
+				else if (mousePosWorldSpace.x > 0.0f)
+					normalizedMouseSen = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / playButtonTrans.GetScale().x) * 100.f)) - 0.5f);
+
+
+				//if it's to the right than find the percentage
+				else if (mousePosWorldSpace.x < 0.0f)
+					normalizedMouseSen = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / playButtonTrans.GetScale().x) * 100.f)) + 0.5f);
+
+				//otherwise it's just the existing value
+				else
+					float normalizedMouseSen = tempMouseSen / 100.f;
+
+				//set the mask to the normalized mouse senestivity
+				Get<TTN_Renderer2D>(mouseSensitivity).SetHoriMask(normalizedMouseSen);
+
+				//take it out of the normalized range
+				tempMouseSen = normalizedMouseSen * 100.f;
+				//and round it back to an integer
+				mouse_sen = std::round(tempMouseSen);
+			}
+		}
+
+		//master volume bar
+		{
+			//grab the transform of the bar
+			TTN_Transform volumeBarTrans = Get<TTN_Transform>(volumeBar);
+			//if the player's mouse is over the bar
+			if (mousePosWorldSpace.x < volumeBarTrans.GetPos().x + 0.5f * abs(volumeBarTrans.GetScale().x) &&
+				mousePosWorldSpace.x > volumeBarTrans.GetPos().x - 0.5f * abs(volumeBarTrans.GetScale().x) &&
+				mousePosWorldSpace.y < volumeBarTrans.GetPos().y + 0.5f * abs(volumeBarTrans.GetScale().y) &&
+				mousePosWorldSpace.y > volumeBarTrans.GetPos().y - 0.5f * abs(volumeBarTrans.GetScale().y)) {
+
+				//get a temp float for the volume
+				float tempVolume = volume;
+				//normalize it
+				float normalizedVolume = tempVolume / 100.f;
+
+				//if it's at the center than the volume is 50%
+				if (mousePosWorldSpace.x == 0.0f)
+					normalizedVolume = 0.5f;
+
+				//if it's too the left find the percetange
+				else if (mousePosWorldSpace.x > 0.0f)
+					normalizedVolume = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / volumeBarTrans.GetScale().x) * 100.f)) - 0.5f);
+
+
+				//if it's too the right find the percetange
+				else if (mousePosWorldSpace.x < 0.0f)
+					normalizedVolume = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / volumeBarTrans.GetScale().x) * 100.f)) + 0.5f);
+
+				//otherwise just store the existing value
+				else
+					float normalizedVolume = tempVolume / 100.f;
+
+				//set the horizontal mask to the normalized value
+				Get<TTN_Renderer2D>(volumeBar).SetHoriMask(normalizedVolume);
+
+				//take out of normalized space
+				tempVolume = normalizedVolume * 100.f;
+				//and round it back to an integer
+				volume = std::round(tempVolume);
+			}
+		}
+		
+		//music volume bar
+		{
+			//get the bar's transform
+			TTN_Transform MusicVolumeBarTrans = Get<TTN_Transform>(MusicVolumeBar);
+			//if the player's mouse is over the bar
+			if (mousePosWorldSpace.x < MusicVolumeBarTrans.GetPos().x + 0.5f * abs(MusicVolumeBarTrans.GetScale().x) &&
+				mousePosWorldSpace.x > MusicVolumeBarTrans.GetPos().x - 0.5f * abs(MusicVolumeBarTrans.GetScale().x) &&
+				mousePosWorldSpace.y < MusicVolumeBarTrans.GetPos().y + 0.5f * abs(MusicVolumeBarTrans.GetScale().y) &&
+				mousePosWorldSpace.y > MusicVolumeBarTrans.GetPos().y - 0.5f * abs(MusicVolumeBarTrans.GetScale().y)) {
+
+				//get a temp float for the volume
+				float tempMusic = volumeMusic;
+				//normalize it
+				float normalizedMusic = tempMusic / 100.f;
+
+				//if it's at the center than the volume is 50% 
+				if (mousePosWorldSpace.x == 0.0f)
+					normalizedMusic = 0.5f;
+
+				//if it's too the left, figure out what percentage the volume is 
+				else if (mousePosWorldSpace.x > 0.0f)
+					normalizedMusic = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / MusicVolumeBarTrans.GetScale().x) * 100.f)) - 0.5f);
+
+				//if it's too the right, figure out what percentage the volume is 
+				else if (mousePosWorldSpace.x < 0.0f)
+					normalizedMusic = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / MusicVolumeBarTrans.GetScale().x) * 100.f)) + 0.5f);
+
+				//otherwise just save the previous value
+				else
+					float normalizedMusic = tempMusic / 100.f;
+
+				//set the mask to the normalized value
+				Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalizedMusic);
+				
+				//take it out of mormalized space
+				tempMusic = normalizedMusic * 100.f;
+				//and round it back to an integer
+				volumeMusic = std::round(tempMusic);
+			}
+		}
+
+		//sfx volume bar
+		{
+			//get the bar's transform
+			TTN_Transform SFXVolumeBarTrans = Get<TTN_Transform>(SFXvolumeBar);
+			//if the player's mouse is over the bar
+			if (mousePosWorldSpace.x < SFXVolumeBarTrans.GetPos().x + 0.5f * abs(SFXVolumeBarTrans.GetScale().x) &&
+				mousePosWorldSpace.x > SFXVolumeBarTrans.GetPos().x - 0.5f * abs(SFXVolumeBarTrans.GetScale().x) &&
+				mousePosWorldSpace.y < SFXVolumeBarTrans.GetPos().y + 0.5f * abs(SFXVolumeBarTrans.GetScale().y) &&
+				mousePosWorldSpace.y > SFXVolumeBarTrans.GetPos().y - 0.5f * abs(SFXVolumeBarTrans.GetScale().y)) {
+				//make a temp float for the volume
+				float tempSFX = volumeSFX;
+				//normalize it 
+				float normalizedSFX = tempSFX / 100.f;
+
+				//if it's in the center than the volume is 50%
+				if (mousePosWorldSpace.x == 0.0f)
+					normalizedSFX = 0.5f;
+
+				//if it's to the left then find out what percentage it is
+				else if (mousePosWorldSpace.x > 0.0f)
+					normalizedSFX = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / SFXVolumeBarTrans.GetScale().x) * 100.f)) - 0.5f);
+
+
+				//if it's to the right then find out what percentage it is
+				else if (mousePosWorldSpace.x < 0.0f)
+					normalizedSFX = abs(TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / SFXVolumeBarTrans.GetScale().x) * 100.f)) + 0.5f);
+
+				//otherwise just keep the existing value
+				else
+					float normalizedSFX = tempSFX / 100.f;
+
+				//set the mask to the normalized value
+				Get<TTN_Renderer2D>(SFXvolumeBar).SetHoriMask(normalizedSFX);
+
+				//take it out of normalized space
+				tempSFX = normalizedSFX * 100.f;
+				//and round it back to an integer
+				volumeSFX = std::round(tempSFX);
+			}
 		}
 
 		//difficulty bar
-		TTN_Transform diffBarTrans = Get<TTN_Transform>(diffBar);
-		if (mousePosWorldSpace.x < diffBarTrans.GetPos().x + 0.5f * abs(diffBarTrans.GetScale().x) &&
-			mousePosWorldSpace.x > diffBarTrans.GetPos().x - 0.5f * abs(diffBarTrans.GetScale().x) &&
-			mousePosWorldSpace.y < diffBarTrans.GetPos().y + 0.5f * abs(diffBarTrans.GetScale().y) &&
-			mousePosWorldSpace.y > diffBarTrans.GetPos().y - 0.5f * abs(diffBarTrans.GetScale().y)) {
-			float normalizedDiff = diff / 200.f;
-			if (mousePosWorldSpace.x == 0.0f) {
-				normalizedDiff = 0.5f;
-			}
+		{
+			//get the bar's transform
+			TTN_Transform diffBarTrans = Get<TTN_Transform>(diffBar);
+			//check if the player's mouse is over the bar
+			if (mousePosWorldSpace.x < diffBarTrans.GetPos().x + 0.5f * abs(diffBarTrans.GetScale().x) &&
+				mousePosWorldSpace.x > diffBarTrans.GetPos().x - 0.5f * abs(diffBarTrans.GetScale().x) &&
+				mousePosWorldSpace.y < diffBarTrans.GetPos().y + 0.5f * abs(diffBarTrans.GetScale().y) &&
+				mousePosWorldSpace.y > diffBarTrans.GetPos().y - 0.5f * abs(diffBarTrans.GetScale().y)) {
 
-			else if (mousePosWorldSpace.x > 0.0f) {
-				normalizedDiff = abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs((mousePosWorldSpace.x - 10.f) / diffBarTrans.GetScale().x) * 200.f)) - 0.5f);
-				std::cout << normalizedDiff << std::endl;
-				/*std::cout << abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) - 0.5f + 0.1f) << std::endl;
-				std::cout << abs(TTN_Interpolation::ReMap(10.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) - 0.5f) << "  SEP " << std::endl;*/
-				if (normalizedDiff < 0.050f) {
-					normalizedDiff = 0.05f;
+				//get a temp float for the difficulty
+				float tempDiff = diff;
+				//normalize it
+				float normalizedDiff = tempDiff / 200.f;
+
+				//if it's on the center than it's 50% 
+				if (mousePosWorldSpace.x == 0.0f) {
+					normalizedDiff = 0.5f;
 				}
+
+				//if it's to the left then figure out what percentage it is
+				else if (mousePosWorldSpace.x > 0.0f) {
+					normalizedDiff = abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs((mousePosWorldSpace.x - 10.f) / diffBarTrans.GetScale().x) * 200.f)) - 0.5f);
+					if (normalizedDiff < 0.050f) {
+						normalizedDiff = 0.05f;
+					}
+				}
+
+				//if it's to the right then figure out what percentage it is
+				else if (mousePosWorldSpace.x < 0.0f) {
+					normalizedDiff = abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs((mousePosWorldSpace.x) / diffBarTrans.GetScale().x) * 200.f)) + 0.5f);
+				}
+
+				//otherwise keep the existing value
+				else {
+					float normalizedDiff = tempDiff / 200.f;
+				}
+
+				//set the mask to the normalized value
+				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
+				
+				//take it out of normalized space
+				tempDiff = normalizedDiff * 200.f;
+				//and round it back to an integer 
+				diff = std::round(tempDiff);
+			}
+		}
+	}
+
+	//if the user has left clicked this frame
+	if (TTN_Application::TTN_Input::GetMouseButtonDown(TTN_MouseButton::Left) && m_InputDelay <= 0.0f) {
+		//color correction buttons
+		{
+			//get off button trans transform and check if it's being pressed
+			TTN_Transform buttonOffTrans = Get<TTN_Transform>(buttonOff);
+			if (mousePosWorldSpace.x < buttonOffTrans.GetPos().x + 0.5f * abs(buttonOffTrans.GetScale().x) &&
+				mousePosWorldSpace.x > buttonOffTrans.GetPos().x - 0.5f * abs(buttonOffTrans.GetScale().x) &&
+				mousePosWorldSpace.y < buttonOffTrans.GetPos().y + 0.5f * abs(buttonOffTrans.GetScale().y) &&
+				mousePosWorldSpace.y > buttonOffTrans.GetPos().y - 0.5f * abs(buttonOffTrans.GetScale().y)) {
+				\
+					//if it is, turn off the colorbind modes
+					Off = true;
+				color = false;
 			}
 
-			else if (mousePosWorldSpace.x < 0.0f) {
-				normalizedDiff = abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs((mousePosWorldSpace.x) / diffBarTrans.GetScale().x) * 200.f)) + 0.5f);
-				/*	std::cout << abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs(mousePosWorldSpace.x / diffBarTrans.GetScale().x) * 200.f)) + 0.5f - 0.1f) << std::endl;
-					std::cout << abs(TTN_Interpolation::ReMap(10.0f, 200.0f, 0.0f, 1.0f, (abs((mousePosWorldSpace.x - 10.f) / diffBarTrans.GetScale().x) * 200.f)) + 0.5f) << "  SEP 1" << std::endl;*/
+			//get the first colorbind mode button's transform and check if it's being pressed
+			TTN_Transform buttonColor1Trans = Get<TTN_Transform>(buttonColor1);
+			if (mousePosWorldSpace.x < buttonColor1Trans.GetPos().x + 0.5f * abs(buttonColor1Trans.GetScale().x) &&
+				mousePosWorldSpace.x > buttonColor1Trans.GetPos().x - 0.5f * abs(buttonColor1Trans.GetScale().x) &&
+				mousePosWorldSpace.y < buttonColor1Trans.GetPos().y + 0.5f * abs(buttonColor1Trans.GetScale().y) &&
+				mousePosWorldSpace.y > buttonColor1Trans.GetPos().y - 0.5f * abs(buttonColor1Trans.GetScale().y)) {
+				//if it is, turn it on
+				color = true;
+				Off = false;
 			}
-			else {
+		}
+
+		// difficulty buttons
+		{
+			//get the transform for the easy button and check if they are pressing it
+			TTN_Transform buttonEasyTrans = Get<TTN_Transform>(buttonEasy);
+			if (mousePosWorldSpace.x < buttonEasyTrans.GetPos().x + 0.5f * abs(buttonEasyTrans.GetScale().x) &&
+				mousePosWorldSpace.x > buttonEasyTrans.GetPos().x - 0.5f * abs(buttonEasyTrans.GetScale().x) &&
+				mousePosWorldSpace.y < buttonEasyTrans.GetPos().y + 0.5f * abs(buttonEasyTrans.GetScale().y) &&
+				mousePosWorldSpace.y > buttonEasyTrans.GetPos().y - 0.5f * abs(buttonEasyTrans.GetScale().y)) {
+				//if they are, set the difficulty to easy
+				easy = true;
+				reg = false;
+				hard = false;
+				diff = 50.f;
+				//and update the bar as approriate
 				float normalizedDiff = diff / 200.f;
+				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
 			}
 
-			Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
-			diff = normalizedDiff * 200.f;
-			//std::cout << diff << " difficulty " << std::endl;
+			//get the trnasform for the regular difficultly button, and check if they are pressing it
+			TTN_Transform buttonRegTrans = Get<TTN_Transform>(buttonReg);
+			if (mousePosWorldSpace.x < buttonRegTrans.GetPos().x + 0.5f * abs(buttonRegTrans.GetScale().x) &&
+				mousePosWorldSpace.x > buttonRegTrans.GetPos().x - 0.5f * abs(buttonRegTrans.GetScale().x) &&
+				mousePosWorldSpace.y < buttonRegTrans.GetPos().y + 0.5f * abs(buttonRegTrans.GetScale().y) &&
+				mousePosWorldSpace.y > buttonRegTrans.GetPos().y - 0.5f * abs(buttonRegTrans.GetScale().y)) {
+				//if they are, set the difficulty to regular
+				easy = false;
+				reg = true;
+				hard = false;
+				diff = 100.0f;
+				//and update the bar as approriate
+				float normalizedDiff = diff / 200.f;
+				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
+			}
+
+			//get the transform for the hard difficultly button, and check if they are pressing it 
+			TTN_Transform buttonHardTrans = Get<TTN_Transform>(buttonHard);
+			if (mousePosWorldSpace.x < buttonHardTrans.GetPos().x + 0.5f * abs(buttonHardTrans.GetScale().x) &&
+				mousePosWorldSpace.x > buttonHardTrans.GetPos().x - 0.5f * abs(buttonHardTrans.GetScale().x) &&
+				mousePosWorldSpace.y < buttonHardTrans.GetPos().y + 0.5f * abs(buttonHardTrans.GetScale().y) &&
+				mousePosWorldSpace.y > buttonHardTrans.GetPos().y - 0.5f * abs(buttonHardTrans.GetScale().y)) {
+				//if they are, set the difficulty to regular
+				easy = false;
+				reg = false;
+				hard = true;
+				diff = 150.f;
+				//and update the bar as approriate
+				float normalizedDiff = diff / 200.f;
+				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
+			}
 		}
 
-		///// difficulty buttons  /////
-		TTN_Transform buttonEasyTrans = Get<TTN_Transform>(buttonEasy);
-		if (mousePosWorldSpace.x < buttonEasyTrans.GetPos().x + 0.5f * abs(buttonEasyTrans.GetScale().x) &&
-			mousePosWorldSpace.x > buttonEasyTrans.GetPos().x - 0.5f * abs(buttonEasyTrans.GetScale().x) &&
-			mousePosWorldSpace.y < buttonEasyTrans.GetPos().y + 0.5f * abs(buttonEasyTrans.GetScale().y) &&
-			mousePosWorldSpace.y > buttonEasyTrans.GetPos().y - 0.5f * abs(buttonEasyTrans.GetScale().y)) {
-			easy = true;
-			reg = false;
-			hard = false;
-			diff = 50.f;
-			float normalizedDiff = diff / 200.f;
-			Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
-		}
+		//apply, undo, and default buttons
+		{
+			//get apply button transform and check if it's being pressed
+			TTN_Transform buttonApplyTrans = Get<TTN_Transform>(buttonApply);
+			if (mousePosWorldSpace.x < buttonApplyTrans.GetPos().x + 0.5f * abs(buttonApplyTrans.GetScale().x) &&
+				mousePosWorldSpace.x > buttonApplyTrans.GetPos().x - 0.5f * abs(buttonApplyTrans.GetScale().x) &&
+				mousePosWorldSpace.y < buttonApplyTrans.GetPos().y + 0.5f * abs(buttonApplyTrans.GetScale().y) &&
+				mousePosWorldSpace.y > buttonApplyTrans.GetPos().y - 0.5f * abs(buttonApplyTrans.GetScale().y)) {
+				
+				//if it is, apply the values and write them to the file
+				acutal_mouse_sen = mouse_sen;
+				acutal_volume = volume;
+				acutal_volumeSFX = volumeSFX;
+				acutal_volumeMuisc = volumeMusic;
+				acutal_Diff = diff;
+				acutal_Off = Off;
+				acutal_color = color;
+				acutal_easy = easy;
+				acutal_reg = reg;
+				acutal_hard = hard;
 
-		TTN_Transform buttonRegTrans = Get<TTN_Transform>(buttonReg);
-		if (mousePosWorldSpace.x < buttonRegTrans.GetPos().x + 0.5f * abs(buttonRegTrans.GetScale().x) &&
-			mousePosWorldSpace.x > buttonRegTrans.GetPos().x - 0.5f * abs(buttonRegTrans.GetScale().x) &&
-			mousePosWorldSpace.y < buttonRegTrans.GetPos().y + 0.5f * abs(buttonRegTrans.GetScale().y) &&
-			mousePosWorldSpace.y > buttonRegTrans.GetPos().y - 0.5f * abs(buttonRegTrans.GetScale().y)) {
-			easy = false;
-			reg = true;
-			hard = false;
-			diff = 100.0f;
-			float normalizedDiff = diff / 200.f;
-			Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
-		}
+				WriteToFile();
+			}
 
-		TTN_Transform buttonHardTrans = Get<TTN_Transform>(buttonHard);
-		if (mousePosWorldSpace.x < buttonHardTrans.GetPos().x + 0.5f * abs(buttonHardTrans.GetScale().x) &&
-			mousePosWorldSpace.x > buttonHardTrans.GetPos().x - 0.5f * abs(buttonHardTrans.GetScale().x) &&
-			mousePosWorldSpace.y < buttonHardTrans.GetPos().y + 0.5f * abs(buttonHardTrans.GetScale().y) &&
-			mousePosWorldSpace.y > buttonHardTrans.GetPos().y - 0.5f * abs(buttonHardTrans.GetScale().y)) {
-			easy = false;
-			reg = false;
-			hard = true;
-			diff = 150.f;
-			float normalizedDiff = diff / 200.f;
-			Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalizedDiff);
+			//get undo button transform and check if it's being pressed
+			TTN_Transform buttonUndoTrans = Get<TTN_Transform>(buttonUndo);
+			if (mousePosWorldSpace.x < buttonUndoTrans.GetPos().x + 0.5f * abs(buttonUndoTrans.GetScale().x) &&
+				mousePosWorldSpace.x > buttonUndoTrans.GetPos().x - 0.5f * abs(buttonUndoTrans.GetScale().x) &&
+				mousePosWorldSpace.y < buttonUndoTrans.GetPos().y + 0.5f * abs(buttonUndoTrans.GetScale().y) &&
+				mousePosWorldSpace.y > buttonUndoTrans.GetPos().y - 0.5f * abs(buttonUndoTrans.GetScale().y)) {
+
+				//if it is, reset the values to their acutal numbers
+				mouse_sen = acutal_mouse_sen;
+				volume = acutal_volume;
+				volumeSFX = acutal_volumeSFX;
+				volumeMusic = acutal_volumeMuisc;
+				diff = acutal_Diff;
+				Off = acutal_Off;
+				color = acutal_color;
+				easy = acutal_easy;
+				reg = acutal_reg;
+				hard = acutal_hard;
+
+				//and update the bars as approriate
+				float normalized = mouse_sen / 100.0f;
+				Get<TTN_Renderer2D>(mouseSensitivity).SetHoriMask(normalized);
+				normalized = volume / 100.0f;
+				Get<TTN_Renderer2D>(volumeBar).SetHoriMask(normalized);
+				normalized = volumeSFX / 100.0f;
+				Get<TTN_Renderer2D>(SFXvolumeBar).SetHoriMask(normalized);
+				normalized = volumeMusic / 100.0f;
+				Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalized);
+				normalized = diff / 200.0f;
+				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalized);
+			}
+
+			//get default button transform and check if it's being pressed
+			TTN_Transform buttonDefaultTrans = Get<TTN_Transform>(buttonDefault);
+			if (mousePosWorldSpace.x < buttonDefaultTrans.GetPos().x + 0.5f * abs(buttonDefaultTrans.GetScale().x) &&
+				mousePosWorldSpace.x > buttonDefaultTrans.GetPos().x - 0.5f * abs(buttonDefaultTrans.GetScale().x) &&
+				mousePosWorldSpace.y < buttonDefaultTrans.GetPos().y + 0.5f * abs(buttonDefaultTrans.GetScale().y) &&
+				mousePosWorldSpace.y > buttonDefaultTrans.GetPos().y - 0.5f * abs(buttonDefaultTrans.GetScale().y)) {
+
+				//if it is, reset the values to their default numbers
+				mouse_sen = 50;
+				volume = 100;
+				volumeSFX = 5;
+				volumeMusic = 20;
+				diff = 100;
+				Off = true;
+				color = false;
+				easy = false;
+				reg = true;
+				hard = false;
+
+				//and update the bars as approriate
+				float normalized = mouse_sen / 100.0f;
+				Get<TTN_Renderer2D>(mouseSensitivity).SetHoriMask(normalized);
+				normalized = volume / 100.0f;
+				Get<TTN_Renderer2D>(volumeBar).SetHoriMask(normalized);
+				normalized = volumeSFX / 100.0f;
+				Get<TTN_Renderer2D>(SFXvolumeBar).SetHoriMask(normalized);
+				normalized = volumeMusic / 100.0f;
+				Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalized);
+				normalized = diff / 200.0f;
+				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalized);
+			}
 		}
 	}
 }
@@ -866,10 +1117,12 @@ void OptionsMenu::KeyDownChecks()
 {
 	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc)) {
 		shouldMenu = true;
+		m_InputDelay = 0.3f;
 	}
 
 	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::B)) {
 		shouldBack = true;
+		m_InputDelay = 0.3f;
 	}
 }
 
@@ -947,6 +1200,48 @@ void OptionsMenu::MakeDiffNumEntity()
 	//create a sprite renderer for the logo
 	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
 	AttachCopy(diffNums[diffNums.size() - 1], numRenderer);
+}
+
+void OptionsMenu::WriteToFile()
+{
+}
+
+void OptionsMenu::ReadFromFile()
+{
+	//just set to default values right now
+	mouse_sen = 50;
+	volume = 100;
+	volumeSFX = 5;
+	volumeMusic = 20;
+	diff = 100;
+	Off = true;
+	color = false;
+	easy = false;
+	reg = true;
+	hard = false;
+
+	acutal_mouse_sen = mouse_sen;
+	acutal_volume = volume;
+	acutal_volumeSFX = volumeSFX;
+	acutal_volumeMuisc = volumeMusic;
+	acutal_Diff = diff;
+	acutal_Off = Off;
+	acutal_color = color;
+	acutal_easy = easy;
+	acutal_reg = reg;
+	acutal_hard = hard;
+
+	//and update the bars as approriate
+	float normalized = mouse_sen / 100.0f;
+	Get<TTN_Renderer2D>(mouseSensitivity).SetHoriMask(normalized);
+	normalized = volume / 100.0f;
+	Get<TTN_Renderer2D>(volumeBar).SetHoriMask(normalized);
+	normalized = volumeSFX / 100.0f;
+	Get<TTN_Renderer2D>(SFXvolumeBar).SetHoriMask(normalized);
+	normalized = volumeMusic / 100.0f;
+	Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalized);
+	normalized = diff / 200.0f;
+	Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalized);
 }
 
 void OptionsMenu::MakeSFXNumEntity()

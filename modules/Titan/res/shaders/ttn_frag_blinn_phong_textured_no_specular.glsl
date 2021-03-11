@@ -7,10 +7,37 @@ layout(location = 2) in vec2 inUV;
 layout(location = 3) in vec3 inColor;
 layout(location = 4) in vec4 inFragPosLightSpace;
 
+struct DirectionalLight
+{
+	//Light direction (defaults to down, to the left, and a little forward)
+	vec4 m_lightDirection;
+
+	//Generic Light controls
+	vec4 m_lightColor;
+
+	//Ambience controls
+	vec4 m_ambientColor;
+	float m_ambientPower;
+	
+	//Power controls
+	float m_lightAmbientPower;
+	float m_lightSpecularPower;
+
+	float m_minShadowBias;
+	float m_maxShadowBias;
+	int m_pcfFilterSamples;
+};
+
+layout (std140, binding = 0) uniform u_Lights
+{
+	DirectionalLight sun;
+};
+
 //material data
 uniform sampler2D s_Diffuse;
 uniform int u_UseDiffuse;
 uniform float u_Shininess;
+uniform int u_recievesShadows;
 
 //scene ambient lighting
 uniform vec3  u_AmbientCol;
@@ -49,8 +76,8 @@ uniform vec3  u_CamPos;
 out vec4 frag_color;
 
 //functions 
-//vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst, float attenLine, float attenQuad, vec3 norm, vec3 viewDir, float textSpec);
-vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst, float attenLine, float attenQuad, vec3 norm, vec3 viewDir, float textSpec, float shadow);
+vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst, float attenLine, float attenQuad, vec3 norm, vec3 viewDir, float textSpec);
+vec3 CalcDirLight(vec3 norm, vec3 viewDir, float textSpec, float shadow);
 float ShadowCalculation(vec4 FragPosLightSpace);
 
 // https://learnopengl.com/Advanced-Lighting/Advanced-Lighting
@@ -67,14 +94,19 @@ void main() {
 	//combine everything
 	vec3 result = u_AmbientCol * u_AmbientStrength * u_hasAmbientLighting; // global ambient light
 
-		float shadow = ShadowCalculation(inFragPosLightSpace);
+	//check the shadow map
+	float useShadows = u_recievesShadows;
+	float shadow = mix(0.0, ShadowCalculation(inFragPosLightSpace), useShadows);
 
-	//add the results from all the lights
+	//add the results from all the point lights
 	for(int i = 0; i < u_NumOfLights; i++) {
 		result = result + CalcLight(u_LightPos[i], u_LightCol[i], u_AmbientLightStrength[i], u_SpecularLightStrength[i], 
 					u_LightAttenuationConstant[i], u_LightAttenuationLinear[i], u_LightAttenuationQuadratic[i], 
-					N, viewDir, 1.0, shadow);
+					N, viewDir, 1.0);
 	}
+
+	//add the directional light to the lighting 
+	result += CalcDirLight(N, viewDir, 1.0, shadow);
 
 	//add that to the texture color if the texture color should be applied
 	result = mix(result * inColor, result * inColor * textureColor.rgb, u_UseDiffuse);
@@ -86,7 +118,7 @@ void main() {
 	frag_color = vec4(result, textureColor.a) * vec4(vec3(edge), 1.0);
 }
 
-vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst, float attenLine, float attenQuad, vec3 norm, vec3 viewDir, float textSpec, float shadow) {
+vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst, float attenLine, float attenQuad, vec3 norm, vec3 viewDir, float textSpec) {
 	//ambient 
 	vec3 ambient = ambStr * col * u_hasAmbientLighting;
 
@@ -111,36 +143,66 @@ vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst
 	specular = mix(specular, (texture(s_specularRamp, vec2(spec, spec)).xyz), u_useSpecularRamp);
 	specular = specular * u_hasSpecularLighting;
 	
-	return ((1.0-shadow)*(ambient + diffuse + specular) * attenuation);
+	return ((ambient + diffuse + specular) * attenuation);
 }
 
-float ShadowCalculation(vec4 FragPosLightSpace)
-{
-	// perspective division 
+vec3 CalcDirLight(vec3 norm, vec3 viewDir, float textSpec, float shadow) {
+	//ambient
+	vec3 ambient = sun.m_ambientPower * sun.m_ambientColor.xyz * u_hasAmbientLighting;
+
+	//difuse
+	vec3 lightDir = normalize(-sun.m_lightDirection.xyz);
+	float dif = max(dot(norm, lightDir), 0.0);
+	vec3 diffuse = dif * sun.m_lightColor.xyz;
+	diffuse = mix(diffuse, texture(s_diffuseRamp, vec2(dif, dif)).xyz, u_useDiffuseRamp);
+	diffuse = diffuse * u_hasAmbientLighting * u_hasSpecularLighting;
+
+	//specular
+	vec3 halfWay =  normalize(lightDir + viewDir);
+	float spec = pow(max(dot(norm, halfWay), 0.0), u_Shininess); 
+	vec3 specular = sun.m_lightSpecularPower * textSpec * spec * sun.m_lightColor.xyz;
+	specular = mix(specular, texture(s_specularRamp, vec2(spec, spec)).xyz, u_useSpecularRamp);
+	specular = specular * u_hasSpecularLighting;
+
+	//add them together and return
+	return ambient + (1.0 - shadow) * (diffuse + specular);
+}
+
+float ShadowCalculation(vec4 FragPosLightSpace) {
+	//perspective division
 	vec3 projectionCoordinates = FragPosLightSpace.xyz / FragPosLightSpace.w;
 
-	//transform values into [0,1] rnage
+	//transform to a [0,1] range
 	projectionCoordinates = projectionCoordinates * 0.5 + 0.5;
 
-	//get the closest dpeth value
-	float closestDepth = texture(s_ShadowMap, projectionCoordinates.xy).r;
+	//Get current depth acoording to our camera
+	float currentDepth = projectionCoordinates.z; 
 
-	//get current depth
-	float currentDepth = projectionCoordinates.z;
-
-	//check whether's theres a shadow 
-	float shadow = currentDepth -shadowBias > closestDepth ? 1.0 : 0.0;
-
+	//sample for the shadows
+	float shadow = 0.0; 
+	//track the number of samples that have been taken
+	int samplesTaken = 0;
+	//get the size of a single texel
 	vec2 texelSize = 1.0 / textureSize(s_ShadowMap, 0);
-	for(int x = -1; x <= 1; ++x){
-			for(int y = -1; y <= 1; ++y){
-					float pcfDepth = texture(s_ShadowMap, projectionCoordinates.xy + vec2(x, y) * texelSize).r; 
-					shadow += currentDepth - shadowBias > pcfDepth ? 1.0 : 0.0;        
-				}    
+
+	//caculate the shadow bias based on the angle between the view and the surface 
+	float shadowBias = max(sun.m_maxShadowBias * (1.0 - dot(normalize(inNormal), normalize(sun.m_lightDirection.xyz))), sun.m_minShadowBias);
+
+	//sample the shadow map at the correct point and in the surronding texels, up to the number of samples set in the light and add it to the shadow
+	for(int x = 0 - sun.m_pcfFilterSamples / 2; x <= sun.m_pcfFilterSamples / 2; x++)
+	{
+		for(int y = 0 - sun.m_pcfFilterSamples / 2; y <= sun.m_pcfFilterSamples / 2; y++)
+		{
+			float depth = texture(s_ShadowMap, projectionCoordinates.xy + vec2(x, y) * texelSize).r;
+			shadow += currentDepth - shadowBias > depth ? 1.0 : 0.0;
+			samplesTaken++;
 		}
-	shadow /= 2.0;
+	}
+	//and divide the shadow result by the number of samples taken to get the average softened shadow for this fragment
+	shadow /= samplesTaken;
 
-	//shadow =(0.5 + (shadow / 18.0));
+	shadow = projectionCoordinates.z > 1.0 ? 0.0 : shadow;
 
+	//check wheter there's a shadow and return it 
 	return shadow;
 }

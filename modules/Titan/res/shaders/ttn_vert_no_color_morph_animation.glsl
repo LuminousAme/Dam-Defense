@@ -21,7 +21,7 @@ uniform mat4 MVP;
 uniform mat4 Model; 
 //normal matrix
 uniform mat3 NormalMat;
-//lightspace amtrix
+//lightspace matrix
 uniform mat4 u_LightSpaceMatrix;
 
 
@@ -41,8 +41,9 @@ void main() {
 	outNormal = NormalMat * normal;
 	outUV = inUV;
 	outColor = vec3(1.0f, 1.0f, 1.0f);
+
 	//pass out the light space fragment pos
-	outFragPosLightSpace = u_LightSpaceMatrix* vec4(outPos,1.0);
+	outFragPosLightSpace = u_LightSpaceMatrix * vec4(outPos, 1.0);
 
 	//set the position of the vertex
 	gl_Position = newPos;

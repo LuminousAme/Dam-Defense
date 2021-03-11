@@ -232,25 +232,6 @@ void MainMenu::SetUpEntities()
 		Get<TTN_Camera>(camera).View();
 	}
 
-	//entity for the light
-	{
-		//create an entity in the scene for a light
-		light = CreateEntity();
-
-		m_Lights.push_back(light);
-
-		//set up a trasnform for the light
-		TTN_Transform lightTrans = TTN_Transform();
-		lightTrans.SetPos(glm::vec3(0.0f, 3.0f, 5.0f));
-		//attach that transform to the light entity
-		AttachCopy<TTN_Transform>(light, lightTrans);
-
-		//set up a light component for the light
-		TTN_Light lightLight = TTN_Light(glm::vec3(1.0f), 0.6f, 2.0f, 0.3f, 0.3f, 0.3f);
-		//attach that light to the light entity
-		AttachCopy<TTN_Light>(light, lightLight);
-	}
-
 	//entity for the skybox
 	{
 		skybox = CreateEntity();

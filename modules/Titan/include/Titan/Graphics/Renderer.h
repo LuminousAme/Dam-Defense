@@ -72,7 +72,7 @@ namespace Titan {
 		//should cast shadows or not
 		bool m_castShadows = true;
 
-		static TTN_Shader::sshptr s_simpleShadowShader;
+		inline static TTN_Shader::sshptr s_simpleShadowShader = nullptr;
 		inline static bool s_shaderRenderingIsInit = false;
 	};
 }
