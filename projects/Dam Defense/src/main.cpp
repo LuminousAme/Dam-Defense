@@ -12,7 +12,6 @@
 #include "Menu/GameOverMenu.h"
 #include "Menu/GameWinMenu.h"
 #include "Menu/OptionMenu.h"
-#include "Menu/ShopMenu.h"
 #include "Game/HUD.h"
 
 using namespace Titan;
@@ -114,7 +113,7 @@ int main() {
 
 		/// PLAY ///
 		//check if the loading is done and the menu should be going to the game
-		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldPlay() && (!firstTime) ) {
+		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldPlay() && (!firstTime)) {
 			//if it is, go to the game
 			titleScreen->SetShouldRender(false);
 			titleScreenUI->SetShouldRender(false);
@@ -127,7 +126,7 @@ int main() {
 			gameOverUI->InitScene();
 			gameWin->InitScene();
 			gameWinUI->InitScene();
-			shop->InitScene();		
+			shop->InitScene();
 			shop->SetShouldRender(false);
 			gameOver->SetShouldRender(false);
 			gameOverUI->SetShouldRender(false);
@@ -163,7 +162,7 @@ int main() {
 		}
 
 		/// OPTIONS ////
-		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldOptions()  && (!firstTime))
+		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldOptions() && (!firstTime))
 		{
 			//if it is, go to the options
 			titleScreen->SetShouldRender(false);
@@ -202,7 +201,7 @@ int main() {
 
 		//// PAUSE menu rendering ////
 		//if the player has paused but the menu hasn't appeared yet
-		if (gameScene->GetShouldRender() && !paused->GetShouldRender() && gameScene->GetPaused() && !options->GetShouldRender()) {
+		if (gameScene->GetShouldRender() && !paused->GetShouldRender() && gameScene->GetPaused() && !options->GetShouldRender() && !gameSceneUI->GetShouldShop() && !gameSceneUI->GetShouldShopping()) {
 			TTN_Application::TTN_Input::SetCursorLocked(false);
 			paused->SetShouldResume(false);
 			paused->SetShouldRender(true);
@@ -248,35 +247,62 @@ int main() {
 			paused->SetShouldOptions(false);
 		}
 		//if player has pressed the B key to go back to the pause menu
-		else if (!paused->GetShouldRender() && gameScene->GetPaused() && options->GetShouldBack() && options->GetShouldRender()) {
+		else if (!paused->GetShouldRender() && gameScene->GetPaused() && options->GetShouldBack() && options->GetShouldRender() && !gameSceneUI->GetShouldShop()) {
 			TTN_Application::TTN_Input::SetCursorLocked(false);
 			options->SetShouldRender(false);
 			options->SetShouldBack(false);
 			paused->SetShouldRender(true);
 		}
 
-		///// SHOP ///////
-		//if in game and the player wnat sto go to the shop (not in pause menu of options menu)
-		if (gameScene->GetShouldRender() && gameScene->GetShouldShop() && !paused->GetShouldRender() && !options->GetShouldRender()) {
+		else if (gameScene->GetShouldRender() && gameSceneUI->GetShouldShop() && !paused->GetShouldRender() && !options->GetShouldRender()) {
 			TTN_Application::TTN_Input::SetCursorLocked(false);
 			options->SetShouldRender(false);
+			//gameScene->SetPaused(true);
+			gameScene->SetGameIsPaused(true);
+			//gameSceneUI->SetShouldShop(false);
 			paused->SetShouldRender(false);
-			//gameScene->SetShouldRender(false);
-			gameScene->SetPaused(true);
-			gameScene->SetShouldShop(false);
-			shop->SetShouldRender(true);
+			paused->SetPaused(false);
+			paused->SetShouldResume(true);
 		}
 
-		if (gameScene->GetShouldRender() && shop->GetShouldBack() && shop->GetShouldRender() && !paused->GetShouldRender() && !options->GetShouldRender()) {
-			TTN_Application::TTN_Input::SetCursorLocked(true);
-			options->SetShouldRender(false);
-			paused->SetShouldRender(false);
-			//gameScene->SetShouldRender(true);
-			gameScene->SetPaused(false);
-			shop->SetShouldRender(false);
-			shop->SetShouldBack(false);
-		}
 
+		///// SHOP ///////
+		//if in game and the player wnat sto go to the shop (not in pause menu of options menu)
+		//if (gameScene->GetShouldRender() && gameScene->GetShouldShop() && !paused->GetShouldRender() && !options->GetShouldRender()) {
+		//	TTN_Application::TTN_Input::SetCursorLocked(false);
+		//	options->SetShouldRender(false);
+		//	paused->SetShouldRender(false);
+		//	//gameScene->SetShouldRender(false);
+		//	gameScene->SetPaused(true);
+		//	gameScene->SetGameIsPaused(true);
+		//	gameScene->SetShouldShop(false);
+		//	shop->SetShouldRender(true);
+		//}
+
+		//if (gameScene->GetShouldRender() && shop->GetShouldBack() && shop->GetShouldRender() && !paused->GetShouldRender() && !options->GetShouldRender()) {
+		//	TTN_Application::TTN_Input::SetCursorLocked(true);
+		//	options->SetShouldRender(false);
+		//	paused->SetShouldRender(false);
+		//	//gameScene->SetShouldRender(true);
+		//	gameScene->SetPaused(false);
+		//	gameScene->SetGameIsPaused(false);
+		//	shop->SetShouldRender(false);
+		//	shop->SetShouldBack(false);
+		//}
+
+		///// SHOP ///////
+	//if in game and the player wnat sto go to the shop (not in pause menu of options menu)
+		//if (gameScene->GetShouldRender() && gameSceneUI->GetShouldShop() && !paused->GetShouldRender() && !options->GetShouldRender()) {
+		//	TTN_Application::TTN_Input::SetCursorLocked(false);
+		//	options->SetShouldRender(false);
+		//	//gameScene->SetShouldRender(false);
+		//	gameScene->SetPaused(true);
+		//	gameScene->SetGameIsPaused(true);
+		//	gameScene->SetShouldShop(false);
+		//	paused->SetShouldRender(false);
+		//	paused->SetPaused(false);
+		//	//shop->SetShouldRender(true);
+		//}
 
 		//if the game is over
 		if (gameScene->GetGameIsOver()) {
@@ -386,9 +412,8 @@ int main() {
 			set1Loaded = true;
 		/*if (!set2Loaded && TTN_AssetSystem::GetSetLoaded(2) && TTN_AssetSystem::GetCurrentSet() == 2)
 			set2Loaded = true;*/
-		
 
-		//update the scenes and render the screen
+			//update the scenes and render the screen
 		TTN_Application::Update();
 	}
 
@@ -454,12 +479,12 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Main Menu", "textures/text/Main Menu.png", 1); //rendered text of word main menu
 
 	for (int i = 0; i < 23; i++) {
-		TTN_AssetSystem::AddTexture2DToBeLoaded("Game logo " + std::to_string(i), "textures/logo/Game Logo " + std::to_string(i+1) + ".png", 1); //logo for the game
+		TTN_AssetSystem::AddTexture2DToBeLoaded("Game logo " + std::to_string(i), "textures/logo/Game Logo " + std::to_string(i + 1) + ".png", 1); //logo for the game
 	}
 	TTN_AssetSystem::AddMeshToBeLoaded("Sphere", "models/IcoSphereMesh.obj", 1);
 
 	//set 2, the game (excluding things already loaded into set 1)
-	for(int i = 0; i < 10; i++)
+	for (int i = 0; i < 10; i++)
 		TTN_AssetSystem::AddTexture2DToBeLoaded(std::to_string(i) + "-Text", "textures/text/" + std::to_string(i) + ".png", 1); //numbers for health and score
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Wave-Text", "textures/text/Wave.png");
@@ -467,7 +492,7 @@ void PrepareAssetLoading() {
 
 	for (int i = 1; i < 4; i++) {
 		TTN_AssetSystem::AddMeshToBeLoaded("Boat " + std::to_string(i), "models/Boat " + std::to_string(i) + ".obj", 1); //enemy boat meshes
-		TTN_AssetSystem::AddTexture2DToBeLoaded("Boat texture " + std::to_string(i), "textures/Boat " + std::to_string(i) + " Texture.png", 1); //enemy boat textures 
+		TTN_AssetSystem::AddTexture2DToBeLoaded("Boat texture " + std::to_string(i), "textures/Boat " + std::to_string(i) + " Texture.png", 1); //enemy boat textures
 	}
 	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Bird mesh", "models/bird/bird", 2, 1); //bird mesh
 	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Enemy Cannon mesh", "models/Enemy Cannon/e_cannon", 17, 1); //mesh for the enemy cannons
@@ -486,5 +511,5 @@ void PrepareAssetLoading() {
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Cross", "textures/crosshair/crosshair cross.png", 1); //the cross at the top of the crosshair
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Hori Line", "textures/crosshair/crosshair hori.png", 1); //the horiztonal lines dropping down on the crosshair
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Vert Line", "textures/crosshair/crosshair vert dotted.png", 1); //the vertical line 
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Vert Line", "textures/crosshair/crosshair vert dotted.png", 1); //the vertical line
 }

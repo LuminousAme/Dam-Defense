@@ -81,11 +81,11 @@ void Game::Update(float deltaTime)
 		if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
 		//update the enemy wave spawning
-		WaveUpdate(deltaTime);	
+		WaveUpdate(deltaTime);
 		//collision check
 		Collisions();
 		//damage function, contains cooldoown
-		Damage(deltaTime); 
+		Damage(deltaTime);
 
 		//goes through the boats vector
 		for (int i = 0; i < boats.size(); i++) {
@@ -778,8 +778,8 @@ void Game::SetUpOtherData()
 		gunParticle = TTN_ParticleTemplate();
 		gunParticle.SetMat(smokeMat);
 		gunParticle.SetMesh(sphereMesh);
-			//	gunParticle.SetTwoEndColors(glm::vec4(0.5f, 0.5f, 0.5f, 0.1f), glm::vec4(0.5f, 0.5f, 0.5f, 0.1f)); //orange
-		//gunParticle.SetTwoEndColors(glm::vec4(0.1f, 0.1f, 0.1f, 0.8f), glm::vec4(0.1f, 0.1f, 0.1f, 0.8f)); ///black
+		//	gunParticle.SetTwoEndColors(glm::vec4(0.5f, 0.5f, 0.5f, 0.1f), glm::vec4(0.5f, 0.5f, 0.5f, 0.1f)); //orange
+	//gunParticle.SetTwoEndColors(glm::vec4(0.1f, 0.1f, 0.1f, 0.8f), glm::vec4(0.1f, 0.1f, 0.1f, 0.8f)); ///black
 		gunParticle.SetTwoEndColors(glm::vec4(1.0f, 0.50f, 0.0f, 0.50f), glm::vec4(1.0f, 0.50f, 0.0f, 0.50f)); ///yellow
 		gunParticle.SetOneEndSize(0.35f);
 		gunParticle.SetOneEndSpeed(0.35f);
@@ -1773,8 +1773,8 @@ void Game::Damage(float deltaTime) {
 
 				if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetMuzzleCD() <= 0.0f) {
 					Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).SetMuzzleCD(muzzleFlashCD);
-					if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetBoatType() == 1) { //red boat
-						CreateMuzzleFlash(glm::vec3(temp.x + (tempS.x) - 1.5f, temp.y + 0.30f, temp.z - 2.0f), *can);
+					if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetBoatType() == 1) { //red carrier boat
+						CreateMuzzleFlash(glm::vec3(temp.x + (tempS.x) - 1.0f, temp.y + 0.30f, temp.z - 2.0f), *can);
 					}
 					else if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetBoatType() == 0) { //green boat
 						CreateMuzzleFlash(glm::vec3(temp.x - abs(tempS.x), temp.y + 0.30f, temp.z - 2.0f), *can);
@@ -2143,7 +2143,6 @@ void Game::ImGui()
 			SetSun(tempSun);
 		}
 	}
-
 
 	if (ImGui::CollapsingHeader("Point and SceneLight Controls")) {
 		ImGui::Text("Maximum number of lights: 16");

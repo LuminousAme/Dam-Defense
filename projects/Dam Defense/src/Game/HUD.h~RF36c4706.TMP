@@ -5,7 +5,6 @@
 //include required features from titan
 #include "Titan/Application.h"
 #include "Titan/Utilities/Interpolation.h"
-#include "glm/ext.hpp"
 
 using namespace Titan;
 
@@ -15,7 +14,7 @@ public:
 	//default constructor
 	GameUI();
 
-	//default destrcutor
+	//default destrcutor 
 	~GameUI() = default;
 
 	//sets up the scene
@@ -23,9 +22,6 @@ public:
 
 	//update the scene
 	void Update(float deltaTime);
-
-	//input keys
-	void KeyDownChecks();
 
 	//setters
 	void SetScore(unsigned score) { m_score = score; }
@@ -46,17 +42,9 @@ public:
 	float GetWaveProgress() { return m_waveProgress; }
 	bool GetGamePaused() { return m_paused; }
 
-	//shop stuff
-	bool GetShouldShop() { return shouldShop; }
-	void SetShouldShop(bool shop) { shouldShop = shop; }
-	bool GetShouldShopping() { return shopping; }
-	void SetShouldShopping(bool shop) { shopping = shop; }
-
 private:
 	//entities
 	entt::entity cam;
-	entt::entity background;
-
 	//healthbar
 	entt::entity healthBar;
 	entt::entity healthBarBg;
@@ -105,13 +93,6 @@ private:
 	//special ability general data
 	float specialAbilityScale = 0.2f;
 
-	entt::entity buttonHealth;
-
-	//assets
-	TTN_Texture2D::st2dptr textureShop;//options text/title
-	TTN_Texture2D::st2dptr textureButton1;
-	TTN_Texture2D::st2dptr textureButton2;
-
 	//assets
 	TTN_Texture2D::st2dptr textureScore;
 
@@ -132,14 +113,6 @@ private:
 	float m_waveCompleteTotalTime = 4.0f;
 	bool waveDone = false;
 
-	bool shopOnce = false;
-	//shop stuff
-	float m_waveCompleteTime2 = 10.0f;
-	float m_waveCompleteTotalTime2 = 2.0f;
-	bool shouldShop = false;
-	bool shopPause = false;
-	bool shopping = false;
-	int waveTracker = 0;
 	//special ability variables
 	//flamethrower
 	float flameThrowerCoolDownTime = 0.0f;
@@ -159,6 +132,7 @@ private:
 	void MakeBirdBombNumEntity();
 };
 
+
 class ShopMenu : public TTN_Scene {
 public:
 	//default constructor
@@ -177,6 +151,7 @@ public:
 	void MouseButtonDownChecks();
 	void KeyDownChecks();
 
+
 	bool GetShouldShop() { return shouldShop; };
 	bool GetShouldBack() { return shouldBack; };
 
@@ -187,20 +162,20 @@ private:
 	//entities
 	entt::entity cam;
 	entt::entity background;
+
 	entt::entity buttonHealth;
+
 
 	//assets
 	TTN_Texture2D::st2dptr textureShop;//options text/title
 	TTN_Texture2D::st2dptr textureButton1;
 	TTN_Texture2D::st2dptr textureButton2;
 
-	float timing;
-
-	bool shopping;
 	//should go back to game
 	bool shouldBack;
 	//should go to shop menu
 	bool shouldShop;
+
 };
 
 //get the number of digits in a number
