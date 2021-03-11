@@ -156,7 +156,7 @@ int main() {
 		}
 
 		/// OPTIONS ////
-		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldOptions()  && (!firstTime))
+		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldOptions())
 		{
 			//if it is, go to the options
 			titleScreen->SetShouldRender(false);
@@ -165,18 +165,9 @@ int main() {
 			titleScreenUI->SetShouldOptions(false);
 			TTN_Application::TTN_Input::SetCursorLocked(false);
 			titleScreenUI->SetShouldArcade(false);
-			options->SetShouldRender(true);
-		}
-
-		//for if it should be going to the options from the main menu and the player has already played the game in this session
-		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldOptions() && (firstTime)) {
-			//if it is, go to the options
-			titleScreen->SetShouldRender(false);
-			titleScreenUI->SetShouldRender(false);
-			titleScreenUI->SetShouldPlay(false);
-			titleScreenUI->SetShouldOptions(false);
-			TTN_Application::TTN_Input::SetCursorLocked(false);
-			titleScreenUI->SetShouldArcade(false);
+			options->SetShouldBack(false);
+			options->SetShouldMenu(false);
+			options->SetLastSceneWasMainMenu();
 			options->SetShouldRender(true);
 		}
 
@@ -187,7 +178,9 @@ int main() {
 			titleScreenUI->SetShouldPlay(false);
 			options->SetShouldRender(false);
 			options->SetShouldMenu(false);
+			options->SetShouldBack(false);
 		}
+
 		//check if the game should quit
 		if (titleScreenUI->GetShouldQuit() || paused->GetShouldQuit() || gameOverUI->GetShouldQuit() || gameWinUI->GetShouldQuit()) {
 			TTN_Application::Quit();
@@ -236,16 +229,27 @@ int main() {
 		//if the menu has appeared and the player has pressed the options button
 		else if (paused->GetShouldRender() && paused->GetShouldOptions() && !options->GetShouldRender() && gameScene->GetPaused()) {
 			TTN_Application::TTN_Input::SetCursorLocked(false);
-			options->SetShouldRender(true);
+			gameScene->SetShouldRender(false);
+			gameSceneUI->SetShouldRender(false);
 			paused->SetShouldRender(false);
 			paused->SetShouldOptions(false);
+			audioEngine.GetBus("Music").SetPaused(true);
+			audioEngine.GetBus("SFX").SetPaused(true);
+			options->SetLastSceneWasPauseMenu();
+			options->SetShouldRender(true);
+
 		}
-		//if player has pressed the B key to go back to the pause menu
+		//if player has pressed the esc key to go back to the pause menu from the options menu
 		else if (!paused->GetShouldRender() && gameScene->GetPaused() && options->GetShouldBack() && options->GetShouldRender()) {
 			TTN_Application::TTN_Input::SetCursorLocked(false);
+			gameScene->SetShouldRender(true);
+			gameSceneUI->SetShouldRender(true);
+			paused->SetShouldRender(true);
+			audioEngine.GetBus("Music").SetPaused(false);
+			audioEngine.GetBus("SFX").SetPaused(false);
 			options->SetShouldRender(false);
 			options->SetShouldBack(false);
-			paused->SetShouldRender(true);
+			options->SetShouldMenu(false);
 		}
 
 		//if the game is over
@@ -317,6 +321,7 @@ int main() {
 			gameScene->RestartData();
 		}
 
+		//if game win and they want to go back to the main menu
 		if (gameWinUI->GetShouldRender() && gameWinUI->GetShouldMenu() && gameWin->GetShouldRender()) {
 			gameWin->SetShouldRender(false);
 			gameWinUI->SetShouldRender(false);
@@ -349,14 +354,11 @@ int main() {
 			gameScene->SetNoLut(options->GetOff());
 			gameScene->SetWarmLut(options->GetColor());
 			gameScene->SetDiff(options->GetDiff());
-			//options
 		}
 
+		//if set 1 has finished loaded, mark it as done
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)
-			set1Loaded = true;
-		/*if (!set2Loaded && TTN_AssetSystem::GetSetLoaded(2) && TTN_AssetSystem::GetCurrentSet() == 2)
-			set2Loaded = true;*/
-		
+			set1Loaded = true;		
 
 		//update the scenes and render the screen
 		TTN_Application::Update();

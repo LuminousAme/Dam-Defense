@@ -130,6 +130,9 @@ namespace Titan {
 			//if it's anything else we can just ignore it for now
 		}
 
+		//close the file
+		file.close();
+
 		//now we have loaded in all the data, we can use it to construct a mesh 
 		//create a new vectors with all the positions, uvs, and normals (this is the lenght of the indices, as these are all the vertices needed to construct the faces, some of which
 		//may have the same values twice) 
@@ -160,6 +163,7 @@ namespace Titan {
 		newMesh->AddVertices(meshVertPos);
 		newMesh->AddNormals(meshVertNorms);
 		newMesh->SetUVs(meshVertUvs);
+
 
 		return newMesh;
 	}
@@ -254,6 +258,9 @@ namespace Titan {
 				//if it's anything else we can just ignore it for now
 
 			}
+
+			//close the file
+			file.close();
 
 			//now we have loaded in all the data, we can use it to construct a mesh 
 			//create a new vectors with all the positions, uvs, and normals (this is the lenght of the indices, as these are all the vertices needed to construct the faces, some of which

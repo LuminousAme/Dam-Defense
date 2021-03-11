@@ -2,6 +2,31 @@
 //OptionMenu.cpp, the source file for the scene class representing the options menu in the game
 #include "OptionMenu.h"
 
+// Taken from https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+#pragma region String Trimming
+
+// trim from start (in place)
+static inline void ltrim(std::string& s) {
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
+		return !std::isspace(ch);
+	}));
+}
+
+// trim from end (in place)
+static inline void rtrim(std::string& s) {
+	s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+		return !std::isspace(ch);
+	}).base(), s.end());
+}
+
+// trim from both ends (in place)
+static inline void trim(std::string& s) {
+	ltrim(s);
+	rtrim(s);
+}
+
+#pragma endregion 
+
 OptionsMenu::OptionsMenu() : TTN_Scene()
 {
 }
@@ -11,6 +36,8 @@ void OptionsMenu::InitScene()
 	textureButton1 = TTN_AssetSystem::GetTexture2D("Button Base");
 	textureButton2 = TTN_AssetSystem::GetTexture2D("Button Hovering");
 	m_InputDelay = 0.3f;
+
+	previousSceneMainMenu = true;
 
 	//main camera
 	{
@@ -1116,13 +1143,33 @@ void OptionsMenu::MouseButtonDownChecks()
 void OptionsMenu::KeyDownChecks()
 {
 	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc)) {
-		shouldMenu = true;
+		if (previousSceneMainMenu) shouldMenu = true;
+		else shouldBack = true;
 		m_InputDelay = 0.3f;
-	}
 
-	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::B)) {
-		shouldBack = true;
-		m_InputDelay = 0.3f;
+		//reset the values to their acutal numbers
+		mouse_sen = acutal_mouse_sen;
+		volume = acutal_volume;
+		volumeSFX = acutal_volumeSFX;
+		volumeMusic = acutal_volumeMuisc;
+		diff = acutal_Diff;
+		Off = acutal_Off;
+		color = acutal_color;
+		easy = acutal_easy;
+		reg = acutal_reg;
+		hard = acutal_hard;
+
+		//and update the bars as approriate
+		float normalized = mouse_sen / 100.0f;
+		Get<TTN_Renderer2D>(mouseSensitivity).SetHoriMask(normalized);
+		normalized = volume / 100.0f;
+		Get<TTN_Renderer2D>(volumeBar).SetHoriMask(normalized);
+		normalized = volumeSFX / 100.0f;
+		Get<TTN_Renderer2D>(SFXvolumeBar).SetHoriMask(normalized);
+		normalized = volumeMusic / 100.0f;
+		Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalized);
+		normalized = diff / 200.0f;
+		Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalized);
 	}
 }
 
@@ -1202,28 +1249,151 @@ void OptionsMenu::MakeDiffNumEntity()
 	AttachCopy(diffNums[diffNums.size() - 1], numRenderer);
 }
 
+void OptionsMenu::MakeSFXNumEntity()
+{
+	SFXvolumeNums.push_back(CreateEntity());
+
+	//reference to the health bar's transform
+	TTN_Transform& volumeTrans = Get<TTN_Transform>(SFXvolumeBar);
+
+	//setup a transform for the new entity
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(volumeTrans.GetGlobalPos().x + 0.3f * std::abs(volumeTrans.GetScale().x) -
+		(float)SFXvolumeNums.size() * 0.5f * numScale * 150.0f, volumeTrans.GetGlobalPos().y, volumeTrans.GetGlobalPos().z),
+		glm::vec3(0.0f), glm::vec3(numScale * 150.0f, numScale * 150.0f, 1.0f));
+	AttachCopy(SFXvolumeNums[SFXvolumeNums.size() - 1], numTrans);
+
+	//setup a 2D renderer for the new entity
+	//create a sprite renderer for the logo
+	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
+	AttachCopy(SFXvolumeNums[SFXvolumeNums.size() - 1], numRenderer);
+
+}
+
 void OptionsMenu::WriteToFile()
 {
+	//open the file
+	std::ofstream file;
+	file.open("Settings.txt", std::ios::out);
+
+	if (!file) {
+		LOG_ERROR("Settings file failed to open for writting.");
+		throw std::runtime_error("Options menu failed to open settings file.");
+	}
+
+	//pass in each variable to the file
+	file << acutal_mouse_sen << std::endl;
+	file << acutal_volume << std::endl;
+	file << acutal_volumeMuisc << std::endl;
+	file << acutal_volumeSFX << std::endl;
+	file << acutal_Diff << std::endl;
+	file << (int)acutal_Off << std::endl;
+	file << (int)acutal_color << std::endl;
+	file << (int)acutal_easy << std::endl;
+	file << (int)acutal_reg << std::endl;
+	file << (int)acutal_hard << std::endl;
+
+	//close the file
+	file.close();
+
+	//update the current values to the acutal values
+	mouse_sen = acutal_mouse_sen;
+	volume = acutal_volume;
+	volumeSFX = acutal_volumeSFX;
+	volumeMusic = acutal_volumeMuisc;
+	diff = acutal_Diff;
+	Off = acutal_Off;
+	color = acutal_color;
+	easy = acutal_easy;
+	reg = acutal_reg;
+	hard = acutal_hard;
+
+	//and update the bars as approriate
+	float normalized = mouse_sen / 100.0f;
+	Get<TTN_Renderer2D>(mouseSensitivity).SetHoriMask(normalized);
+	normalized = volume / 100.0f;
+	Get<TTN_Renderer2D>(volumeBar).SetHoriMask(normalized);
+	normalized = volumeSFX / 100.0f;
+	Get<TTN_Renderer2D>(SFXvolumeBar).SetHoriMask(normalized);
+	normalized = volumeMusic / 100.0f;
+	Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalized);
+	normalized = diff / 200.0f;
+	Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalized);
 }
 
 void OptionsMenu::ReadFromFile()
 {
-	//just set to default values right now
-	mouse_sen = 50;
-	volume = 100;
-	volumeSFX = 5;
-	volumeMusic = 20;
-	diff = 100;
-	Off = true;
-	color = false;
-	easy = false;
-	reg = true;
-	hard = false;
+	//Open the file
+	std::ifstream file;
+	file.open("Settings.txt", std::ios::binary);
 
+	//if it fails to open, throw an error
+	if (!file) {
+		LOG_ERROR("Settings file failed to load.");
+		throw std::runtime_error("Options menu failed to open settings file.");
+	}
+
+	//get a string to represent each line of the file
+	std::string line;
+
+	int counter = 0;
+
+	//parse each line of the file
+	while (std::getline(file, line)) {
+		//trim the line so there isn't any white space
+		trim(line);
+
+		//make a string stream of the line
+		std::stringstream ss = std::stringstream(line);
+
+		//copy the string stream into the variables based on the counter
+		if (counter == 0)
+			ss >> mouse_sen;
+		else if (counter == 1)
+			ss >> volume;
+		else if (counter == 2)
+			ss >> volumeMusic;
+		else if (counter == 3)
+			ss >> volumeSFX;
+		else if (counter == 4)
+			ss >> diff;
+		else if (counter == 5) {
+			int temp = 0;
+			ss >> temp;
+			Off = (bool)temp;
+		}
+		else if (counter == 6) {
+			int temp = 0;
+			ss >> temp;
+			color = (bool)temp;
+		}
+		else if (counter == 7) {
+			int temp = 0;
+			ss >> temp;
+			easy = (bool)temp;
+		}
+		else if (counter == 8) {
+			int temp = 0;
+			ss >> temp;
+			reg = (bool)temp;
+		}
+		else if (counter == 9) {
+			int temp = 0;
+			ss >> temp;
+			hard = (bool)temp;
+		}
+
+		//increment the counter
+		counter++;
+	}
+
+	//close the file as we have finished reading from it
+	file.close();
+
+	//save the acutal values
 	acutal_mouse_sen = mouse_sen;
 	acutal_volume = volume;
-	acutal_volumeSFX = volumeSFX;
 	acutal_volumeMuisc = volumeMusic;
+	acutal_volumeSFX = volumeSFX;
 	acutal_Diff = diff;
 	acutal_Off = Off;
 	acutal_color = color;
@@ -1242,23 +1412,4 @@ void OptionsMenu::ReadFromFile()
 	Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalized);
 	normalized = diff / 200.0f;
 	Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalized);
-}
-
-void OptionsMenu::MakeSFXNumEntity()
-{
-	SFXvolumeNums.push_back(CreateEntity());
-
-	//reference to the health bar's transform
-	TTN_Transform& volumeTrans = Get<TTN_Transform>(SFXvolumeBar);
-
-	//setup a transform for the new entity
-	TTN_Transform numTrans = TTN_Transform(glm::vec3(volumeTrans.GetGlobalPos().x + 0.3f * std::abs(volumeTrans.GetScale().x) -
-		(float)SFXvolumeNums.size() * 0.5f * numScale * 150.0f, volumeTrans.GetGlobalPos().y, volumeTrans.GetGlobalPos().z),
-		glm::vec3(0.0f), glm::vec3(numScale * 150.0f, numScale * 150.0f, 1.0f));
-	AttachCopy(SFXvolumeNums[SFXvolumeNums.size() - 1], numTrans);
-
-	//setup a 2D renderer for the new entity
-	//create a sprite renderer for the logo
-	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
-	AttachCopy(SFXvolumeNums[SFXvolumeNums.size() - 1], numRenderer);
 }
