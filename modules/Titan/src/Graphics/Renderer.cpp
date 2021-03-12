@@ -103,6 +103,7 @@ namespace Titan {
 			m_Shader->SetUniformMatrix("NormalMat", glm::mat3(glm::transpose(glm::inverse(model))));
 			m_Shader->SetUniformMatrix("u_LightSpaceMatrix", lightSpaceMat);
 		}
+
 		//render the VAO
 		m_mesh->GetVAOPointer()->Render();
 	}

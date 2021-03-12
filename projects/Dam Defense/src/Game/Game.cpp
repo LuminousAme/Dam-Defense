@@ -278,6 +278,7 @@ void Game::KeyDownChecks()
 
 		//and they press the 2 key, try to activate the bird bomb
 		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Two)) {
+			std::cout << "bombing\n";
 			BirdBomb();
 		}
 
@@ -357,7 +358,7 @@ void Game::MouseButtonChecks()
 			//reset the cooldown
 			playerShootCooldownTimer = playerShootCooldown;
 			//and play the smoke particle effect
-			Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f, 0.0f) + 1.75f * playerDir);
+			Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f / 10.0f, 0.0f) + (1.75f / 10.0f) * playerDir);
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
 				SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
@@ -517,29 +518,9 @@ void Game::SetUpEntities()
 		camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f, 1000.f);
+		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f / 10.0f, 1000.f / 10.0f);
 		Get<TTN_Camera>(camera).View();
 	}
-
-	/*
-	//entity for the light
-	{
-		//create an entity in the scene for a light
-		light = CreateEntity();
-
-		m_Lights.push_back(light);
-
-		//set up a trasnform for the light
-		TTN_Transform lightTrans = TTN_Transform();
-		lightTrans.SetPos(glm::vec3(0.0f, 3.0f, 5.0f));
-		//attach that transform to the light entity
-		AttachCopy<TTN_Transform>(light, lightTrans);
-
-		//set up a light component for the light
-		TTN_Light lightLight = TTN_Light(glm::vec3(1.0f), 0.6f, 2.0f, 0.3f, 0.3f, 0.3f);
-		//attach that light to the light entity
-		AttachCopy<TTN_Light>(light, lightLight);
-	}*/
 
 	//entity for the skybox
 	{
@@ -554,7 +535,7 @@ void Game::SetUpEntities()
 		AttachCopy<TTN_Renderer>(skybox, skyboxRenderer);
 
 		//setup a transform for the skybox
-		TTN_Transform skyboxTrans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		TTN_Transform skyboxTrans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
 		//attach that transform to the entity
 		AttachCopy<TTN_Transform>(skybox, skyboxTrans);
 	}
@@ -569,7 +550,7 @@ void Game::SetUpEntities()
 		AttachCopy(cannon, cannonRenderer);
 
 		//setup a transform for the cannon
-		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(0.0f, -0.4f, -0.25f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.3375f, 0.3375f, 0.2875f));
+		TTN_Transform cannonTrans = TTN_Transform(glm::vec3(0.0f, -0.4f / 10.0f, -0.25f / 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.3375f / 10.0f, 0.3375f / 10.0f, 0.2875f / 10.0f));
 		//attach that transform to the entity
 		AttachCopy(cannon, cannonTrans);
 
@@ -608,7 +589,7 @@ void Game::SetUpEntities()
 		AttachCopy(dam, damRenderer);
 
 		//setup a transform for the dam
-		TTN_Transform damTrans = TTN_Transform(glm::vec3(0.0f, -10.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.7f, 0.7f, 0.3f));
+		TTN_Transform damTrans = TTN_Transform(glm::vec3(0.0f, -10.0f / 10.0f, 3.0f / 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.7f / 10.0f, 0.7f / 10.0f, 0.3f / 10.0f));
 		//attach that transform to the entity
 		AttachCopy(dam, damTrans);
 	}
@@ -627,21 +608,21 @@ void Game::SetUpEntities()
 			AttachCopy<TTN_Renderer>(flamethrowers[i], ftRenderer);
 
 			//setup a transform for the flamethrower
-			TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f, -6.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
+			TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f / 10.0f, -6.0f / 10.0f, 2.0f / 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f / 10.0f));
 			if (i == 0) {
-				ftTrans.SetPos(glm::vec3(-5.0f, -6.0f, 2.0f));
+				ftTrans.SetPos(glm::vec3(-5.0f / 10.0f, -6.0f / 10.0f, 2.0f / 10.0f));
 			}
 			else if (i == 1) {
-				ftTrans.SetPos(glm::vec3(15.0f, -6.0f, 2.0f));
+				ftTrans.SetPos(glm::vec3(15.0f / 10.0f, -6.0f / 10.0f, 2.0f / 10.0f));
 			}
 			else if (i == 2) {
-				ftTrans.SetPos(glm::vec3(-15.0f, -6.0f, 2.0f));
+				ftTrans.SetPos(glm::vec3(-15.0f / 10.0f, -6.0f / 10.0f, 2.0f / 10.0f));
 			}
 			else if (i == 3) {
-				ftTrans.SetPos(glm::vec3(40.0f, -6.0f, 2.0f));
+				ftTrans.SetPos(glm::vec3(40.0f / 10.0f, -6.0f / 10.0f, 2.0f / 10.0f));
 			}
 			else if (i == 4) {
-				ftTrans.SetPos(glm::vec3(-40.0f, -6.0f, 2.0f));
+				ftTrans.SetPos(glm::vec3(-40.0f / 10.0f, -6.0f / 10.0f, 2.0f / 10.0f));
 			}
 
 			//attach that transform to the entity
@@ -655,7 +636,7 @@ void Game::SetUpEntities()
 		smokePS = CreateEntity();
 
 		//setup a transfrom for the particle system
-		TTN_Transform smokePSTrans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		TTN_Transform smokePSTrans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
 		//attach that transform to the entity
 		AttachCopy(smokePS, smokePSTrans);
 
@@ -675,7 +656,7 @@ void Game::SetUpEntities()
 		terrain = CreateEntity();
 
 		//setup a transform for the terrain
-		TTN_Transform terrainTrans = TTN_Transform(glm::vec3(0.0f, -15.0f, 35.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(100.0f));
+		TTN_Transform terrainTrans = TTN_Transform(glm::vec3(0.0f, -15.0f / 10.0f, 35.0f / 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(100.0f / 10.0f));
 		//attach that transform to the entity
 		AttachCopy(terrain, terrainTrans);
 	}
@@ -685,7 +666,7 @@ void Game::SetUpEntities()
 		water = CreateEntity();
 
 		//setup a transform for the water
-		TTN_Transform waterTrans = TTN_Transform(glm::vec3(0.0f, -8.0f, 35.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(93.0f));
+		TTN_Transform waterTrans = TTN_Transform(glm::vec3(0.0f, -8.0f / 10.0f, 35.0f / 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(93.0f / 10.0f));
 		//attach that transform to the entity
 		AttachCopy(water, waterTrans);
 	}
@@ -711,6 +692,8 @@ void Game::SetUpOtherData()
 	//call the restart data function
 	RestartData();
 
+	Bombing = false;
+
 	//create the particle templates
 	//smoke particle
 	{
@@ -720,10 +703,10 @@ void Game::SetUpOtherData()
 		smokeParticle.SetTwoLifetimes((playerShootCooldown - 0.1f), playerShootCooldown);
 		smokeParticle.SetOneStartColor(glm::vec4(0.1f, 0.1f, 0.1f, 0.8f));
 		smokeParticle.SetOneEndColor(glm::vec4(0.5f, 0.5f, 0.5f, 0.1f));
-		smokeParticle.SetOneStartSize(0.05f);
-		smokeParticle.SetOneEndSize(0.05f);
-		smokeParticle.SetTwoStartSpeeds(1.5f, 1.0f);
-		smokeParticle.SetOneEndSpeed(0.05f);
+		smokeParticle.SetOneStartSize(0.05f / 10.0f);
+		smokeParticle.SetOneEndSize(0.05f / 10.0f);
+		smokeParticle.SetTwoStartSpeeds(1.5f / 10.0f, 1.0f / 10.0f);
+		smokeParticle.SetOneEndSpeed(0.05f / 10.0f);
 	}
 
 	//fire particle template
@@ -732,12 +715,12 @@ void Game::SetUpOtherData()
 		fireParticle.SetMat(fireMat);
 		fireParticle.SetMesh(sphereMesh);
 		fireParticle.SetOneEndColor(glm::vec4(1.0f, 0.2f, 0.0f, 0.0f));
-		fireParticle.SetOneEndSize(4.0f);
-		fireParticle.SetOneEndSpeed(6.0f);
+		fireParticle.SetOneEndSize(4.0f / 10.0f);
+		fireParticle.SetOneEndSpeed(6.0f / 10.0f);
 		fireParticle.SetOneLifetime(2.0f);
 		fireParticle.SetTwoStartColors(glm::vec4(1.0f, 0.35f, 0.0f, 1.0f), glm::vec4(1.0f, 0.60f, 0.0f, 1.0f));
-		fireParticle.SetOneStartSize(0.5f);
-		fireParticle.SetOneStartSpeed(8.5f);
+		fireParticle.SetOneStartSize(0.5f / 10.0f);
+		fireParticle.SetOneStartSpeed(8.5f / 10.0f);
 	}
 
 	//expolsion particle template
@@ -746,12 +729,12 @@ void Game::SetUpOtherData()
 		expolsionParticle.SetMat(fireMat);
 		expolsionParticle.SetMesh(sphereMesh);
 		expolsionParticle.SetTwoEndColors(glm::vec4(0.5f, 0.1f, 0.0f, 0.2f), glm::vec4(0.8f, 0.3f, 0.0f, 0.2f));
-		expolsionParticle.SetOneEndSize(4.5f);
-		expolsionParticle.SetOneEndSpeed(0.05f);
+		expolsionParticle.SetOneEndSize(4.5f / 10.0f);
+		expolsionParticle.SetOneEndSpeed(0.05f / 10.0f);
 		expolsionParticle.SetTwoLifetimes(1.8f, 2.0f);
 		expolsionParticle.SetTwoStartColors(glm::vec4(1.0f, 0.35f, 0.0f, 1.0f), glm::vec4(1.0f, 0.60f, 0.0f, 1.0f));
-		expolsionParticle.SetOneStartSize(1.0f);
-		expolsionParticle.SetOneStartSpeed(4.5f);
+		expolsionParticle.SetOneStartSize(1.0f / 10.0f);
+		expolsionParticle.SetOneStartSpeed(4.5f / 10.0f);
 	}
 
 	//bird particle template
@@ -760,12 +743,12 @@ void Game::SetUpOtherData()
 		birdParticle.SetMat(smokeMat);
 		birdParticle.SetMesh(sphereMesh);
 		birdParticle.SetTwoEndColors(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), glm::vec4(1.0f, 1.0f, 1.0f, 0.2f));
-		birdParticle.SetOneEndSize(0.65f);
-		birdParticle.SetOneEndSpeed(0.13f);
+		birdParticle.SetOneEndSize(0.65f / 10.0f);
+		birdParticle.SetOneEndSpeed(0.13f / 10.0f);
 		birdParticle.SetTwoLifetimes(0.85f, 1.10f);
 		birdParticle.SetTwoStartColors(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		birdParticle.SetOneStartSize(0.01f);
-		birdParticle.SetOneStartSpeed(10.9f);
+		birdParticle.SetOneStartSize(0.01f / 10.0f);
+		birdParticle.SetOneStartSpeed(10.9f / 10.0f);
 	}
 
 	//muzzle flash particle template
@@ -840,7 +823,7 @@ void Game::RestartData()
 	BombTimer = 0.0f;
 
 	//scene data setup
-	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));
+	TTN_Scene::SetGravity(glm::vec3(0.0f, -9.8f / 10.0f, 0.0f));
 	m_paused = false;
 	m_gameOver = false;
 	m_gameWin = false;
@@ -979,12 +962,12 @@ void Game::CreateCannonball()
 		//set up a transform for the cannonball
 		TTN_Transform cannonBallTrans = TTN_Transform();
 		cannonBallTrans.SetPos(Get<TTN_Transform>(cannon).GetGlobalPos());
-		cannonBallTrans.SetScale(glm::vec3(0.35f));
+		cannonBallTrans.SetScale(glm::vec3(0.35f / 10.0f));
 		//attach that transform to the entity
 		AttachCopy(cannonBalls[cannonBalls.size() - 1].first, cannonBallTrans);
 
 		//set up a physics body for the cannonball
-		TTN_Physics cannonBallPhysBod = TTN_Physics(cannonBallTrans.GetPos(), glm::vec3(0.0f), cannonBallTrans.GetScale() + glm::vec3(0.1f),
+		TTN_Physics cannonBallPhysBod = TTN_Physics(cannonBallTrans.GetPos(), glm::vec3(0.0f), cannonBallTrans.GetScale() + glm::vec3(0.1f / 10.0f),
 			cannonBalls[cannonBalls.size() - 1].first);
 
 		//attach that physics body to the entity
@@ -1003,7 +986,7 @@ void Game::DeleteCannonballs()
 	//iterate through the vector of cannonballs, deleting the cannonball if it is at or below y = -50
 	std::vector<std::pair<entt::entity, bool>>::iterator it = cannonBalls.begin();
 	while (it != cannonBalls.end()) {
-		if (Get<TTN_Transform>((*it).first).GetGlobalPos().y > -40.0f) {
+		if (Get<TTN_Transform>((*it).first).GetGlobalPos().y > -40.0f / 10.0f) {
 			it++;
 		}
 		else {
@@ -1020,7 +1003,7 @@ void Game::CreateExpolsion(glm::vec3 location)
 	entt::entity newExpolsion = CreateEntity(2.0f);
 
 	//setup a transfrom for the particle system
-	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(0.90f));
+	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
 	//attach that transform to the entity
 	AttachCopy(newExpolsion, PSTrans);
 	//glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
@@ -1046,7 +1029,7 @@ void Game::CreateBirdExpolsion(glm::vec3 location)
 	entt::entity newExpolsion = CreateEntity(2.0f);
 
 	//setup a transfrom for the particle system
-	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f));
+	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
 	//attach that transform to the entity
 	AttachCopy(newExpolsion, PSTrans);
 	//glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
@@ -1132,7 +1115,7 @@ void Game::Flamethrower() {
 				flames.push_back(CreateEntity(3.0f));
 
 				//setup a transfrom for the particle system
-				TTN_Transform firePSTrans = TTN_Transform(Get<TTN_Transform>(flamethrowers[i]).GetGlobalPos() + glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f));
+				TTN_Transform firePSTrans = TTN_Transform(Get<TTN_Transform>(flamethrowers[i]).GetGlobalPos() + glm::vec3(0.0f, 0.0f, 2.0f / 10.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f / 10.0f));
 
 				//attach that transform to the entity
 				AttachCopy(flames[i], firePSTrans);
@@ -1180,7 +1163,7 @@ void Game::FlamethrowerUpdate(float deltaTime)
 		//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 27
 		std::vector<entt::entity>::iterator it = boats.begin();
 		while (it != boats.end()) {
-			if (Get<TTN_Transform>(*it).GetPos().z >= 27.0f) {
+			if (Get<TTN_Transform>(*it).GetPos().z >= 27.0f / 10.0f) {
 				it++;
 			}
 			else {
@@ -1246,35 +1229,35 @@ void Game::SpawnBoatLeft()
 		AttachCopy<TTN_Renderer>(boats[boats.size() - 1], boatRenderer);
 
 		//create a transform for the boat
-		TTN_Transform boatTrans = TTN_Transform(glm::vec3(20.0f, 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		TTN_Transform boatTrans = TTN_Transform(glm::vec3(20.0f / 10.0f, 10.0f / 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
 		//set up the transform for the green boat
 		if (randomBoat == 0) {
 			boatTrans.RotateFixed(glm::vec3(0.0f, 180.0f, 0.0f));
-			boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
-			boatTrans.SetPos(glm::vec3(90.0f, -8.5f, 115.0f));
+			boatTrans.SetScale(glm::vec3(0.25f / 10.0f, 0.25f / 10.0f, 0.25f / 10.0f));
+			boatTrans.SetPos(glm::vec3(90.0f / 10.0f, -8.5f / 10.0f, 115.0f / 10.0f));
 		}
 		//setup transform for the red boat
 		else if (randomBoat == 1) {
 			boatTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
-			boatTrans.SetScale(glm::vec3(0.05f, 0.05f, 0.05f));
-			boatTrans.SetPos(glm::vec3(90.0f, -8.0f, 115.0f));
+			boatTrans.SetScale(glm::vec3(0.05f / 10.0f, 0.05f / 10.0f, 0.05f / 10.0f));
+			boatTrans.SetPos(glm::vec3(90.0f / 10.0f, -8.0f / 10.0f, 115.0f / 10.0f));
 		}
 		//set up transform for the yellow boat
 		else if (randomBoat == 2) {
 			boatTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
-			boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
-			boatTrans.SetPos(glm::vec3(90.0f, -7.5f, 115.0f));
+			boatTrans.SetScale(glm::vec3(0.15f / 10.0f, 0.15f / 10.0f, 0.15f / 10.0f));
+			boatTrans.SetPos(glm::vec3(90.0f / 10.0f, -7.5f / 10.0f, 115.0f / 10.0f));
 		}
 		//attach the transform
 		AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
 		//AttachCopy(boats[boats.size() - 1], boatTrans);
 
 		//create an attach a physics body
-		glm::vec3 scale = glm::vec3(2.0f, 5.0f, 8.95f);
-		if (randomBoat == 1) scale = glm::vec3(2.0f, 4.7f, 8.95f);
-		if (randomBoat == 2) scale = glm::vec3(2.0f, 3.8f, 8.95f);
+		glm::vec3 scale = glm::vec3(2.0f / 10.0f, 5.0f / 10.0f, 8.95f / 10.0f);
+		if (randomBoat == 1) scale = glm::vec3(2.0f / 10.0f, 4.7f / 10.0f, 8.95f / 10.0f);
+		if (randomBoat == 2) scale = glm::vec3(2.0f / 10.0f, 3.8f / 10.0f, 8.95f / 10.0f);
 		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), scale, boats[boats.size() - 1], TTN_PhysicsBodyType::DYNAMIC);
-		pbody.SetLinearVelocity(glm::vec3(-25.0f, 0.0f, 0.0f));//-2.0f
+		pbody.SetLinearVelocity(glm::vec3(-25.0f / 10.0f, 0.0f, 0.0f));//-2.0f
 		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
 
 		//creates and attaches a tag to the boat
@@ -1312,7 +1295,6 @@ void Game::SpawnBoatLeft()
 			cannonTrans.SetScale(glm::vec3(1.95f));
 		}
 
-		//cannonTrans.SetPos(Get<TTN_Transform>(boats[boats.size() - 1]).GetPos());
 		else if (Get<EnemyComponent>(boats[boats.size() - 1]).GetBoatType() == 2) { //yellow
 			cannonTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
 			cannonTrans.SetScale(glm::vec3(1.0f));
@@ -1386,32 +1368,32 @@ void Game::SpawnBoatRight() {
 
 		//create a transform for the boat
 		//TTN_Transform boatTrans = TTN_Transform();
-		TTN_Transform boatTrans = TTN_Transform(glm::vec3(21.0f, 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		TTN_Transform boatTrans = TTN_Transform(glm::vec3(21.0f / 10.0f, 10.0f / 10.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
 		//set up the transform for the green boat
 		if (randomBoat == 0) {
 			boatTrans.RotateFixed(glm::vec3(0.0f, 0.0f, 0.0f));
-			boatTrans.SetScale(glm::vec3(0.25f, 0.25f, 0.25f));
-			boatTrans.SetPos(glm::vec3(-90.0f, -8.5f, 115.0f));
+			boatTrans.SetScale(glm::vec3(0.25f / 10.0f, 0.25f / 10.0f, 0.25f / 10.0f));
+			boatTrans.SetPos(glm::vec3(-90.0f / 10.0f, -8.5f / 10.0f, 115.0f / 10.0f));
 		}
 		//set up the transform for the red boat
 		else if (randomBoat == 1) {
 			boatTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
-			boatTrans.SetScale(glm::vec3(0.05f, 0.05f, 0.05f));
-			boatTrans.SetPos(glm::vec3(-90.0f, -8.0f, 115.0f));
+			boatTrans.SetScale(glm::vec3(0.05f / 10.0f, 0.05f / 10.0f, 0.05f / 10.0f));
+			boatTrans.SetPos(glm::vec3(-90.0f / 10.0f, -8.0f / 10.0f, 115.0f / 10.0f));
 		}
 		//set up the transform the yellow boat
 		else if (randomBoat == 2) {
 			boatTrans.RotateFixed(glm::vec3(0.0f, -90.0f, 0.0f));
-			boatTrans.SetScale(glm::vec3(0.15f, 0.15f, 0.15f));
-			boatTrans.SetPos(glm::vec3(-90.0f, -7.5f, 115.0f));
+			boatTrans.SetScale(glm::vec3(0.15f / 10.0f, 0.15f / 10.0f, 0.15f / 10.0f));
+			boatTrans.SetPos(glm::vec3(-90.0f / 10.0f, -7.5f / 10.0f, 115.0f / 10.0f));
 		}
 		//attach the transform
 		//AttachCopy<TTN_Transform>(boats[boats.size() - 1], boatTrans);
 		AttachCopy(boats[boats.size() - 1], boatTrans);
 
 		//create and attach a physics body to the boats
-		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.1f, 4.7f, 9.05f), boats[boats.size() - 1]);
-		pbody.SetLinearVelocity(glm::vec3(25.0f, 0.0f, 0.0f));//-2.0f
+		TTN_Physics pbody = TTN_Physics(boatTrans.GetPos(), glm::vec3(0.0f), glm::vec3(2.1f / 10.0f, 4.7f / 10.0f, 9.05f / 10.0f), boats[boats.size() - 1]);
+		pbody.SetLinearVelocity(glm::vec3(25.0f / 10.0f, 0.0f, 0.0f));//-2.0f
 		AttachCopy<TTN_Physics>(boats[boats.size() - 1], pbody);
 
 		//creates and attaches a tag to the boat
@@ -1449,7 +1431,6 @@ void Game::SpawnBoatRight() {
 			cannonTrans.SetScale(glm::vec3(1.95f));
 		}
 
-		//cannonTrans.SetPos(Get<TTN_Transform>(boats[boats.size() - 1]).GetPos());
 		else if (Get<EnemyComponent>(boats[boats.size() - 1]).GetBoatType() == 2) { //yellow
 			cannonTrans.RotateFixed(glm::vec3(0.0f, 90.0f, 0.0f));
 			cannonTrans.SetScale(glm::vec3(1.0f));
@@ -1597,10 +1578,10 @@ void Game::Collisions() {
 							Get<EnemyComponent>(*itt).SetAlive(false);
 
 							//add to the player's score, based on the distance of the boat
-							if (Get<TTN_Transform>(*itt).GetGlobalPos().z <= 30.0f)
+							if (Get<TTN_Transform>(*itt).GetGlobalPos().z <= 30.0f / 10.0f)
 								m_score += 50;
-							else if (Get<TTN_Transform>(*itt).GetGlobalPos().z > 30.0f
-								&& Get<TTN_Transform>(*itt).GetGlobalPos().z <= 70.0f)
+							else if (Get<TTN_Transform>(*itt).GetGlobalPos().z > 30.0f / 10.0f
+								&& Get<TTN_Transform>(*itt).GetGlobalPos().z <= 70.0f / 10.0f)
 								m_score += 100;
 							else
 								m_score += 200;
@@ -1659,10 +1640,10 @@ void Game::Collisions() {
 							Get<EnemyComponent>(*itt).SetAlive(false);
 
 							//add to the player's score, based on the distance of the boat
-							if (Get<TTN_Transform>(*itt).GetGlobalPos().z <= 30.0f)
+							if (Get<TTN_Transform>(*itt).GetGlobalPos().z <= 30.0f / 10.0f)
 								m_score += 50;
-							else if (Get<TTN_Transform>(*itt).GetGlobalPos().z > 30.0f
-								&& Get<TTN_Transform>(*itt).GetGlobalPos().z <= 70.0f)
+							else if (Get<TTN_Transform>(*itt).GetGlobalPos().z > 30.0f / 10.0f
+								&& Get<TTN_Transform>(*itt).GetGlobalPos().z <= 70.0f / 10.0f)
 								m_score += 100;
 							else
 								m_score += 200;
@@ -1925,13 +1906,14 @@ void Game::GameSounds(float deltaTime)
 //function for bird bomb, decides which ship to target and sends the birds after them
 void Game::BirdBomb()
 {
+	std::cout << (int)Bombing << std::endl;
 	//if the bird bomb is not active and isn't on cooldown
 	if (!Bombing && BombTimer <= 0.0f) {
-		//set bombing to true
+		//set bombing to true 
 		Bombing = true;
 
 		//get a streched out verison of the player's direction vector
-		glm::vec3 bombingVector = playerDir * 10000.0f;
+		glm::vec3 bombingVector = playerDir * 10000.0f / 100.0f;
 
 		//get the smallest angle between that vector and a ship
 		float currentAngle = 1000.0f;
@@ -1968,7 +1950,12 @@ void Game::BirdBomb()
 		if (currentAngle > 130.0f) currentTarget = entt::null;
 
 		//if the target is null, turn bombing to false as there were no valid targets for the birds to target
-		if (currentTarget == entt::null) Bombing = false;
+		if (currentTarget == entt::null) {
+			Bombing = false;
+			std::cout << "No target found\n";
+		}
+		else
+			std::cout << "Target found\n";
 
 		//loop through and set the target for all of the birds
 		for (auto bird : birds)
@@ -1996,10 +1983,10 @@ void Game::MakeABird()
 	AttachCopy(birds[birds.size() - 1], birdAnimator);
 
 	//create a transform
-	float randX = TTN_Random::RandomFloat(-60.0f, 60.0f);
-	float randY = TTN_Random::RandomFloat(20.0f, 30.0f);
-	float randZ = TTN_Random::RandomFloat(20.0f, 100.0f);
-	TTN_Transform birdTrans = TTN_Transform(glm::vec3(randX, randY, randZ), glm::vec3(0.0f), glm::vec3(1.0f));
+	float randX = TTN_Random::RandomFloat(-60.0f / 10.0f, 60.0f / 10.0f);
+	float randY = TTN_Random::RandomFloat(20.0f / 10.0f, 30.0f / 10.0f);
+	float randZ = TTN_Random::RandomFloat(20.0f / 10.0f, 100.0f / 10.0f);
+	TTN_Transform birdTrans = TTN_Transform(glm::vec3(randX, randY, randZ), glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
 	//attach that transform to the entity
 	AttachCopy(birds[birds.size() - 1], birdTrans);
 
@@ -2011,7 +1998,7 @@ void Game::MakeABird()
 
 	//generate a random base velocity
 	randX = TTN_Random::RandomFloat(-1.0f, 1.0f);
-	randY = TTN_Random::RandomFloat(-1.0f, 1.0f);
+	randY = TTN_Random::RandomFloat(-0.5, 1.0f);
 	randZ = TTN_Random::RandomFloat(-1.0f, 1.0f);
 	if (randX == 0.0f && randZ == 0.0f) {
 		randX += 0.01f;
@@ -2106,7 +2093,11 @@ void Game::ImGui()
 		int pcfPasses = tempSun.m_pcfFilterSamples;
 		*/
 
-		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -1.0f, 1.0f)) {
+		if (ImGui::SliderFloat("Light Frustrum XY", &shadowOrthoXY, 2.0f, 50.0f));
+
+		if (ImGui::SliderFloat("Light Frustrum Z", &shadowOrthoZ, 2.0f, 50.0f));
+
+		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 50.0f)) {
 			SetSun(tempSun);
 		}
 
@@ -2130,11 +2121,11 @@ void Game::ImGui()
 			SetSun(tempSun);
 		}
 
-		if (ImGui::SliderFloat("Directional Light Min Shadow Bias", &tempSun.m_minShadowBias, 0.0f, 1.0f)) {
+		if (ImGui::SliderFloat("Directional Light Min Shadow Bias", &tempSun.m_minShadowBias, 0.0f, 0.005f)) {
 			SetSun(tempSun);
 		}
 
-		if (ImGui::SliderFloat("Directional Light Max Shadow Bias", &tempSun.m_maxShadowBias, 0.0f, 1.0f)) {
+		if (ImGui::SliderFloat("Directional Light Max Shadow Bias", &tempSun.m_maxShadowBias, 0.0f, 0.005f)) {
 			SetSun(tempSun);
 		}
 

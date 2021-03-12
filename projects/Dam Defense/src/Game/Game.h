@@ -219,7 +219,7 @@ protected:
 protected:
 	bool shouldShop;
 	/////// Player control data/////////
-	float cannonBallForce = 3600.0f;;//a multiplier for the ammount of force should be applied to a cannonball when it is fired
+	float cannonBallForce = 3600.0f / 10.0f;//a multiplier for the ammount of force should be applied to a cannonball when it is fired
 	float playerShootCooldown = 0.7f;//the ammount of time in seconds that the player has to wait between shots
 
 	glm::vec2 mousePos;//position of the mouse in screenspace
@@ -257,9 +257,9 @@ protected:
 	float Dam_health;//the current health on the dam
 
 	//////// BIRD CONTROL DATA ///////////////
-	float birdNeighbourHoodDistance = 10.0f;
-	float birdBaseSpeed = 5.0f;
-	float birdDiveSpeed = 25.0f;
+	float birdNeighbourHoodDistance = 10.0f / 10.0f;
+	float birdBaseSpeed = 5.0f / 10.0f;
+	float birdDiveSpeed = 25.0f / 10.0f;
 	float birdAligmentWeight = 0.5f;
 	float birdCohensionWeight = 0.75f;
 	float birdSeperationWeight = 1.25f;
