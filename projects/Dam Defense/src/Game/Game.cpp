@@ -118,17 +118,12 @@ void Game::Update(float deltaTime)
 		m_gameWin = true;
 	}
 
-	if (m_applyWarmLut) {
-		m_colorCorrectEffect->SetShouldApply(true);
-		m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
-		//and make sure the cool and customs luts are set not to render
-		m_applyCoolLut = false;
-		m_applyCustomLut = false;
+	if ((healCounter > 0)) {
+		Dam_health = Dam_health + healAmount;
+		std::cout << Dam_health << std::endl;
 	}
-	else {
-		//if it's been turned of set the effect not to render
-		m_colorCorrectEffect->SetShouldApply(false);
-	}
+
+	ColorCorrection();
 
 	//update the sound
 	engine.Update();
@@ -850,6 +845,10 @@ void Game::RestartData()
 	m_gameOver = false;
 	m_gameWin = false;
 	shouldShop = false;
+
+	//shop stuff
+	healAmount = 10.0f;
+	healCounter = 0;
 
 	//enemy and wave data setup
 	m_currentWave = 0;
@@ -2442,4 +2441,19 @@ void Game::ImGui()
 	}
 
 	ImGui::End();
+}
+
+void Game::ColorCorrection()
+{
+	if (m_applyWarmLut) {
+		m_colorCorrectEffect->SetShouldApply(true);
+		m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
+		//and make sure the cool and customs luts are set not to render
+		m_applyCoolLut = false;
+		m_applyCustomLut = false;
+	}
+	else {
+		//if it's been turned of set the effect not to render
+		m_colorCorrectEffect->SetShouldApply(false);
+	}
 }

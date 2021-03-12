@@ -26,6 +26,8 @@ public:
 
 	//input keys
 	void KeyDownChecks();
+	//mouse input
+	void MouseButtonDownChecks();
 
 	//setters
 	void SetScore(unsigned score) { m_score = score; }
@@ -46,11 +48,16 @@ public:
 	float GetWaveProgress() { return m_waveProgress; }
 	bool GetGamePaused() { return m_paused; }
 
+	void SetInputDelay(float delay) { m_InputDelay = delay; }
 	//shop stuff
 	bool GetShouldShop() { return shouldShop; }
 	void SetShouldShop(bool shop) { shouldShop = shop; }
 	bool GetShouldShopping() { return shopping; }
 	void SetShouldShopping(bool shop) { shopping = shop; }
+	float GetHealAmount() { return healAmount; }
+	void SetHealAmount(float heal) { healAmount = heal; }
+	int GetHealCounter() { return healCounter; }
+	void SetHealCounter(int heal) { healCounter = heal; }
 
 private:
 	//entities
@@ -132,14 +139,22 @@ private:
 	float m_waveCompleteTotalTime = 4.0f;
 	bool waveDone = false;
 
-	bool shopOnce = false;
+	bool shopOnce = false; //variable for only spawning the shop once per end of round
 	//shop stuff
-	float m_waveCompleteTime2 = 10.0f;
-	float m_waveCompleteTotalTime2 = 2.0f;
+	float lerpTime = 10.0f;
+	float lerpTotalTime = 1.5f;
 	bool shouldShop = false;
 	bool shopPause = false;
 	bool shopping = false;
+	bool waveChange;
 	int waveTracker = 0;
+
+	float healAmount; //heal the dam by this much
+	int healCounter;  //how many times to heal
+
+	//the time remaining before it accepts player input, used for the shop
+	float m_InputDelay = 0.3f;
+
 	//special ability variables
 	//flamethrower
 	float flameThrowerCoolDownTime = 0.0f;

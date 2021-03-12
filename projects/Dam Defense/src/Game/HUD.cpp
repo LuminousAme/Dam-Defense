@@ -12,16 +12,20 @@ void GameUI::InitScene()
 	textureScore = TTN_AssetSystem::GetTexture2D("Score");
 	textureButton1 = TTN_AssetSystem::GetTexture2D("Button Base");
 	textureButton2 = TTN_AssetSystem::GetTexture2D("Button Hovering");
+
+	m_InputDelay = 0.3f;
 	m_DamHealth = 100.0f;
 	m_displayedWaveProgress = 0.0f;
 	m_waveProgress = 0.0f;
 	m_waveCompleteTime = 10.0f;
-	m_currentWave = 0;
 	shouldShop = false;
 	shopPause = false;
 	shopping = false;
 	shopOnce = false;
-	waveTracker = m_currentWave - 1;
+	waveChange = false;
+	waveTracker = 0;
+	healAmount = 0.f;
+	healCounter = 0;
 	//std::cout << waveTracker << "  wave " << std::endl;
 	//std::cout << m_currentWave << " Curretn  wave " << std::endl;
 
@@ -433,106 +437,21 @@ void GameUI::InitScene()
 
 void GameUI::Update(float deltaTime)
 {
+	//get the mouse position
+	glm::vec2 mousePos = TTN_Application::TTN_Input::GetMousePosition();
+	//convert it to worldspace
+	glm::vec3 mousePosWorldSpace;
+	{
+		float tx = TTN_Interpolation::InverseLerp(0.0f, 1920.0f, mousePos.x);
+		float ty = TTN_Interpolation::InverseLerp(0.0f, 1080.0f, mousePos.y);
+
+		float newX = TTN_Interpolation::Lerp(960.0f, -960.0f, tx);
+		float newY = TTN_Interpolation::Lerp(540.0f, -540.0f, ty);
+
+		mousePosWorldSpace = glm::vec3(newX, newY, 2.0f);
+	}
+
 	if (!m_paused) {
-		//update the score number
-		{
-			while (GetNumOfDigits(m_score) < scoreNums.size()) {
-				DeleteEntity(scoreNums[scoreNums.size() - 1]);
-				scoreNums.pop_back();
-			}
-
-			if (GetNumOfDigits(m_score) > scoreNums.size())
-				MakeScoreNumEntity();
-
-			for (int i = 0; i < scoreNums.size(); i++) {
-				Get<TTN_Renderer2D>(scoreNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_score, scoreNums.size() - i - 1)) + "-Text"));
-			}
-		}
-
-		//update the health number
-		{
-			unsigned health = std::ceil(m_DamHealth);
-			while (GetNumOfDigits(health) < healthNums.size()) {
-				DeleteEntity(healthNums[healthNums.size() - 1]);
-				healthNums.pop_back();
-			}
-
-			if (GetNumOfDigits(health) > healthNums.size())
-				MakeHealthNumEntity();
-
-			for (int i = 0; i < healthNums.size(); i++) {
-				Get<TTN_Renderer2D>(healthNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(health, healthNums.size() - i - 1)) + "-Text"));
-			}
-		}
-
-		//update the health bar
-		{
-			float normalizedDamHealth = TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, m_DamHealth);
-			Get<TTN_Renderer2D>(healthDam).SetHoriMask(normalizedDamHealth);
-
-			//update the progress bar
-			if (m_displayedWaveProgress >= m_waveProgress + 0.01f || m_displayedWaveProgress <= m_waveProgress - 0.01f) {
-				float sign = (m_waveProgress - m_displayedWaveProgress) / std::abs(m_waveProgress - m_displayedWaveProgress);
-				m_displayedWaveProgress += sign * 0.5f * deltaTime;
-				m_displayedWaveProgress = std::clamp(m_displayedWaveProgress, 0.0f, 1.0f);
-			}
-
-			Get<TTN_Renderer2D>(progressRepresentation).SetHoriMask(m_displayedWaveProgress);
-		}
-
-		//update the wave complete
-		{
-			while (GetNumOfDigits(m_currentWave) < waveNums.size()) {
-				DeleteEntity(waveNums[waveNums.size() - 1]);
-				waveNums.pop_back();
-			}
-
-			if (GetNumOfDigits(m_currentWave) > waveNums.size())
-				MakeWaveNumEntity();
-
-			for (int i = 0; i < waveNums.size(); i++) {
-				Get<TTN_Renderer2D>(waveNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_currentWave, waveNums.size() - i - 1)) + "-Text"));
-			}
-
-			//update time
-			m_waveCompleteTime += deltaTime;
-			if (m_waveProgress == 1.0f && waveDone && m_waveCompleteTime > 10.0f) {
-				m_waveCompleteTime = 0.0f;
-			}
-
-			//update position
-			float t = waveCompleteLerpParamter(m_waveCompleteTime / m_waveCompleteTotalTime);
-			glm::vec3 centerPos = TTN_Interpolation::Lerp(glm::vec3(1500.0f, 0.0f, 1.0f), glm::vec3(-1500.0f, 0.0f, 1.0f), t);
-			int offset = std::ceil((float)waveNums.size() / 2.0f);
-			//position of the numbers
-			for (int i = 0; i < waveNums.size(); i++) {
-				TTN_Transform& trans = Get<TTN_Transform>(waveNums[i]);
-				if (i < offset) {
-					//places the numbers to the left of the center
-					trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
-				}
-				else {
-					//places the numbers on and to the right of the center
-					trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
-				}
-			}
-			TTN_Transform& firstNumTrans = Get<TTN_Transform>(waveNums[0]);
-			//places the wave text
-			Get<TTN_Transform>(waveText).SetPos(firstNumTrans.GetGlobalPos() + glm::vec3(0.5f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
-				std::abs(Get<TTN_Transform>(waveText).GetScale().x), 0.0f, 0.0f));
-
-			TTN_Transform& lastNumTrans = Get<TTN_Transform>(waveNums[waveNums.size() - 1]);
-			//places the complete text
-			Get<TTN_Transform>(completeText).SetPos(lastNumTrans.GetGlobalPos() - glm::vec3(0.6f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
-				std::abs(Get<TTN_Transform>(completeText).GetScale().x), 0.0f, 0.0f));
-
-			if (firstNumTrans.GetGlobalPos().x <= 99.9f && firstNumTrans.GetGlobalPos().x >= 0.f && !shopOnce) {
-				shouldShop = true;
-				shopOnce = true;
-				std::cout << "WORKING" << std::endl;
-			}
-		}
-
 		//update the flame thrower
 		{
 			//normalized cooldown
@@ -672,23 +591,129 @@ void GameUI::Update(float deltaTime)
 		}
 	}
 
-	/*
-	std::cout << waveTracker << "  wave " << std::endl;
-	std::cout << m_currentWave << " curretn " << std::endl;*/
+	//update the score number
+	{
 
+		while (GetNumOfDigits(m_score) < scoreNums.size()) {
+			DeleteEntity(scoreNums[scoreNums.size() - 1]);
+			scoreNums.pop_back();
+		}
+
+		if (GetNumOfDigits(m_score) > scoreNums.size())
+			MakeScoreNumEntity();
+
+		for (int i = 0; i < scoreNums.size(); i++) {
+			Get<TTN_Renderer2D>(scoreNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_score, scoreNums.size() - i - 1)) + "-Text"));
+		}
+	}
+
+	//update the health number
+	{
+		unsigned health = std::ceil(m_DamHealth);
+		while (GetNumOfDigits(health) < healthNums.size()) {
+			DeleteEntity(healthNums[healthNums.size() - 1]);
+			healthNums.pop_back();
+		}
+
+		if (GetNumOfDigits(health) > healthNums.size())
+			MakeHealthNumEntity();
+
+		for (int i = 0; i < healthNums.size(); i++) {
+			Get<TTN_Renderer2D>(healthNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(health, healthNums.size() - i - 1)) + "-Text"));
+		}
+	}
+	//update the health bar
+	{
+		float normalizedDamHealth = TTN_Interpolation::ReMap(0.0f, 100.0f, 0.0f, 1.0f, m_DamHealth);
+		Get<TTN_Renderer2D>(healthDam).SetHoriMask(normalizedDamHealth);
+
+		//update the progress bar
+		if (m_displayedWaveProgress >= m_waveProgress + 0.01f || m_displayedWaveProgress <= m_waveProgress - 0.01f) {
+			float sign = (m_waveProgress - m_displayedWaveProgress) / std::abs(m_waveProgress - m_displayedWaveProgress);
+			m_displayedWaveProgress += sign * 0.5f * deltaTime;
+			m_displayedWaveProgress = std::clamp(m_displayedWaveProgress, 0.0f, 1.0f);
+		}
+
+		Get<TTN_Renderer2D>(progressRepresentation).SetHoriMask(m_displayedWaveProgress);
+	}
+	//update the wave complete
+	{
+		while (GetNumOfDigits(m_currentWave) < waveNums.size()) {
+			DeleteEntity(waveNums[waveNums.size() - 1]);
+			waveNums.pop_back();
+		}
+
+		if (GetNumOfDigits(m_currentWave) > waveNums.size())
+			MakeWaveNumEntity();
+
+		for (int i = 0; i < waveNums.size(); i++) {
+			Get<TTN_Renderer2D>(waveNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_currentWave, waveNums.size() - i - 1)) + "-Text"));
+		}
+
+		//update time
+		m_waveCompleteTime += deltaTime;
+		if (m_waveProgress == 1.0f && waveDone && m_waveCompleteTime > 10.0f) {
+			m_waveCompleteTime = 0.0f;
+		}
+
+		//update position
+		float t = waveCompleteLerpParamter(m_waveCompleteTime / m_waveCompleteTotalTime);
+		glm::vec3 centerPos = TTN_Interpolation::Lerp(glm::vec3(1500.0f, 0.0f, 1.0f), glm::vec3(-1500.0f, 0.0f, 1.0f), t);
+		int offset = std::ceil((float)waveNums.size() / 2.0f);
+		//position of the numbers
+		for (int i = 0; i < waveNums.size(); i++) {
+			TTN_Transform& trans = Get<TTN_Transform>(waveNums[i]);
+			if (i < offset) {
+				//places the numbers to the left of the center
+				trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+			}
+			else {
+				//places the numbers on and to the right of the center
+				trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+			}
+		}
+		TTN_Transform& firstNumTrans = Get<TTN_Transform>(waveNums[0]);
+		//places the wave text
+		Get<TTN_Transform>(waveText).SetPos(firstNumTrans.GetGlobalPos() + glm::vec3(0.5f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
+			std::abs(Get<TTN_Transform>(waveText).GetScale().x), 0.0f, 0.0f));
+
+		TTN_Transform& lastNumTrans = Get<TTN_Transform>(waveNums[waveNums.size() - 1]);
+		//places the complete text
+		Get<TTN_Transform>(completeText).SetPos(lastNumTrans.GetGlobalPos() - glm::vec3(0.6f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
+			std::abs(Get<TTN_Transform>(completeText).GetScale().x), 0.0f, 0.0f));
+
+		if (firstNumTrans.GetGlobalPos().x <= 99.9f && firstNumTrans.GetGlobalPos().x >= 0.f && !shopOnce) {
+			shouldShop = true;
+			shopOnce = true;
+			std::cout << "WORKING" << std::endl;
+		}
+	}
+
+	if ((m_currentWave > waveTracker) && m_waveProgress == 1.0f) { //check if round ended and its a new round
+		shopOnce = false; //set shoponce to false so we know the player hasn't seen the shop yet
+		//std::cout << "WORKIINGGNGGNGGNGNG " << std::endl;
+	}
+
+	if (waveChange) { // if the player closes out of the shop and goes on to a new wave
+		waveTracker++; // increment wave counter (1 behind current wave)
+		waveChange = false;
+		healCounter = 0;
+	}
+	/*std::cout << waveTracker << "  wave " << std::endl;
+	std::cout << m_currentWave << " curretn " << std::endl;*/
 	//std::cout << trans.GetGlobalPos().x << std::endl;
 
 	if (shouldShop) {
 		TTN_Transform& trans = Get<TTN_Transform>(background);
 		TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);
 		//update time
-		m_waveCompleteTime2 += deltaTime;
-		if (m_waveProgress == 1.0f && m_waveCompleteTime2 > 10.0f) {
-			m_waveCompleteTime2 = 0.0f;
+		lerpTime += deltaTime;
+		if (m_waveProgress == 1.0f && lerpTime > 4.0f) {
+			lerpTime = 0.0f;
 		}
 
 		if (shopping) {
-			m_waveCompleteTime2 = 0.0f;
+			lerpTime = 0.0f;
 			trans.SetPos(glm::vec3(0.10f, 0.0f, 0.20f));
 			//buttonTrans.SetPos(glm::vec3(510.0f, 220.0f, 0.10f));
 		}
@@ -697,33 +722,27 @@ void GameUI::Update(float deltaTime)
 			//update position
 			glm::vec3 centerPos = glm::vec3(0.f);
 			glm::vec3 centerPosButton = glm::vec3(0.f);
-			float t = waveCompleteLerpParamter(m_waveCompleteTime2 / m_waveCompleteTotalTime2);
+			float t = waveCompleteLerpParamter(lerpTime / lerpTotalTime);
 			//std::cout << trans.GetGlobalPos().x << std::endl;
-			if (trans.GetGlobalPos().x >= -3.f && trans.GetGlobalPos().x <= 3.f) {
-				std::cout << trans.GetGlobalPos().x << " LLL LLLLLLLLLLL" << std::endl;
+			//std::cout << t << std::endl;
+			if (trans.GetGlobalPos().x >= -6.f && trans.GetGlobalPos().x <= 8.f) { // if shop background reaches the end of the screen
+				//std::cout << trans.GetGlobalPos().x << " LLL LLLLLLLLLLL" << std::endl;
 				shopping = true;
 			}
 
 			centerPos = TTN_Interpolation::Lerp(glm::vec3(1920.0f, 0.0f, 0.20f), glm::vec3(0.0f, 0.0f, 0.20f), t);
-			centerPosButton = TTN_Interpolation::Lerp(glm::vec3(1270.0f, 220.0f, 0.1f), glm::vec3(650.0f, 220.0f, 0.1f), t);
+			centerPosButton = TTN_Interpolation::Lerp(glm::vec3(1270.0f, 220.0f, 0.1f), glm::vec3(0.0f, 220.0f, 0.1f), t);
 
 			trans.SetPos(centerPos + glm::vec3(0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
 
-			if (buttonTrans.GetPos() == glm::vec3(650.0f, 220.0f, 0.10f)) {
-				buttonTrans.SetPos(glm::vec3(650.0f, 220.0f, 0.10f));
+			if (buttonTrans.GetPos() == glm::vec3(510.0f, 220.0f, 0.10f)) {
+				buttonTrans.SetPos(glm::vec3(510.0f, 220.0f, 0.10f));
 			}
 			else {
-				buttonTrans.SetPos(centerPosButton - glm::vec3(std::abs(buttonTrans.GetScale().x), 0.0f, 0.0f));
-				buttonTrans.SetPos(centerPosButton);
+				buttonTrans.SetPos(centerPosButton - glm::vec3(0.5f * std::abs(buttonTrans.GetScale().x), 0.0f, 0.0f));
 			}
 
-			std::cout << glm::to_string(buttonTrans.GetPos()) << std::endl;
-		}
-
-		if ((m_currentWave > waveTracker) /*&& m_waveProgress == 1.0f*/ && shouldShop) {
-			shopOnce = false;
-			waveTracker = m_currentWave;
-			std::cout << "WORKIINGGNGGNGGNGNG " << std::endl;
+			//std::cout << glm::to_string(buttonTrans.GetPos()) << std::endl;
 		}
 	}
 
@@ -735,15 +754,66 @@ void GameUI::Update(float deltaTime)
 		buttonTrans.SetPos(glm::vec3(1270.0f, 220.0f, 0.10f));
 	}
 
+	//get options buttons transform
+	TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);
+	if (mousePosWorldSpace.x < buttonTrans.GetPos().x + 0.5f * abs(buttonTrans.GetScale().x) &&
+		mousePosWorldSpace.x > buttonTrans.GetPos().x - 0.5f * abs(buttonTrans.GetScale().x) &&
+		mousePosWorldSpace.y < buttonTrans.GetPos().y + 0.5f * abs(buttonTrans.GetScale().y) &&
+		mousePosWorldSpace.y > buttonTrans.GetPos().y - 0.5f * abs(buttonTrans.GetScale().y)) {
+		Get<TTN_Renderer2D>(buttonHealth).SetSprite(textureButton2);
+	}
+	else {
+		Get<TTN_Renderer2D>(buttonHealth).SetSprite(textureButton1);
+	}
+
+	if (m_InputDelay >= 0.0f) {
+		m_InputDelay -= deltaTime;
+	}
+
 	//update the base scene
 	TTN_Scene::Update(deltaTime);
 }
 
 void GameUI::KeyDownChecks()
 {
-	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc) && shouldShop && shopping) {
+	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc) && shouldShop && shopping) { //only happens when player is in the shop
 		shouldShop = false;
 		shopping = false;
+		waveChange = true; //player is going to a new wave
+		m_InputDelay = 0.3f;
+	}
+}
+
+void GameUI::MouseButtonDownChecks()
+{
+	if (TTN_Application::TTN_Input::GetMouseButton(TTN_MouseButton::Left) && m_InputDelay <= 0.0f) {
+		//get the mouse position
+		glm::vec2 mousePos = TTN_Application::TTN_Input::GetMousePosition();
+		//convert it to worldspace
+		glm::vec3 mousePosWorldSpace;
+		{
+			float tx = TTN_Interpolation::InverseLerp(0.0f, 1920.0f, mousePos.x);
+			float ty = TTN_Interpolation::InverseLerp(0.0f, 1080.0f, mousePos.y);
+
+			float newX = TTN_Interpolation::Lerp(960.0f, -960.0f, tx);
+			float newY = TTN_Interpolation::Lerp(540.0f, -540.0f, ty);
+
+			mousePosWorldSpace = glm::vec3(newX, newY, 2.0f);
+		}
+
+		//get heal buttons transform
+		TTN_Transform playButtonTrans = Get<TTN_Transform>(buttonHealth);
+		if (mousePosWorldSpace.x < playButtonTrans.GetPos().x + 0.5f * abs(playButtonTrans.GetScale().x) &&
+			mousePosWorldSpace.x > playButtonTrans.GetPos().x - 0.5f * abs(playButtonTrans.GetScale().x) &&
+			mousePosWorldSpace.y < playButtonTrans.GetPos().y + 0.5f * abs(playButtonTrans.GetScale().y) &&
+			mousePosWorldSpace.y > playButtonTrans.GetPos().y - 0.5f * abs(playButtonTrans.GetScale().y)) {
+			healCounter++;
+			std::cout << healCounter << std::endl;
+		}
+
+
+
+		m_InputDelay = 0.3f;
 	}
 }
 

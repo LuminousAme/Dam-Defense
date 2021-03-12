@@ -113,6 +113,12 @@ public:
 	void SetArcade(bool arcade) { m_arcade = arcade; }
 	bool GetArcade() { return m_arcade; }
 
+	float GetHealAmount() { return healAmount; }
+	void SetHealAmount(float heal) { healAmount = heal; }
+
+	int GetHealCounter() { return healCounter; }
+	void SetHealCounter(int heal) { healCounter = heal; }
+
 	//function to restart the game reseting all the data
 	void RestartData();
 	//Assets
@@ -225,7 +231,7 @@ protected:
 
 	//////// GAMEPLAY DATA ////////////
 	int lastWave = 3; //the wave the player needs to reach and beat to win
-	float damage = 2.0f; //damage of boats (dam health is 100.f)
+	float damage = 5.0f; //damage of boats (dam health is 100.f)
 	unsigned m_score = 0;
 
 	/////// Terrain and water control data ////////
@@ -287,6 +293,10 @@ protected:
 	bool m_firstWave = true;
 	float difficulty = 100.0f;
 
+	/////////// SHOP RELATED STUFF///////////////
+	float healAmount; //heal the dam by this much
+	int healCounter;
+
 	/////////// SOUND CONTROL///////////////
 	//control melody
 	float melodyTimeTracker = 0.0f;
@@ -343,6 +353,7 @@ protected:
 	void MakeABird();
 	void BirdUpate(float deltaTime);
 	void ImGui();
+	void ColorCorrection();// stuff for color correction
 
 	//other functions, ussually called in relation to something happening like player input or a collision
 protected:

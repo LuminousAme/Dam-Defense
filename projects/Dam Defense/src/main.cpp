@@ -243,7 +243,6 @@ int main() {
 			audioEngine.GetBus("SFX").SetPaused(true);
 			options->SetLastSceneWasPauseMenu();
 			options->SetShouldRender(true);
-
 		}
 		//if player has pressed the B key to go back to the pause menu
 		else if (!paused->GetShouldRender() && gameScene->GetPaused() && options->GetShouldBack() && options->GetShouldRender()) {
@@ -268,7 +267,6 @@ int main() {
 			paused->SetPaused(false);
 			paused->SetShouldResume(true);
 		}
-
 
 		///// SHOP ///////
 		//if in game and the player wnat sto go to the shop (not in pause menu of options menu)
@@ -391,6 +389,8 @@ int main() {
 		//if the game is running
 		if (gameScene->GetShouldRender() && gameSceneUI->GetShouldRender()) {
 			//pass the score between the scenes
+			gameScene->SetHealCounter(gameSceneUI->GetHealCounter());
+
 			gameSceneUI->SetScore(gameScene->GetScore());
 			gameSceneUI->SetDamHP(gameScene->GetDamHealth());
 			gameSceneUI->SetWaveProgress(gameScene->GetWaveProgress());
@@ -410,6 +410,8 @@ int main() {
 			gameScene->SetNoLut(options->GetOff());
 			gameScene->SetWarmLut(options->GetColor());
 			gameScene->SetDiff(options->GetDiff());
+			if (gameSceneUI->GetHealCounter() >= 1)
+				gameSceneUI->SetHealCounter(gameSceneUI->GetHealCounter() - 1);
 		}
 
 		//if set 1 has finished loaded, mark it as done
@@ -417,7 +419,6 @@ int main() {
 			set1Loaded = true;
 		/*if (!set2Loaded && TTN_AssetSystem::GetSetLoaded(2) && TTN_AssetSystem::GetCurrentSet() == 2)
 			set2Loaded = true;*/
-		
 
 			//update the scenes and render the screen
 		TTN_Application::Update();
