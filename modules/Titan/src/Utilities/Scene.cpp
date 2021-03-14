@@ -37,6 +37,12 @@ namespace Titan {
 		m_emptyEffect = TTN_PostEffect::Create();
 		m_emptyEffect->Init(windowSize.x, windowSize.y);
 
+		gBuffer = TTN_GBuffer::Create();
+		gBuffer->Init(windowSize.x, windowSize.y);
+
+		illBuffer = TTN_IlluminationBuffer::Create();
+		illBuffer->Init(windowSize.x, windowSize.y);
+
 		//shadow buffer
 		shadowWidth = 1024;
 		shadowHeight = 1024;
@@ -76,6 +82,12 @@ namespace Titan {
 		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 		m_emptyEffect = TTN_PostEffect::Create();
 		m_emptyEffect->Init(windowSize.x, windowSize.y);
+
+		gBuffer = TTN_GBuffer::Create();
+		gBuffer->Init(windowSize.x, windowSize.y);
+
+		illBuffer = TTN_IlluminationBuffer::Create();
+		illBuffer->Init(windowSize.x, windowSize.y);
 
 		//shadow buffer
 		shadowWidth = 1024;
@@ -209,10 +221,12 @@ namespace Titan {
 	void TTN_Scene::Update(float deltaTime)
 	{
 		//bind the sun buffer
-		sunBuffer.Bind(0);
+		//sunBuffer.Bind(0);
 
 		//clear the shadow buffer
 		shadowBuffer->Clear();
+		gBuffer->Clear();
+		illBuffer->Clear();
 
 		//only run the updates if the scene is not paused
 		if (!m_Paused) {
@@ -309,7 +323,15 @@ namespace Titan {
 		}
 
 		//unbind the empty effect and run through all the post effect
-		m_emptyEffect->UnbindBuffer();
+		//m_emptyEffect->UnbindBuffer();
+		gBuffer->Unbind();
+		illBuffer->BindBuffer(0);
+
+		illBuffer->UnbindBuffer();
+
+		shadowBuffer->BindDepthAsTexture(30);
+		illBuffer->ApplyEffect(gBuffer);
+		shadowBuffer->UnbindTexture(30);
 
 		//if there are post processing effects that can be applied
 		if (m_PostProcessingEffects.size() > 0) {
@@ -350,8 +372,12 @@ namespace Titan {
 			TTN_Backend::SetLastEffect(m_emptyEffect);
 		}
 
+		gBuffer->DrawBuffersToScreen();
+		//illBuffer->DrawToScreen();
+		illBuffer->DrawIllumBuffer();
+
 		//unbind the sun buffer
-		sunBuffer.Unbind(0);
+	//	sunBuffer.Unbind(0);
 	}
 
 	//renders all the messes in our game
@@ -361,6 +387,9 @@ namespace Titan {
 		m_emptyEffect->Clear();
 		for (int i = 0; i < m_PostProcessingEffects.size(); i++)
 			m_PostProcessingEffects[i]->Clear();
+
+		//gBuffer->Clear();
+		//illBuffer->Clear();
 
 		//get the view and projection martix
 		glm::mat4 vp;
@@ -374,8 +403,12 @@ namespace Titan {
 
 		//set up light space matrix
 		glm::mat4 lightProjectionMatrix = glm::ortho(-shadowOrthoXY, shadowOrthoXY, -shadowOrthoXY, shadowOrthoXY, -shadowOrthoZ, shadowOrthoZ);
-		glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(-m_Sun.m_lightDirection), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(-illBuffer->GetSunRef().m_lightDirection), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 lightSpaceViewProj = lightProjectionMatrix * lightViewMatrix;
+
+		illBuffer->SetLightSpaceViewProj(lightSpaceViewProj);
+		glm::vec3 camPos = glm::inverse(viewMat) * glm::vec4(0, 0, 0, 1);
+		illBuffer->SetCamPos(camPos);
 
 		//sort our render group
 		m_RenderGroup->sort<TTN_Renderer>([](const TTN_Renderer& l, const TTN_Renderer& r) {
@@ -393,7 +426,6 @@ namespace Titan {
 		});
 
 		ReconstructScenegraph();
-
 		//shadow depth pass
 		//set the viewport
 		glViewport(0, 0, shadowWidth, shadowHeight);
@@ -417,7 +449,6 @@ namespace Titan {
 					simpleShadowShader->SetUniform("t", 0.0f);
 				renderer.Render(transform.GetGlobal(), vp, lightSpaceViewProj);
 			}
-
 		});
 
 		glCullFace(GL_BACK);
@@ -427,11 +458,31 @@ namespace Titan {
 		//unbind the shadow framebuffer
 		shadowBuffer->Unbind();
 
-		//normal render pass
+		//TTN_Shader::sshptr gBufferShader = TTN_Renderer::GetgBufferShader();
+		//gBufferShader->Bind();
+		////loop through all of the meshes
+		//m_RenderGroup->each([&](entt::entity entity, TTN_Transform& transform, TTN_Renderer& renderer) {
+		//	int textureSlot = 0;
+		//	// if renderer has material
+		//	if (renderer.GetMat() != nullptr) {
+		//		//gBufferShader->SetUniformMatrix("u_Model", transform.GetGlobal());
+		//		//gBufferShader->SetUniformMatrix("u_LightSpaceMatrix", lightSpaceViewProj);
 
+		//		gBufferShader->SetUniform("u_UseDiffuse", (int)renderer.GetMat()->GetUseAlbedo());
+		//		renderer.GetMat()->GetAlbedo()->Bind(textureSlot);
+		//		textureSlot++;
+
+		//		renderer.GetMat()->GetSpecularMap()->Bind(textureSlot);
+		//		textureSlot++;
+		//		//gBufferShader->SetUniform("s_Diffuse", renderer.GetMat()->GetAlbedo());
+		//		//gBufferShader->SetUniformMatrix("u_Specular", lightSpaceViewProj);
+		//	}
+		//});
+		//gBufferShader->UnBind();
+
+		//normal render pass
 		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 		glViewport(0, 0, windowSize.x, windowSize.y);
-
 
 		//before going through see if it needs to render another scene as the background first
 		if (TTN_Backend::GetLastEffect() != nullptr) {
@@ -440,12 +491,14 @@ namespace Titan {
 		}
 
 		//bind the empty effect
-		m_emptyEffect->BindBuffer(0); //this gets unbound in postRender
+		gBuffer->Bind();
+		//m_emptyEffect->BindBuffer(0); //this gets unbound in postRender
 
 		TTN_Shader::sshptr currentShader = nullptr;
 		TTN_Material::smatptr currentMatieral = nullptr;
 		TTN_Mesh::smptr currentMesh = nullptr;
 		bool morphAnimatedLastMesh = false;
+
 		m_RenderGroup->each([&](entt::entity entity, TTN_Transform& transform, TTN_Renderer& renderer) {
 			//bool to track if uniforms have been reset
 			bool shaderChanged = false;
@@ -538,7 +591,8 @@ namespace Titan {
 				currentMatieral->GetSpecularRamp()->Bind(11);
 
 				//bind the shadow map as a texture
-				shadowBuffer->BindDepthAsTexture(30);
+				//shadowBuffer->BindDepthAsTexture(30);
+
 				//set if the current material should use shadows or not
 				currentShader->SetUniform("u_recievesShadows", (int)currentMatieral->GetRecievesShadows());
 
@@ -621,7 +675,6 @@ namespace Titan {
 			//and finish by rendering the mesh
 			renderer.Render(transform.GetGlobal(), vp, lightSpaceViewProj);
 		});
-
 
 		//2D sprite rendering
 		//make a vector to store all the entities to render

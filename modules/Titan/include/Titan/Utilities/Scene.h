@@ -1,5 +1,5 @@
-//Titan Engine, by Atlas X Games 
-// Scene.h - header for the class that handles ECS, render calls, etc. 
+//Titan Engine, by Atlas X Games
+// Scene.h - header for the class that handles ECS, render calls, etc.
 #pragma once
 
 //precompile header, this file uses entt.hpp
@@ -24,6 +24,8 @@
 #include "Titan/Graphics/UniformBuffer.h"
 #include "Titan/Graphics/Post/ColorCorrect.h"
 #include "Titan/Graphics/Post/BloomEffect.h"
+#include "Titan/Graphics/GBuffer.h"
+#include "Titan/Graphics/IlluminationBuffer.h"
 //include ImGui stuff
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include "imgui.h"
@@ -33,11 +35,11 @@
 namespace Titan {
 	typedef entt::basic_group<entt::entity, entt::exclude_t<>, entt::get_t<>, TTN_Transform, TTN_Renderer> RenderGroupType;
 
-	//scene class, handles the ECS, render class, etc. 
+	//scene class, handles the ECS, render class, etc.
 	class TTN_Scene
 	{
 	public:
-		//default constructor 
+		//default constructor
 		TTN_Scene(std::string name = std::string());
 
 		//constructor with data, using basic scene level lighting information
@@ -48,11 +50,11 @@ namespace Titan {
 		TTN_Scene(TTN_Scene&&) = default;
 		TTN_Scene& operator=(TTN_Scene&) = default;
 
-		//destrutor 
+		//destrutor
 		~TTN_Scene();
 
 #pragma region ECS_functions_dec
-		//creates a new entity 
+		//creates a new entity
 		entt::entity CreateEntity(std::string name = "");
 		//creates a new entity with a limit lifetime
 		entt::entity CreateEntity(float lifeTime, std::string name = "");
@@ -60,15 +62,15 @@ namespace Titan {
 		//deletes an entity
 		void DeleteEntity(entt::entity entity);
 
-		//attaches a compontent to an entity 
+		//attaches a compontent to an entity
 		template<typename T>
 		void Attach(entt::entity entity);
 
-		//attaches a component to an entity, and makes that component a copy of whatever object is passed in 
+		//attaches a component to an entity, and makes that component a copy of whatever object is passed in
 		template<typename T>
 		void AttachCopy(entt::entity entity, const T& copy);
 
-		//returns a reference to the component of the relevant entity 
+		//returns a reference to the component of the relevant entity
 		template<typename T>
 		T& Get(entt::entity entity);
 
@@ -76,7 +78,7 @@ namespace Titan {
 		template<typename T>
 		bool Has(entt::entity entity);
 
-		//removes a component from an object 
+		//removes a component from an object
 		template<typename T>
 		void Remove(entt::entity entity);
 
@@ -90,7 +92,7 @@ namespace Titan {
 
 #pragma endregion ECS_functions_dec
 
-		//virtual functions for polymorphism 
+		//virtual functions for polymorphism
 		//updates all the entities in the scene
 		virtual void Update(float deltaTime);
 		virtual void PostRender();
@@ -106,20 +108,20 @@ namespace Titan {
 		virtual void MouseButtonUpChecks() {}
 
 		//init
-		virtual void InitScene() {} 
+		virtual void InitScene() {}
 
 #pragma region Graphics_functions_dec
-		//renders all the entities with meshes and transforms in the scene 
-		virtual void Render(); 
+		//renders all the entities with meshes and transforms in the scene
+		virtual void Render();
 
-		//sets wheter or not the scene should be rendered 
+		//sets wheter or not the scene should be rendered
 		void SetShouldRender(bool _shouldRender);
 		//sets the ambient color of the lighting in the scene
 		void SetSceneAmbientColor(glm::vec3 color);
 		//sets the strenght of the ambient lighting in the scene
 		void SetSceneAmbientLightStrength(float str);
 
-		//gets wheter or not the scene should be rendered 
+		//gets wheter or not the scene should be rendered
 		bool GetShouldRender();
 		//gets the ambient color of the lighting in the scene
 		glm::vec3 GetSceneAmbientColor();
@@ -159,6 +161,9 @@ namespace Titan {
 		TTN_DirectionalLight m_Sun;
 
 		TTN_Framebuffer::sfboptr shadowBuffer;
+		TTN_GBuffer::sgbufptr gBuffer;
+		TTN_IlluminationBuffer::sillbufptr illBuffer;
+
 		int shadowWidth = 1024;
 		int shadowHeight = 1024;
 		float shadowOrthoXY = 5.0f;
@@ -171,16 +176,16 @@ namespace Titan {
 		//name of the scene
 		std::string m_sceneName;
 
-		//context that contains all our entities, their ids, and components 
+		//context that contains all our entities, their ids, and components
 		entt::registry* m_Registry = nullptr;
 
 		//entt group that has all the entities with renderer and transform components so we can edit and render them live
 		std::unique_ptr<RenderGroupType> m_RenderGroup;
 
 		//boolean to store whether or not this scene should currently be rendered
-		bool m_ShouldRender; 
+		bool m_ShouldRender;
 
-		//boolean to store whether or not this scene should currently be updating 
+		//boolean to store whether or not this scene should currently be updating
 		bool m_Paused;
 
 		//variable to store the entity for the camera
@@ -212,7 +217,7 @@ namespace Titan {
 		void ReconstructScenegraph();
 
 #pragma region Sorts
-		//functions to perform a merge sort on a vector of entities based on their z positions 
+		//functions to perform a merge sort on a vector of entities based on their z positions
 		//slightly modified from code from GeeksForGeeks: https://www.geeksforgeeks.org/merge-sort/
 
 		//merge function
@@ -240,7 +245,7 @@ namespace Titan {
 
 			//loop through comparing both sides
 			while (leftIndex < lenght1 && rightIndex < lenght2) {
-				//if the left has a smaller or equal z value, add it back to the merged vector 
+				//if the left has a smaller or equal z value, add it back to the merged vector
 				if (Get<TTN_Transform>(tempLeftList[leftIndex]).GetGlobalPos().z <= Get<TTN_Transform>(tempRightList[rightIndex]).GetGlobalPos().z) {
 					list[mergedIndex] = tempLeftList[leftIndex];
 					leftIndex++;
@@ -269,7 +274,7 @@ namespace Titan {
 
 		//merge sort function
 		void mergeSortEntitiesZ(std::vector<entt::entity>& list, int left, int right) {
-			//base case, returns recursively 
+			//base case, returns recursively
 			if (left >= right) {
 				return;
 			}
@@ -314,7 +319,7 @@ namespace Titan {
 	template<typename T>
 	inline void TTN_Scene::AttachCopy(entt::entity entity, const T& copy)
 	{
-		//assign the component to the entity 
+		//assign the component to the entity
 		m_Registry->emplace_or_replace<T>(entity, copy);
 		//reconstruct scenegraph as entt was shuffled
 		ReconstructScenegraph();
@@ -323,11 +328,11 @@ namespace Titan {
 	//overload for physics
 	template<>
 	inline void TTN_Scene::AttachCopy<TTN_Physics>(entt::entity entity, const TTN_Physics& copy) {
-		//assign the component to the entity 
+		//assign the component to the entity
 		m_Registry->emplace_or_replace<TTN_Physics>(entity, copy);
 		//reconstruct scenegraph as entt was shuffled
 		ReconstructScenegraph();
-		
+
 		//add it to the physics world
 		Get<TTN_Physics>(entity).SetEntity(entity);
 		m_physicsWorld->addRigidBody(Get<TTN_Physics>(entity).GetRigidBody());
@@ -338,7 +343,7 @@ namespace Titan {
 	template<typename T>
 	inline T& TTN_Scene::Get(entt::entity entity)
 	{
-		//return a reference to the component 
+		//return a reference to the component
 		return m_Registry->get<T>(entity);
 	}
 
@@ -381,7 +386,7 @@ namespace Titan {
 		delete body->getCollisionShape();
 		m_physicsWorld->removeRigidBody(body);
 		delete body;
-		
+
 		//remove the component from the entity
 		m_Registry->remove<TTN_Physics>(entity);
 		//reconstruct scenegraph as entt was shuffled

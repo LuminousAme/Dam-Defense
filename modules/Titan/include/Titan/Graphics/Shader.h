@@ -20,7 +20,8 @@ namespace Titan {
 		VERT_SKYBOX = 8,
 		FRAG_SKYBOX = 9,
 		VERT_MORPH_ANIMATION_NO_COLOR = 10,
-		VERT_MORPH_ANIMATION_COLOR = 11
+		VERT_MORPH_ANIMATION_COLOR = 11,
+		FRAG_GBUFFER=12
 	};
 
 	//class to wrap around an opengl shader

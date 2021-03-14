@@ -368,6 +368,14 @@ protected:
 protected:
 	//color correction effect
 	TTN_ColorCorrect::scolcorptr m_colorCorrectEffect;
+	TTN_BloomEffect::sbloomptr m_bloomEffect;
+	int m_passes = 5;
+	int m_downscale = 1;
+	float m_threshold = 0.625f;
+
+	//the radius of the effect
+	float m_radius = 1.0f;
+	
 	//bools for imgui controls
 	bool m_applyWarmLut;
 	bool m_applyCoolLut;

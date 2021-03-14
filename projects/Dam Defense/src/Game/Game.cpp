@@ -118,6 +118,7 @@ void Game::Update(float deltaTime)
 		m_gameWin = true;
 	}
 
+	//heal from shop
 	if ((healCounter > 0)) {
 		Dam_health = Dam_health + healAmount;
 		std::cout << Dam_health << std::endl;
@@ -398,11 +399,11 @@ void Game::SetUpAssets()
 	//// SHADERS ////
 	//grab the shaders
 	shaderProgramTextured = TTN_AssetSystem::GetShader("Basic textured shader");
+	//shaderProgramTextured = TTN_AssetSystem::GetShader("gBuffer shader");
 	shaderProgramSkybox = TTN_AssetSystem::GetShader("Skybox shader");
 	shaderProgramTerrain = TTN_AssetSystem::GetShader("Terrain shader");
 	shaderProgramWater = TTN_AssetSystem::GetShader("Water shader");
 	shaderProgramAnimatedTextured = TTN_AssetSystem::GetShader("Animated textured shader");
-	shaderDepth = TTN_AssetSystem::GetShader("Depth shader");
 
 	////MESHES////
 	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
@@ -496,12 +497,27 @@ void Game::SetUpAssets()
 	damMat->SetAlbedo(damText);
 	m_mats.push_back(damMat);
 
+	TTN_Shader::sshptr gBufferShader = TTN_Renderer::GetgBufferShader();
+	gBufferShader->Bind();
+
+	int textureSlot = 0;
 	for (int i = 0; i < m_mats.size(); i++) {
 		m_mats[i]->SetDiffuseRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
 		m_mats[i]->SetSpecularRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
 		m_mats[i]->SetUseDiffuseRamp(m_useDiffuseRamp);
 		m_mats[i]->SetUseSpecularRamp(m_useSpecularRamp);
+		/*m_mats[i]->SetUseAlbedo(true);
+		gBufferShader->SetUniform("u_UseDiffuse", (int)m_mats[i]->GetUseAlbedo());
+		m_mats[i]->GetAlbedo()->Bind(textureSlot);
+		textureSlot++;
+
+		m_mats[i]->GetSpecularMap()->Bind(textureSlot);
+		textureSlot++;*/
+		//gBufferShader->SetUniform("s_Diffuse", renderer.GetMat()->GetAlbedo());
+		//gBufferShader->SetUniformMatrix("u_Specular", lightSpaceViewProj);
 	}
+
+	gBufferShader->UnBind();
 }
 
 //create the scene's initial entities
@@ -779,6 +795,19 @@ void Game::SetUpOtherData()
 	//and add it to this scene's list of effects
 	m_PostProcessingEffects.push_back(m_colorCorrectEffect);
 
+	//bloom
+	//m_bloomEffect = TTN_BloomEffect::Create();
+	//m_bloomEffect->Init(windowSize.x, windowSize.y);
+	//m_bloomEffect->SetShouldApply(false);
+	////add it to the list
+	//m_PostProcessingEffects.push_back(m_bloomEffect);
+
+	////bloom stuff
+	//m_bloomEffect->SetNumOfPasses(m_passes);
+	//m_bloomEffect->SetBlurDownScale(m_downscale);
+	//m_bloomEffect->SetThreshold(m_threshold);
+	//m_bloomEffect->SetRadius(m_radius);
+
 	//set all 3 effects to false
 	m_applyWarmLut = false;
 	m_applyCoolLut = false;
@@ -900,6 +929,8 @@ void Game::RestartData()
 
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	firstFrame = true;
+
+	float m_passes = 0.f;
 }
 
 #pragma endregion
@@ -1909,7 +1940,7 @@ void Game::BirdBomb()
 	std::cout << (int)Bombing << std::endl;
 	//if the bird bomb is not active and isn't on cooldown
 	if (!Bombing && BombTimer <= 0.0f) {
-		//set bombing to true 
+		//set bombing to true
 		Bombing = true;
 
 		//get a streched out verison of the player's direction vector
@@ -2043,7 +2074,6 @@ void Game::ImGui()
 	ImGui::SliderFloat("Mouse", &mouseSensetivity, 0.0f, 100.0f);
 
 	ImGui::End();
-
 	//ImGui controller for the camera
 	ImGui::Begin("Editor");
 
@@ -2259,6 +2289,25 @@ void Game::ImGui()
 			//set the size of the outline in the materials
 			for (int i = 0; i < m_mats.size(); i++)
 				m_mats[i]->SetOutlineSize(m_outlineSize);
+		}
+
+		if (ImGui::SliderInt("Bloom Passes", &m_passes, 0, 15)) {
+			//set the size of the outline in the materials
+			m_bloomEffect->SetNumOfPasses(m_passes);
+		}
+
+		if (ImGui::SliderInt("Blur Downscale", &m_downscale, 1, 10)) {
+			//set the size of the outline in the materials
+			m_bloomEffect->SetBlurDownScale(m_downscale);
+		}
+		if (ImGui::SliderFloat("Bloom Threshold", &m_threshold, 0.0f, 1.0f)) {
+			//set the size of the outline in the materials
+			m_bloomEffect->SetThreshold(m_threshold);
+		}
+
+		if (ImGui::SliderFloat("Bloom Radius", &m_radius, 0.0f, 5.0f)) {
+			//set the size of the outline in the materials
+			m_bloomEffect->SetRadius(m_radius);
 		}
 
 		//No ligthing

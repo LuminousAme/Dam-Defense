@@ -82,13 +82,16 @@ namespace Titan {
 		//set up the shader program for shadow mapping
 		TTN_Renderer::InitShadowRendering();
 
+		//set up the shader program for g buffer
+		TTN_Renderer::InitgBufferRendering();
+
 		//set up the shader and vaos for the sprite rendering system
 		TTN_Renderer2D::InitRenderer2D();
 
 		//set up the audio engine
 		m_soundEngine.Init();
 		
-		//Set the background colour for our scene to the base black
+		//Set the background colour for our scene to the base red
 		glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
 	}
 

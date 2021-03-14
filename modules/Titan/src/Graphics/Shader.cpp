@@ -188,6 +188,11 @@ namespace Titan {
 			vertexShaderTTNIndentity = (int)shader;
 		}
 
+		else if (shader == TTN_DefaultShaders::FRAG_GBUFFER) {
+			filePath = "shaders/ttn_gBuffer_pass_frag.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
+			vertexShaderTTNIndentity = (int)shader;
+		}
 		else {
 			//if the user tried to load a shader that doesn't,
 			LOG_ERROR("Default shader {} does not exist", shader);

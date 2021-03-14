@@ -461,6 +461,8 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddDefaultShaderToBeLoaded("Animated textured shader", TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR, TTN_DefaultShaders::FRAG_BLINN_PHONG_ALBEDO_ONLY, 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Terrain shader", "shaders/terrain_vert.glsl", "shaders/terrain_frag.glsl", 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Water shader", "shaders/water_vert.glsl", "shaders/water_frag.glsl", 1);
+	TTN_AssetSystem::AddShaderToBeLoaded("gBuffer shader", "shaders/ttn_vert_no_color.glsl", "shaders/ttn_gBuffer_pass_frag.glsl", 1);
+	//TTN_AssetSystem::AddDefaultShaderToBeLoaded("gBuffer shader", TTN_DefaultShaders::VERT_NO_COLOR, TTN_DefaultShaders::FRAG_GBUFFER, 1);
 
 	TTN_AssetSystem::AddLUTTobeLoaded("Warm LUT", "Warm_LUT.cube", 1);
 	TTN_AssetSystem::AddLUTTobeLoaded("Cool LUT", "Cool_LUT.cube", 1);

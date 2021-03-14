@@ -1,4 +1,5 @@
 #version 410
+//passthorguh vert
 
 //data from c++ program
 layout (location = 0) in vec3 inPosition;

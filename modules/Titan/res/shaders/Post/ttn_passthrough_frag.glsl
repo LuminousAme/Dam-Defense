@@ -1,4 +1,5 @@
 #version 420
+//passthrough fraG
 
 //take in the uvs from the vertex shader
 layout(location = 0) in vec2 inUV;
@@ -17,5 +18,8 @@ void main()
 	vec4 source = texture(s_screenTex, inUV);
 
 	//and apply it to the full screen quad
-	frag_color = vec4(source.rgb, 1.0);
+	//frag_color = vec4(source.rgb,1.0);
+	frag_color.rgb = source.rgb; 
+	frag_color.a = source.a * u_Transparency;//transparency stuff
+	
 }

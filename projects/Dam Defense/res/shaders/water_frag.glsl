@@ -29,5 +29,6 @@ void main() {
 	result = result * textureColor.rgb;
 
 	//save the result and pass it on
-	frag_color = vec4(result, textureColor.a);
+	//frag_color = vec4(result, textureColor.a);
+	frag_color = vec4(result, 1.0);
 }

@@ -782,6 +782,7 @@ void GameUI::KeyDownChecks()
 		waveChange = true; //player is going to a new wave
 		m_InputDelay = 0.3f;
 	}
+
 }
 
 void GameUI::MouseButtonDownChecks()
@@ -810,8 +811,6 @@ void GameUI::MouseButtonDownChecks()
 			healCounter++;
 			std::cout << healCounter << std::endl;
 		}
-
-
 
 		m_InputDelay = 0.3f;
 	}
