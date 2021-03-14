@@ -80,8 +80,12 @@ namespace Titan {
 		case GL_VERTEX_SHADER: //if it's a vertex shader, set the vertex shader variable
 			_vs = handle;
 			break;
-		case GL_FRAGMENT_SHADER: //if it's a fragment shader, set the vertex shader variable
+		case GL_FRAGMENT_SHADER: //if it's a fragment shader, set the fragment shader variable
 			_fs = handle;
+			break;
+		case GL_GEOMETRY_SHADER: //if it's a geometry shader, set the geometry shader variable
+			_gs = handle;
+			_hasGs = true;
 			break;
 		default: //if it is anything else, log a warning that that type of shader has not been implemented with this shader program
 			LOG_WARN("Shader type not implemented");
@@ -210,6 +214,7 @@ namespace Titan {
 		//Attach our shaders
 		glAttachShader(_handle, _vs);
 		glAttachShader(_handle, _fs);
+		if (_hasGs) glAttachShader(_handle, _gs);
 
 		//Perform linking
 		glLinkProgram(_handle);
@@ -219,6 +224,10 @@ namespace Titan {
 		glDeleteShader(_vs);
 		glDetachShader(_handle, _fs);
 		glDeleteShader(_fs);
+		if (_hasGs) {
+			glDetachShader(_handle, _gs);
+			glDeleteShader(_gs);
+		}
 
 		//Setup a check to make sure the shader program compiled and linked correclty
 		GLint status = 0;

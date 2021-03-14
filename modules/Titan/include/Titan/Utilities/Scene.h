@@ -22,6 +22,7 @@
 //include all the graphics features we need
 #include "Titan/Graphics/Shader.h"
 #include "Titan/Graphics/UniformBuffer.h"
+#include "Titan/Graphics/Post/CascadedFrameBuffer.h"
 #include "Titan/Graphics/Post/ColorCorrect.h"
 #include "Titan/Graphics/Post/BloomEffect.h"
 //include ImGui stuff
@@ -158,11 +159,9 @@ namespace Titan {
 		//direction light for the scene
 		TTN_DirectionalLight m_Sun;
 
-		TTN_Framebuffer::sfboptr shadowBuffer;
+		TTN_CascadedFrameBuffer::scfboptr shadowBuffer;
 		int shadowWidth = 1024;
 		int shadowHeight = 1024;
-		float shadowOrthoXY = 5.0f;
-		float shadowOrthoZ = 30.0f;
 		TTN_UniformBuffer sunBuffer;
 
 		//vector to store the post processing effects

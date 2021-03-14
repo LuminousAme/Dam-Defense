@@ -56,6 +56,97 @@ namespace Titan {
 
 	void TTN_Camera::CalcPerspective(float fovDegrees, float aspectRatio, float nearClip, float farClip){
 		m_projection = glm::perspective(glm::radians(fovDegrees), aspectRatio, nearClip, farClip);
+		m_fov = fovDegrees;
+		m_aspectRatio = aspectRatio;
+		m_zNear = nearClip;
+		m_zFar = farClip;
 	}
 
+	std::vector<glm::vec3> TTN_Camera::CalcPerspectiveCorners(glm::vec3 center, glm::vec3 forward, glm::vec3 right, glm::vec3 up, float nearT, float farT)
+	{
+		//get the tangent of half of the fov in degrees
+		float tfov = glm::tan(glm::radians(m_fov / 2.0f));
+
+		float nearClipping = glm::mix(m_zNear, m_zFar, nearT);
+		float farClipping = glm::mix(m_zNear, m_zFar, farT);
+
+		//get the near plane's center, width, and height
+		float hn = 2.0f * tfov * nearClipping;
+		float wn = hn * m_aspectRatio;
+		glm::vec3 cn = center + glm::normalize(forward) * nearClipping;
+
+		//get the far plane's center, width, and height
+		float hf = 2.0f * tfov * farClipping;
+		float wf = hf * m_aspectRatio;
+		glm::vec3 cf = center + glm::normalize(forward) * farClipping;
+
+		//calculate the corners
+		glm::vec3 ntl = cn + glm::normalize(up) * hn / 2.0f - glm::normalize(right) * wn / 2.0f;
+		glm::vec3 ntr = cn + glm::normalize(up) * hn / 2.0f + glm::normalize(right) * wn / 2.0f;
+		glm::vec3 nbl = cn - glm::normalize(up) * hn / 2.0f - glm::normalize(right) * wn / 2.0f;
+		glm::vec3 nbr = cn - glm::normalize(up) * hn / 2.0f + glm::normalize(right) * wn / 2.0f;
+
+		glm::vec3 ftl = cf + glm::normalize(up) * hf / 2.0f - glm::normalize(right) * wf / 2.0f;
+		glm::vec3 ftr = cf + glm::normalize(up) * hf / 2.0f + glm::normalize(right) * wf / 2.0f;
+		glm::vec3 fbl = cf - glm::normalize(up) * hf / 2.0f - glm::normalize(right) * wf / 2.0f;
+		glm::vec3 fbr = cf - glm::normalize(up) * hf / 2.0f + glm::normalize(right) * wf / 2.0f;
+
+		//make a vector and push all the corners back into the vector
+		std::vector<glm::vec3> corners = std::vector<glm::vec3>();
+
+		corners.push_back(ntl);
+		corners.push_back(ntr);
+		corners.push_back(nbl);
+		corners.push_back(nbr);
+
+		corners.push_back(ftl);
+		corners.push_back(ftr);
+		corners.push_back(fbl);
+		corners.push_back(fbr);
+
+		//finally return that vector
+		return corners;
+	}
+
+	std::vector<glm::vec3> TTN_Camera::CalcPerspectiveCornersFromVP(glm::mat4 vp, float nearZ, float farZ)
+	{
+		//first define all 8 corners in clip space
+		glm::vec3 ntl = glm::vec3(-1.0f, 1.0f, nearZ);
+		glm::vec3 ntr = glm::vec3(1.0f, 1.0f, nearZ);
+		glm::vec3 nbl = glm::vec3(-1.0f, -1.0f, nearZ);
+		glm::vec3 nbr = glm::vec3(1.0f, -1.0f, nearZ);
+
+		glm::vec3 ftl = glm::vec3(-1.0f, 1.0f, farZ);
+		glm::vec3 ftr = glm::vec3(1.0f, 1.0f, farZ);
+		glm::vec3 fbl = glm::vec3(-1.0f, -1.0f, farZ);
+		glm::vec3 fbr = glm::vec3(1.0f, -1.0f, farZ);
+
+		//make a vector and push all the corners back into the vector
+		std::vector<glm::vec3> corners = std::vector<glm::vec3>();
+
+		corners.push_back(ntl);
+		corners.push_back(ntr);
+		corners.push_back(nbl);
+		corners.push_back(nbr);
+
+		corners.push_back(ftl);
+		corners.push_back(ftr);
+		corners.push_back(fbl);
+		corners.push_back(fbr);
+
+		//get the inverse of the view projection matrix
+		glm::mat4 tempInverse = glm::inverse(vp);
+
+		for (auto corner : corners) {
+			//convert the corner to world space
+			glm::vec4 tempVec = tempInverse * glm::vec4(corner, 1.0f);
+			tempVec /= tempVec.w;
+
+			//and save the worldspace position
+			corner = glm::vec3(tempVec);
+		}
+
+		//finally return that vector
+		return corners;
+	}
 }

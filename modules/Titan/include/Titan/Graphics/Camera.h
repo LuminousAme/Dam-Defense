@@ -28,6 +28,8 @@ namespace Titan {
 		const glm::vec3& GetUp() { return m_up; }
 		/// Gets the direction that the camera is looking at 
 		const glm::vec3& GetTarget() { return m_target; }
+		// Gets the far plane
+		const float& GetFarPlane() { return m_zFar; }
 
 		//gets the view and projection coordinates
 		const glm::mat4& GetView() { return m_view; }
@@ -51,6 +53,10 @@ namespace Titan {
 		// 3D perspective projection 
 		void CalcPerspective(float fovDegrees, float aspectRatio, float nearClip, float farClip);
 
+		// calculates and returns a vector with the corners
+		std::vector<glm::vec3> CalcPerspectiveCorners(glm::vec3 center, glm::vec3 forward, glm::vec3 right, glm::vec3 up, float nearT, float farT);
+		std::vector<glm::vec3> CalcPerspectiveCornersFromVP(glm::mat4 vp, float nearZ, float farZ);
+
 	protected:
 			
 		glm::vec3 m_position;  //postion of camera in world space
@@ -63,6 +69,11 @@ namespace Titan {
 
 		glm::mat4 m_view;
 		glm::mat4 m_projection;
+
+		float m_fov = 0.0f;
+		float m_zNear = 0.0f;
+		float m_zFar = 0.0f;
+		float m_aspectRatio = 0.0f;
 
 		mutable glm::mat4 m_viewProjection;//mutable, so it can be recalculated using const methods
 	};

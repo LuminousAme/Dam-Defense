@@ -55,7 +55,7 @@ namespace Titan {
 		//gets the shadow shader
 		static TTN_Shader::sshptr GetSimpleShadowShader() { return s_simpleShadowShader; }
 
-		void Render(glm::mat4 model, glm::mat4 VP, glm::mat4 lightSpaceMat);
+		void Render(glm::mat4 model, glm::mat4 VP, glm::mat4 lightSpaceMat[], glm::mat4 view);
 
 	private:
 		//a pointer to the shader that should be used to render this object

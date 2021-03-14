@@ -336,7 +336,7 @@ void Game::MouseButtonChecks()
 			//reset the cooldown
 			playerShootCooldownTimer = playerShootCooldown;
 			//and play the smoke particle effect
-			Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f / 10.0f, 0.0f) + (1.75f / 10.0f) * playerDir);
+			Get<TTN_Transform>(smokePS).SetPos(Get<TTN_Transform>(cannon).GetGlobalPos() + (1.75f / 10.0f) * playerDir);
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
 				SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
@@ -493,10 +493,10 @@ void Game::SetUpEntities()
 		Attach<TTN_Transform>(camera);
 		Attach<TTN_Camera>(camera);
 		auto& camTrans = Get<TTN_Transform>(camera);
-		camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
+		camTrans.SetPos(glm::vec3(0.0f, 0.070f, -0.275f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f / 10.0f, 1000.f / 10.0f);
+		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f / 10.0f, 17.5f);
 		Get<TTN_Camera>(camera).View();
 	}
 
@@ -872,9 +872,9 @@ void Game::PlayerRotate(float deltaTime)
 		rotAmmount += addAmmount;
 
 		//clamp the rotation to within 85 degrees of the base rotation in all the directions
-		if (rotAmmount.x > 85.0f) rotAmmount.x = 85.0f;
-		else if (rotAmmount.x < -85.0f) rotAmmount.x = -85.0f;
-		if (rotAmmount.y > 85.0f) rotAmmount.y = 85.0f;
+		if (rotAmmount.x > 80.0f) rotAmmount.x = 80.0f;
+		else if (rotAmmount.x < -80.0f) rotAmmount.x = -80.0f;
+		if (rotAmmount.y > 32.5f) rotAmmount.y = 32.5f;
 		else if (rotAmmount.y < -85.0f) rotAmmount.y = -85.0f;
 
 		//reset the rotation
@@ -1978,10 +1978,6 @@ void Game::ImGui()
 		int pcfPasses = tempSun.m_pcfFilterSamples;
 		*/
 
-		if (ImGui::SliderFloat("Light Frustrum XY", &shadowOrthoXY, 2.0f, 50.0f));
-
-		if (ImGui::SliderFloat("Light Frustrum Z", &shadowOrthoZ, 2.0f, 50.0f));
-
 		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 50.0f)) {
 			SetSun(tempSun);
 		}
@@ -2127,14 +2123,20 @@ void Game::ImGui()
 		//control the x axis position
 		auto& a = Get<TTN_Transform>(camera);
 		float b = a.GetPos().x;
-		if (ImGui::SliderFloat("Camera Test X-Axis", &b, -100.0f, 100.0f)) {
+		if (ImGui::SliderFloat("Camera Test X-Axis", &b, -0.5f, 0.5f)) {
 			a.SetPos(glm::vec3(b, a.GetPos().y, a.GetPos().z));
 		}
 
 		//control the y axis position
 		float c = a.GetPos().y;
-		if (ImGui::SliderFloat("Camera Test Y-Axis", &c, -100.0f, 100.0f)) {
+		if (ImGui::SliderFloat("Camera Test Y-Axis", &c, -0.5f, 0.5f)) {
 			a.SetPos(glm::vec3(a.GetPos().x, c, a.GetPos().z));
+		}
+
+		//control the y axis position
+		float d = a.GetPos().z;
+		if (ImGui::SliderFloat("Camera Test Z-Axis", &d, -0.5f, 0.5f)) {
+			a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y, d));
 		}
 	}
 
