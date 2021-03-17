@@ -61,6 +61,8 @@ namespace Titan {
 		//set if the effect should be applied
 		void SetShouldApply(bool shouldApply) { m_shouldRender = shouldApply; }
 
+		GLuint GetFrameBufferHandle(int index) { return m_buffers[index]->GetHandle(); }
+
 	protected:
 		//holds all our buffers for the effects
 		std::vector <TTN_Framebuffer::sfboptr> m_buffers;

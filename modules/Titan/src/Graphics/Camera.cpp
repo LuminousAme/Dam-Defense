@@ -107,46 +107,4 @@ namespace Titan {
 		//finally return that vector
 		return corners;
 	}
-
-	std::vector<glm::vec3> TTN_Camera::CalcPerspectiveCornersFromVP(glm::mat4 vp, float nearZ, float farZ)
-	{
-		//first define all 8 corners in clip space
-		glm::vec3 ntl = glm::vec3(-1.0f, 1.0f, nearZ);
-		glm::vec3 ntr = glm::vec3(1.0f, 1.0f, nearZ);
-		glm::vec3 nbl = glm::vec3(-1.0f, -1.0f, nearZ);
-		glm::vec3 nbr = glm::vec3(1.0f, -1.0f, nearZ);
-
-		glm::vec3 ftl = glm::vec3(-1.0f, 1.0f, farZ);
-		glm::vec3 ftr = glm::vec3(1.0f, 1.0f, farZ);
-		glm::vec3 fbl = glm::vec3(-1.0f, -1.0f, farZ);
-		glm::vec3 fbr = glm::vec3(1.0f, -1.0f, farZ);
-
-		//make a vector and push all the corners back into the vector
-		std::vector<glm::vec3> corners = std::vector<glm::vec3>();
-
-		corners.push_back(ntl);
-		corners.push_back(ntr);
-		corners.push_back(nbl);
-		corners.push_back(nbr);
-
-		corners.push_back(ftl);
-		corners.push_back(ftr);
-		corners.push_back(fbl);
-		corners.push_back(fbr);
-
-		//get the inverse of the view projection matrix
-		glm::mat4 tempInverse = glm::inverse(vp);
-
-		for (auto corner : corners) {
-			//convert the corner to world space
-			glm::vec4 tempVec = tempInverse * glm::vec4(corner, 1.0f);
-			tempVec /= tempVec.w;
-
-			//and save the worldspace position
-			corner = glm::vec3(tempVec);
-		}
-
-		//finally return that vector
-		return corners;
-	}
 }

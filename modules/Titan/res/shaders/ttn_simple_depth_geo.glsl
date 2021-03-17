@@ -1,15 +1,14 @@
-#version 410
+#version 420 
 
-//based on and modified from code found in https://youtu.be/lUo7s-i9Gy4 
+//based on and modified from code found in https://youtu.be/lUo7s-i9Gy4
 
 layout(triangles, invocations = 4) in;
 layout(triangle_strip, max_vertices = 3) out;
 
 uniform mat4 u_LightSpaceMatrix[4];
 
-void main()
-{
-	//go through each vertex, setting the approriate layer and grabbing the approraite light space matrix based on the invocation id so it renders to all the shadow maps and can discard from ones it's not in later down the pipeline
+void main() {
+	//go through each vertex, setting the approriate layer and grabbing the approraite light space matrix based on the invocation id so it renders to all the shadow maps and can discard further down the path
 
 	//first vertex
 	gl_Layer = gl_InvocationID;

@@ -9,7 +9,7 @@
 #include "Titan/Graphics/Shader.h"
 
 namespace Titan {
-	//depth target 
+	//depth target
 	struct TTN_DepthTarget {
 		//Destructor, unloads the texture
 		~TTN_DepthTarget();
@@ -29,17 +29,17 @@ namespace Titan {
 		std::vector<TTN_Texture2D::st2dptr> m_textures;
 		std::vector<GLenum> m_formats;
 		std::vector<GLenum> m_buffers;
-		//stores the number of color attachments this target has 
+		//stores the number of color attachments this target has
 		unsigned int m_numAttachments = 0;
 	};
 
 	//framebuffer class
 	class TTN_Framebuffer {
 	public:
-		//defines a special easier to use name for shared(smart) pointers to the class 
+		//defines a special easier to use name for shared(smart) pointers to the class
 		typedef std::shared_ptr<TTN_Framebuffer> sfboptr;
 
-		//creates and returns a shared(smart) pointer to the class 
+		//creates and returns a shared(smart) pointer to the class
 		static inline sfboptr Create() {
 			return std::make_shared<TTN_Framebuffer>();
 		}
@@ -61,7 +61,7 @@ namespace Titan {
 		//adds the depth target (we can only ever have 1 depth target)
 		void AddDepthTarget();
 
-		//adds color target (max number of color targets is gpu demendent) 
+		//adds color target (max number of color targets is gpu demendent)
 		void AddColorTarget(GLenum format);
 
 		//Binds depth buffer as a texture to a specified slot
@@ -101,6 +101,9 @@ namespace Titan {
 		//Draws our fullscreen quad
 		static void DrawFullScreenQuad();
 
+		//Get the framebuffer's handle
+		GLuint GetHandle() { return m_FBO; }
+
 		//Initial width and height is zero
 		unsigned int m_width = 0;
 		unsigned int m_height = 0;
@@ -121,7 +124,7 @@ namespace Titan {
 		//Clearflag is nothing by default
 		GLbitfield m_clearFlag = 0;
 
-		//is the framebuffer initialized 
+		//is the framebuffer initialized
 		bool _isInit = false;
 		//depth attachment
 		bool m_depthActive = false;

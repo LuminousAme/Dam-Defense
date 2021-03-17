@@ -1,4 +1,4 @@
-#version 410
+#version 420
 
 layout (location = 0) in vec3 inPosition;
 layout(location = 4) in vec3 inPosNextFrame;
@@ -10,5 +10,5 @@ uniform float t;
 void main()
 { 
 	//lightspace matrix form the light's perspective
-	gl_Position = u_Model * vec4(mix(inPosition, inPosNextFrame, t), 1.0);
+	gl_Position =  u_Model * vec4(mix(inPosition, inPosNextFrame, t), 1.0);
 }

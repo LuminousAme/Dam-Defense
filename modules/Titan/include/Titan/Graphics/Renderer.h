@@ -1,5 +1,5 @@
-//Titan Engine, by Atlas X Games 
-// Renderer.h - header for the class that allows meshes to be rendered 
+//Titan Engine, by Atlas X Games
+// Renderer.h - header for the class that allows meshes to be rendered
 #pragma once
 
 //include the mesh, shader, and material classes
@@ -8,7 +8,7 @@
 #include "Titan/Graphics/Material.h"
 
 namespace Titan {
-	//class that acts as a component to allow objects to be rendered in the game 
+	//class that acts as a component to allow objects to be rendered in the game
 	class TTN_Renderer {
 	public:
 		//constructor that sets the mesh
@@ -20,6 +20,9 @@ namespace Titan {
 
 		//init shadows function
 		static void InitShadowRendering();
+
+		//init gbuffer pass function
+		static void InitgBufferRendering();
 
 		//destructor
 		~TTN_Renderer();
@@ -43,8 +46,8 @@ namespace Titan {
 		//gets the mesh
 		const TTN_Mesh::smptr GetMesh() const { return m_mesh; }
 		//gets the shader
-		const TTN_Shader::sshptr GetShader() const { return m_Shader;  }
-		//gets the material 
+		const TTN_Shader::sshptr GetShader() const { return m_Shader; }
+		//gets the material
 		const TTN_Material::smatptr GetMat() const { return m_Mat; }
 		//gets the render layer
 		const int GetRenderLayer() const { return m_RenderLayer; }
@@ -54,6 +57,8 @@ namespace Titan {
 		static bool GetShadowsAreInit() { return s_shaderRenderingIsInit; }
 		//gets the shadow shader
 		static TTN_Shader::sshptr GetSimpleShadowShader() { return s_simpleShadowShader; }
+		//gets the gbuffer shader
+		static TTN_Shader::sshptr GetgBufferShader() { return s_gBufferPassShader; }
 
 		void Render(glm::mat4 model, glm::mat4 VP, glm::mat4 lightSpaceMat[], glm::mat4 view);
 
@@ -71,5 +76,7 @@ namespace Titan {
 
 		inline static TTN_Shader::sshptr s_simpleShadowShader = nullptr;
 		inline static bool s_shaderRenderingIsInit = false;
+
+		inline static TTN_Shader::sshptr s_gBufferPassShader = nullptr;
 	};
 }

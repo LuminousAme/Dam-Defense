@@ -1,4 +1,4 @@
-//Titan Engine, by Atlas X Games 
+//Titan Engine, by Atlas X Games
 // Renderer.cpp - source file for the class that allows meshes to be rendered
 
 //precompile header
@@ -59,6 +59,14 @@ namespace Titan {
 		s_shaderRenderingIsInit = true;
 	}
 
+	void TTN_Renderer::InitgBufferRendering()
+	{
+		//s_gBufferPassShader = TTN_Shader::Create();
+		//s_gBufferPassShader->LoadShaderStageFromFile("shaders/ttn_vert_color.glsl", GL_VERTEX_SHADER);
+		//s_gBufferPassShader->LoadShaderStageFromFile("shaders/ttn_gBuffer_pass_frag.glsl", GL_FRAGMENT_SHADER);
+		//s_gBufferPassShader->Link();
+	}
+
 	//destructor, destroys the object
 	TTN_Renderer::~TTN_Renderer()
 	{
@@ -96,8 +104,8 @@ namespace Titan {
 			//if it isn't, then stop then return so the later code doesn't break the entire program
 			return;
 
-		//send the uniforms to openGL 
-		if (m_Shader->GetVertexShaderDefaultStatus() != (int)TTN_DefaultShaders::VERT_SKYBOX && 
+		//send the uniforms to openGL
+		if (m_Shader->GetVertexShaderDefaultStatus() != (int)TTN_DefaultShaders::VERT_SKYBOX &&
 			m_Shader->GetVertexShaderDefaultStatus() != (int)TTN_DefaultShaders::NOT_DEFAULT) {
 			m_Shader->SetUniformMatrix("MVP", VP * model);
 			m_Shader->SetUniformMatrix("Model", model);

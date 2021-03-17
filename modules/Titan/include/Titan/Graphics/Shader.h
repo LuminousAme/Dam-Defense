@@ -20,7 +20,10 @@ namespace Titan {
 		VERT_SKYBOX = 8,
 		FRAG_SKYBOX = 9,
 		VERT_MORPH_ANIMATION_NO_COLOR = 10,
-		VERT_MORPH_ANIMATION_COLOR = 11
+		VERT_MORPH_ANIMATION_COLOR = 11,
+		FRAG_BLINN_GBUFFER_NO_TEXTURE = 12,
+		FRAG_BLINN_GBUFFER_ALBEDO_ONLY = 13,
+		FFRAG_BLINN_GBUFFER_ALBEDO_AND_SPECULAR = 14
 	};
 
 	//class to wrap around an opengl shader
@@ -136,7 +139,7 @@ namespace Titan {
 			}
 			else {
 				//if it doesn't log a warning
-				LOG_WARN("Ignoring uniform \"{}\"", name);
+				//LOG_WARN("Ignoring uniform \"{}\"", name);
 			}
 		}
 
@@ -146,8 +149,8 @@ namespace Titan {
 		//fragment shader
 		GLuint _fs;
 		//geometry shader
-		GLuint _gs;
 		bool _hasGs = false;
+		GLuint _gs;
 
 		//marker if they're using a default shader (and which one), 0 is a custom shader, the rest are default shaders
 		int vertexShaderTTNIndentity, fragShaderTTNIdentity;
@@ -162,5 +165,4 @@ namespace Titan {
 		//function to get the locations of all the uniforms
 		int __GetUniformLocation(const std::string& name);
 	};
-
 }

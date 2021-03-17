@@ -83,7 +83,7 @@ namespace Titan {
 		case GL_FRAGMENT_SHADER: //if it's a fragment shader, set the fragment shader variable
 			_fs = handle;
 			break;
-		case GL_GEOMETRY_SHADER: //if it's a geometry shader, set the geometry shader variable
+		case GL_GEOMETRY_SHADER:
 			_gs = handle;
 			_hasGs = true;
 			break;
@@ -192,6 +192,23 @@ namespace Titan {
 			vertexShaderTTNIndentity = (int)shader;
 		}
 
+		else if (shader == TTN_DefaultShaders::FRAG_BLINN_GBUFFER_NO_TEXTURE) {
+			filePath = "shaders/ttn_gBuffer_pass_with_no_texture_frag.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
+			fragShaderTTNIdentity = (int)shader;
+		}
+
+		else if (shader == TTN_DefaultShaders::FRAG_BLINN_GBUFFER_ALBEDO_ONLY) {
+			filePath = "shaders/ttn_gBuffer_pass_with_albedo_texture_only_frag.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
+			fragShaderTTNIdentity = (int)shader;
+		}
+
+		else if (shader == TTN_DefaultShaders::FFRAG_BLINN_GBUFFER_ALBEDO_AND_SPECULAR) {
+			filePath = "shaders/ttn_gBuffer_pass_with_albedo_and_specular_texture_frag.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
+			fragShaderTTNIdentity = (int)shader;
+		}
 		else {
 			//if the user tried to load a shader that doesn't,
 			LOG_ERROR("Default shader {} does not exist", shader);

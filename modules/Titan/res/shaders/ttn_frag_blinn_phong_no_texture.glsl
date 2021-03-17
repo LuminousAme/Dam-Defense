@@ -5,7 +5,7 @@ layout(location = 0) in vec3 inPos;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inUV;
 layout(location = 3) in vec3 inColor;
-layout(location = 4) in vec3 inViewSpacePosition;
+layout(location = 4) in vec4 inFragPosLightSpace;
 
 struct DirectionalLight
 {
@@ -64,13 +64,8 @@ uniform float u_LightAttenuationQuadratic[16];
 
 uniform int u_NumOfLights;
 
-layout (binding = 30) uniform sampler2DArray s_ShadowMap;
+layout (binding = 30) uniform sampler2D s_ShadowMap;
 uniform float shadowBias=0.005f;
-
-//lightspace matrix
-uniform mat4 u_LightSpaceMatrix[4];
-uniform float u_shadowSplits[4];
-uniform float u_farPlane;
 
 //camera data
 uniform vec3  u_CamPos;
@@ -81,7 +76,7 @@ out vec4 frag_color;
 //functions 
 vec3 CalcLight(vec3 pos, vec3 col, float ambStr, float specStr, float attenConst, float attenLine, float attenQuad, vec3 norm, vec3 viewDir, float textSpec);
 vec3 CalcDirLight(vec3 norm, vec3 viewDir, float textSpec, float shadow);
-float ShadowCalculation();
+float ShadowCalculation(vec4 FragPosLightSpace);
 
 void main() {
 	//calcualte the vectors needed for lighting
@@ -93,7 +88,7 @@ void main() {
 
 	//check the shadow map
 	float useShadows = u_recievesShadows;
-	float shadow = mix(0.0, ShadowCalculation(), useShadows);
+	float shadow = mix(0.0, ShadowCalculation(inFragPosLightSpace), useShadows);
 
 	//add the results from all the lights
 	for(int i = 0; i < u_NumOfLights; i++) {
@@ -110,7 +105,8 @@ void main() {
 
 	//calculate if it should be coloured as a black outline
 	float edge = max(step(u_OutlineSize, abs(dot(viewDir, N))), u_hasOutline);
-
+	 
+	  
 	//save the result and pass it on
 	frag_color = vec4(result, 1.0) * vec4(vec3(edge), 1.0);
 }
@@ -165,19 +161,7 @@ vec3 CalcDirLight(vec3 norm, vec3 viewDir, float textSpec, float shadow) {
 	return ambient + (1.0 - shadow) * (diffuse + specular);
 }
 
-float ShadowCalculation() {
-	//figure out the texture depth
-	vec4 FragPosLightSpace = vec4(0.0);
-	int textureDepth = 3;
-	float depth = inViewSpacePosition.z / u_farPlane;
-
-	for(int i = 3; i >= 0; i--) {
-		textureDepth = (depth < u_shadowSplits[i]) ? i : textureDepth;
-	}
-
-	//using the approriate texture depth, get the light space frag position 
-	FragPosLightSpace = u_LightSpaceMatrix[textureDepth] * vec4(inPos, 1.0);
-
+float ShadowCalculation(vec4 FragPosLightSpace) {
 	//perspective division
 	vec3 projectionCoordinates = FragPosLightSpace.xyz / FragPosLightSpace.w;
 
@@ -192,7 +176,7 @@ float ShadowCalculation() {
 	//track the number of samples that have been taken
 	int samplesTaken = 0;
 	//get the size of a single texel
-	vec2 texelSize = vec2(1.0 / textureSize(s_ShadowMap, 0).x, 1.0 / textureSize(s_ShadowMap, 0).y);
+	vec2 texelSize = 1.0 / textureSize(s_ShadowMap, 0);
 
 	//caculate the shadow bias based on the angle between the view and the surface 
 	float shadowBias = max(sun.m_maxShadowBias * (1.0 - dot(normalize(inNormal), normalize(sun.m_lightDirection.xyz))), sun.m_minShadowBias);
@@ -202,7 +186,7 @@ float ShadowCalculation() {
 	{
 		for(int y = 0 - sun.m_pcfFilterSamples / 2; y <= sun.m_pcfFilterSamples / 2; y++)
 		{
-			float depth = texture(s_ShadowMap, vec3((projectionCoordinates.xy + vec2(x, y) * texelSize), textureDepth)).r;
+			float depth = texture(s_ShadowMap, projectionCoordinates.xy + vec2(x, y) * texelSize).r;
 			shadow += currentDepth - shadowBias > depth ? 1.0 : 0.0;
 			samplesTaken++;
 		}

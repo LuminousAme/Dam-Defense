@@ -85,9 +85,7 @@ namespace Titan {
 
 	//binds a color buffer as a texture to a given texture slot
 	void TTN_PostEffect::BindColorAsTexture(int index, int colorBuffer, int textureSlot) {
-
 		m_buffers[index]->BindColorAsTexture(colorBuffer, textureSlot);
-
 	}
 
 	//binds a depth buffer as a texture to a given texture slot
