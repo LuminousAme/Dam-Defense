@@ -120,8 +120,20 @@ void Game::Update(float deltaTime)
 
 	//heal from shop
 	if ((healCounter > 0)) {
-		Dam_health = Dam_health + healAmount;
-		std::cout << Dam_health << std::endl;
+		if (m_score < healCost) { //if score is less than the cost, do nothing
+		}
+		else {
+			if (Dam_health < 100.f && Dam_health>90.f) { // if dam health is above 90 but below 100
+				healAmount = abs(Dam_health - 100.f); //get remaining health
+			}
+			else // else normal heal amount
+				healAmount = 10.f;
+
+			Dam_health = Dam_health + healAmount; //heal
+			//Dam_health = round(Dam_health); 
+			m_score = m_score - healCost;//score cost of heal
+			std::cout << Dam_health << std::endl;
+		}
 	}
 
 	ColorCorrection();
@@ -281,10 +293,6 @@ void Game::KeyDownChecks()
 		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Two)) {
 			std::cout << "bombing\n";
 			BirdBomb();
-		}
-
-		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::L)) {
-			shouldShop = true;
 		}
 	}
 
@@ -497,10 +505,6 @@ void Game::SetUpAssets()
 	damMat->SetAlbedo(damText);
 	m_mats.push_back(damMat);
 
-	TTN_Shader::sshptr gBufferShader = TTN_Renderer::GetgBufferShader();
-	gBufferShader->Bind();
-
-	int textureSlot = 0;
 	for (int i = 0; i < m_mats.size(); i++) {
 		m_mats[i]->SetDiffuseRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
 		m_mats[i]->SetSpecularRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
@@ -516,8 +520,6 @@ void Game::SetUpAssets()
 		//gBufferShader->SetUniform("s_Diffuse", renderer.GetMat()->GetAlbedo());
 		//gBufferShader->SetUniformMatrix("u_Specular", lightSpaceViewProj);
 	}
-
-	gBufferShader->UnBind();
 }
 
 //create the scene's initial entities
@@ -856,11 +858,11 @@ void Game::RestartData()
 	m_paused = false;
 	m_gameOver = false;
 	m_gameWin = false;
-	shouldShop = false;
 
 	//shop stuff
 	healAmount = 10.0f;
 	healCounter = 0;
+	healCost = 5;
 
 	//enemy and wave data setup
 	m_currentWave = 0;
@@ -1515,12 +1517,14 @@ void Game::WaveUpdate(float deltaTime) {
 		m_timeUntilNextSpawn = m_timeBetweenEnemyWaves;
 		playJingle = true;
 		m_waveInProgress = false;
+		round(Dam_health); // round the health at the end of the round
 	}
 
 	//if it is in the cooldown between waves, reduce the cooldown by deltaTime
 	if (m_timeTilNextWave >= 0.0f) {
 		m_timeTilNextWave -= deltaTime;
 	}
+	 
 	//if the cooldown between waves has ended, begin the next wave
 	else if (!m_waveInProgress && m_timeTilNextWave <= 0.0f && m_timeUntilNextSpawn >= 0.0f) {
 		m_currentWave++;

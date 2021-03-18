@@ -161,8 +161,8 @@ namespace Titan {
 		TTN_DirectionalLight m_Sun;
 
 		TTN_Framebuffer::sfboptr shadowBuffer;
-		TTN_GBuffer::sgbufptr gBuffer;
-		TTN_IlluminationBuffer::sillbufptr illBuffer;
+		//TTN_GBuffer::sgbufptr gBuffer;
+		//TTN_IlluminationBuffer::sillbufptr illBuffer;
 
 		int shadowWidth = 1024;
 		int shadowHeight = 1024;

@@ -54,8 +54,8 @@ public:
 	void SetShouldShop(bool shop) { shouldShop = shop; }
 	bool GetShouldShopping() { return shopping; }
 	void SetShouldShopping(bool shop) { shopping = shop; }
-	float GetHealAmount() { return healAmount; }
-	void SetHealAmount(float heal) { healAmount = heal; }
+	bool GetWaveChange() { return waveChange; }
+	void SetWaveChange(bool wave) { waveChange = wave; }
 	int GetHealCounter() { return healCounter; }
 	void SetHealCounter(int heal) { healCounter = heal; }
 
@@ -149,8 +149,8 @@ private:
 	bool waveChange;
 	int waveTracker = 0;
 
-	float healAmount; //heal the dam by this much
 	int healCounter;  //how many times to heal
+	bool healOnce; // bool to keep track of whether the player can buy the heal 
 
 	//the time remaining before it accepts player input, used for the shop
 	float m_InputDelay = 0.3f;

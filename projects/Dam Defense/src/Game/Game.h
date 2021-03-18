@@ -37,8 +37,8 @@ public:
 	void MouseButtonChecks();
 	void MouseButtonUpChecks();
 
-	bool GetShouldShop() { return shouldShop; };
-	void SetShouldShop(bool menu) { shouldShop = menu; }
+	/*bool GetShouldShop() { return shouldShop; };
+	void SetShouldShop(bool menu) { shouldShop = menu; }*/
 
 	bool GetGameIsPaused() { return m_paused; }
 	void SetGameIsPaused(bool paused) { m_paused = paused; }
@@ -215,9 +215,8 @@ protected:
 	std::vector<entt::entity> flames;
 
 	/////// OTHER DATA ///////////
-#pragma region Data
+#pragma region GAME DATA
 protected:
-	bool shouldShop;
 	/////// Player control data/////////
 	float cannonBallForce = 3600.0f / 10.0f;//a multiplier for the ammount of force should be applied to a cannonball when it is fired
 	float playerShootCooldown = 0.7f;//the ammount of time in seconds that the player has to wait between shots
@@ -295,6 +294,7 @@ protected:
 
 	/////////// SHOP RELATED STUFF///////////////
 	float healAmount; //heal the dam by this much
+	unsigned healCost; //score cost of heal 
 	int healCounter;
 
 	/////////// SOUND CONTROL///////////////

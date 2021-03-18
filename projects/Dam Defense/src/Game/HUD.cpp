@@ -24,8 +24,8 @@ void GameUI::InitScene()
 	shopOnce = false;
 	waveChange = false;
 	waveTracker = 0;
-	healAmount = 0.f;
 	healCounter = 0;
+	healOnce = false;
 	//std::cout << waveTracker << "  wave " << std::endl;
 	//std::cout << m_currentWave << " Curretn  wave " << std::endl;
 
@@ -404,7 +404,7 @@ void GameUI::InitScene()
 		}
 	}
 
-	//background
+	//background of shop
 	{
 		//create an entity in the scene for the background
 		background = CreateEntity();
@@ -415,10 +415,11 @@ void GameUI::InitScene()
 
 		//create a sprite renderer for the background
 		TTN_Renderer2D bgRenderer2D = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("BG"));
-		bgRenderer2D.SetColor(glm::vec4(0.75f));
+		bgRenderer2D.SetColor(glm::vec4(0.5f));
 		AttachCopy(background, bgRenderer2D);
 	}
 
+	//button to buy health
 	{
 		buttonHealth = CreateEntity();
 
@@ -593,7 +594,6 @@ void GameUI::Update(float deltaTime)
 
 	//update the score number
 	{
-
 		while (GetNumOfDigits(m_score) < scoreNums.size()) {
 			DeleteEntity(scoreNums[scoreNums.size() - 1]);
 			scoreNums.pop_back();
@@ -691,13 +691,15 @@ void GameUI::Update(float deltaTime)
 
 	if ((m_currentWave > waveTracker) && m_waveProgress == 1.0f) { //check if round ended and its a new round
 		shopOnce = false; //set shoponce to false so we know the player hasn't seen the shop yet
-		//std::cout << "WORKIINGGNGGNGGNGNG " << std::endl;
 	}
 
-	if (waveChange) { // if the player closes out of the shop and goes on to a new wave
+	if (waveChange && !m_waveProgress == 1.0f) { // if the player closes out of the shop and goes on to a new wave
 		waveTracker++; // increment wave counter (1 behind current wave)
 		waveChange = false;
 		healCounter = 0;
+		healOnce = false;
+	//	std::cout << "  wave tracking " << std::endl;
+
 	}
 	/*std::cout << waveTracker << "  wave " << std::endl;
 	std::cout << m_currentWave << " curretn " << std::endl;*/
@@ -708,7 +710,7 @@ void GameUI::Update(float deltaTime)
 		TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);
 		//update time
 		lerpTime += deltaTime;
-		if (m_waveProgress == 1.0f && lerpTime > 4.0f) {
+		if (m_waveProgress == 1.0f && lerpTime > 4.5f) {
 			lerpTime = 0.0f;
 		}
 
@@ -718,14 +720,15 @@ void GameUI::Update(float deltaTime)
 			//buttonTrans.SetPos(glm::vec3(510.0f, 220.0f, 0.10f));
 		}
 
-		if (!shopping) {
+		if (!shopping) { //if the shop hasn't lerped in yet
 			//update position
 			glm::vec3 centerPos = glm::vec3(0.f);
 			glm::vec3 centerPosButton = glm::vec3(0.f);
+
 			float t = waveCompleteLerpParamter(lerpTime / lerpTotalTime);
 			//std::cout << trans.GetGlobalPos().x << std::endl;
-			//std::cout << t << std::endl;
-			if (trans.GetGlobalPos().x >= -6.f && trans.GetGlobalPos().x <= 8.f) { // if shop background reaches the end of the screen
+			std::cout << " T Intwerpolate  " << t << std::endl;
+			if (trans.GetGlobalPos().x >= -10.f && trans.GetGlobalPos().x <= 10.f) { // if shop background reaches the end of the screen
 				//std::cout << trans.GetGlobalPos().x << " LLL LLLLLLLLLLL" << std::endl;
 				shopping = true;
 			}
@@ -782,7 +785,6 @@ void GameUI::KeyDownChecks()
 		waveChange = true; //player is going to a new wave
 		m_InputDelay = 0.3f;
 	}
-
 }
 
 void GameUI::MouseButtonDownChecks()
@@ -808,8 +810,14 @@ void GameUI::MouseButtonDownChecks()
 			mousePosWorldSpace.x > playButtonTrans.GetPos().x - 0.5f * abs(playButtonTrans.GetScale().x) &&
 			mousePosWorldSpace.y < playButtonTrans.GetPos().y + 0.5f * abs(playButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > playButtonTrans.GetPos().y - 0.5f * abs(playButtonTrans.GetScale().y)) {
-			healCounter++;
-			std::cout << healCounter << std::endl;
+			if (m_DamHealth >= 100.f || healOnce) {//do nothing if dam is at full health or they already bought the heal
+				//std::cout << " SHOPING HEALTH" << std::endl;
+			}
+			else {
+				healCounter++;
+				healOnce = true;
+				std::cout << healCounter << std::endl;
+			}
 		}
 
 		m_InputDelay = 0.3f;

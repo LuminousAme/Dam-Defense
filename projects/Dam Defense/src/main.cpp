@@ -260,12 +260,23 @@ int main() {
 		else if (gameScene->GetShouldRender() && gameSceneUI->GetShouldShop() && !paused->GetShouldRender() && !options->GetShouldRender()) {
 			TTN_Application::TTN_Input::SetCursorLocked(false);
 			options->SetShouldRender(false);
-			//gameScene->SetPaused(true);
+			gameScene->SetPaused(true);
 			gameScene->SetGameIsPaused(true);
 			//gameSceneUI->SetShouldShop(false);
 			paused->SetShouldRender(false);
 			paused->SetPaused(false);
 			paused->SetShouldResume(true);
+		}
+
+		if (gameScene->GetShouldRender() && !gameSceneUI->GetShouldShop() && !gameSceneUI->GetShouldShopping()&& gameSceneUI->GetWaveChange()  && !options->GetShouldRender()) {
+			TTN_Application::TTN_Input::SetCursorLocked(true);
+			options->SetShouldRender(false);
+			gameScene->SetPaused(false);
+			gameScene->SetGameIsPaused(false);
+			paused->SetShouldRender(false);
+			paused->SetPaused(false);
+			//paused->SetShouldResume(true);
+			//std::cout << "  MAINNNNN " << std::endl;
 		}
 
 		///// SHOP ///////
