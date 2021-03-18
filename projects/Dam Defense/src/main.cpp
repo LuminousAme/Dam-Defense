@@ -52,7 +52,7 @@ int main() {
 	GameWinMenu* gameWin = new GameWinMenu;
 	GameWinMenuUI* gameWinUI = new GameWinMenuUI;
 	OptionsMenu* options = new OptionsMenu;
-	ShopMenu* shop = new ShopMenu;
+	//ShopMenu* shop = new ShopMenu;
 
 	//initliaze them
 	splash->InitScene();
@@ -68,9 +68,9 @@ int main() {
 	gameWin->SetShouldRender(false);
 	gameWinUI->SetShouldRender(false);
 	options->SetShouldRender(false);
-	shop->SetShouldRender(false);
+	//	shop->SetShouldRender(false);
 
-	//add them to the application
+		//add them to the application
 	TTN_Application::scenes.push_back(splash);
 	TTN_Application::scenes.push_back(loadingScreen);
 	TTN_Application::scenes.push_back(gameScene);
@@ -83,7 +83,7 @@ int main() {
 	TTN_Application::scenes.push_back(gameWin);
 	TTN_Application::scenes.push_back(gameWinUI);
 	TTN_Application::scenes.push_back(options);
-	TTN_Application::scenes.push_back(shop);
+	//TTN_Application::scenes.push_back(shop);
 
 	// init's the configs and contexts for imgui
 	TTN_Application::InitImgui();
@@ -126,8 +126,8 @@ int main() {
 			gameOverUI->InitScene();
 			gameWin->InitScene();
 			gameWinUI->InitScene();
-			shop->InitScene();
-			shop->SetShouldRender(false);
+			//shop->InitScene();
+			//shop->SetShouldRender(false);
 			gameOver->SetShouldRender(false);
 			gameOverUI->SetShouldRender(false);
 			gameWin->SetShouldRender(false);
@@ -156,7 +156,7 @@ int main() {
 			gameScene->SetShouldRender(true);
 			gameScene->SetPaused(false);
 			gameSceneUI->SetShouldRender(true);
-			shop->SetShouldRender(false);
+			//shop->SetShouldRender(false);
 			gameScene->RestartData();
 			paused->SetShouldRender(false);
 		}
@@ -256,7 +256,7 @@ int main() {
 			options->SetShouldBack(false);
 			options->SetShouldMenu(false);
 		}
-
+		////Shop //////
 		else if (gameScene->GetShouldRender() && gameSceneUI->GetShouldShop() && !paused->GetShouldRender() && !options->GetShouldRender()) {
 			TTN_Application::TTN_Input::SetCursorLocked(false);
 			options->SetShouldRender(false);
@@ -268,15 +268,16 @@ int main() {
 			paused->SetShouldResume(true);
 		}
 
-		if (gameScene->GetShouldRender() && !gameSceneUI->GetShouldShop() && !gameSceneUI->GetShouldShopping()&& gameSceneUI->GetWaveChange()  && !options->GetShouldRender()) {
+		else if (gameScene->GetShouldRender() && !gameSceneUI->GetShouldShop() && !gameSceneUI->GetShouldShopping() && gameSceneUI->GetShouldExit() && !options->GetShouldRender()) {
 			TTN_Application::TTN_Input::SetCursorLocked(true);
 			options->SetShouldRender(false);
 			gameScene->SetPaused(false);
 			gameScene->SetGameIsPaused(false);
 			paused->SetShouldRender(false);
 			paused->SetPaused(false);
-			//paused->SetShouldResume(true);
-			//std::cout << "  MAINNNNN " << std::endl;
+			paused->SetShouldResume(true);
+			gameSceneUI->SetShouldExit(false);
+			std::cout << "  MAINNNNN " << std::endl;
 		}
 
 		///// SHOP ///////
@@ -401,6 +402,7 @@ int main() {
 		if (gameScene->GetShouldRender() && gameSceneUI->GetShouldRender()) {
 			//pass the score between the scenes
 			gameScene->SetHealCounter(gameSceneUI->GetHealCounter());
+			gameScene->SetCannonBuff(gameSceneUI->GetCannonPower());
 
 			gameSceneUI->SetScore(gameScene->GetScore());
 			gameSceneUI->SetDamHP(gameScene->GetDamHealth());

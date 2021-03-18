@@ -130,11 +130,18 @@ void Game::Update(float deltaTime)
 				healAmount = 10.f;
 
 			Dam_health = Dam_health + healAmount; //heal
-			//Dam_health = round(Dam_health); 
+			//Dam_health = round(Dam_health);
 			m_score = m_score - healCost;//score cost of heal
 			std::cout << Dam_health << std::endl;
 		}
 	}
+
+	if (cannonBuff) {
+		playerShootCooldown = 0.45f;
+		std::cout << "  CD LOWWW " << std::endl;
+	}
+	else
+		playerShootCooldown = 0.7f;
 
 	ColorCorrection();
 
@@ -863,6 +870,7 @@ void Game::RestartData()
 	healAmount = 10.0f;
 	healCounter = 0;
 	healCost = 5;
+	cannonBuff = false;
 
 	//enemy and wave data setup
 	m_currentWave = 0;
@@ -1517,14 +1525,14 @@ void Game::WaveUpdate(float deltaTime) {
 		m_timeUntilNextSpawn = m_timeBetweenEnemyWaves;
 		playJingle = true;
 		m_waveInProgress = false;
-		round(Dam_health); // round the health at the end of the round
+		Dam_health = round(Dam_health); // round the health at the end of the round
 	}
 
 	//if it is in the cooldown between waves, reduce the cooldown by deltaTime
 	if (m_timeTilNextWave >= 0.0f) {
 		m_timeTilNextWave -= deltaTime;
 	}
-	 
+
 	//if the cooldown between waves has ended, begin the next wave
 	else if (!m_waveInProgress && m_timeTilNextWave <= 0.0f && m_timeUntilNextSpawn >= 0.0f) {
 		m_currentWave++;

@@ -119,6 +119,9 @@ public:
 	int GetHealCounter() { return healCounter; }
 	void SetHealCounter(int heal) { healCounter = heal; }
 
+	bool GetCannonBuff() { return cannonBuff; }
+	void SetCannonBuff(bool buff) { cannonBuff = buff; }
+
 	//function to restart the game reseting all the data
 	void RestartData();
 	//Assets
@@ -296,6 +299,8 @@ protected:
 	float healAmount; //heal the dam by this much
 	unsigned healCost; //score cost of heal 
 	int healCounter;
+
+	bool cannonBuff;
 
 	/////////// SOUND CONTROL///////////////
 	//control melody

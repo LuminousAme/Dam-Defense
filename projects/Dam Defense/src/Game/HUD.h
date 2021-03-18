@@ -56,10 +56,20 @@ public:
 	void SetShouldShopping(bool shop) { shopping = shop; }
 	bool GetWaveChange() { return waveChange; }
 	void SetWaveChange(bool wave) { waveChange = wave; }
+	//shop powers
 	int GetHealCounter() { return healCounter; }
 	void SetHealCounter(int heal) { healCounter = heal; }
 
+	bool GetCannonPower() { return cannonPower; }
+	void SetCannonPower(bool power) { cannonPower = power; }
+
+	bool GetShouldExit() { return shouldExitShop; }
+	void SetShouldExit(bool exit) { shouldExitShop = exit; }
+
 private:
+
+#pragma region ENTITES AND STUFF
+
 	//entities
 	entt::entity cam;
 	entt::entity background;
@@ -112,10 +122,13 @@ private:
 	//special ability general data
 	float specialAbilityScale = 0.2f;
 
+#pragma endregion
+	//shop buttons
 	entt::entity buttonHealth;
+	entt::entity buttonCannon;
 
 	//assets
-	TTN_Texture2D::st2dptr textureShop;//options text/title
+	TTN_Texture2D::st2dptr textureShop;//shop text/title
 	TTN_Texture2D::st2dptr textureButton1;
 	TTN_Texture2D::st2dptr textureButton2;
 
@@ -139,8 +152,11 @@ private:
 	float m_waveCompleteTotalTime = 4.0f;
 	bool waveDone = false;
 
-	bool shopOnce = false; //variable for only spawning the shop once per end of round
 	//shop stuff
+	bool shouldExitShop; //exit bool
+	bool shopOnce = false; //variable for only spawning the shop once per end of round
+
+
 	float lerpTime = 10.0f;
 	float lerpTotalTime = 1.5f;
 	bool shouldShop = false;
@@ -150,7 +166,9 @@ private:
 	int waveTracker = 0;
 
 	int healCounter;  //how many times to heal
-	bool healOnce; // bool to keep track of whether the player can buy the heal 
+	bool healOnce; // bool to keep track of whether the player can buy the heal
+
+	bool cannonPower;//bool for cannon powerup
 
 	//the time remaining before it accepts player input, used for the shop
 	float m_InputDelay = 0.3f;
@@ -174,49 +192,6 @@ private:
 	void MakeBirdBombNumEntity();
 };
 
-class ShopMenu : public TTN_Scene {
-public:
-	//default constructor
-	ShopMenu();
-
-	//default destructor
-	~ShopMenu() = default;
-
-	//sets up the scene
-	void InitScene();
-
-	//update the scene
-	void Update(float deltaTime);
-
-	//mouse input
-	void MouseButtonDownChecks();
-	void KeyDownChecks();
-
-	bool GetShouldShop() { return shouldShop; };
-	bool GetShouldBack() { return shouldBack; };
-
-	void SetShouldShop(bool menu) { shouldShop = menu; }
-	void SetShouldBack(bool back) { shouldBack = back; }
-
-private:
-	//entities
-	entt::entity cam;
-	entt::entity background;
-	entt::entity buttonHealth;
-
-	//assets
-	TTN_Texture2D::st2dptr textureShop;//options text/title
-	TTN_Texture2D::st2dptr textureButton1;
-	TTN_Texture2D::st2dptr textureButton2;
-
-	float timing;
-
-	bool shopping;
-	//should go back to game
-	bool shouldBack;
-	//should go to shop menu
-	bool shouldShop;
-};
 
 //get the number of digits in a number
 inline unsigned GetNumOfDigits(unsigned int number) {
