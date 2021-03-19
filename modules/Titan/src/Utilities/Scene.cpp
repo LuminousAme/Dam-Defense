@@ -32,27 +32,10 @@ namespace Titan {
 
 		m_Paused = false;
 
-		//init the basic effect
-		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
-		m_emptyEffect = TTN_PostEffect::Create();
-		m_emptyEffect->Init(windowSize.x, windowSize.y);
-
 		//init the scene's combintation buffer
+		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 		sceneBuffer = TTN_PostEffect::Create();
 		sceneBuffer->Init(windowSize.x, windowSize.y);
-
-		//init the geometry buffer
-		gBuffer = TTN_GBuffer::Create();
-		gBuffer->Init(windowSize.x, windowSize.y);
-
-		//init the illumination buffer
-		illBuffer = TTN_IlluminationBuffer::Create();
-		illBuffer->Init(windowSize.x, windowSize.y);
-
-		//shadow buffer
-		shadowBuffer = TTN_CascadedFrameBuffer::Create();
-		shadowBuffer->AddDepthTarget();
-		shadowBuffer->Init(shadowWidth, shadowHeight);
 
 		//directional light buffer
 		sunBuffer.AllocateMemory(sizeof(TTN_DirectionalLight));
@@ -82,27 +65,10 @@ namespace Titan {
 
 		m_Paused = false;
 
-		//init the basic effect
-		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
-		m_emptyEffect = TTN_PostEffect::Create();
-		m_emptyEffect->Init(windowSize.x, windowSize.y);
-
 		//init the scene's combintation buffer
+		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 		sceneBuffer = TTN_PostEffect::Create();
 		sceneBuffer->Init(windowSize.x, windowSize.y);
-
-		//init the geometry buffer
-		gBuffer = TTN_GBuffer::Create();
-		gBuffer->Init(windowSize.x, windowSize.y);
-
-		//init the illumination buffer
-		illBuffer = TTN_IlluminationBuffer::Create();
-		illBuffer->Init(windowSize.x, windowSize.y);
-
-		//shadow buffer
-		shadowBuffer = TTN_CascadedFrameBuffer::Create();
-		shadowBuffer->AddDepthTarget();
-		shadowBuffer->Init(shadowWidth, shadowHeight);
 
 		//directional light buffer
 		sunBuffer.AllocateMemory(sizeof(TTN_DirectionalLight));
@@ -470,6 +436,27 @@ namespace Titan {
 			//unbind the sun buffer
 			sunBuffer.Unbind(0);
 		}
+	}
+
+	void TTN_Scene::InitBuffers()
+	{
+		//init the basic effect
+		glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
+		m_emptyEffect = TTN_PostEffect::Create();
+		m_emptyEffect->Init(windowSize.x, windowSize.y);
+
+		//init the geometry buffer
+		gBuffer = TTN_GBuffer::Create();
+		gBuffer->Init(windowSize.x, windowSize.y);
+
+		//init the illumination buffer
+		illBuffer = TTN_IlluminationBuffer::Create();
+		illBuffer->Init(windowSize.x, windowSize.y);
+
+		//shadow buffer
+		shadowBuffer = TTN_CascadedFrameBuffer::Create();
+		shadowBuffer->AddDepthTarget();
+		shadowBuffer->Init(shadowWidth, shadowHeight);
 	}
 
 	//renders all the messes in our game

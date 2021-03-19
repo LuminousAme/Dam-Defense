@@ -85,6 +85,9 @@ namespace Titan {
 		//set up the shader and vaos for the sprite rendering system
 		TTN_Renderer2D::InitRenderer2D();
 
+		//set up the scene buffers
+		TTN_Scene::InitBuffers();
+
 		//set up the audio engine
 		m_soundEngine.Init();
 		

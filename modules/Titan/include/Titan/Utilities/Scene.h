@@ -113,6 +113,7 @@ namespace Titan {
 
 		//init
 		virtual void InitScene() {} 
+		static void InitBuffers();
 
 #pragma region Graphics_functions_dec
 		//renders all the entities with meshes and transforms in the scene 
@@ -204,18 +205,18 @@ namespace Titan {
 		//direction light for the scene
 		TTN_DirectionalLight m_Sun;
 
-		TTN_CascadedFrameBuffer::scfboptr shadowBuffer;
-		int shadowWidth = 1024;
-		int shadowHeight = 1024;
+		inline static TTN_CascadedFrameBuffer::scfboptr shadowBuffer = nullptr;
+		inline static int shadowWidth = 1024;
+		inline static int shadowHeight = 1024;
 		TTN_UniformBuffer sunBuffer;
 
 		//flag for if 3D geo has been drawn
 		bool m_hasDrawn3DGeo = false;
 
 		//all of the buffers needed to render a scene
-		TTN_GBuffer::sgbufptr gBuffer; //gBuffer for initial 3D geometry rendering
-		TTN_IlluminationBuffer::sillbufptr illBuffer; //illumination buffer for applying lights to the gBuffer
-		TTN_PostEffect::spostptr m_emptyEffect; //empty post effect buffer that 2D sprites and particle will get drawn too
+		inline static TTN_GBuffer::sgbufptr gBuffer = nullptr; //gBuffer for initial 3D geometry rendering
+		inline static TTN_IlluminationBuffer::sillbufptr illBuffer = nullptr; //illumination buffer for applying lights to the gBuffer
+		inline static TTN_PostEffect::spostptr m_emptyEffect = nullptr; //empty post effect buffer that 2D sprites and particle will get drawn too
 		TTN_PostEffect::spostptr sceneBuffer; //the final buffer that all of the other buffers draw into, and then this draws the final result to the screen
 
 		//vector to store the post processing effects
