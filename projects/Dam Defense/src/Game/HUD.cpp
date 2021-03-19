@@ -27,6 +27,7 @@ void GameUI::InitScene()
 	healCounter = 0;
 	healOnce = false;
 	cannonPower = false;
+	m_score = 0;
 	//std::cout << waveTracker << "  wave " << std::endl;
 	//std::cout << m_currentWave << " Curretn  wave " << std::endl;
 
@@ -485,6 +486,25 @@ void GameUI::InitScene()
 	}
 }
 
+void GameUI::RestartData()
+{
+	m_InputDelay = 0.3f;
+	m_DamHealth = 100.0f;
+	m_displayedWaveProgress = 0.0f;
+	m_waveProgress = 0.0f;
+	m_waveCompleteTime = 10.0f;
+	shouldShop = false;
+	shopPause = false;
+	shopping = false;
+	shopOnce = false;
+	waveChange = false;
+	waveTracker = 0;
+	healCounter = 0;
+	healOnce = false;
+	cannonPower = false;
+	m_score = 0;
+}
+
 void GameUI::Update(float deltaTime)
 {
 	//get the mouse position
@@ -732,12 +752,12 @@ void GameUI::Update(float deltaTime)
 			std::abs(Get<TTN_Transform>(completeText).GetScale().x), 0.0f, 0.0f));
 
 		//when the text leaves opens shop and resets all shop based power ups
-		if (firstNumTrans.GetGlobalPos().x <= 99.9f && firstNumTrans.GetGlobalPos().x >= 0.f && !shopOnce) {
+		if ((firstNumTrans.GetGlobalPos().x <= 99.9f && firstNumTrans.GetGlobalPos().x >= 0.f) && !shopOnce) {
 			shouldShop = true;
 			shopOnce = true;
 			cannonPower = false;
 			abilityCooldownBuff = false;
-			std::cout << "WORKING" << std::endl;
+			//std::cout << "WORKING" << std::endl;
 		}
 	}
 
@@ -817,8 +837,7 @@ void GameUI::Update(float deltaTime)
 			else
 				buttonTransAbility.SetPos(centerPosAbilityButton - glm::vec3(0.5f * std::abs(buttonTransAbility.GetScale().x), 0.0f, 0.0f));
 
-			std::cout << glm::to_string(buttonTransAbility.GetPos()) << std::endl;
-
+			//std::cout << glm::to_string(buttonTransAbility.GetPos()) << std::endl;
 			//std::cout << glm::to_string(buttonTrans.GetPos()) << std::endl;
 		}
 	}
@@ -918,13 +937,13 @@ void GameUI::MouseButtonDownChecks()
 			mousePosWorldSpace.x > playButtonTrans.GetPos().x - 0.5f * abs(playButtonTrans.GetScale().x) &&
 			mousePosWorldSpace.y < playButtonTrans.GetPos().y + 0.5f * abs(playButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > playButtonTrans.GetPos().y - 0.5f * abs(playButtonTrans.GetScale().y)) {
-			if (m_DamHealth >= 100.f || healOnce) {//do nothing if dam is at full health or they already bought the heal
+			if (m_DamHealth >= 100.f || healOnce || m_score < 5.f) {//do nothing if dam is at full health or they already bought the heal
 				//std::cout << " SHOPING HEALTH" << std::endl;
 			}
 			else {
 				healCounter++;
 				healOnce = true;
-				std::cout << healCounter << std::endl;
+				//std::cout << healCounter << std::endl;
 				Get<TTN_Renderer2D>(buttonHealth).SetColor(glm::vec4(0.5f));
 			}
 		}
@@ -934,7 +953,7 @@ void GameUI::MouseButtonDownChecks()
 			mousePosWorldSpace.x > cannonButtonTrans.GetPos().x - 0.5f * abs(cannonButtonTrans.GetScale().x) &&
 			mousePosWorldSpace.y < cannonButtonTrans.GetPos().y + 0.5f * abs(cannonButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > cannonButtonTrans.GetPos().y - 0.5f * abs(cannonButtonTrans.GetScale().y)) {
-			if (!cannonPower) {//if power is not active
+			if (!cannonPower && m_score >= 10.f) {//if power is not active and score is equal to or greater than the cost
 				cannonPower = true;
 				std::cout << " SHOPING C" << std::endl;
 				Get<TTN_Renderer2D>(buttonCannon).SetColor(glm::vec4(0.5f));
@@ -948,9 +967,9 @@ void GameUI::MouseButtonDownChecks()
 			mousePosWorldSpace.x > abilityButtonTrans.GetPos().x - 0.5f * abs(abilityButtonTrans.GetScale().x) &&
 			mousePosWorldSpace.y < abilityButtonTrans.GetPos().y + 0.5f * abs(abilityButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > abilityButtonTrans.GetPos().y - 0.5f * abs(abilityButtonTrans.GetScale().y)) {
-			if (!abilityCooldownBuff) {//if power is not active
+			if (!abilityCooldownBuff && m_score >= 15.f) {//if power is not active
 				abilityCooldownBuff = true;
-				std::cout << " SHOPING C" << std::endl;
+				std::cout << " SHOPING AAAAAAAAAAAA" << std::endl;
 				Get<TTN_Renderer2D>(buttonAbilityCD).SetColor(glm::vec4(0.5f));
 			}
 			else {// if power up is active

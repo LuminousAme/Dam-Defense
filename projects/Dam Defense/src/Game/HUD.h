@@ -21,6 +21,9 @@ public:
 	//sets up the scene
 	void InitScene();
 
+	//restart the scene
+	void RestartData();
+
 	//update the scene
 	void Update(float deltaTime);
 

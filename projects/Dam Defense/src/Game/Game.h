@@ -304,9 +304,14 @@ protected:
 
 	//bool for whether faster cannon buff form the shop is active
 	bool cannonBuff;
+	unsigned cannonCost; //score cost of cannon powerup 
+	bool cannonScoreCost;
 
 	//bool for whether faster ability cooldowns from the shop is active
 	bool abilityCooldownBuff; 
+	unsigned abilityCost; //score cost of ability powerup 
+	bool abilityScoreCost;
+
 
 	/////////// SOUND CONTROL///////////////
 	//control melody
@@ -360,6 +365,7 @@ protected:
 	//sounds
 	void GameSounds(float dt);
 	//misc
+	void Shop(float deltaTime);
 	void BirdBomb();
 	void MakeABird();
 	void BirdUpate(float deltaTime);

@@ -118,38 +118,8 @@ void Game::Update(float deltaTime)
 		m_gameWin = true;
 	}
 
-	//heal from shop
-	if ((healCounter > 0)) {
-		if (m_score < healCost) { //if score is less than the cost, do nothing
-		}
-		else {
-			if (Dam_health < 100.f && Dam_health>90.f) { // if dam health is above 90 but below 100
-				healAmount = abs(Dam_health - 100.f); //get remaining health
-			}
-			else // else normal heal amount
-				healAmount = 10.f;
-
-			Dam_health = Dam_health + healAmount; //heal
-			//Dam_health = round(Dam_health);
-			m_score = m_score - healCost;//score cost of heal
-			std::cout << Dam_health << std::endl;
-		}
-	}
-
-	if (cannonBuff) {
-		playerShootCooldown = 0.45f;
-
-		std::cout << "  CD LOWWW " << std::endl;
-	}
-	else {
-		playerShootCooldown = 0.7f;
-	}
-
-	//if the player has lower ability cd from shop
-	if (abilityCooldownBuff) {
-		FlameTimer = FlameTimer - deltaTime;
-		BombTimer = BombTimer - deltaTime;
-	}
+	//shop function
+	Shop(deltaTime);
 
 	ColorCorrection();
 
@@ -879,7 +849,11 @@ void Game::RestartData()
 	healCounter = 0;
 	healCost = 5;
 	cannonBuff = false;
+	cannonCost = 10;
 	abilityCooldownBuff = false;
+	abilityCost = 15;
+	cannonScoreCost = false;
+	abilityScoreCost = false;
 
 	//enemy and wave data setup
 	m_currentWave = 0;
@@ -948,8 +922,7 @@ void Game::RestartData()
 
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	firstFrame = true;
-
-	float m_passes = 0.f;
+	m_score = 0;
 }
 
 #pragma endregion
@@ -1535,6 +1508,9 @@ void Game::WaveUpdate(float deltaTime) {
 		playJingle = true;
 		m_waveInProgress = false;
 		Dam_health = round(Dam_health); // round the health at the end of the round
+		abilityScoreCost = false;
+		cannonScoreCost = false;
+		std::cout << cannonScoreCost << std::endl;
 	}
 
 	//if it is in the cooldown between waves, reduce the cooldown by deltaTime
@@ -1550,6 +1526,8 @@ void Game::WaveUpdate(float deltaTime) {
 		m_timeUntilNextSpawn = 0.0f;
 		m_waveInProgress = true;
 		m_firstWave = false;
+		//reset shop cost bools
+		std::cout << cannonScoreCost << std::endl;
 	}
 	//otherwise, check if it should spawn
 	else {
@@ -1955,10 +1933,58 @@ void Game::GameSounds(float deltaTime)
 	melodyTimeTracker += deltaTime;
 }
 
+void Game::Shop(float deltaTime)
+{
+	//heal from shop
+	if ((healCounter > 0)) {
+		//if (m_score < healCost) { //if score is less than the cost, do nothing
+		//}
+		//else {
+		if (Dam_health < 100.f && Dam_health>90.f) { // if dam health is above 90 but below 100
+			healAmount = abs(Dam_health - 100.f); //get remaining health
+		}
+		else // else normal heal amount
+			healAmount = 10.f;
+
+		Dam_health = Dam_health + healAmount; //heal
+		//Dam_health = round(Dam_health);
+		m_score = m_score - healCost;//score cost of heal
+		//std::cout << Dam_health << std::endl;
+		//}
+	}
+
+	if (cannonBuff) {
+		playerShootCooldown = 0.45f;
+		//std::cout << "  CD LOWWW " << std::endl;
+		if (!cannonScoreCost) {
+			m_score = m_score - cannonCost;//score cost of cannon powerup
+			cannonScoreCost = true;
+			std::cout << "  CD LOWWW " << std::endl;
+		}
+	}
+	else {
+		playerShootCooldown = 0.7f;
+		cannonScoreCost = false;
+	}
+
+	//if the player has lower ability cd from shop
+	if (abilityCooldownBuff) {
+		FlameTimer = FlameTimer - deltaTime;
+		BombTimer = BombTimer - deltaTime;
+		if (!abilityScoreCost) {
+			m_score = m_score - abilityCost;//score cost of ability power up
+			abilityScoreCost = true;
+		}
+	}
+	else {
+		abilityScoreCost = false;
+	}
+}
+
 //function for bird bomb, decides which ship to target and sends the birds after them
 void Game::BirdBomb()
 {
-	std::cout << (int)Bombing << std::endl;
+	//std::cout << (int)Bombing << std::endl;
 	//if the bird bomb is not active and isn't on cooldown
 	if (!Bombing && BombTimer <= 0.0f) {
 		//set bombing to true
@@ -2004,14 +2030,14 @@ void Game::BirdBomb()
 		//if the target is null, turn bombing to false as there were no valid targets for the birds to target
 		if (currentTarget == entt::null) {
 			Bombing = false;
-			std::cout << "No target found\n";
+			//std::cout << "No target found\n";
 		}
 		else
-			std::cout << "Target found\n";
+			//std::cout << "Target found\n";
 
 		//loop through and set the target for all of the birds
-		for (auto bird : birds)
-			Get<BirdComponent>(bird).SetTarget(currentTarget);
+			for (auto bird : birds)
+				Get<BirdComponent>(bird).SetTarget(currentTarget);
 	}
 }
 

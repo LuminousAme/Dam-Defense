@@ -68,9 +68,9 @@ int main() {
 	gameWin->SetShouldRender(false);
 	gameWinUI->SetShouldRender(false);
 	options->SetShouldRender(false);
-//	shop->SetShouldRender(false);
+	//	shop->SetShouldRender(false);
 
-	//add them to the application
+		//add them to the application
 	TTN_Application::scenes.push_back(splash);
 	TTN_Application::scenes.push_back(loadingScreen);
 	TTN_Application::scenes.push_back(gameScene);
@@ -127,7 +127,6 @@ int main() {
 			gameWin->InitScene();
 			gameWinUI->InitScene();
 			//shop->InitScene();
-			//shop->SetShouldRender(false);
 			gameOver->SetShouldRender(false);
 			gameOverUI->SetShouldRender(false);
 			gameWin->SetShouldRender(false);
@@ -157,8 +156,9 @@ int main() {
 			gameScene->SetPaused(false);
 			gameSceneUI->SetShouldRender(true);
 			//shop->SetShouldRender(false);
-			gameScene->RestartData();
 			paused->SetShouldRender(false);
+			gameSceneUI->RestartData();
+			gameScene->RestartData();
 		}
 
 		/// OPTIONS ////
@@ -277,7 +277,7 @@ int main() {
 			paused->SetPaused(false);
 			paused->SetShouldResume(true);
 			gameSceneUI->SetShouldExit(false);
-			std::cout << "  MAINNNNN " << std::endl;
+			//std::cout << "  MAINNNNN " << std::endl;
 		}
 
 		///// SHOP ///////
@@ -345,6 +345,7 @@ int main() {
 			gameSceneUI->SetShouldRender(true);
 			gameScene->SetGameIsOver(false);
 			gameScene->RestartData();
+			gameSceneUI->RestartData();
 		}
 
 		//game over go to menu
@@ -385,6 +386,7 @@ int main() {
 			gameSceneUI->SetShouldRender(true);
 			gameScene->SetGameIsOver(false);
 			gameScene->RestartData();
+			gameSceneUI->RestartData();
 		}
 
 		//if game win and they want to go back to the main menu
