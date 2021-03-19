@@ -68,9 +68,9 @@ int main() {
 	gameWin->SetShouldRender(false);
 	gameWinUI->SetShouldRender(false);
 	options->SetShouldRender(false);
-	//	shop->SetShouldRender(false);
+//	shop->SetShouldRender(false);
 
-		//add them to the application
+	//add them to the application
 	TTN_Application::scenes.push_back(splash);
 	TTN_Application::scenes.push_back(loadingScreen);
 	TTN_Application::scenes.push_back(gameScene);
@@ -403,6 +403,7 @@ int main() {
 			//pass the score between the scenes
 			gameScene->SetHealCounter(gameSceneUI->GetHealCounter());
 			gameScene->SetCannonBuff(gameSceneUI->GetCannonPower());
+			gameScene->SetAbilityBuff(gameSceneUI->GetAbilityBuff());
 
 			gameSceneUI->SetScore(gameScene->GetScore());
 			gameSceneUI->SetDamHP(gameScene->GetDamHealth());

@@ -63,9 +63,10 @@ public:
 	bool GetCannonPower() { return cannonPower; }
 	void SetCannonPower(bool power) { cannonPower = power; }
 
+	bool GetAbilityBuff() { return abilityCooldownBuff; }
+
 	bool GetShouldExit() { return shouldExitShop; }
 	void SetShouldExit(bool exit) { shouldExitShop = exit; }
-
 private:
 
 #pragma region ENTITES AND STUFF
@@ -126,6 +127,7 @@ private:
 	//shop buttons
 	entt::entity buttonHealth;
 	entt::entity buttonCannon;
+	entt::entity buttonAbilityCD;
 
 	//assets
 	TTN_Texture2D::st2dptr textureShop;//shop text/title
@@ -156,7 +158,6 @@ private:
 	bool shouldExitShop; //exit bool
 	bool shopOnce = false; //variable for only spawning the shop once per end of round
 
-
 	float lerpTime = 10.0f;
 	float lerpTotalTime = 1.5f;
 	bool shouldShop = false;
@@ -169,6 +170,9 @@ private:
 	bool healOnce; // bool to keep track of whether the player can buy the heal
 
 	bool cannonPower;//bool for cannon powerup
+
+	//bool for whether faster ability cooldowns from the shop is active
+	bool abilityCooldownBuff;
 
 	//the time remaining before it accepts player input, used for the shop
 	float m_InputDelay = 0.3f;
@@ -191,7 +195,6 @@ private:
 	void MakeFlamethrowerNumEntity();
 	void MakeBirdBombNumEntity();
 };
-
 
 //get the number of digits in a number
 inline unsigned GetNumOfDigits(unsigned int number) {

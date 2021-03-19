@@ -122,6 +122,8 @@ public:
 	bool GetCannonBuff() { return cannonBuff; }
 	void SetCannonBuff(bool buff) { cannonBuff = buff; }
 
+	void SetAbilityBuff(bool buff) { abilityCooldownBuff = buff; }
+
 	//function to restart the game reseting all the data
 	void RestartData();
 	//Assets
@@ -300,7 +302,11 @@ protected:
 	unsigned healCost; //score cost of heal 
 	int healCounter;
 
+	//bool for whether faster cannon buff form the shop is active
 	bool cannonBuff;
+
+	//bool for whether faster ability cooldowns from the shop is active
+	bool abilityCooldownBuff; 
 
 	/////////// SOUND CONTROL///////////////
 	//control melody

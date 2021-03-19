@@ -138,10 +138,18 @@ void Game::Update(float deltaTime)
 
 	if (cannonBuff) {
 		playerShootCooldown = 0.45f;
+
 		std::cout << "  CD LOWWW " << std::endl;
 	}
-	else
+	else {
 		playerShootCooldown = 0.7f;
+	}
+
+	//if the player has lower ability cd from shop
+	if (abilityCooldownBuff) {
+		FlameTimer = FlameTimer - deltaTime;
+		BombTimer = BombTimer - deltaTime;
+	}
 
 	ColorCorrection();
 
@@ -871,6 +879,7 @@ void Game::RestartData()
 	healCounter = 0;
 	healCost = 5;
 	cannonBuff = false;
+	abilityCooldownBuff = false;
 
 	//enemy and wave data setup
 	m_currentWave = 0;
