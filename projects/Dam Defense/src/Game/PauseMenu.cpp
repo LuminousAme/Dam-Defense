@@ -122,7 +122,7 @@ void PauseMenu::InitScene()
 	}
 
 
-
+	TTN_Scene::InitScene();
 }
 
 void PauseMenu::Update(float deltaTime)

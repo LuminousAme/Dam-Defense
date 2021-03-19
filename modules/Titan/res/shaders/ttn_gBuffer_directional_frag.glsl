@@ -67,11 +67,10 @@ float ShadowCalculation(vec4 fragPosLightSpace, float bias)
 
 // https://learnopengl.com/Advanced-Lighting/Advanced-Lighting
 void main() {
-
     //albedo 
     vec4 textureColor = texture(s_albedoTex, inUV);
     //normals
-    vec3 inNormal = (normalize(texture(s_normalsTex,inUV).rgb)*2.0 )-1.0;
+    vec3 inNormal = (normalize(texture(s_normalsTex,inUV).rgb) * 2.0) - 1.0;
     //specular
     float texSpec = texture(s_specularTex,inUV).r;
     //positions

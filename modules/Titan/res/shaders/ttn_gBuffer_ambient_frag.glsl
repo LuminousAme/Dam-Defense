@@ -28,15 +28,12 @@ layout (std140, binding = 0) uniform u_Lights
     DirectionalLight ambience;
 };
 
-
 layout (binding = 0) uniform sampler2D s_albedoTex;
 layout (binding = 4) uniform sampler2D s_lightAccumTex;
 
 out vec4 frag_color;
 
-
-void main(){
-
+void main() {
     //albedo 
     vec4 textureColor = texture(s_albedoTex, inUV); 
 
@@ -50,5 +47,5 @@ void main(){
     vec3 result = (ambient + lightAccum.rgb) * textureColor.rgb;
 
     //the light accumulation
-    frag_color = vec4 (result,1.0);
+    frag_color = vec4(result, 1.0);
 }

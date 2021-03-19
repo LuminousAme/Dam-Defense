@@ -496,6 +496,8 @@ void OptionsMenu::InitScene()
 
 
 	ReadFromFile();
+
+	TTN_Scene::InitScene();
 }
 
 void OptionsMenu::Update(float deltaTime)

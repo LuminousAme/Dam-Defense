@@ -355,6 +355,13 @@ protected:
 	bool m_applyCoolLut;
 	bool m_applyCustomLut;
 
+	//bloom effect
+	TTN_BloomEffect::sbloomptr m_bloomEffect;
+	float m_bloomThreshold = 0.55f;
+	int m_numOfBloomPasses;
+	unsigned m_bloomBufferDivisor;
+	float m_bloomRadius = 3.0f;
+
 	bool m_noLighting;
 	bool m_ambientOnly;
 	bool m_specularOnly;
@@ -383,4 +390,12 @@ inline float SlowStart(float t) {
 
 inline float ZeroOneZero(float t) {
 	return (-4.0f * (t * t) + 4.0f * t);
+}
+
+inline float ZeroUntilHalfThenOne(float t){
+	if (t <= 0.5f) {
+		return 0.0f;
+	}
+	
+	return TTN_Interpolation::ReMap(0.5f, 1.0f, 0.0f, 1.0f, t);
 }

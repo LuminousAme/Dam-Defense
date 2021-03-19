@@ -20,12 +20,14 @@ void MainMenu::InitScene()
 
 	//create the entities
 	SetUpEntities();
+
+	TTN_Scene::InitScene();
 }
 
 void MainMenu::Update(float deltaTime)
 {
 	//increase the total time of the scene to make the water animated correctly
-	time += deltaTime;
+	time += deltaTime / 2.5f;
 
 	//call imgui's update for this scene
 	ImGui();
@@ -36,7 +38,13 @@ void MainMenu::Update(float deltaTime)
 
 void MainMenu::PostRender()
 {
-	//terrain
+	//disable blending so the gBuffer can draw properlly
+	glDisable(GL_BLEND);
+
+	//bind the geometry buffer
+	gBuffer->Bind();
+
+	//render the terrain
 	{
 		//bind the shader
 		shaderProgramTerrain->Bind();
@@ -68,60 +76,15 @@ void MainMenu::PostRender()
 
 		m_mats[0]->GetDiffuseRamp()->Bind(10);
 		m_mats[0]->GetSpecularMap()->Bind(11);
-		
+
 		//set if the albedo textures should be used
 		shaderProgramTerrain->SetUniform("u_UseDiffuse", (int)m_mats[0]->GetUseAlbedo());
-
-		//send lighting from the scene
-		shaderProgramTerrain->SetUniform("u_AmbientCol", TTN_Scene::GetSceneAmbientColor());
-		shaderProgramTerrain->SetUniform("u_AmbientStrength", TTN_Scene::GetSceneAmbientLightStrength());
-		shaderProgramTerrain->SetUniform("u_Shininess", 128.0f);
-		shaderProgramTerrain->SetUniform("u_hasAmbientLighting", (int)m_mats[0]->GetHasAmbient());
-		shaderProgramTerrain->SetUniform("u_hasSpecularLighting", (int)m_mats[0]->GetHasSpecular());
-		shaderProgramTerrain->SetUniform("u_hasOutline", (int)m_mats[0]->GetHasOutline());
-		shaderProgramTerrain->SetUniform("u_useDiffuseRamp", m_mats[0]->GetUseDiffuseRamp());
-		shaderProgramTerrain->SetUniform("u_useSpecularRamp", (int)m_mats[0]->GetUseSpecularRamp());
-		//stuff from the light
-		glm::vec3 lightPositions[16];
-		glm::vec3 lightColor[16];
-		float lightAmbientStr[16];
-		float lightSpecStr[16];
-		float lightAttenConst[16];
-		float lightAttenLinear[16];
-		float lightAttenQuadartic[16];
-
-		for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
-			auto& light = Get<TTN_Light>(m_Lights[i]);
-			auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
-			lightPositions[i] = lightTrans.GetPos();
-			lightColor[i] = light.GetColor();
-			lightAmbientStr[i] = light.GetAmbientStrength();
-			lightSpecStr[i] = light.GetSpecularStrength();
-			lightAttenConst[i] = light.GetConstantAttenuation();
-			lightAttenLinear[i] = light.GetConstantAttenuation();
-			lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
-		}
-
-		//send all the data about the lights to glsl
-		shaderProgramTerrain->SetUniform("u_LightPos", lightPositions[0], 16);
-		shaderProgramTerrain->SetUniform("u_LightCol", lightColor[0], 16);
-		shaderProgramTerrain->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
-		shaderProgramTerrain->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
-		shaderProgramTerrain->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
-		shaderProgramTerrain->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
-		shaderProgramTerrain->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
-
-		//and tell it how many lights there actually are
-		shaderProgramTerrain->SetUniform("u_NumOfLights", (int)m_Lights.size());
-
-		//stuff from the camera
-		shaderProgramTerrain->SetUniform("u_CamPos", Get<TTN_Transform>(camera).GetPos());
 
 		//render the terrain
 		terrainPlain->GetVAOPointer()->Render();
 	}
 
-	//water
+	//render the water
 	{
 		//bind the shader
 		shaderProgramWater->Bind();
@@ -151,13 +114,20 @@ void MainMenu::PostRender()
 		waterText->Bind(0);
 
 		//send lighting from the scene
-		shaderProgramWater->SetUniform("u_AmbientCol", TTN_Scene::GetSceneAmbientColor());
-		shaderProgramWater->SetUniform("u_AmbientStrength", TTN_Scene::GetSceneAmbientLightStrength());
+		shaderProgramWater->SetUniform("u_UseDiffuse", (int)m_mats[0]->GetUseAlbedo());
 
 		//render the water (just use the same plane as the terrain)
 		terrainPlain->GetVAOPointer()->Render();
 	}
 
+	//unbind the geometry buffer
+	gBuffer->Unbind();
+
+	//enable blending again so it works on everything else
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	//and do the rest of the titan side rendering
 	TTN_Scene::PostRender();
 }
 
@@ -235,6 +205,7 @@ void MainMenu::SetUpEntities()
 	//entity for the skybox
 	{
 		skybox = CreateEntity();
+		SetSkyboxEntity(skybox);
 
 		//setup a mesh renderer for the skybox
 		TTN_Renderer skyboxRenderer = TTN_Renderer(skyboxMesh, shaderProgramSkybox);
@@ -816,6 +787,8 @@ void MainMenuUI::InitScene()
 		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureButton1);
 		AttachCopy(temp, buttonRenderer);
 	}
+
+	TTN_Scene::InitScene();
 }
 
 void MainMenuUI::Update(float deltaTime)

@@ -63,6 +63,8 @@ void SplashCard::InitScene()
 		TTN_Renderer2D bgRenderer2D = TTN_Renderer2D(bgText, glm::vec4(1.0f), 1);
 		AttachCopy(background, bgRenderer2D);
 	}	
+
+	TTN_Scene::InitScene();
 }
 
 //update function, runs once every frame

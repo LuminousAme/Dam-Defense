@@ -138,6 +138,10 @@ namespace Titan {
 		void SetCamEntity(const entt::entity& cam) { m_Cam = cam; }
 		//gets the camera entity
 		const entt::entity& GetCamEntity() { return m_Cam; }
+		//Sets the skybox entity reference
+		void SetSkyboxEntity(const entt::entity& skybox) { m_Skybox = skybox; }
+		//gets the skybox entity
+		const entt::entity& GetSkyboxEntity() { return m_Skybox; }
 
 		//bullet physics stuff
 		//set the gravity
@@ -212,7 +216,7 @@ namespace Titan {
 		TTN_GBuffer::sgbufptr gBuffer; //gBuffer for initial 3D geometry rendering
 		TTN_IlluminationBuffer::sillbufptr illBuffer; //illumination buffer for applying lights to the gBuffer
 		TTN_PostEffect::spostptr m_emptyEffect; //empty post effect buffer that 2D sprites and particle will get drawn too
-		TTN_CombineFrameBuffer::scombineptr sceneBuffer; //the final buffer that all of the other buffers draw into, and then this draws the final result to the screen
+		TTN_PostEffect::spostptr sceneBuffer; //the final buffer that all of the other buffers draw into, and then this draws the final result to the screen
 
 		//vector to store the post processing effects
 		std::vector<TTN_PostEffect::spostptr> m_PostProcessingEffects;
@@ -243,6 +247,9 @@ namespace Titan {
 
 		//variable to store the entity for the camera
 		entt::entity m_Cam;
+
+		//variable to store the skybox
+		entt::entity m_Skybox = entt::null;
 
 		//the colour of the scene's ambient lighting
 		glm::vec3 m_AmbientColor;

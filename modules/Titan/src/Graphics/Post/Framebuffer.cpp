@@ -31,9 +31,9 @@ namespace Titan {
 	//unloads all the color targets
 	void TTN_ColorTarget::Unload()
 	{
-		if (m_numAttachments > 0) {
+		for(int i = 0; i < m_numAttachments; i++) {
 			//delete all the color target textures
-			glDeleteTextures(m_numAttachments, &m_textures[0]->GetHandle());
+			glDeleteTextures(1, &m_textures[i]->GetHandle());
 		}
 	}
 

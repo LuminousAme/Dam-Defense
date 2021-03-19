@@ -383,6 +383,8 @@ void GameUI::InitScene()
 		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bird Bomb Key"));
 		AttachCopy(birdBombKey, Renderer);
 	}
+
+	TTN_Scene::InitScene();
 }
 
 void GameUI::Update(float deltaTime)
