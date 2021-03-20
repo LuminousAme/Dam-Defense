@@ -1508,9 +1508,9 @@ void Game::WaveUpdate(float deltaTime) {
 		playJingle = true;
 		m_waveInProgress = false;
 		Dam_health = round(Dam_health); // round the health at the end of the round
+		//reset shop cost bools
 		abilityScoreCost = false;
 		cannonScoreCost = false;
-		std::cout << cannonScoreCost << std::endl;
 	}
 
 	//if it is in the cooldown between waves, reduce the cooldown by deltaTime
@@ -1526,8 +1526,6 @@ void Game::WaveUpdate(float deltaTime) {
 		m_timeUntilNextSpawn = 0.0f;
 		m_waveInProgress = true;
 		m_firstWave = false;
-		//reset shop cost bools
-		std::cout << cannonScoreCost << std::endl;
 	}
 	//otherwise, check if it should spawn
 	else {
@@ -1956,7 +1954,7 @@ void Game::Shop(float deltaTime)
 	if (cannonBuff) {
 		playerShootCooldown = 0.45f;
 		//std::cout << "  CD LOWWW " << std::endl;
-		if (!cannonScoreCost) {
+		if (!cannonScoreCost && m_score >= cannonCost) {
 			m_score = m_score - cannonCost;//score cost of cannon powerup
 			cannonScoreCost = true;
 			std::cout << "  CD LOWWW " << std::endl;
@@ -1971,7 +1969,7 @@ void Game::Shop(float deltaTime)
 	if (abilityCooldownBuff) {
 		FlameTimer = FlameTimer - deltaTime;
 		BombTimer = BombTimer - deltaTime;
-		if (!abilityScoreCost) {
+		if (!abilityScoreCost && m_score >= abilityCost) {
 			m_score = m_score - abilityCost;//score cost of ability power up
 			abilityScoreCost = true;
 		}
@@ -1979,6 +1977,9 @@ void Game::Shop(float deltaTime)
 	else {
 		abilityScoreCost = false;
 	}
+
+	if (m_score < 0)
+		m_score = 0;
 }
 
 //function for bird bomb, decides which ship to target and sends the birds after them

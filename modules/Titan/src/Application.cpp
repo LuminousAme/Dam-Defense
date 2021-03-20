@@ -1,9 +1,9 @@
-//Titan Engine, by Atlas X Games 
+//Titan Engine, by Atlas X Games
 // Application.cpp - source file for the class that runs the program, creating the window, etc.
 
 //include the precompile header, this file uses stdio.h
 #include "Titan/ttn_pch.h"
-//include the header 
+//include the header
 #include "Titan/Application.h"
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include "imgui.h"
@@ -26,12 +26,12 @@ namespace Titan {
 	std::unordered_map<TTN_MouseButton, bool> TTN_Application::TTN_Input::MouseHandled;
 	glm::vec2 TTN_Application::TTN_Input::mousePos = glm::vec2(0.0f);
 	bool TTN_Application::TTN_Input::inFrame = false;
-	std::vector<std::function<void()>> imGuiCallbacks; 
+	std::vector<std::function<void()>> imGuiCallbacks;
 
-	//function to initialize a new window 
+	//function to initialize a new window
 	void TTN_Application::Init(const std::string name, int width, int height, bool fullScreen)
 	{
-		//init GLFW and check it initliazed properly 
+		//init GLFW and check it initliazed properly
 		if (glfwInit() == GLFW_FALSE)
 		{
 			//if it did not init properly print that to the console and throw a runtime error
@@ -42,8 +42,8 @@ namespace Titan {
 		//prevent the user from resizing the window at will (it could distort our graphics if they could)
 		glfwWindowHint(GLFW_RESIZABLE, false);
 
-		//create the window 
-		if(!fullScreen) m_window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
+		//create the window
+		if (!fullScreen) m_window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
 		else m_window = glfwCreateWindow(width, height, name.c_str(), glfwGetPrimaryMonitor(), nullptr);
 
 		//set the window we want to draw on to the window that was just created
@@ -52,7 +52,7 @@ namespace Titan {
 		//send the window to backend so other parts of titan can access the screensize
 		TTN_Backend::setWindow(m_window);
 
-		//initliaze glad and check it initliazed properly 
+		//initliaze glad and check it initliazed properly
 		if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) == 0) {
 			//if it did not init properly print that to the console and throw a runtime error
 			printf("glad init failed.");
@@ -62,7 +62,7 @@ namespace Titan {
 		//set the cursor callbacks so we can get the cursor position
 		glfwSetCursorEnterCallback(m_window, TTN_Input::cursorEnterFrameCallback);
 
-		//enable depth test so things don't get drawn on top of objects behind them 
+		//enable depth test so things don't get drawn on top of objects behind them
 		glEnable(GL_DEPTH_TEST);
 
 		//enable cull faces so only the front faces are rendered, this will improve performance and model back faces shouldn't be
@@ -90,7 +90,7 @@ namespace Titan {
 
 		//set up the audio engine
 		m_soundEngine.Init();
-		
+
 		//Set the background colour for our scene to the base red
 		glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
 	}
@@ -106,7 +106,7 @@ namespace Titan {
 		return glfwWindowShouldClose(m_window);
 	}
 
-	//function that cleans things up when the window closes so there are no memory leaks and everything goes cleanly 
+	//function that cleans things up when the window closes so there are no memory leaks and everything goes cleanly
 	void TTN_Application::Closing()
 	{
 		//clean up imgui
@@ -115,7 +115,7 @@ namespace Titan {
 		//shutdown the audio engine
 		m_soundEngine.Shutdown();
 
-		//have glfw destroy the window 
+		//have glfw destroy the window
 		glfwDestroyWindow(m_window);
 
 		//close glfw
@@ -128,15 +128,15 @@ namespace Titan {
 
 	void TTN_Application::NewFrameStart()
 	{
-		//Find deltatime for the frame 
+		//Find deltatime for the frame
 		//first grab the current time from glfw
 		float Currenttime = (float)glfwGetTime();
 		//calculate deltatime by subtracting the time at the last frame
 		m_dt = Currenttime - m_previousFrameTime;
-		//save time in the previous frame time variable so we can calculate deltatime correctly next frame 
+		//save time in the previous frame time variable so we can calculate deltatime correctly next frame
 		m_previousFrameTime = Currenttime;
 
-		//Clear our window 
+		//Clear our window
 		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
@@ -147,33 +147,33 @@ namespace Titan {
 		return m_dt;
 	}
 
-	//function to set the background colour that the window clears to 
+	//function to set the background colour that the window clears to
 	void TTN_Application::SetClearColor(const glm::vec4& clearColor)
 	{
 		glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	}
 
-	//function to run each frame 
+	//function to run each frame
 	void TTN_Application::Update()
 	{
 		if (!m_hasQuit) {
-			//start a new frame 
+			//start a new frame
 			TTN_Application::NewFrameStart();
 
 			//start ImGui
 			StartImgui();
 
-			//check for events from glfw 
+			//check for events from glfw
 			glfwPollEvents();
 
 			//update the asset system
 			TTN_AssetSystem::Update();
 
-			//go through each scene 
+			//go through each scene
 			for (int i = 0; i < TTN_Application::scenes.size(); i++) {
 				//and check if they should be rendered
 				if (TTN_Application::scenes[i]->GetShouldRender()) {
-					//if they should, then check input, update, and render them 
+					//if they should, then check input, update, and render them
 					TTN_Application::scenes[i]->KeyDownChecks();
 					TTN_Application::scenes[i]->KeyChecks();
 					TTN_Application::scenes[i]->KeyUpChecks();
@@ -197,7 +197,7 @@ namespace Titan {
 			m_soundEngine.Update();
 
 			//now all the scenes that should be rendered (current gameplay scene, ui, etc.) will be rendered
-			//while anything that doesn't need to be rendered (such as a prefabs scene) will not 
+			//while anything that doesn't need to be rendered (such as a prefabs scene) will not
 
 			//end Imgui, rendering it
 			EndImgui();
@@ -205,7 +205,7 @@ namespace Titan {
 			//set the last effect to nullpointer so it's set up correctly for the next frame
 			TTN_Backend::SetLastEffect(nullptr);
 
-			//swap the buffers so all the drawings that the scenes just did are acutally visible 
+			//swap the buffers so all the drawings that the scenes just did are acutally visible
 			glfwSwapBuffers(m_window);
 		}
 	}
@@ -244,7 +244,7 @@ namespace Titan {
 		ImGui_ImplGlfw_InitForOpenGL(m_window, true);
 		ImGui_ImplOpenGL3_Init("#version 420");
 
-		// Dark mode 
+		// Dark mode
 		ImGui::StyleColorsDark();
 
 		// Get our imgui style
@@ -307,7 +307,7 @@ namespace Titan {
 		//check if the keyinputted currently exists in the map
 		if (KeyWasPressedMap.find(key) == KeyWasPressedMap.end())
 		{
-			//if it doesn't, add it to the map (doing this here means we only add keys to the map if the user acutally wants to use them) 
+			//if it doesn't, add it to the map (doing this here means we only add keys to the map if the user acutally wants to use them)
 			KeyWasPressedMap[key] = false;
 			KeyHandled[key] = false;
 			KeyPressed[key] = false;
@@ -399,7 +399,7 @@ namespace Titan {
 			glfwGetCursorPos(m_window, &tempX, &tempY);
 			mousePos = glm::vec2(tempX, tempY);
 		}
-			
+
 		//pass the mouse position to the user
 		return mousePos;
 	}
@@ -410,7 +410,7 @@ namespace Titan {
 		//check if the button inputted currently exists in the map
 		if (MouseWasPressedMap.find(button) == MouseWasPressedMap.end())
 		{
-			//if it doesn't, add it to the map (doing this here means we only add buttons to the map if the user acutally wants to use them) 
+			//if it doesn't, add it to the map (doing this here means we only add buttons to the map if the user acutally wants to use them)
 			MouseWasPressedMap[button] = false;
 			MouseHandled[button] = false;
 			MousePressed[button] = false;
@@ -495,7 +495,7 @@ namespace Titan {
 	void TTN_Application::TTN_Input::SetCursorHidden(bool hidden)
 	{
 		//if they want to hide the cursor, tell glfw to make it invisible
-		if(!hidden) glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		if (!hidden) glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 		//otherwise make it visible as normal
 		else  glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
@@ -524,5 +524,4 @@ namespace Titan {
 		glfwGetWindowSize(m_window, &width, &height);
 		return glm::ivec2(width, height);
 	}
- 
 }

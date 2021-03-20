@@ -124,6 +124,7 @@ public:
 
 	void SetAbilityBuff(bool buff) { abilityCooldownBuff = buff; }
 
+	int GetLastWave() { return lastWave; }
 	//function to restart the game reseting all the data
 	void RestartData();
 	//Assets
@@ -299,19 +300,18 @@ protected:
 
 	/////////// SHOP RELATED STUFF///////////////
 	float healAmount; //heal the dam by this much
-	unsigned healCost; //score cost of heal 
+	unsigned healCost; //score cost of heal
 	int healCounter;
 
 	//bool for whether faster cannon buff form the shop is active
 	bool cannonBuff;
-	unsigned cannonCost; //score cost of cannon powerup 
+	unsigned cannonCost; //score cost of cannon powerup
 	bool cannonScoreCost;
 
 	//bool for whether faster ability cooldowns from the shop is active
-	bool abilityCooldownBuff; 
-	unsigned abilityCost; //score cost of ability powerup 
+	bool abilityCooldownBuff;
+	unsigned abilityCost; //score cost of ability powerup
 	bool abilityScoreCost;
-
 
 	/////////// SOUND CONTROL///////////////
 	//control melody
@@ -392,7 +392,7 @@ protected:
 
 	//the radius of the effect
 	float m_radius = 1.0f;
-	
+
 	//bools for imgui controls
 	bool m_applyWarmLut;
 	bool m_applyCoolLut;

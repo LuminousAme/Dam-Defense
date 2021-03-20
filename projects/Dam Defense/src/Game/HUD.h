@@ -70,6 +70,9 @@ public:
 
 	bool GetShouldExit() { return shouldExitShop; }
 	void SetShouldExit(bool exit) { shouldExitShop = exit; }
+
+	void SetLastWave(int wave) { lastWave = wave; }
+
 private:
 
 #pragma region ENTITES AND STUFF
@@ -156,6 +159,8 @@ private:
 	float m_waveCompleteTime = 10.0f;
 	float m_waveCompleteTotalTime = 4.0f;
 	bool waveDone = false;
+
+	int lastWave; //last wave of the game
 
 	//shop stuff
 	bool shouldExitShop; //exit bool

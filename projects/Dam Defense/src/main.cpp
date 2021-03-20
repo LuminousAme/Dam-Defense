@@ -407,6 +407,7 @@ int main() {
 			gameScene->SetCannonBuff(gameSceneUI->GetCannonPower());
 			gameScene->SetAbilityBuff(gameSceneUI->GetAbilityBuff());
 
+			gameSceneUI->SetLastWave(gameScene->GetLastWave());
 			gameSceneUI->SetScore(gameScene->GetScore());
 			gameSceneUI->SetDamHP(gameScene->GetDamHealth());
 			gameSceneUI->SetWaveProgress(gameScene->GetWaveProgress());

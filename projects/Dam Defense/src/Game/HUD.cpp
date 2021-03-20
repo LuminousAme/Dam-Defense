@@ -28,6 +28,7 @@ void GameUI::InitScene()
 	healOnce = false;
 	cannonPower = false;
 	m_score = 0;
+	lastWave = 3;
 	//std::cout << waveTracker << "  wave " << std::endl;
 	//std::cout << m_currentWave << " Curretn  wave " << std::endl;
 
@@ -752,7 +753,7 @@ void GameUI::Update(float deltaTime)
 			std::abs(Get<TTN_Transform>(completeText).GetScale().x), 0.0f, 0.0f));
 
 		//when the text leaves opens shop and resets all shop based power ups
-		if ((firstNumTrans.GetGlobalPos().x <= 99.9f && firstNumTrans.GetGlobalPos().x >= 0.f) && !shopOnce) {
+		if ((firstNumTrans.GetGlobalPos().x <= 99.9f && firstNumTrans.GetGlobalPos().x >= 0.f) && !shopOnce && (m_currentWave != lastWave)) {
 			shouldShop = true;
 			shopOnce = true;
 			cannonPower = false;
