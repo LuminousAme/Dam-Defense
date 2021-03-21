@@ -124,6 +124,8 @@ public:
 
 	void SetAbilityBuff(bool buff) { abilityCooldownBuff = buff; }
 
+	void SetUpgradeBuff(bool up) { upgradeAbilities = up; }
+
 	int GetLastWave() { return lastWave; }
 	//function to restart the game reseting all the data
 	void RestartData();
@@ -310,8 +312,13 @@ protected:
 
 	//bool for whether faster ability cooldowns from the shop is active
 	bool abilityCooldownBuff;
-	unsigned abilityCost; //score cost of ability powerup
+	unsigned abilityCost; //score cost of ability cd powerup
 	bool abilityScoreCost;
+
+	//bool for upgrade to abilites
+	bool upgradeAbilities;
+	unsigned upgradeCost; //score cost of upgrade powerup
+	bool upgradeScoreCost; //bool to reset after every round
 
 	/////////// SOUND CONTROL///////////////
 	//control melody

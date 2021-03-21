@@ -406,6 +406,8 @@ int main() {
 			gameScene->SetHealCounter(gameSceneUI->GetHealCounter());
 			gameScene->SetCannonBuff(gameSceneUI->GetCannonPower());
 			gameScene->SetAbilityBuff(gameSceneUI->GetAbilityBuff());
+			gameScene->SetUpgradeBuff(gameSceneUI->GetUpgradeBuff());
+			//gameScene->SetUpgradeBuff(true);
 
 			gameSceneUI->SetLastWave(gameScene->GetLastWave());
 			gameSceneUI->SetScore(gameScene->GetScore());

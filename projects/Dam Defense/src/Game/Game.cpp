@@ -720,7 +720,7 @@ void Game::SetUpOtherData()
 		fireParticle.SetOneEndColor(glm::vec4(1.0f, 0.2f, 0.0f, 0.0f));
 		fireParticle.SetOneEndSize(4.0f / 10.0f);
 		fireParticle.SetOneEndSpeed(6.0f / 10.0f);
-		fireParticle.SetOneLifetime(2.0f);
+		fireParticle.SetOneLifetime(2.f);
 		fireParticle.SetTwoStartColors(glm::vec4(1.0f, 0.35f, 0.0f, 1.0f), glm::vec4(1.0f, 0.60f, 0.0f, 1.0f));
 		fireParticle.SetOneStartSize(0.5f / 10.0f);
 		fireParticle.SetOneStartSpeed(8.5f / 10.0f);
@@ -847,13 +847,17 @@ void Game::RestartData()
 	//shop stuff
 	healAmount = 10.0f;
 	healCounter = 0;
-	healCost = 5;
 	cannonBuff = false;
-	cannonCost = 10;
 	abilityCooldownBuff = false;
+	upgradeAbilities = false;
+	healCost = 5;
+	cannonCost = 10;
 	abilityCost = 15;
+	upgradeCost = 20;
+	//bools for cost reset
 	cannonScoreCost = false;
 	abilityScoreCost = false;
+	upgradeScoreCost = false;
 
 	//enemy and wave data setup
 	m_currentWave = 0;
@@ -1135,7 +1139,7 @@ void Game::Flamethrower() {
 		for (int i = 0; i < 6; i++) {
 			//fire particle entities
 			{
-				flames.push_back(CreateEntity(3.0f));
+				flames.push_back(CreateEntity(FlameActiveTime));
 
 				//setup a transfrom for the particle system
 				TTN_Transform firePSTrans = TTN_Transform(Get<TTN_Transform>(flamethrowers[i]).GetGlobalPos() + glm::vec3(0.0f, 0.0f, 2.0f / 10.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f / 10.0f));
@@ -1144,8 +1148,10 @@ void Game::Flamethrower() {
 				AttachCopy(flames[i], firePSTrans);
 
 				//setup a particle system for the particle system
-				TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1200, 300, fireParticle, 2.0f, true);
+				TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1500, 250, fireParticle, FlameActiveTime - 1.0f, true);
 				ps->MakeConeEmitter(15.0f, glm::vec3(90.0f, 0.0f, 0.0f));
+
+				std::cout << FlameActiveTime << std::endl;
 
 				//setup a particle system component
 				TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
@@ -1175,6 +1181,8 @@ void Game::FlamethrowerUpdate(float deltaTime)
 		//increment flamethrower anim timer
 		FlameAnim += deltaTime;
 
+		//std::cout << FlameActiveTime << std::endl;
+
 		//if it's reached the end of the animation
 		if (FlameAnim >= FlameActiveTime) {
 			//get rid of all the flames, reset the timer and set the active flag to false
@@ -1183,7 +1191,14 @@ void Game::FlamethrowerUpdate(float deltaTime)
 			Flaming = false;
 		}
 
-		//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 27
+		/*	std::vector<entt::entity>::iterator itt = flames.begin();
+			while (itt != flames.end()) {
+				TTN_ParticleSystem::spsptr &temp = Get<TTN_ParticeSystemComponent>(*itt).GetParticleSystemPointer();
+				temp.get<TTN_ParticleSystem>
+				itt++;
+			}*/
+
+			//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 27
 		std::vector<entt::entity>::iterator it = boats.begin();
 		while (it != boats.end()) {
 			if (Get<TTN_Transform>(*it).GetPos().z >= 27.0f / 10.0f) {
@@ -1951,6 +1966,7 @@ void Game::Shop(float deltaTime)
 		//}
 	}
 
+	//faster cannon
 	if (cannonBuff) {
 		playerShootCooldown = 0.45f;
 		//std::cout << "  CD LOWWW " << std::endl;
@@ -1960,6 +1976,7 @@ void Game::Shop(float deltaTime)
 			std::cout << "  CD LOWWW " << std::endl;
 		}
 	}
+
 	else {
 		playerShootCooldown = 0.7f;
 		cannonScoreCost = false;
@@ -1976,6 +1993,29 @@ void Game::Shop(float deltaTime)
 	}
 	else {
 		abilityScoreCost = false;
+	}
+
+	if (upgradeAbilities) {
+		FlameActiveTime = 5.0f; //longer active flamethrower
+		//std::cout << " UPPPPPPPPPPPPPPPGRADe" << std::endl;
+		//std::cout << FlameActiveTime << std::endl;
+		for (auto bird : birds) {
+			Get<BirdComponent>(bird).SetDiveSpeed(45.0f / 10.0f);
+		}
+
+		if (!upgradeScoreCost && m_score >= upgradeCost) {
+			m_score = m_score - upgradeCost;//score cost of ability power up
+			upgradeScoreCost = true;
+		}
+	}
+
+	else
+	{
+		FlameActiveTime = 3.0f; // regular flame timer
+		for (auto bird : birds) {
+			Get<BirdComponent>(bird).SetDiveSpeed(25.0f / 10.0f);//regular dive speed
+		}
+		upgradeScoreCost = false;
 	}
 
 	if (m_score < 0)

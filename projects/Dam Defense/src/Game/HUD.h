@@ -73,6 +73,8 @@ public:
 
 	void SetLastWave(int wave) { lastWave = wave; }
 
+	bool GetUpgradeBuff() { return upgradeAbilities; }
+
 private:
 
 #pragma region ENTITES AND STUFF
@@ -181,6 +183,9 @@ private:
 
 	//bool for whether faster ability cooldowns from the shop is active
 	bool abilityCooldownBuff;
+
+	//bool for the ability upgrade option
+	bool upgradeAbilities;
 
 	//the time remaining before it accepts player input, used for the shop
 	float m_InputDelay = 0.3f;

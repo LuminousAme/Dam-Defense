@@ -29,6 +29,8 @@ void GameUI::InitScene()
 	cannonPower = false;
 	m_score = 0;
 	lastWave = 3;
+	abilityCooldownBuff = false;
+	upgradeAbilities = false;
 	//std::cout << waveTracker << "  wave " << std::endl;
 	//std::cout << m_currentWave << " Curretn  wave " << std::endl;
 
@@ -504,6 +506,8 @@ void GameUI::RestartData()
 	healOnce = false;
 	cannonPower = false;
 	m_score = 0;
+	abilityCooldownBuff = false;
+	upgradeAbilities = false;
 }
 
 void GameUI::Update(float deltaTime)
@@ -758,6 +762,7 @@ void GameUI::Update(float deltaTime)
 			shopOnce = true;
 			cannonPower = false;
 			abilityCooldownBuff = false;
+			upgradeAbilities = false;
 			//std::cout << "WORKING" << std::endl;
 		}
 	}
@@ -956,7 +961,7 @@ void GameUI::MouseButtonDownChecks()
 			mousePosWorldSpace.y > cannonButtonTrans.GetPos().y - 0.5f * abs(cannonButtonTrans.GetScale().y)) {
 			if (!cannonPower && m_score >= 10.f) {//if power is not active and score is equal to or greater than the cost
 				cannonPower = true;
-				std::cout << " SHOPING C" << std::endl;
+				//std::cout << " SHOPING C" << std::endl;
 				Get<TTN_Renderer2D>(buttonCannon).SetColor(glm::vec4(0.5f));
 			}
 			else {// if power up is active
@@ -970,6 +975,7 @@ void GameUI::MouseButtonDownChecks()
 			mousePosWorldSpace.y > abilityButtonTrans.GetPos().y - 0.5f * abs(abilityButtonTrans.GetScale().y)) {
 			if (!abilityCooldownBuff && m_score >= 15.f) {//if power is not active
 				abilityCooldownBuff = true;
+				upgradeAbilities = true;
 				std::cout << " SHOPING AAAAAAAAAAAA" << std::endl;
 				Get<TTN_Renderer2D>(buttonAbilityCD).SetColor(glm::vec4(0.5f));
 			}
