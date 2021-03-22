@@ -6,12 +6,13 @@
 #include "glm/ext.hpp"
 
 PauseMenu::PauseMenu()
-	: TTN_Scene()
 {
 	shouldQuit = false;
 	shouldResume = false;
 	shouldMenu = false;
 	shouldOptions = false;
+
+	TTN_Scene();
 }
 
 void PauseMenu::InitScene()
@@ -47,7 +48,7 @@ void PauseMenu::InitScene()
 		entt::entity paused = CreateEntity();
 
 		//create a transform for the text
-		TTN_Transform textTrans = TTN_Transform(glm::vec3(0.0f, 360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f, 150.0f, 1.0f));
+		TTN_Transform textTrans = TTN_Transform(glm::vec3(0.0f, 360.0f, 0.5f), glm::vec3(0.0f), glm::vec3(550.0f, 150.0f, 1.0f));
 		AttachCopy(paused, textTrans);
 
 		//create a 2D renderer for the button
@@ -66,10 +67,10 @@ void PauseMenu::InitScene()
 		//create a transform for the text
 		TTN_Transform textTrans;
 
-		if (i == 0) textTrans = TTN_Transform(glm::vec3(657.75f, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 1) textTrans = TTN_Transform(glm::vec3(254.75, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-148.25, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.0f, 150.0f / 2.0f, 1.0f));
-		else if (i == 3) textTrans = TTN_Transform(glm::vec3(-551.25, -75.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		if (i == 0) textTrans = TTN_Transform(glm::vec3(657.75f, -75.0f, 0.5f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		else if (i == 1) textTrans = TTN_Transform(glm::vec3(254.75, -75.0f, 0.5f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-148.25, -75.0f, 0.5f), glm::vec3(0.0f), glm::vec3(550.0f / 2.0f, 150.0f / 2.0f, 1.0f));
+		else if (i == 3) textTrans = TTN_Transform(glm::vec3(-551.25, -75.0f, 0.5f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
 		AttachCopy(temp, textTrans);
 
 		//create a 2D renderer for the button
@@ -95,10 +96,10 @@ void PauseMenu::InitScene()
 		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(0.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
 		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-300.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
 		else if (i == 3) buttonTrans = TTN_Transform(glm::vec3(-600.0f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));*/
-		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(657.75f, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
-		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(254.75, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
-		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-148.25, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
-		else if (i == 3) buttonTrans = TTN_Transform(glm::vec3(-551.25, -75.0f, 2.0f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(657.75f, -75.0f, 0.8f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(254.75, -75.0f, 0.8f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-148.25, -75.0f, 0.8f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
+		else if (i == 3) buttonTrans = TTN_Transform(glm::vec3(-551.25, -75.0f, 0.8f), glm::vec3(0.0f), glm::vec3(322.75f, 201.5, 1.0f));
 
 		AttachCopy(temp, buttonTrans);
 
@@ -113,16 +114,13 @@ void PauseMenu::InitScene()
 		background = CreateEntity();
 
 		//create a transform for the background, placing it in the center of the screen, covering the whole thing
-		TTN_Transform bgTrans = TTN_Transform(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f), glm::vec3(1920.0f, 1080.0f, 1.0f));
+		TTN_Transform bgTrans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.85f), glm::vec3(0.0f), glm::vec3(1920.0f, 1080.0f, 1.0f));
 		AttachCopy(background, bgTrans);
 
 		//create a sprite renderer for the background
 		TTN_Renderer2D bgRenderer2D = TTN_Renderer2D(textureBackground, glm::vec4(1.0f, 1.0f, 1.0f, 0.5f), 1);
 		AttachCopy(background, bgRenderer2D);
 	}
-
-
-	TTN_Scene::InitScene();
 }
 
 void PauseMenu::Update(float deltaTime)

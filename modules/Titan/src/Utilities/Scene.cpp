@@ -5,6 +5,8 @@
 // Scene.cpp - source file for the class that handles ECS, render calls, etc.
 #include "Titan/Utilities/Scene.h"
 
+#include "TTK/TTKContext.h"
+
 namespace Titan {
 	//default constructor
 
@@ -368,6 +370,12 @@ namespace Titan {
 				viewMat, Get<TTN_Camera>(m_Cam).GetProj());
 		}
 
+		/*
+		if (m_hasDrawn3DGeo) {
+			TTK::Context& ctx = TTK::Context::Instance();
+			ctx.Flush();
+		}*/
+
 		//unbind the empty effect now that we've fully rendered everything and run through all the post effect
 		m_emptyEffect->UnbindBuffer();
 
@@ -391,6 +399,7 @@ namespace Titan {
 		}
 		//if everything should be drawn, draw everything
 		else if (m_renderCompositedScene) {
+			sceneBuffer->Clear();
 			//apply the empty effect
 			sceneBuffer->ApplyEffect(m_emptyEffect);
 
@@ -504,19 +513,26 @@ namespace Titan {
 			//shadow depth pass
 			//set up light space matrices
 			
+			TTK::Context& ctx = TTK::Context::Instance();
+			ctx.SetWindowSize(1920, 1080);
+			ctx.SetView(viewMat);
+			ctx.SetProjection(Get<TTN_Camera>(m_Cam).GetProj());
+
 			//get the light view matrix 
-			glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3((-m_Sun.m_lightDirection)), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			//glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3((-m_Sun.m_lightDirection)), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::vec3 lightForward = glm::normalize(glm::vec3(-illBuffer->GetSunRef().m_lightDirection));
+			glm::vec3 lightRight = glm::cross(lightForward, glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::vec3 lightUp = glm::cross(lightForward, lightRight);
+
+			glm::mat4 lightViewMatrix = glm::mat4(1.0f);
+			lightViewMatrix[0] = glm::vec4(lightRight, 0.0f);
+			lightViewMatrix[1] = glm::vec4(lightUp, 0.0f);
+			lightViewMatrix[2] = glm::vec4(lightForward, 0.0f);
+			lightViewMatrix[3] = glm::vec4(glm::vec3(0.0f), 1.0f);
+			lightViewMatrix = glm::transpose(lightViewMatrix);
+
 			//make an array of matrices with which to make the projection matrices in
 			glm::mat4 lightSpaceMatrices[4];
-
-			//get the up, forward, and right vectors
-			glm::vec3 camForward = glm::normalize(-1.0f * glm::vec3(viewMat[2]));
-			glm::vec3 camUp = glm::normalize(glm::vec3(viewMat[1]));
-			glm::vec3 camRight = glm::normalize(-1.0f * glm::vec3(viewMat[0]));
-
-			//std::cout << "forawrd. x: " << std::to_string(camForward.x) << "\t y: " << std::to_string(camForward.y) << "\t z: " << std::to_string(camForward.z) << std::endl;
-			//std::cout << "up. x: " << std::to_string(camUp.x) << "\t y: " << std::to_string(camUp.y) << "\t z: " << std::to_string(camUp.z) << std::endl;
-			//std::cout << "right. x: " << std::to_string(camRight.x) << "\t y: " << std::to_string(camRight.y) << "\t z: " << std::to_string(camRight.z) << std::endl;
 			
 			//loop through creating each matrix
 			for (int i = 0; i < 4; i++) {
@@ -543,36 +559,74 @@ namespace Titan {
 
 				//now get all of the corners in world space
 				std::vector<glm::vec3> corners;
-				corners = Get<TTN_Camera>(m_Cam).CalcPerspectiveCorners(Get<TTN_Transform>(m_Cam).GetGlobalPos(), camForward, camRight, camUp, n, f);
+				//corners = Get<TTN_Camera>(m_Cam).CalcPerspectiveCorners(Get<TTN_Transform>(m_Cam).GetGlobalPos(), camForward, camRight, camUp, n, f);
+				corners = Get<TTN_Camera>(m_Cam).CalcCornersFromClipSpace(viewMat, n, f);
 
-				//now find the min and max value on each axis in world space
-				float Wolrdvals[6] = { corners[0].x, corners[0].x, corners[0].y, corners[0].y, corners[0].z, corners[0].z };
+				/*
+				ctx.AddLine(corners[0], corners[1], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+				ctx.AddLine(corners[0], corners[3], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+				ctx.AddLine(corners[2], corners[3], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+				ctx.AddLine(corners[2], corners[1], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
+				ctx.AddLine(corners[0 + 4], corners[1 + 4], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+				ctx.AddLine(corners[0 + 4], corners[3 + 4], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+				ctx.AddLine(corners[2 + 4], corners[3 + 4], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+				ctx.AddLine(corners[2 + 4], corners[1 + 4], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
+				ctx.AddLine(corners[0], corners[4], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+				ctx.AddLine(corners[1], corners[5], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+				ctx.AddLine(corners[2], corners[6], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+				ctx.AddLine(corners[3], corners[7], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
 				for (int j = 0; j < 8; j++) {
-					Wolrdvals[0] = (Wolrdvals[0] < corners[j].x) ? Wolrdvals[0] : corners[j].x;
-					Wolrdvals[1] = (Wolrdvals[1] > corners[j].x) ? Wolrdvals[1] : corners[j].x;
-					Wolrdvals[2] = (Wolrdvals[2] < corners[j].y) ? Wolrdvals[2] : corners[j].y;
-					Wolrdvals[3] = (Wolrdvals[3] > corners[j].y) ? Wolrdvals[3] : corners[j].y;
-					Wolrdvals[4] = (Wolrdvals[4] < corners[j].z) ? Wolrdvals[4] : corners[j].z;
-					Wolrdvals[5] = (Wolrdvals[5] > corners[j].z) ? Wolrdvals[5] : corners[j].z;
+					std::cout << "corner " << j << ", x: " << corners[j].x << " y:" << corners[j].y << " z: " << corners[j].z << std::endl;
 				}
+				std::cout << "\n";*/
 
 				//now translate those corners into light space
 				for (auto& corner : corners) {
 					glm::vec4 temp = lightViewMatrix * glm::vec4(corner, 1.0f);
-					temp /= temp.w;
 					corner = temp;
 				}
 
 				//now find the min and max value on each axis
 				float vals[6] = { corners[0].x, corners[0].x, corners[0].y, corners[0].y, corners[0].z, corners[0].z };
 				for (int j = 0; j < 8; j++) {
-					vals[0] = (vals[0] < corners[j].x) ? vals[0] : corners[j].x;
-					vals[1] = (vals[1] > corners[j].x) ? vals[1] : corners[j].x;
-					vals[2] = (vals[2] < corners[j].y) ? vals[2] : corners[j].y;
-					vals[3] = (vals[3] > corners[j].y) ? vals[3] : corners[j].y;
-					vals[4] = (vals[4] < corners[j].z) ? vals[4] : corners[j].z;
-					vals[5] = (vals[5] > corners[j].z) ? vals[5] : corners[j].z;
+					vals[0] = std::min(vals[0], corners[j].x);
+					vals[1] = std::max(vals[1], corners[j].x);
+					vals[2] = std::min(vals[2], corners[j].y);
+					vals[3] = std::max(vals[3], corners[j].y);
+					vals[4] = std::min(vals[4], corners[j].z);
+					vals[5] = std::max(vals[5], corners[j].z);
 				}
+
+				/*
+				std::vector<glm::vec3> orthoCorners = std::vector<glm::vec3>();
+				orthoCorners.push_back(glm::vec3(vals[0], vals[2], vals[4])); //left, bottom, near
+				orthoCorners.push_back(glm::vec3(vals[0], vals[3], vals[4])); //left, top, near
+				orthoCorners.push_back(glm::vec3(vals[1], vals[2], vals[4])); //right bottom, near
+				orthoCorners.push_back(glm::vec3(vals[1], vals[3], vals[4])); //right top, near
+
+				orthoCorners.push_back(glm::vec3(vals[0], vals[2], vals[5])); //left, bottom, far
+				orthoCorners.push_back(glm::vec3(vals[0], vals[3], vals[5])); //left, top, far
+				orthoCorners.push_back(glm::vec3(vals[1], vals[2], vals[5])); //right bottom, far
+				orthoCorners.push_back(glm::vec3(vals[1], vals[3], vals[5])); //right top, far
+				
+			
+				ctx.AddLine(orthoCorners[0], orthoCorners[1], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+				ctx.AddLine(orthoCorners[0], orthoCorners[2], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+				ctx.AddLine(orthoCorners[3], orthoCorners[1], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+				ctx.AddLine(orthoCorners[3], orthoCorners[2], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+
+				ctx.AddLine(orthoCorners[0+4], orthoCorners[1+4], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+				ctx.AddLine(orthoCorners[0+4], orthoCorners[2+4], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+				ctx.AddLine(orthoCorners[3+4], orthoCorners[1+4], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+				ctx.AddLine(orthoCorners[3+4], orthoCorners[2+4], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+
+				ctx.AddLine(orthoCorners[0], orthoCorners[4], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+				ctx.AddLine(orthoCorners[1], orthoCorners[5], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+				ctx.AddLine(orthoCorners[2], orthoCorners[6], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+				ctx.AddLine(orthoCorners[3], orthoCorners[7], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));*/
 
 				//use the min and max values to construct the orthographic projections
 				lightSpaceMatrices[i] = glm::ortho(vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]);
@@ -581,6 +635,15 @@ namespace Titan {
 				//finally multiply the view matrix into the projection matrix to complete the lightspace matrix
 				lightSpaceMatrices[i] *= lightViewMatrix;
 			}
+
+			//send all that data to the illimination buffer
+			illBuffer->SetFarClip(Get<TTN_Camera>(m_Cam).GetFarPlane());
+			illBuffer->SetCamPos(Get<TTN_Transform>(m_Cam).GetGlobalPos());
+			illBuffer->SetLightSpaceMatrices(lightSpaceMatrices);
+			float splitArr[4] = { 0.05f, 0.2f, 0.5f, 1.0f };
+			illBuffer->SetSplitRanges(splitArr);
+			illBuffer->SetViewMat(vp);
+			illBuffer->SetShadowBuffer(shadowBuffer);
 
 			//old lightspace stuff
 			//glm::mat4 lightProjectionMatrix = glm::ortho(-shadowOrthoXY, shadowOrthoXY, -shadowOrthoXY, shadowOrthoXY, -shadowOrthoZ, shadowOrthoZ);
@@ -902,10 +965,7 @@ namespace Titan {
 	//sets the directional light for the scene
 	void TTN_Scene::SetSun(TTN_DirectionalLight newSun)
 	{
-		//save the sun data
-		m_Sun = newSun;
-		//and update the sun buffer
-		sunBuffer.SendData(reinterpret_cast<void*>(&m_Sun), sizeof(TTN_DirectionalLight));
+		illBuffer->SetSun(newSun);
 	}
 
 	//makes all the collision objects by going through all the overalapping manifolds in bullet

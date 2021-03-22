@@ -292,9 +292,9 @@ void GameUI::InitScene()
 		TTN_Transform bgTrans = Get<TTN_Transform>(flameThrowerBG);
 
 		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.25f, bgTrans.GetScale().y * 0.25f, 1.0f));
-		Trans.SetPos(glm::vec3(bgTrans.GetPos().x + 0.4f * std::abs(bgTrans.GetScale().x) + 0.5f * std::abs(Trans.GetScale().x), 
-			bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 0.5f));
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.3f, bgTrans.GetScale().y * 0.3f, 1.0f));
+		Trans.SetPos(glm::vec3(bgTrans.GetPos().x + 0.42f * std::abs(bgTrans.GetScale().x) + 0.5f * std::abs(Trans.GetScale().x), 
+			bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 2.9f));
 		AttachCopy(flameThrowerKey, Trans);
 
 		//create a sprite renderer 
@@ -374,9 +374,9 @@ void GameUI::InitScene()
 		TTN_Transform bgTrans = Get<TTN_Transform>(birdBombBG);
 
 		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.25f, bgTrans.GetScale().y * 0.25f, 1.0f));
-		Trans.SetPos(glm::vec3(bgTrans.GetPos().x + 0.4f * std::abs(bgTrans.GetScale().x) + 0.5f * std::abs(Trans.GetScale().x),
-			bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 0.5f));
+		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.3f, bgTrans.GetScale().y * 0.3f, 1.0f));
+		Trans.SetPos(glm::vec3(bgTrans.GetPos().x + 0.42f * std::abs(bgTrans.GetScale().x) + 0.5f * std::abs(Trans.GetScale().x),
+			bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 2.9f));
 		AttachCopy(birdBombKey, Trans);
 
 		//create a sprite renderer 
@@ -466,21 +466,21 @@ void GameUI::Update(float deltaTime)
 				TTN_Transform& trans = Get<TTN_Transform>(waveNums[i]);
 				if (i < offset) {
 					//places the numbers to the left of the center
-					trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+					trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
 				}
 				else {
 					//places the numbers on and to the right of the center
-					trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+					trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
 				}
 			}
 			TTN_Transform& firstNumTrans = Get<TTN_Transform>(waveNums[0]);
 			//places the wave text
-			Get<TTN_Transform>(waveText).SetPos(firstNumTrans.GetGlobalPos() + glm::vec3(0.5f * std::abs(firstNumTrans.GetScale().x) + 0.4f * 
+			Get<TTN_Transform>(waveText).SetPos(firstNumTrans.GetGlobalPos() + glm::vec3(0.35f * std::abs(firstNumTrans.GetScale().x) + 0.4f * 
 			std::abs(Get<TTN_Transform>(waveText).GetScale().x), 0.0f, 0.0f));
 
 			TTN_Transform& lastNumTrans = Get<TTN_Transform>(waveNums[waveNums.size() - 1]);
 			//places the complete text
-			Get<TTN_Transform>(completeText).SetPos(lastNumTrans.GetGlobalPos() - glm::vec3(0.6f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
+			Get<TTN_Transform>(completeText).SetPos(lastNumTrans.GetGlobalPos() - glm::vec3(0.45f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
 				std::abs(Get<TTN_Transform>(completeText).GetScale().x), 0.0f, 0.0f));
 		}
 
@@ -509,18 +509,18 @@ void GameUI::Update(float deltaTime)
 				//update each digit approriately
 				TTN_Transform bgTrans = Get<TTN_Transform>(flameThrowerBG);
 				glm::vec3 centerPos = glm::vec3(bgTrans.GetPos().x - 0.15f * std::abs(bgTrans.GetScale().x),
-					bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 0.5f);
+					bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 0.9f);
 				int offset = std::ceil((float)flamethrowerNums.size() / 2.0f);
 				for (int i = 0; i < flamethrowerNums.size(); i++) {
 					//update position
 					TTN_Transform& trans = Get<TTN_Transform>(flamethrowerNums[i]);
 					if (i < offset) {
 						//places the numbers to the left of the center
-						trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+						trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
 					}
 					else {
 						//places the numbers on and to the right of the center
-						trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+						trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
 					}
 
 					//update renderer
@@ -578,18 +578,18 @@ void GameUI::Update(float deltaTime)
 				//update each digit approriately
 				TTN_Transform bgTrans = Get<TTN_Transform>(birdBombBG);
 				glm::vec3 centerPos = glm::vec3(bgTrans.GetPos().x - 0.15f * std::abs(bgTrans.GetScale().x),
-					bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 0.5f);
+					bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 0.9f);
 				int offset = std::ceil((float)birdBombNums.size() / 2.0f);
 				for (int i = 0; i < birdBombNums.size(); i++) {
 					//update position
 					TTN_Transform& trans = Get<TTN_Transform>(birdBombNums[i]);
 					if (i < offset) {
 						//places the numbers to the left of the center
-						trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+						trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
 					}
 					else {
 						//places the numbers on and to the right of the center
-						trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+						trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
 					}
 
 					//update renderer
@@ -635,8 +635,8 @@ void GameUI::MakeScoreNumEntity()
 	TTN_Transform& scoreTrans = Get<TTN_Transform>(scoreText);
 
 	//setup a transform for the new entity
-	TTN_Transform numTrans = TTN_Transform(glm::vec3(scoreTrans.GetGlobalPos().x - 0.3f * std::abs(scoreTrans.GetScale().x) - 
-		(float)scoreNums.size() * 0.5f * scoreTextScale * 150.0f, scoreTrans.GetGlobalPos().y, scoreTrans.GetGlobalPos().z),
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(scoreTrans.GetGlobalPos().x - 0.2f * std::abs(scoreTrans.GetScale().x) - 
+		(float)scoreNums.size() * 0.35f * scoreTextScale * 150.0f, scoreTrans.GetGlobalPos().y, scoreTrans.GetGlobalPos().z),
 		glm::vec3(0.0f), glm::vec3(scoreTextScale * 150.0f, scoreTextScale * 150.0f, 1.0f));
 	AttachCopy(scoreNums[scoreNums.size() - 1], numTrans);
 
@@ -655,7 +655,7 @@ void GameUI::MakeHealthNumEntity()
 
 	//setup a transform for the new entity
 	TTN_Transform numTrans = TTN_Transform(glm::vec3(healthTrans.GetGlobalPos().x + 0.3f * std::abs(healthTrans.GetScale().x)  -
-		(float)healthNums.size() * 0.5f * healthTextScale * 150.0f, healthTrans.GetGlobalPos().y, healthTrans.GetGlobalPos().z),
+		(float)healthNums.size() * 0.35f * healthTextScale * 150.0f, healthTrans.GetGlobalPos().y, healthTrans.GetGlobalPos().z),
 		glm::vec3(0.0f), glm::vec3(healthTextScale * 150.0f, healthTextScale * 150.0f, 1.0f));
 	AttachCopy(healthNums[healthNums.size() - 1], numTrans);
 
@@ -674,7 +674,7 @@ void GameUI::MakeWaveNumEntity()
 
 	//setup a transform for the new entity
 	TTN_Transform numTrans = TTN_Transform(glm::vec3(Trans.GetGlobalPos().x + 0.5f * std::abs(Trans.GetScale().x) -
-		(float)waveNums.size() * 0.5f * waveCompleteScale * 150.0f, Trans.GetGlobalPos().y, Trans.GetGlobalPos().z),
+		(float)waveNums.size() * 0.35f * waveCompleteScale * 150.0f, Trans.GetGlobalPos().y, Trans.GetGlobalPos().z),
 		glm::vec3(0.0f), glm::vec3(waveCompleteScale * 100.0f, waveCompleteScale * 100.0f, 1.0f));
 	AttachCopy(waveNums[waveNums.size() - 1], numTrans);
 

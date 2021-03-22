@@ -108,7 +108,7 @@ void TTK::Context::Flush() {
 TTK::Context::Context() {
 	m_Projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
 	m_ViewMatrix = glm::mat4(1.0f);
-	m_DefaultFont = new TrueTypeTextureFont("C:\\\\Windows\\Fonts\\consola.ttf", 32);
+	//m_DefaultFont = new TrueTypeTextureFont("C:\\\\Windows\\Fonts\\consola.ttf", 32);
 	
 	const char* vsSource = R"LIT(#version 430
             layout (location = 0) uniform mat4 xTransform;

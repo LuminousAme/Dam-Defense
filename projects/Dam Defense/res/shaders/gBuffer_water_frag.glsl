@@ -8,7 +8,6 @@ layout(location = 2) in vec2 inUV;
 //material data
 layout(binding=0) uniform sampler2D waterText;
 uniform int u_UseDiffuse;
-
 //result, multiple render targets
 //we can render color to all of these
 layout(location = 0) out vec4 outColors;

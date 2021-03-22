@@ -44,7 +44,7 @@ void main() {
 	outPos = (Model * vec4(vert, 1.0)).xyz;
 
 	//pass the new normal onto the frag shader
-	outNormal = NormalMat * norm;
+	outNormal = NormalMat * inNormal;
 	
 	gl_Position = MVP * vec4(vert, 1.0);
 }

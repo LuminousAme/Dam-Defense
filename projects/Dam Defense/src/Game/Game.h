@@ -357,7 +357,7 @@ protected:
 
 	//bloom effect
 	TTN_BloomEffect::sbloomptr m_bloomEffect;
-	float m_bloomThreshold = 0.55f;
+	float m_bloomThreshold = 0.6f;
 	int m_numOfBloomPasses;
 	unsigned m_bloomBufferDivisor;
 	float m_bloomRadius = 3.0f;

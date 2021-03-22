@@ -22,7 +22,7 @@ void PrepareAssetLoading();
 //main function, runs the program
 int main() {
 	Logger::Init(); //initliaze otter's base logging system
-	TTN_Application::Init("Dam Defense", 1920, 1080, false); //initliaze titan's application
+	TTN_Application::Init("Dam Defense", 1920, 1080, true); //initliaze titan's application
 
 	//data to track loading progress
 	bool set1Loaded = false;
@@ -406,6 +406,7 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddLUTTobeLoaded("Warm LUT", "Warm_LUT.cube", 1);
 	TTN_AssetSystem::AddLUTTobeLoaded("Cool LUT", "Cool_LUT.cube", 1);
 	TTN_AssetSystem::AddLUTTobeLoaded("Custom LUT", "Custom_LUT.cube", 1);
+	TTN_AssetSystem::AddLUTTobeLoaded("Main LUT", "main lut.cube", 1);
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("blue ramp", "textures/ramps/blue ramp.png");
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Normal Map", "textures/terrain normal map.png");

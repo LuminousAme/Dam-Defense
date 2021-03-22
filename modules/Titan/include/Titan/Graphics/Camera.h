@@ -55,6 +55,7 @@ namespace Titan {
 
 		// calculates and returns a vector with the corners
 		std::vector<glm::vec3> CalcPerspectiveCorners(glm::vec3 center, glm::vec3 forward, glm::vec3 right, glm::vec3 up, float nearT, float farT);
+		std::vector<glm::vec3> CalcCornersFromClipSpace(glm::mat4 view, float nearT, float farT);
 
 	protected:
 		glm::vec3 m_position;  //postion of camera in world space
@@ -69,9 +70,22 @@ namespace Titan {
 		glm::mat4 m_projection;
 
 		float m_fov = 0.0f;
+		float m_aspectRatio = 0.0f;
+
+		float m_left = 0.0f;
+		float m_right = 0.0f;
+		float m_bottom = 0.0f;
+		float m_top = 0.0f;
+
 		float m_zNear = 0.0f;
 		float m_zFar = 0.0f;
-		float m_aspectRatio = 0.0f;
+
+		enum projectionMode {
+			PERSPECTIVE,
+			ORTHOGRAPHIC
+		};
+
+		projectionMode m_mode = projectionMode::PERSPECTIVE;
 
 		mutable glm::mat4 m_viewProjection;//mutable, so it can be recalculated using const methods
 	};

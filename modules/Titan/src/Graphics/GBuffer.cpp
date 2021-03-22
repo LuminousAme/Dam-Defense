@@ -42,6 +42,7 @@ namespace Titan {
 		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::NORMAL, 1);
 		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::SPECULAR, 2);
 		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::POSITION, 3);
+		m_gBuffer.BindDepthAsTexture(15);
 	}
 
 	void TTN_GBuffer::Clear()

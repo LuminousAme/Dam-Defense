@@ -120,6 +120,7 @@ void Game::Update(float deltaTime)
 		m_gameWin = true;
 	}
 
+	/*
 	if (m_applyWarmLut) {
 		m_colorCorrectEffect->SetShouldApply(true);
 		m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
@@ -130,7 +131,7 @@ void Game::Update(float deltaTime)
 	else {
 		//if it's been turned of set the effect not to render
 		m_colorCorrectEffect->SetShouldApply(false);
-	}
+	}*/
 
 	//update the sound
 	engine.Update();
@@ -450,6 +451,11 @@ void Game::SetUpAssets()
 		m_mats[i]->SetUseDiffuseRamp(m_useDiffuseRamp);
 		m_mats[i]->SetUseSpecularRamp(m_useSpecularRamp);
 	}
+
+	illBuffer->SetDiffuseRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
+	illBuffer->SetSpecularRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
+	illBuffer->SetUseDiffuseRamp(true);
+	illBuffer->SetUseSpecularRamp(true);
 }
 
 //create the scene's initial entities
@@ -466,7 +472,7 @@ void Game::SetUpEntities()
 		camTrans.SetPos(glm::vec3(0.0f, 0.070f, -0.275f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f / 10.0f, 17.5f);
+		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f, 17.5f);
 		Get<TTN_Camera>(camera).View();
 	}
 
@@ -716,8 +722,9 @@ void Game::SetUpOtherData()
 	m_colorCorrectEffect = TTN_ColorCorrect::Create();
 	m_colorCorrectEffect->Init(windowSize.x, windowSize.y);
 	//set it so it doesn't render
-	m_colorCorrectEffect->SetShouldApply(false);
-	m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
+	m_colorCorrectEffect->SetShouldApply(true);
+	m_colorCorrectEffect->SetIntensity(1.0f);
+	m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Main LUT"));
 	//and add it to this scene's list of effects
 	m_PostProcessingEffects.push_back(m_colorCorrectEffect);
 
@@ -1947,7 +1954,7 @@ void Game::ImGui()
 	}
 
 	if (ImGui::CollapsingHeader("Directional Light Controls")) {
-		TTN_DirectionalLight tempSun = m_Sun;
+		TTN_DirectionalLight tempSun = illBuffer->GetSunRef();
 		/*
 		glm::vec3 direction = tempSun.m_lightDirection;
 		glm::vec3 color = tempSun.m_lightColor;
@@ -1960,7 +1967,7 @@ void Game::ImGui()
 		int pcfPasses = tempSun.m_pcfFilterSamples;
 		*/
 
-		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 50.0f)) {
+		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 0.0f)) {
 			SetSun(tempSun);
 		}
 

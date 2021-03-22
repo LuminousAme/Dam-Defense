@@ -41,6 +41,16 @@ namespace Titan {
 		if (m_sunEnabled) {
 			m_sunBuffer.SendData(reinterpret_cast<void*>(&m_sun), sizeof(TTN_DirectionalLight));
 		}
+
+		//make diffuse and specular ramps
+		m_diffuseRamp = m_diffuseRamp->Create();
+		m_diffuseRamp->Clear();
+		m_specularRamp = m_specularRamp->Create();
+		m_specularRamp->Clear();
+
+		m_useDiffuseRamp = false;
+		m_useSpecularRamp = false;
+
 		TTN_PostEffect::Init(width, height);
 	}
 
@@ -52,13 +62,25 @@ namespace Titan {
 		if (m_sunEnabled) {
 			//binds directional light shader
 			m_shaders[TTN_Lights::DIRECTIONAL]->Bind();
-			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniformMatrix("u_LightSpaceMatrix", m_lightSpaceViewProj);
 			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("u_CamPos", m_camPos);
+			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("u_SplitRanges", m_splitRanges[0], 4);
+			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniformMatrix("u_lightViewProj", m_lightSpaceViewProj[0], 4);
+			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniformMatrix("u_vp", m_viewMat);
 
 			//bind sun uniform
 			m_sunBuffer.Bind(0);
 
+			//bind the gBuffer for lighting
 			gBuffer->BindLighting();
+
+			//bind the shadow buffer's depth
+			m_shadowBuffer->BindDepthAsTexture(30);
+
+			//bind the ramps
+			m_diffuseRamp->Bind(9);
+			m_specularRamp->Bind(10);
+			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("u_UseDiffuseRamp", int(m_useDiffuseRamp));
+			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("u_useSpecularRamp", int(m_useSpecularRamp));
 
 			//binds and draws to illumination buffer
 			m_buffers[1]->RenderToFSQ();
@@ -107,14 +129,40 @@ namespace Titan {
 		m_shaders[m_shaders.size() - 1]->UnBind();
 	}
 
-	void TTN_IlluminationBuffer::SetLightSpaceViewProj(glm::mat4 lightSpaceViewProj)
+	void TTN_IlluminationBuffer::SetViewMat(glm::mat4 view)
 	{
-		m_lightSpaceViewProj = lightSpaceViewProj;
+		m_viewMat = view;
+	}
+
+	void TTN_IlluminationBuffer::SetLightSpaceMatrices(glm::mat4 mats[])
+	{
+		m_lightSpaceViewProj[0] = mats[0];
+		m_lightSpaceViewProj[1] = mats[1];
+		m_lightSpaceViewProj[2] = mats[2];
+		m_lightSpaceViewProj[3] = mats[3];
+	}
+
+	void TTN_IlluminationBuffer::SetSplitRanges(float splits[])
+	{
+		m_splitRanges[0] = splits[0];
+		m_splitRanges[1] = splits[1];
+		m_splitRanges[2] = splits[2];
+		m_splitRanges[3] = splits[3];
+	}
+
+	void TTN_IlluminationBuffer::SetFarClip(float farClip)
+	{
+		m_farClip = farClip;
 	}
 
 	void TTN_IlluminationBuffer::SetCamPos(glm::vec3 camPos)
 	{
 		m_camPos = camPos;
+	}
+
+	void TTN_IlluminationBuffer::SetShadowBuffer(TTN_Framebuffer::sfboptr shadowBuffer)
+	{
+		m_shadowBuffer = shadowBuffer;
 	}
 
 	TTN_DirectionalLight& TTN_IlluminationBuffer::GetSunRef()
