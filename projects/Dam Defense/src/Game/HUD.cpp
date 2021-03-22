@@ -10,8 +10,19 @@ GameUI::GameUI() : TTN_Scene()
 void GameUI::InitScene()
 {
 	textureScore = TTN_AssetSystem::GetTexture2D("Score");
-	textureButton1 = TTN_AssetSystem::GetTexture2D("Button Base");
-	textureButton2 = TTN_AssetSystem::GetTexture2D("Button Hovering");
+	textureShop = TTN_AssetSystem::GetTexture2D("Shop");
+
+	textureCooldownButton1 = TTN_AssetSystem::GetTexture2D("Cooldown Normal");
+	textureCooldownButton2 = TTN_AssetSystem::GetTexture2D("Cooldown Hovered");
+
+	textureFiringButton1 = TTN_AssetSystem::GetTexture2D("Rate");
+	textureFiringButton2 = TTN_AssetSystem::GetTexture2D("Rate Hovered");
+
+	textureHealButton1 = TTN_AssetSystem::GetTexture2D("Heal");
+	textureHealButton2 = TTN_AssetSystem::GetTexture2D("Heal Hovered");
+
+	textureUpgradeButton1 = TTN_AssetSystem::GetTexture2D("Upgrade");
+	textureUpgradeButton2 = TTN_AssetSystem::GetTexture2D("Upgrade Hovered");
 
 	m_InputDelay = 0.3f;
 	m_DamHealth = 100.0f;
@@ -424,19 +435,35 @@ void GameUI::InitScene()
 		AttachCopy(background, bgRenderer2D);
 	}
 
+	//shop sprite
+	{
+		//create an entity in the scene for the background
+		shop = CreateEntity();
+
+		//create a transform for the background, placing it in the center of the screen, covering the whole thing
+		TTN_Transform bgTrans = TTN_Transform(glm::vec3(1920.0f, 0.0f, 0.15f), glm::vec3(0.0f), glm::vec3(1440.f, 810.0f, 1.0f));
+		AttachCopy(shop, bgTrans);
+
+		//create a sprite renderer for the background
+		TTN_Renderer2D bgRenderer2D = TTN_Renderer2D(textureShop);
+		AttachCopy(shop, bgRenderer2D);
+	}
+
+	glm::vec3 ButtonScale = glm::vec3(250.0f, 200.0, 1.0f);
+
 	//button to buy health
 	{
 		buttonHealth = CreateEntity();
 
 		//create a transform for the button
 		TTN_Transform buttonTrans;
-		//buttonTrans = TTN_Transform(glm::vec3(650.0f, 220.0f, 0.1f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
-		buttonTrans = TTN_Transform(glm::vec3(1270.0f, 220.0f, 0.10f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		//buttonTrans = TTN_Transform(glm::vec3(650.0f, 200.0f, 0.1f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		buttonTrans = TTN_Transform(glm::vec3(1270.0f, 160.0f, 0.10f), glm::vec3(0.0f), ButtonScale);
 
 		AttachCopy(buttonHealth, buttonTrans);
 
 		//create a 2D renderer for the button
-		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureButton1);
+		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureHealButton1);
 		AttachCopy(buttonHealth, buttonRenderer);
 	}
 
@@ -446,45 +473,45 @@ void GameUI::InitScene()
 
 		//create a transform for the button
 		TTN_Transform buttonTrans;
-		//buttonTrans = TTN_Transform(glm::vec3(650.0f, 220.0f, 0.1f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
-		buttonTrans = TTN_Transform(glm::vec3(1270.0f, -220.0f, 0.10f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		//buttonTrans = TTN_Transform(glm::vec3(650.0f, 200.0f, 0.1f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		buttonTrans = TTN_Transform(glm::vec3(1270.0f, -200.0f, 0.10f), glm::vec3(0.0f), ButtonScale);
 
 		AttachCopy(buttonCannon, buttonTrans);
 
 		//create a 2D renderer for the button
-		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureButton1);
+		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureFiringButton1);
 		AttachCopy(buttonCannon, buttonRenderer);
 	}
 
-	//button to buy cannon power up
+	//button to buy upgrade power up
 	{
-		buttonCannon = CreateEntity();
+		buttonUpgrade = CreateEntity();
 
 		//create a transform for the button
 		TTN_Transform buttonTrans;
-		//buttonTrans = TTN_Transform(glm::vec3(650.0f, 220.0f, 0.1f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
-		buttonTrans = TTN_Transform(glm::vec3(1270.0f, -220.0f, 0.10f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		//buttonTrans = TTN_Transform(glm::vec3(650.0f, 200.0f, 0.1f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		buttonTrans = TTN_Transform(glm::vec3(1270.0f, 160.0f, 0.10f), glm::vec3(0.0f), ButtonScale);
 
-		AttachCopy(buttonCannon, buttonTrans);
+		AttachCopy(buttonUpgrade, buttonTrans);
 
 		//create a 2D renderer for the button
-		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureButton1);
-		AttachCopy(buttonCannon, buttonRenderer);
+		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureUpgradeButton1);
+		AttachCopy(buttonUpgrade, buttonRenderer);
 	}
 
-	//button to buy cannon power up
+	//button to buy cooldown power up
 	{
 		buttonAbilityCD = CreateEntity();
 
 		//create a transform for the button
 		TTN_Transform buttonTrans;
-		//buttonTrans = TTN_Transform(glm::vec3(650.0f, 220.0f, 0.1f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
-		buttonTrans = TTN_Transform(glm::vec3(1270.0f, -220.0f, 0.10f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		//buttonTrans = TTN_Transform(glm::vec3(650.0f, 200.0f, 0.1f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		buttonTrans = TTN_Transform(glm::vec3(1270.0f, -200.0f, 0.10f), glm::vec3(0.0f), ButtonScale);
 
 		AttachCopy(buttonAbilityCD, buttonTrans);
 
 		//create a 2D renderer for the button
-		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureButton1);
+		TTN_Renderer2D buttonRenderer = TTN_Renderer2D(textureCooldownButton1);
 		AttachCopy(buttonAbilityCD, buttonRenderer);
 	}
 }
@@ -508,6 +535,10 @@ void GameUI::RestartData()
 	m_score = 0;
 	abilityCooldownBuff = false;
 	upgradeAbilities = false;
+	healCost = 500;
+	cannonCost = 100;
+	cooldownCost = 150;
+	upgradeCost = 20;
 }
 
 void GameUI::Update(float deltaTime)
@@ -785,9 +816,11 @@ void GameUI::Update(float deltaTime)
 
 	if (shouldShop) {
 		TTN_Transform& trans = Get<TTN_Transform>(background);
+		TTN_Transform& Shoptrans = Get<TTN_Transform>(shop);
 		TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);
 		TTN_Transform& buttonTransCannon = Get<TTN_Transform>(buttonCannon);
 		TTN_Transform& buttonTransAbility = Get<TTN_Transform>(buttonAbilityCD);
+		TTN_Transform& buttonTransUpgrade = Get<TTN_Transform>(buttonUpgrade);
 
 		//update time
 		lerpTime += deltaTime;
@@ -798,70 +831,98 @@ void GameUI::Update(float deltaTime)
 		if (shopping) {
 			lerpTime = 0.0f;
 			trans.SetPos(glm::vec3(0.0f, 0.0f, 0.20f));
-			//buttonTrans.SetPos(glm::vec3(510.0f, 220.0f, 0.10f));
-			buttonTransAbility.SetPos(glm::vec3(-425.0f, -220.0f, 0.10f));
+			//buttonTrans.SetPos(glm::vec3(510.0f, 200.0f, 0.10f));
+			//buttonTransAbility.SetPos(glm::vec3(-425.0f, -200.0f, 0.10f));
+		}
+
+		if (trans.GetGlobalPos().x >= -10.f && trans.GetGlobalPos().x <= 10.f && !shopping) { // if shop background reaches the end of the screen
+			//std::cout << trans.GetGlobalPos().x << " LLL LLLLLLLLLLL" << std::endl;
+			shopping = true;
+			//std::cout << glm::to_string(Shoptrans.GetPos()) << "  lsss " << std::endl;
+			std::cout << glm::to_string(buttonTransUpgrade.GetPos()) << "  lsss " << std::endl;
+			Shoptrans.SetPos(glm::vec3(0.0f, 0.0f, 0.15f));
 		}
 
 		if (!shopping) { //if the shop hasn't lerped in yet
 			//update position
 			glm::vec3 centerPos = glm::vec3(0.f);
+			glm::vec3 centerPosShop = glm::vec3(0.f);
 			glm::vec3 centerPosButton = glm::vec3(0.f);
 			glm::vec3 centerPosCannonButton = glm::vec3(0.f);
 			glm::vec3 centerPosAbilityButton = glm::vec3(0.f);
+			glm::vec3 centerPosUpgradeButton = glm::vec3(0.f);
 
 			float t = waveCompleteLerpParamter(lerpTime / lerpTotalTime);
 			//std::cout << " T Intwerpolate  " << t << std::endl;
-			if (trans.GetGlobalPos().x >= -10.f && trans.GetGlobalPos().x <= 10.f) { // if shop background reaches the end of the screen
-				//std::cout << trans.GetGlobalPos().x << " LLL LLLLLLLLLLL" << std::endl;
-				shopping = true;
-			}
 
 			centerPos = TTN_Interpolation::Lerp(glm::vec3(1920.0f, 0.0f, 0.20f), glm::vec3(0.0f, 0.0f, 0.20f), t);
-			centerPosButton = TTN_Interpolation::Lerp(glm::vec3(1270.0f, 220.0f, 0.1f), glm::vec3(0.0f, 220.0f, 0.1f), t);
-			centerPosCannonButton = TTN_Interpolation::Lerp(glm::vec3(1270.0f, -220.0f, 0.1f), glm::vec3(0.0f, -220.0f, 0.1f), t);
-			centerPosAbilityButton = TTN_Interpolation::Lerp(glm::vec3(1270.0f, -220.0f, 0.1f), glm::vec3(-1870.0f, -220.0f, 0.1f), t);
+			centerPosShop = TTN_Interpolation::Lerp(glm::vec3(1920.0f, 0.0f, 0.15f), glm::vec3(0.0f, 0.0f, 0.15f), t);
+			centerPosButton = TTN_Interpolation::Lerp(glm::vec3(1270.0f, 160.0f, 0.1f), glm::vec3(-170.0f, 160.0f, 0.1f), t);
+			centerPosCannonButton = TTN_Interpolation::Lerp(glm::vec3(1270.0f, -200.0f, 0.1f), glm::vec3(-170.0f, -200.0f, 0.1f), t);
+			centerPosAbilityButton = TTN_Interpolation::Lerp(glm::vec3(1270.0f, -200.0f, 0.1f), glm::vec3(-1870.0f, -200.0f, 0.1f), t);
+			centerPosUpgradeButton = TTN_Interpolation::Lerp(glm::vec3(1270.0f, 160.0f, 0.1f), glm::vec3(-1870.0f, 160.0f, 0.1f), t);
 			//lerping stops at a halved pos (200.f in lerp is 100.f in pos)
+			// pos can be determined by (lerp 1- lerp 2 /2 - scale/2 [100]
 
 			trans.SetPos(centerPos + glm::vec3(0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+			Shoptrans.SetPos(centerPosShop + glm::vec3(0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+			//std::cout << glm::to_string(Shoptrans.GetPos()) << "  LLL " << std::endl;
 
-			if (buttonTrans.GetPos() == glm::vec3(510.0f, 220.0f, 0.10f)) {
-				buttonTrans.SetPos(glm::vec3(510.0f, 220.0f, 0.10f));
+			//heal button lerping
+			if (buttonTrans.GetPos() == glm::vec3(425.0f, 160.0f, 0.10f)) {
+				buttonTrans.SetPos(glm::vec3(425.0f, 160.0f, 0.10f));
 			}
 			else {
 				buttonTrans.SetPos(centerPosButton - glm::vec3(0.5f * std::abs(buttonTrans.GetScale().x), 0.0f, 0.0f));
+				//std::cout << glm::to_string(buttonTrans.GetPos()) << "  LLL " << std::endl;
 			}
 
-			if (buttonTransCannon.GetPos() == glm::vec3(510.0f, -220.0f, 0.10f)) {
-				buttonTransCannon.SetPos(glm::vec3(510.0f, -220.0f, 0.10f));
+			//cannon firing button lerping
+			if (buttonTransCannon.GetPos() == glm::vec3(425.0f, -200.0f, 0.10f)) {
+				buttonTransCannon.SetPos(glm::vec3(425.0f, -200.0f, 0.10f));
 			}
 			else
 				buttonTransCannon.SetPos(centerPosCannonButton - glm::vec3(0.5f * std::abs(buttonTransCannon.GetScale().x), 0.0f, 0.0f));
 
-			if (buttonTransAbility.GetPos() == glm::vec3(-425.0f, -220.0f, 0.10f)) {
-				buttonTransAbility.SetPos(glm::vec3(-425.0f, -220.0f, 0.10f));
+			//cooldown button lerping
+			if (buttonTransAbility.GetPos() == glm::vec3(-425.0f, -200.0f, 0.10f)) {
+				buttonTransAbility.SetPos(glm::vec3(-425.0f, -200.0f, 0.10f));
 			}
 			else
 				buttonTransAbility.SetPos(centerPosAbilityButton - glm::vec3(0.5f * std::abs(buttonTransAbility.GetScale().x), 0.0f, 0.0f));
+
+			//upgrade button lerping
+			if (buttonTransUpgrade.GetPos() == glm::vec3(-425.0f, 160.0f, 0.10f)) {
+				buttonTransUpgrade.SetPos(glm::vec3(-425.0f, 160.0f, 0.10f));
+			}
+			else
+				buttonTransUpgrade.SetPos(centerPosUpgradeButton - glm::vec3(0.5f * std::abs(buttonTransUpgrade.GetScale().x), 0.0f, 0.0f));
 
 			//std::cout << glm::to_string(buttonTransAbility.GetPos()) << std::endl;
 			//std::cout << glm::to_string(buttonTrans.GetPos()) << std::endl;
 		}
 	}
 
+	//put the sprites/textures back to original position and color
 	if (!shouldShop) {
 		TTN_Transform& trans = Get<TTN_Transform>(background);
+		TTN_Transform& Shoptrans = Get<TTN_Transform>(shop);
 		TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);
 		TTN_Transform& buttonTransCannon = Get<TTN_Transform>(buttonCannon);
 		TTN_Transform& buttonTransAbility = Get<TTN_Transform>(buttonAbilityCD);
+		TTN_Transform& buttonTransUpgrade = Get<TTN_Transform>(buttonUpgrade);
 
 		trans.SetPos(glm::vec3(1920.0f, 0.0f, 0.20f));
-		buttonTrans.SetPos(glm::vec3(1270.0f, 220.0f, 0.10f));
-		buttonTransCannon.SetPos(glm::vec3(1270.0f, -220.0f, 0.10f));
-		buttonTransAbility.SetPos(glm::vec3(1270.0f, -220.0f, 0.10f));
+		Shoptrans.SetPos(glm::vec3(1920.0f, 0.0f, 0.15f));
+		buttonTrans.SetPos(glm::vec3(1270.0f, 160.0f, 0.10f));
+		buttonTransCannon.SetPos(glm::vec3(1270.0f, -200.0f, 0.10f));
+		buttonTransAbility.SetPos(glm::vec3(1270.0f, -200.0f, 0.10f));
+		buttonTransUpgrade.SetPos(glm::vec3(1270.0f, 160.0f, 0.10f));
 
 		Get<TTN_Renderer2D>(buttonHealth).SetColor(glm::vec4(1.0f));
 		Get<TTN_Renderer2D>(buttonCannon).SetColor(glm::vec4(1.0f));
 		Get<TTN_Renderer2D>(buttonAbilityCD).SetColor(glm::vec4(1.0f));
+		Get<TTN_Renderer2D>(buttonUpgrade).SetColor(glm::vec4(1.0f));
 	}
 
 	//button hovering
@@ -872,10 +933,10 @@ void GameUI::Update(float deltaTime)
 			mousePosWorldSpace.x > buttonTrans.GetPos().x - 0.5f * abs(buttonTrans.GetScale().x) &&
 			mousePosWorldSpace.y < buttonTrans.GetPos().y + 0.5f * abs(buttonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > buttonTrans.GetPos().y - 0.5f * abs(buttonTrans.GetScale().y)) {
-			Get<TTN_Renderer2D>(buttonHealth).SetSprite(textureButton2);
+			Get<TTN_Renderer2D>(buttonHealth).SetSprite(textureHealButton2);
 		}
 		else {
-			Get<TTN_Renderer2D>(buttonHealth).SetSprite(textureButton1);
+			Get<TTN_Renderer2D>(buttonHealth).SetSprite(textureHealButton1);
 		}
 
 		TTN_Transform& buttonTransCannon = Get<TTN_Transform>(buttonCannon);
@@ -883,10 +944,10 @@ void GameUI::Update(float deltaTime)
 			mousePosWorldSpace.x > buttonTransCannon.GetPos().x - 0.5f * abs(buttonTransCannon.GetScale().x) &&
 			mousePosWorldSpace.y < buttonTransCannon.GetPos().y + 0.5f * abs(buttonTransCannon.GetScale().y) &&
 			mousePosWorldSpace.y > buttonTransCannon.GetPos().y - 0.5f * abs(buttonTransCannon.GetScale().y)) {
-			Get<TTN_Renderer2D>(buttonCannon).SetSprite(textureButton2);
+			Get<TTN_Renderer2D>(buttonCannon).SetSprite(textureFiringButton2);
 		}
 		else {
-			Get<TTN_Renderer2D>(buttonCannon).SetSprite(textureButton1);
+			Get<TTN_Renderer2D>(buttonCannon).SetSprite(textureFiringButton1);
 		}
 
 		TTN_Transform abilityButtonTrans = Get<TTN_Transform>(buttonAbilityCD);
@@ -894,10 +955,21 @@ void GameUI::Update(float deltaTime)
 			mousePosWorldSpace.x > abilityButtonTrans.GetPos().x - 0.5f * abs(abilityButtonTrans.GetScale().x) &&
 			mousePosWorldSpace.y < abilityButtonTrans.GetPos().y + 0.5f * abs(abilityButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > abilityButtonTrans.GetPos().y - 0.5f * abs(abilityButtonTrans.GetScale().y)) {
-			Get<TTN_Renderer2D>(buttonAbilityCD).SetSprite(textureButton2);
+			Get<TTN_Renderer2D>(buttonAbilityCD).SetSprite(textureCooldownButton2);
 		}
 		else {
-			Get<TTN_Renderer2D>(buttonAbilityCD).SetSprite(textureButton1);
+			Get<TTN_Renderer2D>(buttonAbilityCD).SetSprite(textureCooldownButton1);
+		}
+
+		TTN_Transform upgradeButtonTrans = Get<TTN_Transform>(buttonUpgrade);
+		if (mousePosWorldSpace.x < upgradeButtonTrans.GetPos().x + 0.5f * abs(upgradeButtonTrans.GetScale().x) &&
+			mousePosWorldSpace.x > upgradeButtonTrans.GetPos().x - 0.5f * abs(upgradeButtonTrans.GetScale().x) &&
+			mousePosWorldSpace.y < upgradeButtonTrans.GetPos().y + 0.5f * abs(upgradeButtonTrans.GetScale().y) &&
+			mousePosWorldSpace.y > upgradeButtonTrans.GetPos().y - 0.5f * abs(upgradeButtonTrans.GetScale().y)) {
+			Get<TTN_Renderer2D>(buttonUpgrade).SetSprite(textureUpgradeButton2);
+		}
+		else {
+			Get<TTN_Renderer2D>(buttonUpgrade).SetSprite(textureUpgradeButton1);
 		}
 	}
 
@@ -943,7 +1015,7 @@ void GameUI::MouseButtonDownChecks()
 			mousePosWorldSpace.x > playButtonTrans.GetPos().x - 0.5f * abs(playButtonTrans.GetScale().x) &&
 			mousePosWorldSpace.y < playButtonTrans.GetPos().y + 0.5f * abs(playButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > playButtonTrans.GetPos().y - 0.5f * abs(playButtonTrans.GetScale().y)) {
-			if (m_DamHealth >= 100.f || healOnce || m_score < 5.f) {//do nothing if dam is at full health or they already bought the heal
+			if (m_DamHealth >= 100.f || healOnce || m_score < healCost) {//do nothing if dam is at full health or they already bought the heal
 				//std::cout << " SHOPING HEALTH" << std::endl;
 			}
 			else {
@@ -959,7 +1031,7 @@ void GameUI::MouseButtonDownChecks()
 			mousePosWorldSpace.x > cannonButtonTrans.GetPos().x - 0.5f * abs(cannonButtonTrans.GetScale().x) &&
 			mousePosWorldSpace.y < cannonButtonTrans.GetPos().y + 0.5f * abs(cannonButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > cannonButtonTrans.GetPos().y - 0.5f * abs(cannonButtonTrans.GetScale().y)) {
-			if (!cannonPower && m_score >= 10.f) {//if power is not active and score is equal to or greater than the cost
+			if (!cannonPower && m_score >= cannonCost) {//if power is not active and score is equal to or greater than the cost
 				cannonPower = true;
 				//std::cout << " SHOPING C" << std::endl;
 				Get<TTN_Renderer2D>(buttonCannon).SetColor(glm::vec4(0.5f));
@@ -973,11 +1045,24 @@ void GameUI::MouseButtonDownChecks()
 			mousePosWorldSpace.x > abilityButtonTrans.GetPos().x - 0.5f * abs(abilityButtonTrans.GetScale().x) &&
 			mousePosWorldSpace.y < abilityButtonTrans.GetPos().y + 0.5f * abs(abilityButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > abilityButtonTrans.GetPos().y - 0.5f * abs(abilityButtonTrans.GetScale().y)) {
-			if (!abilityCooldownBuff && m_score >= 15.f) {//if power is not active
+			if (!abilityCooldownBuff && m_score >= cooldownCost) {//if power is not active
 				abilityCooldownBuff = true;
+				//std::cout << " SHOPING AAAAAAAAAAAA" << std::endl;
+				Get<TTN_Renderer2D>(buttonAbilityCD).SetColor(glm::vec4(0.5f));
+			}
+			else {// if power up is active
+			}
+		}
+
+		TTN_Transform upgradeButtonTrans = Get<TTN_Transform>(buttonUpgrade);
+		if (mousePosWorldSpace.x < upgradeButtonTrans.GetPos().x + 0.5f * abs(upgradeButtonTrans.GetScale().x) &&
+			mousePosWorldSpace.x > upgradeButtonTrans.GetPos().x - 0.5f * abs(upgradeButtonTrans.GetScale().x) &&
+			mousePosWorldSpace.y < upgradeButtonTrans.GetPos().y + 0.5f * abs(upgradeButtonTrans.GetScale().y) &&
+			mousePosWorldSpace.y > upgradeButtonTrans.GetPos().y - 0.5f * abs(upgradeButtonTrans.GetScale().y)) {
+			if (!upgradeAbilities && m_score >= upgradeCost) {//if power is not active
 				upgradeAbilities = true;
 				std::cout << " SHOPING AAAAAAAAAAAA" << std::endl;
-				Get<TTN_Renderer2D>(buttonAbilityCD).SetColor(glm::vec4(0.5f));
+				Get<TTN_Renderer2D>(buttonUpgrade).SetColor(glm::vec4(0.5f));
 			}
 			else {// if power up is active
 			}

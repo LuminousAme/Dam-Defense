@@ -127,6 +127,12 @@ public:
 	void SetUpgradeBuff(bool up) { upgradeAbilities = up; }
 
 	int GetLastWave() { return lastWave; }
+
+	int GetHealCost() { return healCost; }
+	int GetCannonCost() { return cannonCost; }
+	int GetCooldownCost() { return abilityCost; }
+	int GetUpgradeCost() { return upgradeCost; }
+
 	//function to restart the game reseting all the data
 	void RestartData();
 	//Assets
@@ -302,22 +308,22 @@ protected:
 
 	/////////// SHOP RELATED STUFF///////////////
 	float healAmount; //heal the dam by this much
-	unsigned healCost; //score cost of heal
+	int healCost; //score cost of heal
 	int healCounter;
 
 	//bool for whether faster cannon buff form the shop is active
 	bool cannonBuff;
-	unsigned cannonCost; //score cost of cannon powerup
+	int cannonCost; //score cost of cannon powerup
 	bool cannonScoreCost;
 
 	//bool for whether faster ability cooldowns from the shop is active
 	bool abilityCooldownBuff;
-	unsigned abilityCost; //score cost of ability cd powerup
+	int abilityCost; //score cost of ability cd powerup
 	bool abilityScoreCost;
 
 	//bool for upgrade to abilites
 	bool upgradeAbilities;
-	unsigned upgradeCost; //score cost of upgrade powerup
+	int upgradeCost; //score cost of upgrade powerup
 	bool upgradeScoreCost; //bool to reset after every round
 
 	/////////// SOUND CONTROL///////////////

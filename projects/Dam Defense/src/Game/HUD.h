@@ -75,6 +75,11 @@ public:
 
 	bool GetUpgradeBuff() { return upgradeAbilities; }
 
+	void SetHealCost(int cost) { healCost = cost; }
+	void SetCannonCost(int cost) { cannonCost = cost; }
+	void SetCooldownCost(int cost) { cooldownCost = cost; }
+	void SetUpgradeCost(int cost) { upgradeCost = cost; }
+
 private:
 
 #pragma region ENTITES AND STUFF
@@ -136,11 +141,19 @@ private:
 	entt::entity buttonHealth;
 	entt::entity buttonCannon;
 	entt::entity buttonAbilityCD;
+	entt::entity buttonUpgrade;
+	entt::entity shop;
 
 	//assets
 	TTN_Texture2D::st2dptr textureShop;//shop text/title
-	TTN_Texture2D::st2dptr textureButton1;
-	TTN_Texture2D::st2dptr textureButton2;
+	TTN_Texture2D::st2dptr textureHealButton1;
+	TTN_Texture2D::st2dptr textureHealButton2;
+	TTN_Texture2D::st2dptr textureFiringButton1;
+	TTN_Texture2D::st2dptr textureFiringButton2;
+	TTN_Texture2D::st2dptr textureCooldownButton1;
+	TTN_Texture2D::st2dptr textureCooldownButton2;
+	TTN_Texture2D::st2dptr textureUpgradeButton1;
+	TTN_Texture2D::st2dptr textureUpgradeButton2;
 
 	//assets
 	TTN_Texture2D::st2dptr textureScore;
@@ -175,6 +188,11 @@ private:
 	bool shopping = false;
 	bool waveChange;
 	int waveTracker = 0;
+	//shop costs
+	int healCost;
+	int cannonCost;
+	int cooldownCost;
+	int upgradeCost;
 
 	int healCounter;  //how many times to heal
 	bool healOnce; // bool to keep track of whether the player can buy the heal

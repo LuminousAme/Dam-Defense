@@ -408,6 +408,10 @@ int main() {
 			gameScene->SetAbilityBuff(gameSceneUI->GetAbilityBuff());
 			gameScene->SetUpgradeBuff(gameSceneUI->GetUpgradeBuff());
 			//gameScene->SetUpgradeBuff(true);
+			gameSceneUI->SetHealCost(gameScene->GetHealCost());
+			gameSceneUI->SetCannonCost(gameScene->GetCannonCost());
+			gameSceneUI->SetCooldownCost(gameScene->GetCooldownCost());
+			gameSceneUI->SetUpgradeCost(gameScene->GetUpgradeCost());
 
 			gameSceneUI->SetLastWave(gameScene->GetLastWave());
 			gameSceneUI->SetScore(gameScene->GetScore());
@@ -505,6 +509,23 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Play Again", "textures/text/Play again.png", 1); //rendered text of words Play again
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Quit-Text", "textures/text/Quit.png", 1); //rendered text of word Quit
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Main Menu", "textures/text/Main Menu.png", 1); //rendered text of word main menu
+
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Cont Hover", "textures/shop/Continue Button_Hovered.png", 1); //texture for continue button
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Cont Normal", "textures/shop/Continue Button_Normal.png", 1); //texture for continue button
+
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Cooldown Normal", "textures/shop/Icon_Cooldown.png", 1); //texture for cooldowns button
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Cooldown Hovered", "textures/shop/Icon_Cooldown_Hovered.png", 1); //texture for cooldowns button
+
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Heal", "textures/shop/Icon_Health.png", 1);  //texture for heal button
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Heal Hovered", "textures/shop/Icon_Health_Hovered.png", 1);  //texture for heal button
+
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Rate", "textures/shop/Icon_RateOfFire.png", 1);  //texture for faster firing button
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Rate Hovered", "textures/shop/Icon_RateOfFire_Hovered.png", 1);  //texture for faster firing button
+
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Upgrade", "textures/shop/Icon_Skills.png", 1);  //texture for upgrade button
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Upgrade Hovered", "textures/shop/Icon_Skills_Hovered.png", 1); //texture for upgrade button
+
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Shop", "textures/shop/Shop Main_OP100.png", 1); //texture for shop menu/ui
 
 	for (int i = 0; i < 23; i++) {
 		TTN_AssetSystem::AddTexture2DToBeLoaded("Game logo " + std::to_string(i), "textures/logo/Game Logo " + std::to_string(i + 1) + ".png", 1); //logo for the game

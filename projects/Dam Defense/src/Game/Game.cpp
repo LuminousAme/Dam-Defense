@@ -850,9 +850,9 @@ void Game::RestartData()
 	cannonBuff = false;
 	abilityCooldownBuff = false;
 	upgradeAbilities = false;
-	healCost = 5;
-	cannonCost = 10;
-	abilityCost = 15;
+	healCost = 50;
+	cannonCost = 100;
+	abilityCost = 150;
 	upgradeCost = 20;
 	//bools for cost reset
 	cannonScoreCost = false;
@@ -1526,6 +1526,7 @@ void Game::WaveUpdate(float deltaTime) {
 		//reset shop cost bools
 		abilityScoreCost = false;
 		cannonScoreCost = false;
+		upgradeScoreCost = false;
 	}
 
 	//if it is in the cooldown between waves, reduce the cooldown by deltaTime
@@ -2000,7 +2001,8 @@ void Game::Shop(float deltaTime)
 		//std::cout << " UPPPPPPPPPPPPPPPGRADe" << std::endl;
 		//std::cout << FlameActiveTime << std::endl;
 		for (auto bird : birds) {
-			Get<BirdComponent>(bird).SetDiveSpeed(45.0f / 10.0f);
+			Get<BirdComponent>(bird).SetDiveSpeed(50.0f / 10.0f);
+			//Get<BirdComponent>(bird).SetDiveWeight
 		}
 
 		if (!upgradeScoreCost && m_score >= upgradeCost) {
