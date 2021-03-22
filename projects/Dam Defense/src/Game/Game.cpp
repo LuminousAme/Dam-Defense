@@ -472,7 +472,7 @@ void Game::SetUpEntities()
 		camTrans.SetPos(glm::vec3(0.0f, 0.070f, -0.275f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f, 17.5f);
+		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.024f, 17.5f);
 		Get<TTN_Camera>(camera).View();
 	}
 
