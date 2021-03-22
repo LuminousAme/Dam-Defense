@@ -1,10 +1,11 @@
 //Dam Defense by Atlas X Games
-//HUD.h, the header file for the scene hclass representing the UI in the main game
+//HUD.h, the header file for the scene class representing the UI in the main game
 #pragma once
 
 //include required features from titan
 #include "Titan/Application.h"
 #include "Titan/Utilities/Interpolation.h"
+#include "glm/ext.hpp"
 
 using namespace Titan;
 
@@ -14,14 +15,22 @@ public:
 	//default constructor
 	GameUI();
 
-	//default destrcutor 
+	//default destrcutor
 	~GameUI() = default;
 
 	//sets up the scene
 	void InitScene();
 
+	//restart the scene
+	void RestartData();
+
 	//update the scene
 	void Update(float deltaTime);
+
+	//input keys
+	void KeyDownChecks();
+	//mouse input
+	void MouseButtonDownChecks();
 
 	//setters
 	void SetScore(unsigned score) { m_score = score; }
@@ -42,9 +51,43 @@ public:
 	float GetWaveProgress() { return m_waveProgress; }
 	bool GetGamePaused() { return m_paused; }
 
+	void SetInputDelay(float delay) { m_InputDelay = delay; }
+	//shop stuff
+	bool GetShouldShop() { return shouldShop; }
+	void SetShouldShop(bool shop) { shouldShop = shop; }
+	bool GetShouldShopping() { return shopping; }
+	void SetShouldShopping(bool shop) { shopping = shop; }
+	bool GetWaveChange() { return waveChange; }
+	void SetWaveChange(bool wave) { waveChange = wave; }
+	//shop powers
+	int GetHealCounter() { return healCounter; }
+	void SetHealCounter(int heal) { healCounter = heal; }
+
+	bool GetCannonPower() { return cannonPower; }
+	void SetCannonPower(bool power) { cannonPower = power; }
+
+	bool GetAbilityBuff() { return abilityCooldownBuff; }
+
+	bool GetShouldExit() { return shouldExitShop; }
+	void SetShouldExit(bool exit) { shouldExitShop = exit; }
+
+	void SetLastWave(int wave) { lastWave = wave; }
+
+	bool GetUpgradeBuff() { return upgradeAbilities; }
+
+	void SetHealCost(int cost) { healCost = cost; }
+	void SetCannonCost(int cost) { cannonCost = cost; }
+	void SetCooldownCost(int cost) { cooldownCost = cost; }
+	void SetUpgradeCost(int cost) { upgradeCost = cost; }
+
 private:
+
+#pragma region ENTITES AND STUFF
+
 	//entities
 	entt::entity cam;
+	entt::entity background;
+
 	//healthbar
 	entt::entity healthBar;
 	entt::entity healthBarBg;
@@ -93,6 +136,28 @@ private:
 	//special ability general data
 	float specialAbilityScale = 0.2f;
 
+#pragma endregion
+	//shop buttons
+	entt::entity buttonHealth;
+	entt::entity buttonCannon;
+	entt::entity buttonAbilityCD;
+	entt::entity buttonUpgrade;
+	entt::entity shop;
+	entt::entity buttonContinue;
+
+	//assets
+	TTN_Texture2D::st2dptr textureShop;//shop text/title
+	TTN_Texture2D::st2dptr textureHealButton1;
+	TTN_Texture2D::st2dptr textureHealButton2;
+	TTN_Texture2D::st2dptr textureFiringButton1;
+	TTN_Texture2D::st2dptr textureFiringButton2;
+	TTN_Texture2D::st2dptr textureCooldownButton1;
+	TTN_Texture2D::st2dptr textureCooldownButton2;
+	TTN_Texture2D::st2dptr textureUpgradeButton1;
+	TTN_Texture2D::st2dptr textureUpgradeButton2;
+	TTN_Texture2D::st2dptr textureContinue1;
+	TTN_Texture2D::st2dptr textureContinue2;
+
 	//assets
 	TTN_Texture2D::st2dptr textureScore;
 
@@ -112,6 +177,39 @@ private:
 	float m_waveCompleteTime = 10.0f;
 	float m_waveCompleteTotalTime = 4.0f;
 	bool waveDone = false;
+
+	int lastWave; //last wave of the game
+
+	//shop stuff
+	bool shouldExitShop; //exit bool
+	bool shopOnce = false; //variable for only spawning the shop once per end of round
+
+	float lerpTime = 10.0f;
+	float lerpTotalTime = 1.5f;
+	bool shouldShop = false;
+	bool shopPause = false;
+	bool shopping = false;
+	bool waveChange;
+	int waveTracker = 0;
+	//shop costs
+	int healCost;
+	int cannonCost;
+	int cooldownCost;
+	int upgradeCost;
+
+	int healCounter;  //how many times to heal
+	bool healOnce; // bool to keep track of whether the player can buy the heal
+
+	bool cannonPower;//bool for cannon powerup
+
+	//bool for whether faster ability cooldowns from the shop is active
+	bool abilityCooldownBuff;
+
+	//bool for the ability upgrade option
+	bool upgradeAbilities;
+
+	//the time remaining before it accepts player input, used for the shop
+	float m_InputDelay = 0.3f;
 
 	//special ability variables
 	//flamethrower

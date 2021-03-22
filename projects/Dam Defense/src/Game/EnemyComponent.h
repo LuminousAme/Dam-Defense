@@ -26,6 +26,7 @@ public:
 	void SetAttacking(bool attacking) { m_attacking = attacking; }
 	void SetCannonEntity(entt::entity entity) { m_cannonEntityRef = entity; }
 	void SetDifficulty(float d) { m_diff = d; }
+	void SetMuzzleCD(float cd) { muzzleFlashCD = cd; }
 	//getters
 	int GetBoatType() { return m_boatType; }
 	int GetDifficulty() { return m_diff; }
@@ -37,6 +38,7 @@ public:
 	glm::vec3 GetDirection() { return direction; }
 	static float GetZTarget() { return m_ztarget; }
 	static float GetZTargetDistance() { return m_targetDistance; }
+	float GetMuzzleCD() { return muzzleFlashCD; }
 
 	//Updates the boat's physics
 	void Update(float deltaTime);
@@ -67,4 +69,5 @@ protected:
 	bool wasAliveLastFrame; //a variable for if the ship was alive last frame
 	float timeSinceDeath; //the ammount of time that has passed since the ship died
 	float timeSinking = 2.5f; //the ammount of time it should be rotating while it sinks
+	float muzzleFlashCD; //cooldown for muzzle flash
 };

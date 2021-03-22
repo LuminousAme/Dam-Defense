@@ -53,7 +53,7 @@ namespace Titan {
 		SetUpData();
 
 		//setup the rest of the data
-		m_durationRemaining = 0.0f;
+		m_durationRemaining = m_duration;
 		m_activeParticleIndex = m_maxParticlesCount - 1;
 		m_vao = TTN_VertexArrayObject::Create();
 		m_rotation = glm::vec3(0.0f);
@@ -150,6 +150,7 @@ namespace Titan {
 	void TTN_ParticleSystem::SetDuration(float duration)
 	{
 		m_duration = duration;
+		m_durationRemaining = m_duration;
 	}
 
 	//set wheter or not the effect should loop

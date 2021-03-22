@@ -37,6 +37,9 @@ public:
 	void MouseButtonChecks();
 	void MouseButtonUpChecks();
 
+	/*bool GetShouldShop() { return shouldShop; };
+	void SetShouldShop(bool menu) { shouldShop = menu; }*/
+
 	bool GetGameIsPaused() { return m_paused; }
 	void SetGameIsPaused(bool paused) { m_paused = paused; }
 
@@ -109,6 +112,26 @@ public:
 
 	void SetArcade(bool arcade) { m_arcade = arcade; }
 	bool GetArcade() { return m_arcade; }
+
+	float GetHealAmount() { return healAmount; }
+	void SetHealAmount(float heal) { healAmount = heal; }
+
+	int GetHealCounter() { return healCounter; }
+	void SetHealCounter(int heal) { healCounter = heal; }
+
+	bool GetCannonBuff() { return cannonBuff; }
+	void SetCannonBuff(bool buff) { cannonBuff = buff; }
+
+	void SetAbilityBuff(bool buff) { abilityCooldownBuff = buff; }
+
+	void SetUpgradeBuff(bool up) { upgradeAbilities = up; }
+
+	int GetLastWave() { return lastWave; }
+
+	int GetHealCost() { return healCost; }
+	int GetCannonCost() { return cannonCost; }
+	int GetCooldownCost() { return abilityCost; }
+	int GetUpgradeCost() { return upgradeCost; }
 
 	//function to restart the game reseting all the data
 	void RestartData();
@@ -206,7 +229,7 @@ protected:
 	std::vector<entt::entity> flames;
 
 	/////// OTHER DATA ///////////
-#pragma region Data
+#pragma region GAME DATA
 protected:
 	/////// Player control data/////////
 	float cannonBallForce = 3600.0f / 10.0f;//a multiplier for the ammount of force should be applied to a cannonball when it is fired
@@ -221,7 +244,7 @@ protected:
 
 	//////// GAMEPLAY DATA ////////////
 	int lastWave = 3; //the wave the player needs to reach and beat to win
-	float damage = 2.0f; //damage of boats (dam health is 100.f)
+	float damage = 5.0f; //damage of boats (dam health is 100.f)
 	unsigned m_score = 0;
 
 	/////// Terrain and water control data ////////
@@ -268,9 +291,10 @@ protected:
 	float m_InputDelay; //the time remaining before it accepts player input, used when the player is moving in and out of the scene
 
 	/////////////ENEMY AND WAVE CONTROLS//////////////////
-	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
+	float muzzleFlashCD = 1.50f; // time for muzzle flash
+	float m_timeBetweenEnemyWaves = 8.0f; //rest time between waves
 	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
-	int m_enemiesPerWave = 5; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
+	int m_enemiesPerWave = 1; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
 
 	int m_currentWave = 0; //the current wave
 	float m_timeTilNextWave; //the timer until the next wave starts, used after a wave has ended
@@ -281,6 +305,26 @@ protected:
 	bool m_waveInProgress;
 	bool m_firstWave = true;
 	float difficulty = 100.0f;
+
+	/////////// SHOP RELATED STUFF///////////////
+	float healAmount; //heal the dam by this much
+	int healCost; //score cost of heal
+	int healCounter;
+
+	//bool for whether faster cannon buff form the shop is active
+	bool cannonBuff;
+	int cannonCost; //score cost of cannon powerup
+	bool cannonScoreCost;
+
+	//bool for whether faster ability cooldowns from the shop is active
+	bool abilityCooldownBuff;
+	int abilityCost; //score cost of ability cd powerup
+	bool abilityScoreCost;
+
+	//bool for upgrade to abilites
+	bool upgradeAbilities;
+	int upgradeCost; //score cost of upgrade powerup
+	bool upgradeScoreCost; //bool to reset after every round
 
 	/////////// SOUND CONTROL///////////////
 	//control melody
@@ -307,6 +351,7 @@ protected:
 	TTN_ParticleTemplate fireParticle;//fire particles
 	TTN_ParticleTemplate expolsionParticle;//expolsion particles
 	TTN_ParticleTemplate birdParticle;//bird expolsion particles
+	TTN_ParticleTemplate gunParticle;//enemy ship gun particles
 
 	//set up functions, called by InitScene()
 protected:
@@ -333,10 +378,12 @@ protected:
 	//sounds
 	void GameSounds(float dt);
 	//misc
+	void Shop(float deltaTime);
 	void BirdBomb();
 	void MakeABird();
 	void BirdUpate(float deltaTime);
 	void ImGui();
+	void ColorCorrection();// stuff for color correction
 
 	//other functions, ussually called in relation to something happening like player input or a collision
 protected:
@@ -345,11 +392,20 @@ protected:
 
 	void CreateExpolsion(glm::vec3 location);
 	void CreateBirdExpolsion(glm::vec3 location);
+	void CreateMuzzleFlash(glm::vec3 location, entt::entity e);
 
 	//CG assingment 2 stuff
 protected:
 	//color correction effect
 	TTN_ColorCorrect::scolcorptr m_colorCorrectEffect;
+	TTN_BloomEffect::sbloomptr m_bloomEffect;
+	int m_passes = 5;
+	int m_downscale = 1;
+	float m_threshold = 0.625f;
+
+	//the radius of the effect
+	float m_radius = 1.0f;
+
 	//bools for imgui controls
 	bool m_applyWarmLut;
 	bool m_applyCoolLut;

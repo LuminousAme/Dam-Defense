@@ -134,7 +134,8 @@ void MainMenu::PostRender()
 void MainMenu::SetUpAssets()
 {
 	//grab the shaders
-	shaderProgramTextured = TTN_AssetSystem::GetShader("Basic textured shader");
+	//shaderProgramTextured = TTN_AssetSystem::GetShader("Basic textured shader");
+	shaderProgramTextured = TTN_AssetSystem::GetShader("gBuffer shader");
 	shaderProgramSkybox = TTN_AssetSystem::GetShader("Skybox shader");
 	shaderProgramTerrain = TTN_AssetSystem::GetShader("Terrain shader");
 	shaderProgramWater = TTN_AssetSystem::GetShader("Water shader");

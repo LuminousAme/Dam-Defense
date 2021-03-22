@@ -83,11 +83,11 @@ void Game::Update(float deltaTime)
 		if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
 		//update the enemy wave spawning
-		WaveUpdate(deltaTime);	
+		WaveUpdate(deltaTime);
 		//collision check
 		Collisions();
 		//damage function, contains cooldoown
-		Damage(deltaTime); 
+		Damage(deltaTime);
 
 		//goes through the boats vector
 		for (int i = 0; i < boats.size(); i++) {
@@ -132,6 +132,10 @@ void Game::Update(float deltaTime)
 		//if it's been turned of set the effect not to render
 		m_colorCorrectEffect->SetShouldApply(false);
 	}*/
+	//shop function
+	Shop(deltaTime);
+
+	ColorCorrection();
 
 	//update the sound
 	engine.Update();
@@ -279,6 +283,29 @@ void Game::KeyDownChecks()
 //function to cehck for when a key is being pressed
 void Game::KeyChecks()
 {
+	auto& a = Get<TTN_Transform>(camera);
+	/// CAMERA MOVEMENT FOR A2 ///
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
+		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y, a.GetPos().z + 1.60f));
+	}
+
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
+		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y, a.GetPos().z - 1.60f));
+	}
+
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
+		a.SetPos(glm::vec3(a.GetPos().x + 1.60f, a.GetPos().y, a.GetPos().z));
+	}
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
+		a.SetPos(glm::vec3(a.GetPos().x - 1.60f, a.GetPos().y, a.GetPos().z));
+	}
+
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::LeftControl)) {
+		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y - 0.60f, a.GetPos().z));
+	}
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Space)) {
+		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y + 0.60f, a.GetPos().z));
+	}
 }
 
 //function to check for when a key has been released
@@ -347,11 +374,11 @@ void Game::SetUpAssets()
 	//// SHADERS ////
 	//grab the shaders
 	shaderProgramTextured = TTN_AssetSystem::GetShader("Basic textured shader");
+	//shaderProgramTextured = TTN_AssetSystem::GetShader("gBuffer shader");
 	shaderProgramSkybox = TTN_AssetSystem::GetShader("Skybox shader");
 	shaderProgramTerrain = TTN_AssetSystem::GetShader("Terrain shader");
 	shaderProgramWater = TTN_AssetSystem::GetShader("Water shader");
 	shaderProgramAnimatedTextured = TTN_AssetSystem::GetShader("Animated textured shader");
-	shaderDepth = TTN_AssetSystem::GetShader("Depth shader");
 
 	////MESHES////
 	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
@@ -450,6 +477,15 @@ void Game::SetUpAssets()
 		m_mats[i]->SetSpecularRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
 		m_mats[i]->SetUseDiffuseRamp(m_useDiffuseRamp);
 		m_mats[i]->SetUseSpecularRamp(m_useSpecularRamp);
+		/*m_mats[i]->SetUseAlbedo(true);
+		gBufferShader->SetUniform("u_UseDiffuse", (int)m_mats[i]->GetUseAlbedo());
+		m_mats[i]->GetAlbedo()->Bind(textureSlot);
+		textureSlot++;
+
+		m_mats[i]->GetSpecularMap()->Bind(textureSlot);
+		textureSlot++;*/
+		//gBufferShader->SetUniform("s_Diffuse", renderer.GetMat()->GetAlbedo());
+		//gBufferShader->SetUniformMatrix("u_Specular", lightSpaceViewProj);
 	}
 
 	illBuffer->SetDiffuseRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
@@ -706,6 +742,25 @@ void Game::SetUpOtherData()
 		birdParticle.SetOneStartSpeed(10.9f / 10.0f);
 	}
 
+	//muzzle flash particle template
+	{
+		gunParticle = TTN_ParticleTemplate();
+		gunParticle.SetMat(smokeMat);
+		gunParticle.SetMesh(sphereMesh);
+		//	gunParticle.SetTwoEndColors(glm::vec4(0.5f, 0.5f, 0.5f, 0.1f), glm::vec4(0.5f, 0.5f, 0.5f, 0.1f)); //orange
+	//gunParticle.SetTwoEndColors(glm::vec4(0.1f, 0.1f, 0.1f, 0.8f), glm::vec4(0.1f, 0.1f, 0.1f, 0.8f)); ///black
+		gunParticle.SetTwoEndColors(glm::vec4(1.0f, 0.50f, 0.0f, 0.50f), glm::vec4(1.0f, 0.50f, 0.0f, 0.50f)); ///yellow
+		gunParticle.SetOneEndSize(0.35f);
+		gunParticle.SetOneEndSpeed(0.35f);
+		gunParticle.SetTwoLifetimes(0.85f, 1.10f);
+		gunParticle.SetTwoStartColors(glm::vec4(1.0f, 0.50f, 0.0f, 1.0f), glm::vec4(1.0f, 0.50f, 0.0f, 1.0f)); //orange
+	//	gunParticle.SetTwoStartColors(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f)); //yellow
+		//gunParticle.SetTwoStartColors(glm::vec4(0.1f, 0.1f, 0.1f, 0.8f), glm::vec4(0.1f, 0.1f, 0.1f, 0.8f)); //black
+		gunParticle.SetOneStartSize(0.20f);
+		gunParticle.SetOneStartSpeed(10.0f);
+	}
+
+	//setup up the color correction effect
 	glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 
 	//setup the bloom effect
@@ -727,6 +782,19 @@ void Game::SetUpOtherData()
 	m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Main LUT"));
 	//and add it to this scene's list of effects
 	m_PostProcessingEffects.push_back(m_colorCorrectEffect);
+
+	//bloom
+	//m_bloomEffect = TTN_BloomEffect::Create();
+	//m_bloomEffect->Init(windowSize.x, windowSize.y);
+	//m_bloomEffect->SetShouldApply(false);
+	////add it to the list
+	//m_PostProcessingEffects.push_back(m_bloomEffect);
+
+	////bloom stuff
+	//m_bloomEffect->SetNumOfPasses(m_passes);
+	//m_bloomEffect->SetBlurDownScale(m_downscale);
+	//m_bloomEffect->SetThreshold(m_threshold);
+	//m_bloomEffect->SetRadius(m_radius);
 
 	//set all 3 effects to false
 	m_applyWarmLut = false;
@@ -776,6 +844,21 @@ void Game::RestartData()
 	m_paused = false;
 	m_gameOver = false;
 	m_gameWin = false;
+
+	//shop stuff
+	healAmount = 10.0f;
+	healCounter = 0;
+	cannonBuff = false;
+	abilityCooldownBuff = false;
+	upgradeAbilities = false;
+	healCost = 50;
+	cannonCost = 100;
+	abilityCost = 150;
+	upgradeCost = 20;
+	//bools for cost reset
+	cannonScoreCost = false;
+	abilityScoreCost = false;
+	upgradeScoreCost = false;
 
 	//enemy and wave data setup
 	m_currentWave = 0;
@@ -844,6 +927,7 @@ void Game::RestartData()
 
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	firstFrame = true;
+	m_score = 0;
 }
 
 #pragma endregion
@@ -950,7 +1034,7 @@ void Game::CreateExpolsion(glm::vec3 location)
 	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
 	//attach that transform to the entity
 	AttachCopy(newExpolsion, PSTrans);
-	glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
+	//glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
 
 	//setup a particle system for the particle system
 	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(500, 0, expolsionParticle, 0.0f, false);
@@ -976,7 +1060,7 @@ void Game::CreateBirdExpolsion(glm::vec3 location)
 	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
 	//attach that transform to the entity
 	AttachCopy(newExpolsion, PSTrans);
-	glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
+	//glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
 
 	//setup a particle system for the particle system
 	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(25, 0, birdParticle, 0.0f, false);
@@ -994,6 +1078,56 @@ void Game::CreateBirdExpolsion(glm::vec3 location)
 	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(25);
 }
 
+void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e)
+{
+	//we don't really need to save the entity number for any reason, so we just make the variable local
+	entt::entity newExpolsion = CreateEntity(2.5f);
+	// 0 green, 1 red, 2 yellow
+	//setup a transfrom for the particle system
+	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f));
+
+	int pos = rand() % 3;
+	if (pos == 0) {//regular
+		PSTrans.SetPos(glm::vec3(location.x, location.y, location.z));
+	}
+	if (pos == 1) {
+		PSTrans.SetPos(glm::vec3(location.x + 0.75f, location.y, location.z));
+	}
+	if (pos == 2) {
+		PSTrans.SetPos(glm::vec3(location.x - 0.75f, location.y, location.z));
+	}
+
+	//PSTrans.SetPos(Get<TTN_Transform>(e).GetGlobalPos());
+	//PSTrans.RotateFixed(Get<TTN_Transform>(e).GetRotation());
+	//PSTrans.SetRotationQuat(Get<TTN_Transform>(e).GetRotQuat());
+	glm::vec3 tempR = Get<TTN_Transform>(e).GetRotation();
+
+	/*glm::vec3 shipDir = glm::vec3(0.0f, 0.0f, 1.0f);
+	shipDir = glm::vec3(glm::toMat4(glm::quat(glm::radians(glm::vec3(-tempR.y, -tempR.x, tempR.z)))) * glm::vec4(shipDir, 1.0f));
+	shipDir = glm::normalize(shipDir);
+	PSTrans.SetPos(glm::vec3(0.0f, -0.0f, 0.0f) + shipDir);*/
+
+	//attach that transform to the entity
+	AttachCopy(newExpolsion, PSTrans);
+
+	//setup a particle system for the particle system
+	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(25, 0, gunParticle, 0.0f, false);
+
+	ps->MakeConeEmitter(10.0f, glm::vec3(-tempR.y, -tempR.x, tempR.z));//-75 x
+	ps->VelocityReadGraphCallback(FastStart);
+	ps->ColorReadGraphCallback(SlowStart);
+	ps->ScaleReadGraphCallback(ZeroOneZero);
+
+	//setup a particle system component
+	TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
+	//attach the particle system component to the entity
+	AttachCopy(newExpolsion, psComponent);
+
+	//get a reference to that particle system and burst it
+	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(30);
+	//Get<TTN_Transform>(newExpolsion).SetParent(&Get<TTN_Transform>(e),e);
+}
+
 //creates the flames for the flamethrower
 void Game::Flamethrower() {
 	//if the cooldown has ended
@@ -1006,7 +1140,7 @@ void Game::Flamethrower() {
 		for (int i = 0; i < 6; i++) {
 			//fire particle entities
 			{
-				flames.push_back(CreateEntity(3.0f));
+				flames.push_back(CreateEntity(FlameActiveTime));
 
 				//setup a transfrom for the particle system
 				TTN_Transform firePSTrans = TTN_Transform(Get<TTN_Transform>(flamethrowers[i]).GetGlobalPos() + glm::vec3(0.0f, 0.0f, 2.0f / 10.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f / 10.0f));
@@ -1015,8 +1149,10 @@ void Game::Flamethrower() {
 				AttachCopy(flames[i], firePSTrans);
 
 				//setup a particle system for the particle system
-				TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1200, 300, fireParticle, 2.0f, true);
+				TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1500, 250, fireParticle, FlameActiveTime - 1.0f, true);
 				ps->MakeConeEmitter(15.0f, glm::vec3(90.0f, 0.0f, 0.0f));
+
+				std::cout << FlameActiveTime << std::endl;
 
 				//setup a particle system component
 				TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
@@ -1046,6 +1182,8 @@ void Game::FlamethrowerUpdate(float deltaTime)
 		//increment flamethrower anim timer
 		FlameAnim += deltaTime;
 
+		//std::cout << FlameActiveTime << std::endl;
+
 		//if it's reached the end of the animation
 		if (FlameAnim >= FlameActiveTime) {
 			//get rid of all the flames, reset the timer and set the active flag to false
@@ -1054,7 +1192,14 @@ void Game::FlamethrowerUpdate(float deltaTime)
 			Flaming = false;
 		}
 
-		//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 27
+		/*	std::vector<entt::entity>::iterator itt = flames.begin();
+			while (itt != flames.end()) {
+				TTN_ParticleSystem::spsptr &temp = Get<TTN_ParticeSystemComponent>(*itt).GetParticleSystemPointer();
+				temp.get<TTN_ParticleSystem>
+				itt++;
+			}*/
+
+			//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 27
 		std::vector<entt::entity>::iterator it = boats.begin();
 		while (it != boats.end()) {
 			if (Get<TTN_Transform>(*it).GetPos().z >= 27.0f / 10.0f) {
@@ -1242,7 +1387,7 @@ void Game::SpawnBoatRight() {
 		boats.push_back(CreateEntity());
 		//gets the type of boat
 		int randomBoat = rand() % 3;
-		
+
 		//create a renderer
 		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
 		//set up renderer for green boat
@@ -1378,12 +1523,18 @@ void Game::WaveUpdate(float deltaTime) {
 		m_timeUntilNextSpawn = m_timeBetweenEnemyWaves;
 		playJingle = true;
 		m_waveInProgress = false;
+		Dam_health = round(Dam_health); // round the health at the end of the round
+		//reset shop cost bools
+		abilityScoreCost = false;
+		cannonScoreCost = false;
+		upgradeScoreCost = false;
 	}
 
 	//if it is in the cooldown between waves, reduce the cooldown by deltaTime
 	if (m_timeTilNextWave >= 0.0f) {
 		m_timeTilNextWave -= deltaTime;
 	}
+
 	//if the cooldown between waves has ended, begin the next wave
 	else if (!m_waveInProgress && m_timeTilNextWave <= 0.0f && m_timeUntilNextSpawn >= 0.0f) {
 		m_currentWave++;
@@ -1458,7 +1609,7 @@ void Game::Collisions() {
 							glm::vec3 loc = Get<TTN_Transform>(*itt).GetGlobalPos();
 							CreateExpolsion(loc);
 							//make sure it's facing the direction it's moving
-							if(Get<TTN_Physics>(*itt).GetLinearVelocity() != glm::vec3(0.0f)) Get<TTN_Transform>(*itt).LookAlong(
+							if (Get<TTN_Physics>(*itt).GetLinearVelocity() != glm::vec3(0.0f)) Get<TTN_Transform>(*itt).LookAlong(
 								glm::normalize(Get<TTN_Physics>(*itt).GetLinearVelocity()), glm::vec3(0.0f, 1.0f, 0.0f));
 							//remove the physics from it
 							Remove<TTN_Physics>(*itt);
@@ -1603,11 +1754,11 @@ void Game::Collisions() {
 							//make a new bird
 							MakeABird();
 							//and set it's target
-							Get<BirdComponent>(birds[birds.size() -1]).SetTarget(Get<BirdComponent>(birds[0]).GetTarget());
+							Get<BirdComponent>(birds[birds.size() - 1]).SetTarget(Get<BirdComponent>(birds[0]).GetTarget());
 
 							//subtract score
 							if (m_score > 50) {
-								m_score= m_score - 50;
+								m_score = m_score - 50;
 							}
 						}
 						else {
@@ -1641,6 +1792,27 @@ void Game::Damage(float deltaTime) {
 		if (Get<TTN_Transform>(*can).GetParentEntity() != entt::null) {
 			if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetAttacking()) {
 				Get<TTN_MorphAnimator>(*can).SetActiveAnim(1);
+				glm::vec3 temp = Get<TTN_Transform>(*can).GetGlobalPos();
+				glm::vec3 tempS = Get<TTN_Transform>(*can).GetScale();
+				glm::vec3 tempR = Get<TTN_Transform>(*can).GetRotation();
+
+				if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetMuzzleCD() <= 0.0f) {
+					Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).SetMuzzleCD(muzzleFlashCD);
+					if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetBoatType() == 1) { //red carrier boat
+						CreateMuzzleFlash(glm::vec3(temp.x + (tempS.x) - 1.0f, temp.y + 0.30f, temp.z - 2.0f), *can);
+					}
+					else if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetBoatType() == 0) { //green boat
+						CreateMuzzleFlash(glm::vec3(temp.x - abs(tempS.x), temp.y + 0.30f, temp.z - 2.0f), *can);
+					}
+					else { //yellow boat
+						CreateMuzzleFlash(glm::vec3(temp.x - abs(tempS.x) + 0.f, temp.y + 0.30f, temp.z - 2.50f), *can);
+					}
+				}
+
+				else {
+					float temp = Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetMuzzleCD() - deltaTime;
+					Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).SetMuzzleCD(temp);
+				}
 			}
 			can++;
 		}
@@ -1776,14 +1948,90 @@ void Game::GameSounds(float deltaTime)
 	melodyTimeTracker += deltaTime;
 }
 
-//function for bird bomb, decides which ship to target and sends the birds after them 
+void Game::Shop(float deltaTime)
+{
+	//heal from shop
+	if ((healCounter > 0)) {
+		//if (m_score < healCost) { //if score is less than the cost, do nothing
+		//}
+		//else {
+		if (Dam_health < 100.f && Dam_health>90.f) { // if dam health is above 90 but below 100
+			healAmount = abs(Dam_health - 100.f); //get remaining health
+		}
+		else // else normal heal amount
+			healAmount = 10.f;
+
+		Dam_health = Dam_health + healAmount; //heal
+		//Dam_health = round(Dam_health);
+		m_score = m_score - healCost;//score cost of heal
+		//std::cout << Dam_health << std::endl;
+		//}
+	}
+
+	//faster cannon
+	if (cannonBuff) {
+		playerShootCooldown = 0.45f;
+		//std::cout << "  CD LOWWW " << std::endl;
+		if (!cannonScoreCost && m_score >= cannonCost) {
+			m_score = m_score - cannonCost;//score cost of cannon powerup
+			cannonScoreCost = true;
+			std::cout << "  CD LOWWW " << std::endl;
+		}
+	}
+
+	else {
+		playerShootCooldown = 0.7f;
+		cannonScoreCost = false;
+	}
+
+	//if the player has lower ability cd from shop
+	if (abilityCooldownBuff) {
+		FlameTimer = FlameTimer - deltaTime;
+		BombTimer = BombTimer - deltaTime;
+		if (!abilityScoreCost && m_score >= abilityCost) {
+			m_score = m_score - abilityCost;//score cost of ability power up
+			abilityScoreCost = true;
+		}
+	}
+	else {
+		abilityScoreCost = false;
+	}
+
+	if (upgradeAbilities) {
+		FlameActiveTime = 5.0f; //longer active flamethrower
+		//std::cout << " UPPPPPPPPPPPPPPPGRADe" << std::endl;
+		//std::cout << FlameActiveTime << std::endl;
+		for (auto bird : birds) {
+			Get<BirdComponent>(bird).SetDiveSpeed(50.0f / 10.0f);
+			//Get<BirdComponent>(bird).SetDiveWeight
+		}
+
+		if (!upgradeScoreCost && m_score >= upgradeCost) {
+			m_score = m_score - upgradeCost;//score cost of ability power up
+			upgradeScoreCost = true;
+		}
+	}
+
+	else
+	{
+		FlameActiveTime = 3.0f; // regular flame timer
+		for (auto bird : birds) {
+			Get<BirdComponent>(bird).SetDiveSpeed(25.0f / 10.0f);//regular dive speed
+		}
+		upgradeScoreCost = false;
+	}
+
+	if (m_score < 0)
+		m_score = 0;
+}
+
+//function for bird bomb, decides which ship to target and sends the birds after them
 void Game::BirdBomb()
 {
-	std::cout << (int)Bombing << std::endl;
+	//std::cout << (int)Bombing << std::endl;
 	//if the bird bomb is not active and isn't on cooldown
 	if (!Bombing && BombTimer <= 0.0f) {
-		std::cout << "bombing 2\n";
-		//set bombing to true 
+		//set bombing to true
 		Bombing = true;
 
 		//get a streched out verison of the player's direction vector
@@ -1797,7 +2045,7 @@ void Game::BirdBomb()
 		for (auto entity : boats) {
 			//Get the position of the boat
 			glm::vec3 boatPos = Get<TTN_Transform>(entity).GetGlobalPos();
-			
+
 			//get the angle between the vectors
 			float newAngle = glm::degrees(std::abs(glm::acos(glm::dot(glm::normalize(bombingVector), glm::normalize(boatPos)))));
 
@@ -1810,7 +2058,7 @@ void Game::BirdBomb()
 			else if (newAngle == currentAngle) {
 				//project the new boat's position onto the player direction
 				glm::vec3 ProjNew = (glm::dot(boatPos, bombingVector) / glm::length(bombingVector) * glm::length(bombingVector)) * bombingVector;
-				
+
 				//project the old boat's position onto the player direction
 				glm::vec3 oldPos = Get<TTN_Transform>(currentTarget).GetGlobalPos();
 				glm::vec3 ProjOld = (glm::dot(oldPos, bombingVector) / glm::length(bombingVector) * glm::length(bombingVector)) * bombingVector;
@@ -1826,14 +2074,14 @@ void Game::BirdBomb()
 		//if the target is null, turn bombing to false as there were no valid targets for the birds to target
 		if (currentTarget == entt::null) {
 			Bombing = false;
-			std::cout << "No target found\n";
+			//std::cout << "No target found\n";
 		}
 		else
-			std::cout << "Target found\n";
+			//std::cout << "Target found\n";
 
 		//loop through and set the target for all of the birds
-		for (auto bird : birds)
-			Get<BirdComponent>(bird).SetTarget(currentTarget);
+			for (auto bird : birds)
+				Get<BirdComponent>(bird).SetTarget(currentTarget);
 	}
 }
 
@@ -1917,7 +2165,6 @@ void Game::ImGui()
 	ImGui::SliderFloat("Mouse", &mouseSensetivity, 0.0f, 100.0f);
 
 	ImGui::End();
-
 	//ImGui controller for the camera
 	ImGui::Begin("Editor");
 
@@ -2032,6 +2279,25 @@ void Game::ImGui()
 			//set the size of the outline in the materials
 			for (int i = 0; i < m_mats.size(); i++)
 				m_mats[i]->SetOutlineSize(m_outlineSize);
+		}
+
+		if (ImGui::SliderInt("Bloom Passes", &m_passes, 0, 15)) {
+			//set the size of the outline in the materials
+			m_bloomEffect->SetNumOfPasses(m_passes);
+		}
+
+		if (ImGui::SliderInt("Blur Downscale", &m_downscale, 1, 10)) {
+			//set the size of the outline in the materials
+			m_bloomEffect->SetBlurDownScale(m_downscale);
+		}
+		if (ImGui::SliderFloat("Bloom Threshold", &m_threshold, 0.0f, 1.0f)) {
+			//set the size of the outline in the materials
+			m_bloomEffect->SetThreshold(m_threshold);
+		}
+
+		if (ImGui::SliderFloat("Bloom Radius", &m_radius, 0.0f, 5.0f)) {
+			//set the size of the outline in the materials
+			m_bloomEffect->SetRadius(m_radius);
 		}
 
 		//No ligthing
@@ -2226,4 +2492,19 @@ void Game::ImGui()
 	}
 
 	ImGui::End();
+}
+
+void Game::ColorCorrection()
+{
+	if (m_applyWarmLut) {
+		m_colorCorrectEffect->SetShouldApply(true);
+		m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
+		//and make sure the cool and customs luts are set not to render
+		m_applyCoolLut = false;
+		m_applyCustomLut = false;
+	}
+	else {
+		//if it's been turned of set the effect not to render
+		m_colorCorrectEffect->SetShouldApply(false);
+	}
 }
