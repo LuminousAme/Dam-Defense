@@ -510,8 +510,8 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Quit-Text", "textures/text/Quit.png", 1); //rendered text of word Quit
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Main Menu", "textures/text/Main Menu.png", 1); //rendered text of word main menu
 
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Cont Hover", "textures/shop/Continue Button_Hovered.png", 1); //texture for continue button
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Cont Normal", "textures/shop/Continue Button_Normal.png", 1); //texture for continue button
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Continue Hovered", "textures/shop/Continue Button_Hovered.png", 1); //texture for continue button
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Continue", "textures/shop/Continue Button_Normal.png", 1); //texture for continue button
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Cooldown Normal", "textures/shop/Icon_Cooldown.png", 1); //texture for cooldowns button
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Cooldown Hovered", "textures/shop/Icon_Cooldown_Hovered.png", 1); //texture for cooldowns button

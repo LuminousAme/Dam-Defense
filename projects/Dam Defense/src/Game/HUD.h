@@ -143,6 +143,7 @@ private:
 	entt::entity buttonAbilityCD;
 	entt::entity buttonUpgrade;
 	entt::entity shop;
+	entt::entity buttonContinue;
 
 	//assets
 	TTN_Texture2D::st2dptr textureShop;//shop text/title
@@ -154,6 +155,8 @@ private:
 	TTN_Texture2D::st2dptr textureCooldownButton2;
 	TTN_Texture2D::st2dptr textureUpgradeButton1;
 	TTN_Texture2D::st2dptr textureUpgradeButton2;
+	TTN_Texture2D::st2dptr textureContinue1;
+	TTN_Texture2D::st2dptr textureContinue2;
 
 	//assets
 	TTN_Texture2D::st2dptr textureScore;
