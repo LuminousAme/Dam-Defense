@@ -30,7 +30,7 @@ void MainMenu::Update(float deltaTime)
 	time += deltaTime / 2.5f;
 
 	//call imgui's update for this scene
-	ImGui();
+	//ImGui();
 
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
@@ -134,8 +134,7 @@ void MainMenu::PostRender()
 void MainMenu::SetUpAssets()
 {
 	//grab the shaders
-	//shaderProgramTextured = TTN_AssetSystem::GetShader("Basic textured shader");
-	shaderProgramTextured = TTN_AssetSystem::GetShader("gBuffer shader");
+	shaderProgramTextured = TTN_AssetSystem::GetShader("Basic textured shader");
 	shaderProgramSkybox = TTN_AssetSystem::GetShader("Skybox shader");
 	shaderProgramTerrain = TTN_AssetSystem::GetShader("Terrain shader");
 	shaderProgramWater = TTN_AssetSystem::GetShader("Water shader");

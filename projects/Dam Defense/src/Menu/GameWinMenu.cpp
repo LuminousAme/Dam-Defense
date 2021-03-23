@@ -29,7 +29,7 @@ void GameWinMenu::Update(float deltaTime)
 	time += deltaTime / 2.5f;
 
 	//call imgui's update for this scene
-	ImGui();
+	//ImGui();
 
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);

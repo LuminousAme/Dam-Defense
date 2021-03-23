@@ -197,7 +197,7 @@ namespace Titan {
 	void TTN_Scene::Update(float deltaTime)
 	{
 		//bind the sun buffer
-		//sunBuffer.Bind(0);
+		sunBuffer.Bind(0);
 
 		//clear the geometry buffer
 		gBuffer->Clear();

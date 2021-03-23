@@ -37,9 +37,6 @@ public:
 	void MouseButtonChecks();
 	void MouseButtonUpChecks();
 
-	/*bool GetShouldShop() { return shouldShop; };
-	void SetShouldShop(bool menu) { shouldShop = menu; }*/
-
 	bool GetGameIsPaused() { return m_paused; }
 	void SetGameIsPaused(bool paused) { m_paused = paused; }
 
@@ -229,7 +226,7 @@ protected:
 	std::vector<entt::entity> flames;
 
 	/////// OTHER DATA ///////////
-#pragma region GAME DATA
+#pragma region Data
 protected:
 	/////// Player control data/////////
 	float cannonBallForce = 3600.0f / 10.0f;//a multiplier for the ammount of force should be applied to a cannonball when it is fired
@@ -244,7 +241,7 @@ protected:
 
 	//////// GAMEPLAY DATA ////////////
 	int lastWave = 3; //the wave the player needs to reach and beat to win
-	float damage = 5.0f; //damage of boats (dam health is 100.f)
+	float damage = 2.0f; //damage of boats (dam health is 100.f)
 	unsigned m_score = 0;
 
 	/////// Terrain and water control data ////////
@@ -294,7 +291,7 @@ protected:
 	float muzzleFlashCD = 1.50f; // time for muzzle flash
 	float m_timeBetweenEnemyWaves = 8.0f; //rest time between waves
 	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
-	int m_enemiesPerWave = 1; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
+	int m_enemiesPerWave = 5; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
 
 	int m_currentWave = 0; //the current wave
 	float m_timeTilNextWave; //the timer until the next wave starts, used after a wave has ended
@@ -383,7 +380,6 @@ protected:
 	void MakeABird();
 	void BirdUpate(float deltaTime);
 	void ImGui();
-	void ColorCorrection();// stuff for color correction
 
 	//other functions, ussually called in relation to something happening like player input or a collision
 protected:
@@ -398,14 +394,6 @@ protected:
 protected:
 	//color correction effect
 	TTN_ColorCorrect::scolcorptr m_colorCorrectEffect;
-	TTN_BloomEffect::sbloomptr m_bloomEffect;
-	int m_passes = 5;
-	int m_downscale = 1;
-	float m_threshold = 0.625f;
-
-	//the radius of the effect
-	float m_radius = 1.0f;
-
 	//bools for imgui controls
 	bool m_applyWarmLut;
 	bool m_applyCoolLut;

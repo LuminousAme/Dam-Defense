@@ -1,11 +1,10 @@
 //Dam Defense by Atlas X Games
-//HUD.h, the header file for the scene class representing the UI in the main game
+//HUD.h, the header file for the scene hclass representing the UI in the main game
 #pragma once
 
 //include required features from titan
 #include "Titan/Application.h"
 #include "Titan/Utilities/Interpolation.h"
-#include "glm/ext.hpp"
 
 using namespace Titan;
 
@@ -15,7 +14,7 @@ public:
 	//default constructor
 	GameUI();
 
-	//default destrcutor
+	//default destrcutor 
 	~GameUI() = default;
 
 	//sets up the scene
@@ -27,8 +26,6 @@ public:
 	//update the scene
 	void Update(float deltaTime);
 
-	//input keys
-	void KeyDownChecks();
 	//mouse input
 	void MouseButtonDownChecks();
 
@@ -81,9 +78,6 @@ public:
 	void SetUpgradeCost(int cost) { upgradeCost = cost; }
 
 private:
-
-#pragma region ENTITES AND STUFF
-
 	//entities
 	entt::entity cam;
 	entt::entity background;
@@ -136,7 +130,6 @@ private:
 	//special ability general data
 	float specialAbilityScale = 0.2f;
 
-#pragma endregion
 	//shop buttons
 	entt::entity buttonHealth;
 	entt::entity buttonCannon;
@@ -146,6 +139,7 @@ private:
 	entt::entity buttonContinue;
 
 	//assets
+	TTN_Texture2D::st2dptr textureScore;
 	TTN_Texture2D::st2dptr textureShop;//shop text/title
 	TTN_Texture2D::st2dptr textureHealButton1;
 	TTN_Texture2D::st2dptr textureHealButton2;
@@ -157,9 +151,6 @@ private:
 	TTN_Texture2D::st2dptr textureUpgradeButton2;
 	TTN_Texture2D::st2dptr textureContinue1;
 	TTN_Texture2D::st2dptr textureContinue2;
-
-	//assets
-	TTN_Texture2D::st2dptr textureScore;
 
 	//dam health
 	float m_DamHealth;
@@ -180,7 +171,7 @@ private:
 
 	int lastWave; //last wave of the game
 
-	//shop stuff
+		//shop stuff
 	bool shouldExitShop; //exit bool
 	bool shopOnce = false; //variable for only spawning the shop once per end of round
 
