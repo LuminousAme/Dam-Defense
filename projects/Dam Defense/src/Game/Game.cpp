@@ -83,11 +83,11 @@ void Game::Update(float deltaTime)
 		if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
 		//update the enemy wave spawning
-		WaveUpdate(deltaTime);	
+		WaveUpdate(deltaTime);
 		//collision check
 		Collisions();
 		//damage function, contains cooldoown
-		Damage(deltaTime); 
+		Damage(deltaTime);
 
 		//goes through the boats vector
 		for (int i = 0; i < boats.size(); i++) {
@@ -1332,7 +1332,7 @@ void Game::SpawnBoatRight() {
 		boats.push_back(CreateEntity());
 		//gets the type of boat
 		int randomBoat = rand() % 3;
-		
+
 		//create a renderer
 		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
 		//set up renderer for green boat
