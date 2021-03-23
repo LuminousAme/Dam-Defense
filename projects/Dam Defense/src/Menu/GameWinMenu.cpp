@@ -19,15 +19,17 @@ void GameWinMenu::InitScene()
 
 	//create the entities
 	SetUpEntities();
+
+	TTN_Scene::InitScene();
 }
 
 void GameWinMenu::Update(float deltaTime)
 {
 	//increase the total time of the scene to make the water animated correctly
-	time += deltaTime;
+	time += deltaTime / 2.5f;
 
 	//call imgui's update for this scene
-	ImGui();
+	//ImGui();
 
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
@@ -35,7 +37,13 @@ void GameWinMenu::Update(float deltaTime)
 
 void GameWinMenu::PostRender()
 {
-	//terrain
+	//disable blending so the gBuffer can draw properlly
+	glDisable(GL_BLEND);
+
+	//bind the geometry buffer
+	gBuffer->Bind();
+
+	//render the terrain
 	{
 		//bind the shader
 		shaderProgramTerrain->Bind();
@@ -71,56 +79,11 @@ void GameWinMenu::PostRender()
 		//set if the albedo textures should be used
 		shaderProgramTerrain->SetUniform("u_UseDiffuse", (int)m_mats[0]->GetUseAlbedo());
 
-		//send lighting from the scene
-		shaderProgramTerrain->SetUniform("u_AmbientCol", TTN_Scene::GetSceneAmbientColor());
-		shaderProgramTerrain->SetUniform("u_AmbientStrength", TTN_Scene::GetSceneAmbientLightStrength());
-		shaderProgramTerrain->SetUniform("u_Shininess", 128.0f);
-		shaderProgramTerrain->SetUniform("u_hasAmbientLighting", (int)m_mats[0]->GetHasAmbient());
-		shaderProgramTerrain->SetUniform("u_hasSpecularLighting", (int)m_mats[0]->GetHasSpecular());
-		shaderProgramTerrain->SetUniform("u_hasOutline", (int)m_mats[0]->GetHasOutline());
-		shaderProgramTerrain->SetUniform("u_useDiffuseRamp", m_mats[0]->GetUseDiffuseRamp());
-		shaderProgramTerrain->SetUniform("u_useSpecularRamp", (int)m_mats[0]->GetUseSpecularRamp());
-		//stuff from the light
-		glm::vec3 lightPositions[16];
-		glm::vec3 lightColor[16];
-		float lightAmbientStr[16];
-		float lightSpecStr[16];
-		float lightAttenConst[16];
-		float lightAttenLinear[16];
-		float lightAttenQuadartic[16];
-
-		for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
-			auto& light = Get<TTN_Light>(m_Lights[i]);
-			auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
-			lightPositions[i] = lightTrans.GetPos();
-			lightColor[i] = light.GetColor();
-			lightAmbientStr[i] = light.GetAmbientStrength();
-			lightSpecStr[i] = light.GetSpecularStrength();
-			lightAttenConst[i] = light.GetConstantAttenuation();
-			lightAttenLinear[i] = light.GetConstantAttenuation();
-			lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
-		}
-
-		//send all the data about the lights to glsl
-		shaderProgramTerrain->SetUniform("u_LightPos", lightPositions[0], 16);
-		shaderProgramTerrain->SetUniform("u_LightCol", lightColor[0], 16);
-		shaderProgramTerrain->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
-		shaderProgramTerrain->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
-		shaderProgramTerrain->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
-		shaderProgramTerrain->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
-		shaderProgramTerrain->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
-
-		//and tell it how many lights there actually are
-		shaderProgramTerrain->SetUniform("u_NumOfLights", (int)m_Lights.size());
-
-		//stuff from the camera
-		shaderProgramTerrain->SetUniform("u_CamPos", Get<TTN_Transform>(camera).GetPos());
-
 		//render the terrain
 		terrainPlain->GetVAOPointer()->Render();
 	}
 
-	//water
+	//render the water
 	{
 		//bind the shader
 		shaderProgramWater->Bind();
@@ -150,13 +113,20 @@ void GameWinMenu::PostRender()
 		waterText->Bind(0);
 
 		//send lighting from the scene
-		shaderProgramWater->SetUniform("u_AmbientCol", TTN_Scene::GetSceneAmbientColor());
-		shaderProgramWater->SetUniform("u_AmbientStrength", TTN_Scene::GetSceneAmbientLightStrength());
+		shaderProgramWater->SetUniform("u_UseDiffuse", (int)m_mats[0]->GetUseAlbedo());
 
 		//render the water (just use the same plane as the terrain)
 		terrainPlain->GetVAOPointer()->Render();
 	}
 
+	//unbind the geometry buffer
+	gBuffer->Unbind();
+
+	//enable blending again so it works on everything else
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	//and do the rest of the titan side rendering
 	TTN_Scene::PostRender();
 }
 
@@ -224,35 +194,17 @@ void GameWinMenu::SetUpEntities()
 		Attach<TTN_Transform>(camera);
 		Attach<TTN_Camera>(camera);
 		auto& camTrans = Get<TTN_Transform>(camera);
-		camTrans.SetPos(glm::vec3(0.0f, 0.0f, 115.0f));
+		camTrans.SetPos(glm::vec3(0.0f, -1.0f, 115.0f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f, 1000.f);
 		Get<TTN_Camera>(camera).View();
 	}
 
-	//entity for the light
-	{
-		//create an entity in the scene for a light
-		light = CreateEntity();
-
-		m_Lights.push_back(light);
-
-		//set up a trasnform for the light
-		TTN_Transform lightTrans = TTN_Transform();
-		lightTrans.SetPos(glm::vec3(0.0f, 3.0f, 5.0f));
-		//attach that transform to the light entity
-		AttachCopy<TTN_Transform>(light, lightTrans);
-
-		//set up a light component for the light
-		TTN_Light lightLight = TTN_Light(glm::vec3(1.0f), 0.6f, 2.0f, 0.3f, 0.3f, 0.3f);
-		//attach that light to the light entity
-		AttachCopy<TTN_Light>(light, lightLight);
-	}
-
 	//entity for the skybox
 	{
 		skybox = CreateEntity();
+		SetSkyboxEntity(skybox);
 
 		//setup a mesh renderer for the skybox
 		TTN_Renderer skyboxRenderer = TTN_Renderer(skyboxMesh, shaderProgramSkybox);
@@ -316,7 +268,7 @@ void GameWinMenu::SetUpEntities()
 		AttachCopy(dam, damRenderer);
 
 		//setup a transform for the dam
-		TTN_Transform damTrans = TTN_Transform(glm::vec3(0.0f, -10.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.7f, 0.7f, 0.3f));
+		TTN_Transform damTrans = TTN_Transform(glm::vec3(0.0f, -11.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.7f, 0.7f, 0.3f));
 		//attach that transform to the entity
 		AttachCopy(dam, damTrans);
 	}
@@ -335,7 +287,7 @@ void GameWinMenu::SetUpEntities()
 			AttachCopy<TTN_Renderer>(flamethrowers[i], ftRenderer);
 
 			//setup a transform for the flamethrower
-			TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f, -6.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
+			TTN_Transform ftTrans = TTN_Transform(glm::vec3(5.0f, -7.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.40f));
 			if (i == 0) {
 				ftTrans.SetPos(glm::vec3(-5.0f, -6.0f, 2.0f));
 			}

@@ -101,6 +101,9 @@ namespace Titan {
 		//Draws our fullscreen quad
 		static void DrawFullScreenQuad();
 
+		//Get the framebuffer's handle
+		GLuint GetHandle() { return m_FBO; }
+
 		//Initial width and height is zero
 		unsigned int m_width = 0;
 		unsigned int m_height = 0;

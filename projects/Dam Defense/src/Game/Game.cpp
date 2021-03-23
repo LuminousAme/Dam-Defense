@@ -24,6 +24,8 @@ void Game::InitScene()
 	SetUpEntities();
 
 	RestartData();
+
+	TTN_Scene::InitScene();
 }
 
 //updates the scene every frame
@@ -81,11 +83,11 @@ void Game::Update(float deltaTime)
 		if (playerShootCooldownTimer >= 0.0f) playerShootCooldownTimer -= deltaTime;
 
 		//update the enemy wave spawning
-		WaveUpdate(deltaTime);
+		WaveUpdate(deltaTime);	
 		//collision check
 		Collisions();
 		//damage function, contains cooldoown
-		Damage(deltaTime);
+		Damage(deltaTime); 
 
 		//goes through the boats vector
 		for (int i = 0; i < boats.size(); i++) {
@@ -106,7 +108,7 @@ void Game::Update(float deltaTime)
 		FlamethrowerUpdate(deltaTime);
 
 		//increase the total time of the scene to make the water animated correctly
-		water_time += deltaTime;
+		water_time += deltaTime / 2.5f;
 	}
 
 	//game over stuff
@@ -121,13 +123,24 @@ void Game::Update(float deltaTime)
 	//shop function
 	Shop(deltaTime);
 
-	ColorCorrection();
+	/*
+	if (m_applyWarmLut) {
+		m_colorCorrectEffect->SetShouldApply(true);
+		m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
+		//and make sure the cool and customs luts are set not to render
+		m_applyCoolLut = false;
+		m_applyCustomLut = false;
+	}
+	else {
+		//if it's been turned of set the effect not to render
+		m_colorCorrectEffect->SetShouldApply(false);
+	}*/
 
 	//update the sound
 	engine.Update();
 
 	//call the update on ImGui
-	ImGui();
+	//ImGui();
 
 	//get fps
 	//std::cout << "FPS: " << std::to_string(1.0f / deltaTime) << std::endl;
@@ -138,7 +151,13 @@ void Game::Update(float deltaTime)
 //render the terrain and water
 void Game::PostRender()
 {
-	//terrain
+	//disable blending so the gBuffer can draw properlly
+	glDisable(GL_BLEND);
+
+	//bind the geometry buffer
+	gBuffer->Bind();
+
+	//render the terrain
 	{
 		//bind the shader
 		shaderProgramTerrain->Bind();
@@ -174,56 +193,11 @@ void Game::PostRender()
 		//set if the albedo textures should be used
 		shaderProgramTerrain->SetUniform("u_UseDiffuse", (int)m_mats[0]->GetUseAlbedo());
 
-		//send lighting from the scene
-		shaderProgramTerrain->SetUniform("u_AmbientCol", TTN_Scene::GetSceneAmbientColor());
-		shaderProgramTerrain->SetUniform("u_AmbientStrength", TTN_Scene::GetSceneAmbientLightStrength());
-		shaderProgramTerrain->SetUniform("u_Shininess", 128.0f);
-		shaderProgramTerrain->SetUniform("u_hasAmbientLighting", (int)m_mats[0]->GetHasAmbient());
-		shaderProgramTerrain->SetUniform("u_hasSpecularLighting", (int)m_mats[0]->GetHasSpecular());
-		shaderProgramTerrain->SetUniform("u_hasOutline", (int)m_mats[0]->GetHasOutline());
-		shaderProgramTerrain->SetUniform("u_useDiffuseRamp", m_mats[0]->GetUseDiffuseRamp());
-		shaderProgramTerrain->SetUniform("u_useSpecularRamp", (int)m_mats[0]->GetUseSpecularRamp());
-		//stuff from the light
-		glm::vec3 lightPositions[16];
-		glm::vec3 lightColor[16];
-		float lightAmbientStr[16];
-		float lightSpecStr[16];
-		float lightAttenConst[16];
-		float lightAttenLinear[16];
-		float lightAttenQuadartic[16];
-
-		for (int i = 0; i < 16 && i < m_Lights.size(); i++) {
-			auto& light = Get<TTN_Light>(m_Lights[i]);
-			auto& lightTrans = Get<TTN_Transform>(m_Lights[i]);
-			lightPositions[i] = lightTrans.GetPos();
-			lightColor[i] = light.GetColor();
-			lightAmbientStr[i] = light.GetAmbientStrength();
-			lightSpecStr[i] = light.GetSpecularStrength();
-			lightAttenConst[i] = light.GetConstantAttenuation();
-			lightAttenLinear[i] = light.GetConstantAttenuation();
-			lightAttenQuadartic[i] = light.GetQuadraticAttenuation();
-		}
-
-		//send all the data about the lights to glsl
-		shaderProgramTerrain->SetUniform("u_LightPos", lightPositions[0], 16);
-		shaderProgramTerrain->SetUniform("u_LightCol", lightColor[0], 16);
-		shaderProgramTerrain->SetUniform("u_AmbientLightStrength", lightAmbientStr[0], 16);
-		shaderProgramTerrain->SetUniform("u_SpecularLightStrength", lightSpecStr[0], 16);
-		shaderProgramTerrain->SetUniform("u_LightAttenuationConstant", lightAttenConst[0], 16);
-		shaderProgramTerrain->SetUniform("u_LightAttenuationLinear", lightAttenLinear[0], 16);
-		shaderProgramTerrain->SetUniform("u_LightAttenuationQuadratic", lightAttenQuadartic[0], 16);
-
-		//and tell it how many lights there actually are
-		shaderProgramTerrain->SetUniform("u_NumOfLights", (int)m_Lights.size());
-
-		//stuff from the camera
-		shaderProgramTerrain->SetUniform("u_CamPos", Get<TTN_Transform>(camera).GetGlobalPos());
-
 		//render the terrain
 		terrainPlain->GetVAOPointer()->Render();
 	}
 
-	//water
+	//render the water
 	{
 		//bind the shader
 		shaderProgramWater->Bind();
@@ -253,13 +227,20 @@ void Game::PostRender()
 		waterText->Bind(0);
 
 		//send lighting from the scene
-		shaderProgramWater->SetUniform("u_AmbientCol", TTN_Scene::GetSceneAmbientColor());
-		shaderProgramWater->SetUniform("u_AmbientStrength", TTN_Scene::GetSceneAmbientLightStrength());
+		shaderProgramWater->SetUniform("u_UseDiffuse", (int)m_mats[0]->GetUseAlbedo());
 
 		//render the water (just use the same plane as the terrain)
 		terrainPlain->GetVAOPointer()->Render();
 	}
 
+	//unbind the geometry buffer
+	gBuffer->Unbind();
+
+	//enable blending again so it works on everything else
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	//and do the rest of the titan side rendering
 	TTN_Scene::PostRender();
 }
 
@@ -301,29 +282,6 @@ void Game::KeyDownChecks()
 //function to cehck for when a key is being pressed
 void Game::KeyChecks()
 {
-	auto& a = Get<TTN_Transform>(camera);
-	/// CAMERA MOVEMENT FOR A2 ///
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::W)) {
-		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y, a.GetPos().z + 1.60f));
-	}
-
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::S)) {
-		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y, a.GetPos().z - 1.60f));
-	}
-
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::A)) {
-		a.SetPos(glm::vec3(a.GetPos().x + 1.60f, a.GetPos().y, a.GetPos().z));
-	}
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::D)) {
-		a.SetPos(glm::vec3(a.GetPos().x - 1.60f, a.GetPos().y, a.GetPos().z));
-	}
-
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::LeftControl)) {
-		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y - 0.60f, a.GetPos().z));
-	}
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::Space)) {
-		a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y + 0.60f, a.GetPos().z));
-	}
 }
 
 //function to check for when a key has been released
@@ -352,7 +310,7 @@ void Game::MouseButtonChecks()
 			//reset the cooldown
 			playerShootCooldownTimer = playerShootCooldown;
 			//and play the smoke particle effect
-			Get<TTN_Transform>(smokePS).SetPos(glm::vec3(0.0f, -0.2f / 10.0f, 0.0f) + (1.75f / 10.0f) * playerDir);
+			Get<TTN_Transform>(smokePS).SetPos(Get<TTN_Transform>(cannon).GetGlobalPos() + (1.75f / 10.0f) * playerDir);
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
 				SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
@@ -392,11 +350,11 @@ void Game::SetUpAssets()
 	//// SHADERS ////
 	//grab the shaders
 	shaderProgramTextured = TTN_AssetSystem::GetShader("Basic textured shader");
-	//shaderProgramTextured = TTN_AssetSystem::GetShader("gBuffer shader");
 	shaderProgramSkybox = TTN_AssetSystem::GetShader("Skybox shader");
 	shaderProgramTerrain = TTN_AssetSystem::GetShader("Terrain shader");
 	shaderProgramWater = TTN_AssetSystem::GetShader("Water shader");
 	shaderProgramAnimatedTextured = TTN_AssetSystem::GetShader("Animated textured shader");
+	shaderDepth = TTN_AssetSystem::GetShader("Depth shader");
 
 	////MESHES////
 	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
@@ -495,16 +453,12 @@ void Game::SetUpAssets()
 		m_mats[i]->SetSpecularRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
 		m_mats[i]->SetUseDiffuseRamp(m_useDiffuseRamp);
 		m_mats[i]->SetUseSpecularRamp(m_useSpecularRamp);
-		/*m_mats[i]->SetUseAlbedo(true);
-		gBufferShader->SetUniform("u_UseDiffuse", (int)m_mats[i]->GetUseAlbedo());
-		m_mats[i]->GetAlbedo()->Bind(textureSlot);
-		textureSlot++;
-
-		m_mats[i]->GetSpecularMap()->Bind(textureSlot);
-		textureSlot++;*/
-		//gBufferShader->SetUniform("s_Diffuse", renderer.GetMat()->GetAlbedo());
-		//gBufferShader->SetUniformMatrix("u_Specular", lightSpaceViewProj);
 	}
+
+	illBuffer->SetDiffuseRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
+	illBuffer->SetSpecularRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
+	illBuffer->SetUseDiffuseRamp(true);
+	illBuffer->SetUseSpecularRamp(true);
 }
 
 //create the scene's initial entities
@@ -518,16 +472,17 @@ void Game::SetUpEntities()
 		Attach<TTN_Transform>(camera);
 		Attach<TTN_Camera>(camera);
 		auto& camTrans = Get<TTN_Transform>(camera);
-		camTrans.SetPos(glm::vec3(0.0f, 0.0f, 0.0f));
+		camTrans.SetPos(glm::vec3(0.0f, 0.070f, -0.275f));
 		camTrans.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		camTrans.LookAlong(glm::vec3(0.0, 0.0, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f / 10.0f, 1000.f / 10.0f);
+		Get<TTN_Camera>(camera).CalcPerspective(60.0f, 1.78f, 0.01f, 17.5f);
 		Get<TTN_Camera>(camera).View();
 	}
 
 	//entity for the skybox
 	{
 		skybox = CreateEntity();
+		SetSkyboxEntity(skybox);
 
 		//setup a mesh renderer for the skybox
 		TTN_Renderer skyboxRenderer = TTN_Renderer(skyboxMesh, shaderProgramSkybox);
@@ -720,8 +675,8 @@ void Game::SetUpOtherData()
 		fireParticle.SetOneEndColor(glm::vec4(1.0f, 0.2f, 0.0f, 0.0f));
 		fireParticle.SetOneEndSize(4.0f / 10.0f);
 		fireParticle.SetOneEndSpeed(6.0f / 10.0f);
-		fireParticle.SetOneLifetime(2.f);
-		fireParticle.SetTwoStartColors(glm::vec4(1.0f, 0.35f, 0.0f, 1.0f), glm::vec4(1.0f, 0.60f, 0.0f, 1.0f));
+		fireParticle.SetOneLifetime(2.0f);
+		fireParticle.SetTwoStartColors(glm::vec4(1.0f, 0.35f, 0.1f, 1.0f), glm::vec4(1.0f, 0.60f, 0.0f, 1.0f));
 		fireParticle.SetOneStartSize(0.5f / 10.0f);
 		fireParticle.SetOneStartSpeed(8.5f / 10.0f);
 	}
@@ -731,13 +686,13 @@ void Game::SetUpOtherData()
 		expolsionParticle = TTN_ParticleTemplate();
 		expolsionParticle.SetMat(fireMat);
 		expolsionParticle.SetMesh(sphereMesh);
-		expolsionParticle.SetTwoEndColors(glm::vec4(0.5f, 0.1f, 0.0f, 0.2f), glm::vec4(0.8f, 0.3f, 0.0f, 0.2f));
-		expolsionParticle.SetOneEndSize(4.5f / 10.0f);
+		expolsionParticle.SetTwoEndColors(glm::vec4(1.0f, 0.35f, 0.1f, 0.0f), glm::vec4(1.0f, 0.60f, 0.1f, 0.0f));
+		expolsionParticle.SetOneEndSize(2.5f / 10.0f);
 		expolsionParticle.SetOneEndSpeed(0.05f / 10.0f);
-		expolsionParticle.SetTwoLifetimes(1.8f, 2.0f);
-		expolsionParticle.SetTwoStartColors(glm::vec4(1.0f, 0.35f, 0.0f, 1.0f), glm::vec4(1.0f, 0.60f, 0.0f, 1.0f));
-		expolsionParticle.SetOneStartSize(1.0f / 10.0f);
-		expolsionParticle.SetOneStartSpeed(4.5f / 10.0f);
+		expolsionParticle.SetOneLifetime(1.9f);
+		expolsionParticle.SetTwoStartColors(glm::vec4(1.0f, 0.35f, 0.1f, 1.0f), glm::vec4(1.0f, 0.60f, 0.1f, 1.0f));
+		expolsionParticle.SetOneStartSize(0.8f / 10.0f);
+		expolsionParticle.SetTwoStartSpeeds(0.01f / 10.0f, 12.0f / 10.0f);
 	}
 
 	//bird particle template
@@ -762,38 +717,37 @@ void Game::SetUpOtherData()
 		//	gunParticle.SetTwoEndColors(glm::vec4(0.5f, 0.5f, 0.5f, 0.1f), glm::vec4(0.5f, 0.5f, 0.5f, 0.1f)); //orange
 	//gunParticle.SetTwoEndColors(glm::vec4(0.1f, 0.1f, 0.1f, 0.8f), glm::vec4(0.1f, 0.1f, 0.1f, 0.8f)); ///black
 		gunParticle.SetTwoEndColors(glm::vec4(1.0f, 0.50f, 0.0f, 0.50f), glm::vec4(1.0f, 0.50f, 0.0f, 0.50f)); ///yellow
-		gunParticle.SetOneEndSize(0.35f);
-		gunParticle.SetOneEndSpeed(0.35f);
+		gunParticle.SetOneEndSize(0.35f / 10.0f);
+		gunParticle.SetOneEndSpeed(0.35f / 10.0f);
 		gunParticle.SetTwoLifetimes(0.85f, 1.10f);
 		gunParticle.SetTwoStartColors(glm::vec4(1.0f, 0.50f, 0.0f, 1.0f), glm::vec4(1.0f, 0.50f, 0.0f, 1.0f)); //orange
 	//	gunParticle.SetTwoStartColors(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 0.0f, 1.0f)); //yellow
 		//gunParticle.SetTwoStartColors(glm::vec4(0.1f, 0.1f, 0.1f, 0.8f), glm::vec4(0.1f, 0.1f, 0.1f, 0.8f)); //black
-		gunParticle.SetOneStartSize(0.20f);
-		gunParticle.SetOneStartSpeed(10.0f);
+		gunParticle.SetOneStartSize(0.20f / 10.0f);
+		gunParticle.SetOneStartSpeed(10.0f / 10.0f);
 	}
 
-	//setup up the color correction effect
 	glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
+
+	//setup the bloom effect
+	m_bloomEffect = TTN_BloomEffect::Create();
+	m_bloomEffect->Init(windowSize.x, windowSize.y);
+	m_bloomEffect->SetThreshold(m_bloomThreshold);
+	m_numOfBloomPasses = m_bloomEffect->GetNumOfPasses();
+	m_bloomBufferDivisor = m_bloomEffect->GetBlurDownScale();
+	m_bloomEffect->SetRadius(m_bloomRadius);
+	m_bloomEffect->SetShouldApply(true);
+	m_PostProcessingEffects.push_back(m_bloomEffect);
+
+	//setup up the color correction effect
 	m_colorCorrectEffect = TTN_ColorCorrect::Create();
 	m_colorCorrectEffect->Init(windowSize.x, windowSize.y);
 	//set it so it doesn't render
-	m_colorCorrectEffect->SetShouldApply(false);
-	m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
+	m_colorCorrectEffect->SetShouldApply(true);
+	m_colorCorrectEffect->SetIntensity(1.0f);
+	m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Main LUT"));
 	//and add it to this scene's list of effects
 	m_PostProcessingEffects.push_back(m_colorCorrectEffect);
-
-	//bloom
-	//m_bloomEffect = TTN_BloomEffect::Create();
-	//m_bloomEffect->Init(windowSize.x, windowSize.y);
-	//m_bloomEffect->SetShouldApply(false);
-	////add it to the list
-	//m_PostProcessingEffects.push_back(m_bloomEffect);
-
-	////bloom stuff
-	//m_bloomEffect->SetNumOfPasses(m_passes);
-	//m_bloomEffect->SetBlurDownScale(m_downscale);
-	//m_bloomEffect->SetThreshold(m_threshold);
-	//m_bloomEffect->SetRadius(m_radius);
 
 	//set all 3 effects to false
 	m_applyWarmLut = false;
@@ -926,6 +880,7 @@ void Game::RestartData()
 
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	firstFrame = true;
+	firstFrame = true;
 	m_score = 0;
 }
 
@@ -944,9 +899,9 @@ void Game::PlayerRotate(float deltaTime)
 		rotAmmount += addAmmount;
 
 		//clamp the rotation to within 85 degrees of the base rotation in all the directions
-		if (rotAmmount.x > 85.0f) rotAmmount.x = 85.0f;
-		else if (rotAmmount.x < -85.0f) rotAmmount.x = -85.0f;
-		if (rotAmmount.y > 85.0f) rotAmmount.y = 85.0f;
+		if (rotAmmount.x > 80.0f) rotAmmount.x = 80.0f;
+		else if (rotAmmount.x < -80.0f) rotAmmount.x = -80.0f;
+		if (rotAmmount.y > 32.5f) rotAmmount.y = 32.5f;
 		else if (rotAmmount.y < -85.0f) rotAmmount.y = -85.0f;
 
 		//reset the rotation
@@ -1033,13 +988,13 @@ void Game::CreateExpolsion(glm::vec3 location)
 	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
 	//attach that transform to the entity
 	AttachCopy(newExpolsion, PSTrans);
-	//glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
+	glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
 
 	//setup a particle system for the particle system
 	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(500, 0, expolsionParticle, 0.0f, false);
 	ps->MakeSphereEmitter();
 	ps->VelocityReadGraphCallback(FastStart);
-	ps->ColorReadGraphCallback(SlowStart);
+	ps->ColorReadGraphCallback(ZeroUntilHalfThenOne);
 	ps->ScaleReadGraphCallback(ZeroOneZero);
 	//setup a particle system component
 	TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
@@ -1059,7 +1014,7 @@ void Game::CreateBirdExpolsion(glm::vec3 location)
 	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
 	//attach that transform to the entity
 	AttachCopy(newExpolsion, PSTrans);
-	//glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
+	glm::vec3 tempLoc = Get<TTN_Transform>(newExpolsion).GetGlobalPos();
 
 	//setup a particle system for the particle system
 	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(25, 0, birdParticle, 0.0f, false);
@@ -1181,8 +1136,6 @@ void Game::FlamethrowerUpdate(float deltaTime)
 		//increment flamethrower anim timer
 		FlameAnim += deltaTime;
 
-		//std::cout << FlameActiveTime << std::endl;
-
 		//if it's reached the end of the animation
 		if (FlameAnim >= FlameActiveTime) {
 			//get rid of all the flames, reset the timer and set the active flag to false
@@ -1191,14 +1144,7 @@ void Game::FlamethrowerUpdate(float deltaTime)
 			Flaming = false;
 		}
 
-		/*	std::vector<entt::entity>::iterator itt = flames.begin();
-			while (itt != flames.end()) {
-				TTN_ParticleSystem::spsptr &temp = Get<TTN_ParticeSystemComponent>(*itt).GetParticleSystemPointer();
-				temp.get<TTN_ParticleSystem>
-				itt++;
-			}*/
-
-			//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 27
+		//while it's flaming, iterate through the vector of boats, deleting the boat if it is at or below z = 27
 		std::vector<entt::entity>::iterator it = boats.begin();
 		while (it != boats.end()) {
 			if (Get<TTN_Transform>(*it).GetPos().z >= 27.0f / 10.0f) {
@@ -1386,7 +1332,7 @@ void Game::SpawnBoatRight() {
 		boats.push_back(CreateEntity());
 		//gets the type of boat
 		int randomBoat = rand() % 3;
-
+		
 		//create a renderer
 		TTN_Renderer boatRenderer = TTN_Renderer(boat1Mesh, shaderProgramTextured, boat1Mat);
 		//set up renderer for green boat
@@ -2164,6 +2110,7 @@ void Game::ImGui()
 	ImGui::SliderFloat("Mouse", &mouseSensetivity, 0.0f, 100.0f);
 
 	ImGui::End();
+
 	//ImGui controller for the camera
 	ImGui::Begin("Editor");
 
@@ -2200,7 +2147,7 @@ void Game::ImGui()
 	}
 
 	if (ImGui::CollapsingHeader("Directional Light Controls")) {
-		TTN_DirectionalLight tempSun = m_Sun;
+		TTN_DirectionalLight tempSun = illBuffer->GetSunRef();
 		/*
 		glm::vec3 direction = tempSun.m_lightDirection;
 		glm::vec3 color = tempSun.m_lightColor;
@@ -2213,11 +2160,7 @@ void Game::ImGui()
 		int pcfPasses = tempSun.m_pcfFilterSamples;
 		*/
 
-		if (ImGui::SliderFloat("Light Frustrum XY", &shadowOrthoXY, 2.0f, 50.0f));
-
-		if (ImGui::SliderFloat("Light Frustrum Z", &shadowOrthoZ, 2.0f, 50.0f));
-
-		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 50.0f)) {
+		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 0.0f)) {
 			SetSun(tempSun);
 		}
 
@@ -2254,121 +2197,24 @@ void Game::ImGui()
 		}
 	}
 
-	if (ImGui::CollapsingHeader("Point and SceneLight Controls")) {
-		ImGui::Text("Maximum number of lights: 16");
-
-		//scene level lighting
-		float sceneAmbientLight[3], sceneAmbientStr;
-		sceneAmbientLight[0] = GetSceneAmbientColor().r;
-		sceneAmbientLight[1] = GetSceneAmbientColor().g;
-		sceneAmbientLight[2] = GetSceneAmbientColor().b;
-		sceneAmbientStr = GetSceneAmbientLightStrength();
-
-		//scene level ambient strenght
-		if (ImGui::SliderFloat("Scene level ambient strenght", &sceneAmbientStr, 0.0f, 1.0f)) {
-			SetSceneAmbientLightStrength(sceneAmbientStr);
-		}
-
-		//scene level ambient color
-		if (ImGui::ColorPicker3("Scene level ambient color", sceneAmbientLight)) {
-			SetSceneAmbientColor(glm::vec3(sceneAmbientLight[0], sceneAmbientLight[1], sceneAmbientLight[2]));
-		}
-
-		//loop through all the lights
-		int i = 0;
-		std::vector<entt::entity>::iterator it = m_Lights.begin();
-		while (it != m_Lights.end()) {
-			//make temp floats for their data
-			float color[3], pos[3], ambientStr, specularStr, attenConst, attenLine, attenQuad;
-			TTN_Light& tempLightRef = Get<TTN_Light>(*it);
-			TTN_Transform& tempLightTransRef = Get<TTN_Transform>(*it);
-			color[0] = tempLightRef.GetColor().r;
-			color[1] = tempLightRef.GetColor().g;
-			color[2] = tempLightRef.GetColor().b;
-			pos[0] = tempLightTransRef.GetPos().x;
-			pos[1] = tempLightTransRef.GetPos().y;
-			pos[2] = tempLightTransRef.GetPos().z;
-			ambientStr = tempLightRef.GetAmbientStrength();
-			specularStr = tempLightRef.GetSpecularStrength();
-			attenConst = tempLightRef.GetConstantAttenuation();
-			attenLine = tempLightRef.GetLinearAttenuation();
-			attenQuad = tempLightRef.GetQuadraticAttenuation();
-
-			//position
-			std::string tempPosString = "Light " + std::to_string(i) + " Position";
-			if (ImGui::SliderFloat3(tempPosString.c_str(), pos, -100.0f, 100.0f)) {
-				tempLightTransRef.SetPos(glm::vec3(pos[0], pos[1], pos[2]));
-			}
-
-			//color
-			std::string tempColorString = "Light " + std::to_string(i) + " Color";
-			if (ImGui::ColorPicker3(tempColorString.c_str(), color)) {
-				tempLightRef.SetColor(glm::vec3(color[0], color[1], color[2]));
-			}
-
-			//strenghts
-			std::string tempAmbientStrString = "Light " + std::to_string(i) + " Ambient strenght";
-			if (ImGui::SliderFloat(tempAmbientStrString.c_str(), &ambientStr, 0.0f, 10.0f)) {
-				tempLightRef.SetAmbientStrength(ambientStr);
-			}
-
-			std::string tempSpecularStrString = "Light " + std::to_string(i) + " Specular strenght";
-			if (ImGui::SliderFloat(tempSpecularStrString.c_str(), &specularStr, 0.0f, 10.0f)) {
-				tempLightRef.SetSpecularStrength(specularStr);
-			}
-
-			//attenutaition
-			std::string tempAttenConst = "Light " + std::to_string(i) + " Constant Attenuation";
-			if (ImGui::SliderFloat(tempAttenConst.c_str(), &attenConst, 0.0f, 100.0f)) {
-				tempLightRef.SetConstantAttenuation(attenConst);
-			}
-
-			std::string tempAttenLine = "Light " + std::to_string(i) + " Linear Attenuation";
-			if (ImGui::SliderFloat(tempAttenLine.c_str(), &attenLine, 0.0f, 100.0f)) {
-				tempLightRef.SetLinearAttenuation(attenLine);
-			}
-
-			std::string tempAttenQuad = "Light " + std::to_string(i) + " Quadratic Attenuation";
-			if (ImGui::SliderFloat(tempAttenQuad.c_str(), &attenQuad, 0.0f, 100.0f)) {
-				tempLightRef.SetQuadraticAttenuation(attenQuad);
-			}
-
-			std::string tempButton = "Remove Light " + std::to_string(i);
-			if (ImGui::Button(tempButton.c_str())) {
-				DeleteEntity(*it);
-				it = m_Lights.erase(it);
-			}
-
-			i++;
-			it++;
-		}
-
-		//if there are less than 16 lights, give a button that allows the user to add a new light
-		if (i < 15) {
-			if (ImGui::Button("Add New Light")) {
-				m_Lights.push_back(CreateEntity());
-
-				TTN_Transform newTrans = TTN_Transform();
-				TTN_Light newLight = TTN_Light();
-
-				AttachCopy(m_Lights[m_Lights.size() - 1], newTrans);
-				AttachCopy(m_Lights[m_Lights.size() - 1], newLight);
-			}
-		}
-	}
-
 	if (ImGui::CollapsingHeader("Camera Controls")) {
 		//control the x axis position
 		auto& a = Get<TTN_Transform>(camera);
 		float b = a.GetPos().x;
-		if (ImGui::SliderFloat("Camera Test X-Axis", &b, -100.0f, 100.0f)) {
+		if (ImGui::SliderFloat("Camera Test X-Axis", &b, -0.5f, 0.5f)) {
 			a.SetPos(glm::vec3(b, a.GetPos().y, a.GetPos().z));
 		}
 
 		//control the y axis position
 		float c = a.GetPos().y;
-		if (ImGui::SliderFloat("Camera Test Y-Axis", &c, -100.0f, 100.0f)) {
+		if (ImGui::SliderFloat("Camera Test Y-Axis", &c, -0.5f, 0.5f)) {
 			a.SetPos(glm::vec3(a.GetPos().x, c, a.GetPos().z));
+		}
+
+		//control the y axis position
+		float d = a.GetPos().z;
+		if (ImGui::SliderFloat("Camera Test Z-Axis", &d, -0.5f, 0.5f)) {
+			a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y, d));
 		}
 	}
 
@@ -2379,25 +2225,6 @@ void Game::ImGui()
 			//set the size of the outline in the materials
 			for (int i = 0; i < m_mats.size(); i++)
 				m_mats[i]->SetOutlineSize(m_outlineSize);
-		}
-
-		if (ImGui::SliderInt("Bloom Passes", &m_passes, 0, 15)) {
-			//set the size of the outline in the materials
-			m_bloomEffect->SetNumOfPasses(m_passes);
-		}
-
-		if (ImGui::SliderInt("Blur Downscale", &m_downscale, 1, 10)) {
-			//set the size of the outline in the materials
-			m_bloomEffect->SetBlurDownScale(m_downscale);
-		}
-		if (ImGui::SliderFloat("Bloom Threshold", &m_threshold, 0.0f, 1.0f)) {
-			//set the size of the outline in the materials
-			m_bloomEffect->SetThreshold(m_threshold);
-		}
-
-		if (ImGui::SliderFloat("Bloom Radius", &m_radius, 0.0f, 5.0f)) {
-			//set the size of the outline in the materials
-			m_bloomEffect->SetRadius(m_radius);
 		}
 
 		//No ligthing
@@ -2568,22 +2395,28 @@ void Game::ImGui()
 				m_mats[i]->SetUseAlbedo(m_useTextures);
 			}
 		}
+
+		//bloom controls
+		ImGui::Text("Bloom settings");
+
+		if (ImGui::SliderFloat("Threshold", &m_bloomThreshold, 0.0f, 1.0f)) {
+			m_bloomEffect->SetThreshold(m_bloomThreshold);
+		}
+
+		if (ImGui::SliderInt("Number of blur passes", &m_numOfBloomPasses, 1, 20)) {
+			m_bloomEffect->SetNumOfPasses(m_numOfBloomPasses);
+		}
+
+		int tempInt = m_bloomBufferDivisor;
+		if (ImGui::SliderInt("Downscale divisor", &tempInt, 1, 20)) {
+			m_bloomBufferDivisor = tempInt;
+			m_bloomEffect->SetBlurDownScale(m_bloomBufferDivisor);
+		}
+
+		if (ImGui::SliderFloat("radius", &m_bloomRadius, 0.1f, 20.0f)) {
+			m_bloomEffect->SetRadius(m_bloomRadius);
+		}
 	}
 
 	ImGui::End();
-}
-
-void Game::ColorCorrection()
-{
-	if (m_applyWarmLut) {
-		m_colorCorrectEffect->SetShouldApply(true);
-		m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
-		//and make sure the cool and customs luts are set not to render
-		m_applyCoolLut = false;
-		m_applyCustomLut = false;
-	}
-	else {
-		//if it's been turned of set the effect not to render
-		m_colorCorrectEffect->SetShouldApply(false);
-	}
 }

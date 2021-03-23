@@ -18,8 +18,5 @@ void main()
 	vec4 source = texture(s_screenTex, inUV);
 
 	//and apply it to the full screen quad
-	//frag_color = vec4(source.rgb,1.0);
-	frag_color.rgb = source.rgb; 
-	frag_color.a = source.a * u_Transparency;//transparency stuff
-	
+	frag_color = vec4(source.rgb, u_Transparency);
 }

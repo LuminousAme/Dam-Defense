@@ -34,5 +34,5 @@ void main() {
 	result += texture(s_SourceImage, vec2(inUV.x, inUV.y - 4.0 * u_Step)) * u_Weights[4];
 
 	//save the result and pass it on 
-	frag_color = result;
+	frag_color = vec4(result.rgb, 1.0);
 }

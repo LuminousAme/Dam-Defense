@@ -60,7 +60,7 @@ namespace Titan {
 		//gets the gbuffer shader
 		static TTN_Shader::sshptr GetgBufferShader() { return s_gBufferPassShader; }
 
-		void Render(glm::mat4 model, glm::mat4 VP, glm::mat4 lightSpaceMat);
+		void Render(glm::mat4 model, glm::mat4 VP, glm::mat4 lightSpaceMat[], glm::mat4 view);
 
 	private:
 		//a pointer to the shader that should be used to render this object

@@ -80,8 +80,12 @@ namespace Titan {
 		case GL_VERTEX_SHADER: //if it's a vertex shader, set the vertex shader variable
 			_vs = handle;
 			break;
-		case GL_FRAGMENT_SHADER: //if it's a fragment shader, set the vertex shader variable
+		case GL_FRAGMENT_SHADER: //if it's a fragment shader, set the fragment shader variable
 			_fs = handle;
+			break;
+		case GL_GEOMETRY_SHADER:
+			_gs = handle;
+			_hasGs = true;
 			break;
 		default: //if it is anything else, log a warning that that type of shader has not been implemented with this shader program
 			LOG_WARN("Shader type not implemented");
@@ -188,10 +192,22 @@ namespace Titan {
 			vertexShaderTTNIndentity = (int)shader;
 		}
 
-		else if (shader == TTN_DefaultShaders::FRAG_GBUFFER) {
-			filePath = "shaders/ttn_gBuffer_pass_frag.glsl";
+		else if (shader == TTN_DefaultShaders::FRAG_BLINN_GBUFFER_NO_TEXTURE) {
+			filePath = "shaders/ttn_gBuffer_pass_with_no_texture_frag.glsl";
 			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
-			vertexShaderTTNIndentity = (int)shader;
+			fragShaderTTNIdentity = (int)shader;
+		}
+
+		else if (shader == TTN_DefaultShaders::FRAG_BLINN_GBUFFER_ALBEDO_ONLY) {
+			filePath = "shaders/ttn_gBuffer_pass_with_albedo_texture_only_frag.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
+			fragShaderTTNIdentity = (int)shader;
+		}
+
+		else if (shader == TTN_DefaultShaders::FFRAG_BLINN_GBUFFER_ALBEDO_AND_SPECULAR) {
+			filePath = "shaders/ttn_gBuffer_pass_with_albedo_and_specular_texture_frag.glsl";
+			result = LoadShaderStageFromFile(filePath, GL_FRAGMENT_SHADER);
+			fragShaderTTNIdentity = (int)shader;
 		}
 		else {
 			//if the user tried to load a shader that doesn't,
@@ -215,6 +231,7 @@ namespace Titan {
 		//Attach our shaders
 		glAttachShader(_handle, _vs);
 		glAttachShader(_handle, _fs);
+		if (_hasGs) glAttachShader(_handle, _gs);
 
 		//Perform linking
 		glLinkProgram(_handle);
@@ -224,6 +241,10 @@ namespace Titan {
 		glDeleteShader(_vs);
 		glDetachShader(_handle, _fs);
 		glDeleteShader(_fs);
+		if (_hasGs) {
+			glDetachShader(_handle, _gs);
+			glDeleteShader(_gs);
+		}
 
 		//Setup a check to make sure the shader program compiled and linked correclty
 		GLint status = 0;

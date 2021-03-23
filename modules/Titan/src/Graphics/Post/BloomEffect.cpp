@@ -70,7 +70,7 @@ namespace Titan {
 		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_gaussian_vertical_frag.glsl", GL_FRAGMENT_SHADER);
 		m_shaders[index]->Link();
 
-		//init the original 
+		//init the original
 		TTN_PostEffect::Init(width, height);
 	}
 
@@ -145,7 +145,7 @@ namespace Titan {
 	void TTN_BloomEffect::Reshape(unsigned width, unsigned height)
 	{
 		//resize all of the framebuffers
-		m_buffers[0]->Reshape(width, height); //extraction 
+		m_buffers[0]->Reshape(width, height); //extraction
 		m_buffers[1]->Reshape(width / m_blurBufferDivisor, height / m_blurBufferDivisor); //hori blur
 		m_buffers[2]->Reshape(width / m_blurBufferDivisor, height / m_blurBufferDivisor); //vert blur
 	}

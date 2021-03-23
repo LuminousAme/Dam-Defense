@@ -37,12 +37,16 @@ namespace Titan {
 		//Makes it so apply effect with a PostEffect does nothing for this object
 		void ApplyEffect(TTN_PostEffect::spostptr buffer) override { };
 		//Can only apply effect using TTN_GBuffer object
-		void ApplyEffect(TTN_GBuffer::sgbufptr TTN_GBuffer);
+		void ApplyEffect(TTN_GBuffer::sgbufptr gBuffer);
 
 		void DrawIllumBuffer();
 
-		void SetLightSpaceViewProj(glm::mat4 lightSpaceViewProj);
+		void SetViewMat(glm::mat4 view);
+		void SetLightSpaceMatrices(glm::mat4 mats[]);
+		void SetSplitRanges(float splits[]);
+		void SetFarClip(float farClip);
 		void SetCamPos(glm::vec3 camPos);
+		void SetShadowBuffer(TTN_Framebuffer::sfboptr shadowBuffer);
 
 		TTN_DirectionalLight& GetSunRef();
 
@@ -50,16 +54,32 @@ namespace Titan {
 		void SetSun(TTN_DirectionalLight newSun);
 		void SetSun(glm::vec4 lightDir, glm::vec4 lightCol);
 
+		//sets variables for toon shading
+		void SetDiffuseRamp(TTN_Texture2D::st2dptr diffuseRamp) { m_diffuseRamp = diffuseRamp; }
+		void SetUseDiffuseRamp(bool useDiffuseRamp) { m_useDiffuseRamp = useDiffuseRamp; }
+		void SetSpecularRamp(TTN_Texture2D::st2dptr specularRamp) { m_specularRamp = specularRamp; }
+		void SetUseSpecularRamp(bool useSpecularRamp) { m_useSpecularRamp = useSpecularRamp; }
+
 		void EnableSun(bool enabled);
 
 	private:
-		glm::mat4 m_lightSpaceViewProj;
+		glm::mat4 m_viewMat;
+		glm::mat4 m_lightSpaceViewProj[4];
+		float m_splitRanges[4];
+		float m_farClip;
 		glm::vec3 m_camPos;
+
+		TTN_Framebuffer::sfboptr m_shadowBuffer;
 
 		TTN_UniformBuffer m_sunBuffer;
 
 		bool m_sunEnabled = true;
 
 		TTN_DirectionalLight m_sun;
+
+		TTN_Texture2D::st2dptr m_diffuseRamp;
+		TTN_Texture2D::st2dptr m_specularRamp;
+		bool m_useDiffuseRamp;
+		bool m_useSpecularRamp;
 	};
 }

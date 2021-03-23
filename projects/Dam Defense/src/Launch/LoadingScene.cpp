@@ -74,6 +74,8 @@ void LoadingScene::InitScene()
 		TTN_Renderer2D bgRenderer2D = TTN_Renderer2D(bgText, glm::vec4(1.0f), 1);
 		AttachCopy(bg, bgRenderer2D);
 	}
+
+	TTN_Scene::InitScene();
 }
 
 void LoadingScene::Update(float deltaTime)

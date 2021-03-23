@@ -26,6 +26,8 @@ namespace Titan {
 		const glm::vec3& GetForward() { return m_forward; }
 		/// Gets the up direction for this camera (basically a vector pointing out the top of the camera's head)
 		const glm::vec3& GetUp() { return m_up; }
+		//Gets the far plane
+		const float& GetFarPlane() { return m_zFar; }
 		/// Gets the direction that the camera is looking at 
 		const glm::vec3& GetTarget() { return m_target; }
 
@@ -51,8 +53,11 @@ namespace Titan {
 		// 3D perspective projection 
 		void CalcPerspective(float fovDegrees, float aspectRatio, float nearClip, float farClip);
 
+		// calculates and returns a vector with the corners
+		std::vector<glm::vec3> CalcPerspectiveCorners(glm::vec3 center, glm::vec3 forward, glm::vec3 right, glm::vec3 up, float nearT, float farT);
+		std::vector<glm::vec3> CalcCornersFromClipSpace(glm::mat4 view, float nearT, float farT);
+
 	protected:
-			
 		glm::vec3 m_position;  //postion of camera in world space
 		glm::vec3 m_forward; // the direction the camera will be facing (forward vector)
 		glm::vec3 m_up; // camera's up vector (vector sticking upwards from camera's head
@@ -63,6 +68,24 @@ namespace Titan {
 
 		glm::mat4 m_view;
 		glm::mat4 m_projection;
+
+		float m_fov = 0.0f;
+		float m_aspectRatio = 0.0f;
+
+		float m_left = 0.0f;
+		float m_right = 0.0f;
+		float m_bottom = 0.0f;
+		float m_top = 0.0f;
+
+		float m_zNear = 0.0f;
+		float m_zFar = 0.0f;
+
+		enum projectionMode {
+			PERSPECTIVE,
+			ORTHOGRAPHIC
+		};
+
+		projectionMode m_mode = projectionMode::PERSPECTIVE;
 
 		mutable glm::mat4 m_viewProjection;//mutable, so it can be recalculated using const methods
 	};

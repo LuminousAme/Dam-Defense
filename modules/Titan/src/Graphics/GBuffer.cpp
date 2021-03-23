@@ -38,10 +38,11 @@ namespace Titan {
 
 	void TTN_GBuffer::BindLighting()
 	{
-		m_gBuffer.BindColorAsTexture(TTN_Target::ALBEDO, 0);
-		m_gBuffer.BindColorAsTexture(TTN_Target::NORMAL, 1);
-		m_gBuffer.BindColorAsTexture(TTN_Target::SPECULAR, 2);
-		m_gBuffer.BindColorAsTexture(TTN_Target::POSITION, 3);
+		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::ALBEDO, 0);
+		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::NORMAL, 1);
+		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::SPECULAR, 2);
+		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::POSITION, 3);
+		m_gBuffer.BindDepthAsTexture(15);
 	}
 
 	void TTN_GBuffer::Clear()
@@ -69,26 +70,71 @@ namespace Titan {
 
 		//set viewport to top left
 		glViewport(0, m_windowHeight / 2.f, m_windowWidth / 2.f, m_windowHeight / 2.f);
-		m_gBuffer.BindColorAsTexture(TTN_Target::ALBEDO, 0);
+		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::ALBEDO, 0);
 		m_gBuffer.DrawFullScreenQuad();
 		m_gBuffer.UnbindTexture(0);
 
 		//set viewport to top right
 		glViewport(m_windowWidth / 2.f, m_windowHeight / 2.f, m_windowWidth / 2.f, m_windowHeight / 2.f);
-		m_gBuffer.BindColorAsTexture(TTN_Target::NORMAL, 0);
+		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::NORMAL, 0);
 		m_gBuffer.DrawFullScreenQuad();
 		m_gBuffer.UnbindTexture(0);
 
 		//set viewport to bottom left
 		glViewport(0, 0, m_windowWidth / 2.f, m_windowHeight / 2.f);
-		m_gBuffer.BindColorAsTexture(TTN_Target::SPECULAR, 0);
+		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::SPECULAR, 0);
 		m_gBuffer.DrawFullScreenQuad();
 		m_gBuffer.UnbindTexture(0);
 
 		//set viewport to bottom right
 		glViewport(m_windowWidth / 2.f, 0, m_windowWidth / 2.f, m_windowHeight / 2.f);
-		m_gBuffer.BindColorAsTexture(TTN_Target::POSITION, 0);
+		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::POSITION, 0);
 		m_gBuffer.DrawFullScreenQuad();
+		m_gBuffer.UnbindTexture(0);
+
+		//unbind passthorugh shader
+		m_passThrough->UnBind();
+	}
+
+	void TTN_GBuffer::DrawPositionBuffer()
+	{
+		//bind passthroguh shader
+		m_passThrough->Bind();
+
+		//bind and draw the position buffer
+		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::POSITION, 0);
+		m_gBuffer.DrawFullScreenQuad();
+		//unbind the position buffer
+		m_gBuffer.UnbindTexture(0);
+
+		//unbind passthorugh shader
+		m_passThrough->UnBind();
+	}
+
+	void TTN_GBuffer::DrawNormalBuffer()
+	{
+		//bind passthroguh shader
+		m_passThrough->Bind();
+
+		//bind and draw the normal buffer
+		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::NORMAL, 0);
+		m_gBuffer.DrawFullScreenQuad();
+		//unbind the normal buffer
+		m_gBuffer.UnbindTexture(0);
+
+		//unbind passthorugh shader
+		m_passThrough->UnBind();
+	}
+
+	void TTN_GBuffer::DrawAlbedoBuffer()
+	{
+		//bind passthroguh shader
+		m_passThrough->Bind();
+
+		//bind and draw the abledo buffer
+		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::ALBEDO, 0);
+		m_gBuffer.DrawFullScreenQuad();
+		//unbind the abledo buffer
 		m_gBuffer.UnbindTexture(0);
 
 		//unbind passthorugh shader

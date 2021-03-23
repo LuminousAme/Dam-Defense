@@ -6,7 +6,7 @@
 #include "Titan/Graphics/Shader.h"
 
 namespace Titan {
-	enum TTN_Target
+	enum class TTN_Target
 	{
 		ALBEDO,
 		NORMAL,
@@ -47,8 +47,19 @@ namespace Titan {
 		//Draws out the buffers to the screen
 		void DrawBuffersToScreen();
 
+		//draws out only the position buffer
+		void DrawPositionBuffer();
+		//draws out only the normal buffer 
+		void DrawNormalBuffer();
+		//draws out only the albedo buffer
+		void DrawAlbedoBuffer();
+
 		//Reshape the framebuffer
 		void Reshape(unsigned width, unsigned height);
+
+		//Get the gbuffer handle
+		GLuint GetHandle() { return m_gBuffer.GetHandle(); }
+
 	private:
 		TTN_Framebuffer m_gBuffer;
 		TTN_Shader::sshptr m_passThrough;

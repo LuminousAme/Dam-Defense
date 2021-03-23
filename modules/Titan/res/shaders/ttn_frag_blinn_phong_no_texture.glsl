@@ -105,7 +105,8 @@ void main() {
 
 	//calculate if it should be coloured as a black outline
 	float edge = max(step(u_OutlineSize, abs(dot(viewDir, N))), u_hasOutline);
-
+	 
+	  
 	//save the result and pass it on
 	frag_color = vec4(result, 1.0) * vec4(vec3(edge), 1.0);
 }

@@ -19,6 +19,7 @@ namespace Titan {
 		//set the specular to an all white texture by default
 		m_SpecularMap = TTN_Texture2D::Create();
 		m_SpecularMap->Clear(glm::vec4(1.0f));
+
 		//set the cube map to an all white texture by default
 		m_SkyboxTexture = TTN_TextureCubeMap::Create();
 		m_SkyboxTexture->Clear(glm::vec4(1.0f));

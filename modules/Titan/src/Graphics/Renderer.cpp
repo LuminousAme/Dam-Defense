@@ -52,6 +52,7 @@ namespace Titan {
 	{
 		s_simpleShadowShader = TTN_Shader::Create();
 		s_simpleShadowShader->LoadShaderStageFromFile("shaders/ttn_simple_depth_vert.glsl", GL_VERTEX_SHADER);
+		s_simpleShadowShader->LoadShaderStageFromFile("shaders/ttn_simple_depth_geo.glsl", GL_GEOMETRY_SHADER);
 		s_simpleShadowShader->LoadShaderStageFromFile("shaders/ttn_simple_depth_frag.glsl", GL_FRAGMENT_SHADER);
 		s_simpleShadowShader->Link();
 
@@ -60,10 +61,10 @@ namespace Titan {
 
 	void TTN_Renderer::InitgBufferRendering()
 	{
-		s_gBufferPassShader = TTN_Shader::Create();
-		s_gBufferPassShader->LoadShaderStageFromFile("shaders/ttn_vert_color.glsl", GL_VERTEX_SHADER);
-		s_gBufferPassShader->LoadShaderStageFromFile("shaders/ttn_gBuffer_pass_frag.glsl", GL_FRAGMENT_SHADER);
-		s_gBufferPassShader->Link();
+		//s_gBufferPassShader = TTN_Shader::Create();
+		//s_gBufferPassShader->LoadShaderStageFromFile("shaders/ttn_vert_color.glsl", GL_VERTEX_SHADER);
+		//s_gBufferPassShader->LoadShaderStageFromFile("shaders/ttn_gBuffer_pass_frag.glsl", GL_FRAGMENT_SHADER);
+		//s_gBufferPassShader->Link();
 	}
 
 	//destructor, destroys the object
@@ -96,7 +97,7 @@ namespace Titan {
 	}
 
 	//function that will send the uniforms with how to draw the object arounding to the camera to openGL
-	void TTN_Renderer::Render(glm::mat4 model, glm::mat4 VP, glm::mat4 lightSpaceMat)
+	void TTN_Renderer::Render(glm::mat4 model, glm::mat4 VP, glm::mat4 lightSpaceMat[], glm::mat4 view)
 	{
 		//make sure the vao is acutally set up before continuing
 		if (m_mesh->GetVAOPointer() == nullptr)
@@ -109,7 +110,8 @@ namespace Titan {
 			m_Shader->SetUniformMatrix("MVP", VP * model);
 			m_Shader->SetUniformMatrix("Model", model);
 			m_Shader->SetUniformMatrix("NormalMat", glm::mat3(glm::transpose(glm::inverse(model))));
-			m_Shader->SetUniformMatrix("u_LightSpaceMatrix", lightSpaceMat);
+			m_Shader->SetUniformMatrix("u_LightSpaceMatrix", lightSpaceMat[0], sizeof(lightSpaceMat)/sizeof(lightSpaceMat[0]));
+			m_Shader->SetUniformMatrix("View", view);
 		}
 
 		//render the VAO
