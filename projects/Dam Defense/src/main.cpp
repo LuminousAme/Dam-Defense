@@ -22,7 +22,7 @@ void PrepareAssetLoading();
 //main function, runs the program
 int main() {
 	Logger::Init(); //initliaze otter's base logging system
-	TTN_Application::Init("Dam Defense", 1920, 1080, true); //initliaze titan's application
+	TTN_Application::Init("Dam Defense", 1920, 1080, false); //initliaze titan's application
 
 	//data to track loading progress
 	bool set1Loaded = false;
@@ -110,7 +110,7 @@ int main() {
 
 		/// PLAY ///
 		//check if the loading is done and the menu should be going to the game
-		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldPlay() && (!firstTime) ) {
+		if (titleScreenUI->GetShouldRender() && titleScreenUI->GetShouldPlay() && (!firstTime)) {
 			//if it is, go to the game
 			titleScreen->SetShouldRender(false);
 			titleScreenUI->SetShouldRender(false);
@@ -152,6 +152,7 @@ int main() {
 			gameScene->SetPaused(false);
 			gameSceneUI->SetShouldRender(true);
 			gameScene->RestartData();
+			gameSceneUI->RestartData();
 			paused->SetShouldRender(false);
 		}
 
@@ -188,13 +189,13 @@ int main() {
 
 		//// PAUSE menu rendering ////
 		//if the player has paused but the menu hasn't appeared yet
-		if (gameScene->GetShouldRender() && !paused->GetShouldRender() && gameScene->GetPaused() && !options->GetShouldRender()) {
+		if (gameScene->GetShouldRender() && !paused->GetShouldRender() && gameScene->GetPaused() && !options->GetShouldRender() && !gameSceneUI->GetShouldShop() && !gameSceneUI->GetShouldShopping()) {
 			TTN_Application::TTN_Input::SetCursorLocked(false);
 			paused->SetShouldResume(false);
 			paused->SetShouldRender(true);
 			options->SetShouldRender(false);
 		}
-		//if the menu has appeared but the player has unpaused with the esc key
+		//if the menu has appeared but the player has unpaused with the esc key	
 		else if (gameScene->GetShouldRender() && (paused->GetShouldRender() || options->GetShouldRender()) && !gameScene->GetPaused()) {
 			TTN_Application::TTN_Input::SetCursorLocked(true);
 			paused->SetShouldResume(false);
@@ -237,7 +238,6 @@ int main() {
 			audioEngine.GetBus("SFX").SetPaused(true);
 			options->SetLastSceneWasPauseMenu();
 			options->SetShouldRender(true);
-
 		}
 		//if player has pressed the esc key to go back to the pause menu from the options menu
 		else if (!paused->GetShouldRender() && gameScene->GetPaused() && options->GetShouldBack() && options->GetShouldRender()) {
@@ -302,6 +302,8 @@ int main() {
 			gameSceneUI->SetShouldRender(true);
 			gameScene->SetGameIsOver(false);
 			gameScene->RestartData();
+			gameSceneUI->RestartData();
+
 		}
 
 		//game over go to menu
@@ -342,6 +344,9 @@ int main() {
 			gameSceneUI->SetShouldRender(true);
 			gameScene->SetGameIsOver(false);
 			gameScene->RestartData();
+			gameSceneUI->RestartData();
+
+
 		}
 
 		//if game win and they want to go back to the main menu
@@ -394,7 +399,7 @@ int main() {
 
 		//if set 1 has finished loaded, mark it as done
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)
-			set1Loaded = true;		
+			set1Loaded = true;
 
 		//update the scenes and render the screen
 		TTN_Application::Update();
@@ -437,7 +442,6 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddDefaultShaderToBeLoaded("Animated textured shader", TTN_DefaultShaders::VERT_MORPH_ANIMATION_NO_COLOR, TTN_DefaultShaders::FRAG_BLINN_GBUFFER_ALBEDO_ONLY, 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Terrain shader", "shaders/terrain_vert.glsl", "shaders/gBuffer_terrain_frag.glsl", 1);
 	TTN_AssetSystem::AddShaderToBeLoaded("Water shader", "shaders/water_vert.glsl", "shaders/gBuffer_water_frag.glsl", 1);
-	
 
 	TTN_AssetSystem::AddLUTTobeLoaded("Warm LUT", "Warm_LUT.cube", 1);
 	TTN_AssetSystem::AddLUTTobeLoaded("Cool LUT", "Cool_LUT.cube", 1);
@@ -481,12 +485,12 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Shop", "textures/shop/Shop Main_OP100.png", 1); //texture for shop menu/ui
 
 	for (int i = 0; i < 23; i++) {
-		TTN_AssetSystem::AddTexture2DToBeLoaded("Game logo " + std::to_string(i), "textures/logo/Game Logo " + std::to_string(i+1) + ".png", 1); //logo for the game
+		TTN_AssetSystem::AddTexture2DToBeLoaded("Game logo " + std::to_string(i), "textures/logo/Game Logo " + std::to_string(i + 1) + ".png", 1); //logo for the game
 	}
 	TTN_AssetSystem::AddMeshToBeLoaded("Sphere", "models/IcoSphereMesh.obj", 1);
 
 	//set 2, the game (excluding things already loaded into set 1)
-	for(int i = 0; i < 10; i++)
+	for (int i = 0; i < 10; i++)
 		TTN_AssetSystem::AddTexture2DToBeLoaded(std::to_string(i) + "-Text", "textures/text/" + std::to_string(i) + ".png", 1); //numbers for health and score
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Wave-Text", "textures/text/Wave.png");
@@ -494,7 +498,7 @@ void PrepareAssetLoading() {
 
 	for (int i = 1; i < 4; i++) {
 		TTN_AssetSystem::AddMeshToBeLoaded("Boat " + std::to_string(i), "models/Boat " + std::to_string(i) + ".obj", 1); //enemy boat meshes
-		TTN_AssetSystem::AddTexture2DToBeLoaded("Boat texture " + std::to_string(i), "textures/Boat " + std::to_string(i) + " Texture.png", 1); //enemy boat textures 
+		TTN_AssetSystem::AddTexture2DToBeLoaded("Boat texture " + std::to_string(i), "textures/Boat " + std::to_string(i) + " Texture.png", 1); //enemy boat textures
 	}
 	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Bird mesh", "models/bird/bird", 2, 1); //bird mesh
 	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Enemy Cannon mesh", "models/Enemy Cannon/e_cannon", 17, 1); //mesh for the enemy cannons
@@ -513,5 +517,5 @@ void PrepareAssetLoading() {
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Cross", "textures/crosshair/crosshair cross.png", 1); //the cross at the top of the crosshair
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Hori Line", "textures/crosshair/crosshair hori.png", 1); //the horiztonal lines dropping down on the crosshair
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Vert Line", "textures/crosshair/crosshair vert dotted.png", 1); //the vertical line 
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Vert Line", "textures/crosshair/crosshair vert dotted.png", 1); //the vertical line
 }

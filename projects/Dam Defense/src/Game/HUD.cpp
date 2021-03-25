@@ -50,6 +50,10 @@ void GameUI::InitScene()
 	lastWave = 3;
 	abilityCooldownBuff = false;
 	upgradeAbilities = false;
+	healCost = 50;
+	cannonCost = 100;
+	cooldownCost = 150;
+	upgradeCost = 50;
 
 	//main camera
 	{
@@ -156,21 +160,21 @@ void GameUI::InitScene()
 		//create an entity
 		crosshairCross = CreateEntity();
 
-		//make a transform for it 
+		//make a transform for it
 		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f), glm::vec3(60.0f * crosshairScale, 60.0f * crosshairScale, 1.0f));
 		AttachCopy(crosshairCross, Trans);
 
-		//make a 2D renderer for it 
+		//make a 2D renderer for it
 		TTN_Renderer2D renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Crosshair Cross"), crosshairColor);
 		AttachCopy(crosshairCross, renderer);
 	}
 
 	//crosshair bars
-	for (int i = 0; i < 4; i++) {	
+	for (int i = 0; i < 4; i++) {
 		//create an entity
 		crosshairHoriLines.push_back(std::pair(CreateEntity(), 1.0f));
 
-		//make a transform for it 
+		//make a transform for it
 		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f), glm::vec3(40.0f * crosshairScale, 40.0f * crosshairScale, 1.0f));
 		if (i == 0) {
 			Trans.SetPos(glm::vec3(0.0f, -22.5f, 2.0f));
@@ -179,19 +183,19 @@ void GameUI::InitScene()
 		if (i == 1) {
 			Trans.SetPos(glm::vec3(0.0f, -45.0f, 2.0f));
 			Trans.SetScale(Trans.GetScale() * glm::vec3(0.6f, 1.0f, 1.0f));
-		}		
+		}
 		if (i == 2) {
 			Trans.SetPos(glm::vec3(0.0f, -67.5f, 2.0f));
 			Trans.SetScale(Trans.GetScale() * glm::vec3(0.4f, 1.0f, 1.0f));
-		}		
+		}
 		if (i == 3) {
 			Trans.SetPos(glm::vec3(0.0f, -90.0f, 2.0f));
 			Trans.SetScale(Trans.GetScale() * glm::vec3(0.2f, 1.0f, 1.0f));
 		}
-		
+
 		AttachCopy(crosshairHoriLines[crosshairHoriLines.size() - 1].first, Trans);
 
-		//make a 2D renderer for it 
+		//make a 2D renderer for it
 		TTN_Renderer2D renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Crosshair Hori Line"), crosshairColor);
 		AttachCopy(crosshairHoriLines[crosshairHoriLines.size() - 1].first, renderer);
 	}
@@ -200,11 +204,11 @@ void GameUI::InitScene()
 	{
 		crosshairVertLine = CreateEntity();
 
-		//make a transform for it 
+		//make a transform for it
 		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, -56.25, 2.5f), glm::vec3(0.0f), glm::vec3(60.0f * crosshairScale, 75.0f, 1.0f));
 		AttachCopy(crosshairVertLine, Trans);
 
-		//make a 2D renderer for it 
+		//make a 2D renderer for it
 		TTN_Renderer2D renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Crosshair Vert Line"), crosshairColor);
 		AttachCopy(crosshairVertLine, renderer);
 	}
@@ -215,7 +219,7 @@ void GameUI::InitScene()
 		scoreText = CreateEntity();
 
 		//create a transform for the logo
-		TTN_Transform logoTrans = TTN_Transform(glm::vec3(825.0f, 480.0f, 1.0f), glm::vec3(0.0f), 
+		TTN_Transform logoTrans = TTN_Transform(glm::vec3(825.0f, 480.0f, 1.0f), glm::vec3(0.0f),
 			glm::vec3(scoreTextScale * 550.0f, scoreTextScale * 150.0f, 1.0f));
 		AttachCopy(scoreText, logoTrans);
 
@@ -224,23 +228,23 @@ void GameUI::InitScene()
 		AttachCopy(scoreText, logoRenderer);
 	}
 
-	//wave complete 
+	//wave complete
 	for (int i = 0; i < 3; i++) {
-		//create an entity in the scene 
+		//create an entity in the scene
 		entt::entity entity = CreateEntity();
 		if (i == 0) waveText = entity;
 		else if (i == 1) waveNums.push_back(entity);
 		else if (i == 2) completeText = entity;
 
-		//create a transform 
+		//create a transform
 		TTN_Transform Trans;
 		if (i == 0)
 			Trans = TTN_Transform(glm::vec3(1500.0f, 0.0f, 1.0f), glm::vec3(0.0f), glm::vec3(200.0f * waveCompleteScale, 150.0f * waveCompleteScale, 1.0f));
 		else if (i == 1)
 			Trans = TTN_Transform(glm::vec3(Get<TTN_Transform>(waveText).GetGlobalPos().x - 0.5f * std::abs(Get<TTN_Transform>(waveText).GetScale().x) - 0.5f * waveCompleteScale * 150.0f, 0.0f, 1.0f),
 				glm::vec3(0.0f), glm::vec3(100.0f * waveCompleteScale, 100.0f * waveCompleteScale, 1.0f));
-		else if (i == 2) 
-			Trans = TTN_Transform(glm::vec3(Get<TTN_Transform>(waveNums[waveNums.size()-1]).GetGlobalPos().x - 
+		else if (i == 2)
+			Trans = TTN_Transform(glm::vec3(Get<TTN_Transform>(waveNums[waveNums.size() - 1]).GetGlobalPos().x -
 				0.5f * std::abs(Get<TTN_Transform>(waveNums[waveNums.size() - 1]).GetScale().x) - 0.5f * waveCompleteScale * 350.0f, 0.0f, 1.0f),
 				glm::vec3(0.0f), glm::vec3(350.0f * waveCompleteScale, 150.0f * waveCompleteScale, 1.0f));
 		AttachCopy(entity, Trans);
@@ -256,168 +260,174 @@ void GameUI::InitScene()
 		AttachCopy(entity, Renderer);
 	}
 
-	//flamethrower background
+	//flamethorwer stuff
 	{
-		//create an entity
-		flameThrowerBG = CreateEntity();
+		//flamethrower background
+		{
+			//create an entity
+			flameThrowerBG = CreateEntity();
 
-		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 1.2f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
-		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f, 1.1f));
-		AttachCopy(flameThrowerBG, Trans);
+			//create a transform
+			TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 1.2f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+			Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f, 1.1f));
+			AttachCopy(flameThrowerBG, Trans);
 
-		//create a sprite renderer 
-		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Background"));
-		AttachCopy(flameThrowerBG, Renderer);
+			//create a sprite renderer
+			TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Background"));
+			AttachCopy(flameThrowerBG, Renderer);
+		}
+
+		//flamethrower bar
+		{
+			//create an entity
+			flameThrowerBar = CreateEntity();
+
+			//get a copy of the background's transform
+			TTN_Transform bgTrans = Get<TTN_Transform>(flameThrowerBG);
+
+			//create a transform
+			TTN_Transform Trans = TTN_Transform(glm::vec3(bgTrans.GetPos().x - 0.175f * std::abs(bgTrans.GetScale().x), bgTrans.GetPos().y - 0.25f * bgTrans.GetScale().y, 1.1f),
+				glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.65f, bgTrans.GetScale().y * 0.1f, 1.0f));
+			AttachCopy(flameThrowerBar, Trans);
+
+			//create a sprite renderer
+			TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Bar"), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+			AttachCopy(flameThrowerBar, Renderer);
+		}
+
+		//flamethrower overlay
+		{
+			//create an entity
+			flameThrowerOverlay = CreateEntity();
+
+			//create a transform
+			TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.9f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+			Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f, 1.1f));
+			AttachCopy(flameThrowerOverlay, Trans);
+
+			//create a sprite renderer
+			TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Overlay"));
+			AttachCopy(flameThrowerOverlay, Renderer);
+		}
+
+		//flamethrower icon
+		{
+			//create an entity
+			flameThrowerIcon = CreateEntity();
+
+			//create a transform
+			TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.8f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+			Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f, 1.1f));
+			AttachCopy(flameThrowerIcon, Trans);
+
+			//create a sprite renderer
+			TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Flamethrower Icon"));
+			AttachCopy(flameThrowerIcon, Renderer);
+		}
+
+		//flamethrower key
+		{
+			//create an entity
+			flameThrowerKey = CreateEntity();
+
+			//get a copy of the background's transform
+			TTN_Transform bgTrans = Get<TTN_Transform>(flameThrowerBG);
+
+			//create a transform
+			TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.3f, bgTrans.GetScale().y * 0.3f, 1.0f));
+			Trans.SetPos(glm::vec3(bgTrans.GetPos().x + 0.42f * std::abs(bgTrans.GetScale().x) + 0.5f * std::abs(Trans.GetScale().x),
+				bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 2.9f));
+			AttachCopy(flameThrowerKey, Trans);
+
+			//create a sprite renderer
+			TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Flamethrower Key"));
+			AttachCopy(flameThrowerKey, Renderer);
+		}
 	}
 
-	//flamethrower bar
+	//bird bomb stuff
 	{
-		//create an entity
-		flameThrowerBar = CreateEntity();
+		//bird bomb background
+		{
+			//create an entity
+			birdBombBG = CreateEntity();
 
-		//get a copy of the background's transform
-		TTN_Transform bgTrans = Get<TTN_Transform>(flameThrowerBG);
-		
-		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(bgTrans.GetPos().x - 0.175f * std::abs(bgTrans.GetScale().x) , bgTrans.GetPos().y - 0.25f * bgTrans.GetScale().y, 1.1f),
-			glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.65f, bgTrans.GetScale().y * 0.1f, 1.0f));
-		AttachCopy(flameThrowerBar, Trans);
+			//create a transform
+			TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 1.2f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+			Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f + 0.75 * 1000.0f * specialAbilityScale, 1.1f));
+			AttachCopy(birdBombBG, Trans);
 
-		//create a sprite renderer 
-		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Bar"), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-		AttachCopy(flameThrowerBar, Renderer);
-	}
+			//create a sprite renderer
+			TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Background"));
+			AttachCopy(birdBombBG, Renderer);
+		}
 
-	//flamethrower overlay
-	{
-		//create an entity
-		flameThrowerOverlay = CreateEntity();
+		//bird bomb bar
+		{
+			//create an entity
+			birdBombBar = CreateEntity();
 
-		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.9f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
-		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f, 1.1f));
-		AttachCopy(flameThrowerOverlay, Trans);
+			//get a copy of the background's transform
+			TTN_Transform bgTrans = Get<TTN_Transform>(birdBombBG);
 
-		//create a sprite renderer 
-		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Overlay"));
-		AttachCopy(flameThrowerOverlay, Renderer);
-	}
+			//create a transform
+			TTN_Transform Trans = TTN_Transform(glm::vec3(bgTrans.GetPos().x - 0.175f * std::abs(bgTrans.GetScale().x), bgTrans.GetPos().y - 0.25f * bgTrans.GetScale().y, 1.1f),
+				glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.65f, bgTrans.GetScale().y * 0.1f, 1.0f));
+			AttachCopy(birdBombBar, Trans);
 
-	//flamethrower icon
-	{
-		//create an entity
-		flameThrowerIcon = CreateEntity();
+			//create a sprite renderer
+			TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Bar"), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+			AttachCopy(birdBombBar, Renderer);
+		}
 
-		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.8f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
-		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f, 1.1f));
-		AttachCopy(flameThrowerIcon, Trans);
+		//bird bomb overlay
+		{
+			//create an entity
+			birdBombOverlay = CreateEntity();
 
-		//create a sprite renderer 
-		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Flamethrower Icon"));
-		AttachCopy(flameThrowerIcon, Renderer);
-	}
+			//create a transform
+			TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.9f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+			Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f + 0.75 * 1000.0f * specialAbilityScale, 1.1f));
+			AttachCopy(birdBombOverlay, Trans);
 
-	//flamethrower key
-	{
-		//create an entity
-		flameThrowerKey = CreateEntity();
+			//create a sprite renderer
+			TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Overlay"));
+			AttachCopy(birdBombOverlay, Renderer);
+		}
 
-		//get a copy of the background's transform
-		TTN_Transform bgTrans = Get<TTN_Transform>(flameThrowerBG);
+		//bird bomb icon
+		{
+			//create an entity
+			birdBombIcon = CreateEntity();
 
-		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.3f, bgTrans.GetScale().y * 0.3f, 1.0f));
-		Trans.SetPos(glm::vec3(bgTrans.GetPos().x + 0.42f * std::abs(bgTrans.GetScale().x) + 0.5f * std::abs(Trans.GetScale().x), 
-			bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 2.9f));
-		AttachCopy(flameThrowerKey, Trans);
+			//create a transform
+			TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.8f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
+			Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f + 0.75 * 1000.0f * specialAbilityScale, 1.1f));
+			AttachCopy(birdBombIcon, Trans);
 
-		//create a sprite renderer 
-		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Flamethrower Key"));
-		AttachCopy(flameThrowerKey, Renderer);
-	}
+			//create a sprite renderer
+			TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bird Bomb Icon"));
+			AttachCopy(birdBombIcon, Renderer);
+		}
 
-	//bird bomb background
-	{
-		//create an entity
-		birdBombBG = CreateEntity();
+		//bird bomb key
+		{
+			//create an entity
+			birdBombKey = CreateEntity();
 
-		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 1.2f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
-		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f + 0.75 * 1000.0f * specialAbilityScale, 1.1f));
-		AttachCopy(birdBombBG, Trans);
+			//get a copy of the background's transform
+			TTN_Transform bgTrans = Get<TTN_Transform>(birdBombBG);
 
-		//create a sprite renderer 
-		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Background"));
-		AttachCopy(birdBombBG, Renderer);
-	}
+			//create a transform
+			TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.3f, bgTrans.GetScale().y * 0.3f, 1.0f));
+			Trans.SetPos(glm::vec3(bgTrans.GetPos().x + 0.42f * std::abs(bgTrans.GetScale().x) + 0.5f * std::abs(Trans.GetScale().x),
+				bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 2.9f));
+			AttachCopy(birdBombKey, Trans);
 
-	//bird bomb bar
-	{
-		//create an entity
-		birdBombBar = CreateEntity();
-
-		//get a copy of the background's transform
-		TTN_Transform bgTrans = Get<TTN_Transform>(birdBombBG);
-
-		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(bgTrans.GetPos().x - 0.175f * std::abs(bgTrans.GetScale().x), bgTrans.GetPos().y - 0.25f * bgTrans.GetScale().y, 1.1f),
-			glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.65f, bgTrans.GetScale().y * 0.1f, 1.0f));
-		AttachCopy(birdBombBar, Trans);
-
-		//create a sprite renderer 
-		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Bar"), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-		AttachCopy(birdBombBar, Renderer);
-	}
-
-	//bird bomb overlay
-	{
-		//create an entity
-		birdBombOverlay = CreateEntity();
-
-		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.9f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
-		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f + 0.75 * 1000.0f * specialAbilityScale, 1.1f));
-		AttachCopy(birdBombOverlay, Trans);
-
-		//create a sprite renderer 
-		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Special Ability Overlay"));
-		AttachCopy(birdBombOverlay, Renderer);
-	}
-
-	//bird bomb icon
-	{
-		//create an entity
-		birdBombIcon = CreateEntity();
-
-		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.8f), glm::vec3(0.0f), glm::vec3(1000.0f * specialAbilityScale, 1000.0f * specialAbilityScale, 1.0f));
-		Trans.SetPos(glm::vec3(-960.0f + 0.5f * std::abs(Trans.GetScale().x), -400.0f + 0.75 * 1000.0f * specialAbilityScale, 1.1f));
-		AttachCopy(birdBombIcon, Trans);
-
-		//create a sprite renderer 
-		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bird Bomb Icon"));
-		AttachCopy(birdBombIcon, Renderer);
-	}
-
-	//bird bomb key
-	{
-		//create an entity
-		birdBombKey = CreateEntity();
-
-		//get a copy of the background's transform
-		TTN_Transform bgTrans = Get<TTN_Transform>(birdBombBG);
-
-		//create a transform 
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(bgTrans.GetScale().x * 0.3f, bgTrans.GetScale().y * 0.3f, 1.0f));
-		Trans.SetPos(glm::vec3(bgTrans.GetPos().x + 0.42f * std::abs(bgTrans.GetScale().x) + 0.5f * std::abs(Trans.GetScale().x),
-			bgTrans.GetPos().y + 0.025f * bgTrans.GetScale().y, 2.9f));
-		AttachCopy(birdBombKey, Trans);
-
-		//create a sprite renderer 
-		TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bird Bomb Key"));
-		AttachCopy(birdBombKey, Renderer);
+			//create a sprite renderer
+			TTN_Renderer2D Renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bird Bomb Key"));
+			AttachCopy(birdBombKey, Renderer);
+		}
 	}
 
 	//background of shop
@@ -551,10 +561,10 @@ void GameUI::RestartData()
 	m_score = 0;
 	abilityCooldownBuff = false;
 	upgradeAbilities = false;
-	healCost = 500;
+	healCost = 50;
 	cannonCost = 100;
 	cooldownCost = 150;
-	upgradeCost = 20;
+	upgradeCost = 50;
 }
 
 void GameUI::Update(float deltaTime)
@@ -574,8 +584,7 @@ void GameUI::Update(float deltaTime)
 	}
 
 	if (!m_paused) {
-
-		//update the flame thrower 
+		//update the flame thrower
 		{
 			//normalized cooldown
 			flameThrowerCoolDownPercent = TTN_Interpolation::ReMap(flameThrowerMaxCoolDownTime, 0.0f, 0.0f, 1.0f, flameThrowerCoolDownTime);
@@ -759,53 +768,63 @@ void GameUI::Update(float deltaTime)
 
 		Get<TTN_Renderer2D>(progressRepresentation).SetHoriMask(m_displayedWaveProgress);
 	}
-	
+
 	//update the wave complete
 	{
-			while (GetNumOfDigits(m_currentWave) < waveNums.size()) {
-				DeleteEntity(waveNums[waveNums.size() - 1]);
-				waveNums.pop_back();
-			}
+		while (GetNumOfDigits(m_currentWave) < waveNums.size()) {
+			DeleteEntity(waveNums[waveNums.size() - 1]);
+			waveNums.pop_back();
+		}
 
-			if (GetNumOfDigits(m_currentWave) > waveNums.size())
-				MakeWaveNumEntity();
+		if (GetNumOfDigits(m_currentWave) > waveNums.size())
+			MakeWaveNumEntity();
 
-			for (int i = 0; i < waveNums.size(); i++) {
-				Get<TTN_Renderer2D>(waveNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_currentWave, waveNums.size() - i - 1)) + "-Text"));
-			}
+		for (int i = 0; i < waveNums.size(); i++) {
+			Get<TTN_Renderer2D>(waveNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_currentWave, waveNums.size() - i - 1)) + "-Text"));
+		}
 
-			//update time
-			m_waveCompleteTime += deltaTime;
-			if (m_waveProgress == 1.0f && waveDone && m_waveCompleteTime > 10.0f) {
-				m_waveCompleteTime = 0.0f;
-			}
+		//update time
+		m_waveCompleteTime += deltaTime;
+		if (m_waveProgress == 1.0f && waveDone && m_waveCompleteTime > 10.0f) {
+			m_waveCompleteTime = 0.0f;
+		}
 
-			//update position
-			float t = waveCompleteLerpParamter(m_waveCompleteTime / m_waveCompleteTotalTime);
-			glm::vec3 centerPos = TTN_Interpolation::Lerp(glm::vec3(1500.0f, 0.0f, 1.0f), glm::vec3(-1500.0f, 0.0f, 1.0f), t);
-			int offset = std::ceil((float)waveNums.size() / 2.0f);
-			//position of the numbers
-			for (int i = 0; i < waveNums.size(); i++) {
-				TTN_Transform& trans = Get<TTN_Transform>(waveNums[i]);
-				if (i < offset) {
-					//places the numbers to the left of the center
-					trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
-				}
-				else {
-					//places the numbers on and to the right of the center
-					trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
-				}
+		//update position
+		float t = waveCompleteLerpParamter(m_waveCompleteTime / m_waveCompleteTotalTime);
+		glm::vec3 centerPos = TTN_Interpolation::Lerp(glm::vec3(1500.0f, 0.0f, 1.0f), glm::vec3(-1500.0f, 0.0f, 1.0f), t);
+		int offset = std::ceil((float)waveNums.size() / 2.0f);
+		//position of the numbers
+		for (int i = 0; i < waveNums.size(); i++) {
+			TTN_Transform& trans = Get<TTN_Transform>(waveNums[i]);
+			if (i < offset) {
+				//places the numbers to the left of the center
+				trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
 			}
-			TTN_Transform& firstNumTrans = Get<TTN_Transform>(waveNums[0]);
-			//places the wave text
-			Get<TTN_Transform>(waveText).SetPos(firstNumTrans.GetGlobalPos() + glm::vec3(0.35f * std::abs(firstNumTrans.GetScale().x) + 0.4f * 
+			else {
+				//places the numbers on and to the right of the center
+				trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+			}
+		}
+		TTN_Transform& firstNumTrans = Get<TTN_Transform>(waveNums[0]);
+		//places the wave text
+		Get<TTN_Transform>(waveText).SetPos(firstNumTrans.GetGlobalPos() + glm::vec3(0.35f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
 			std::abs(Get<TTN_Transform>(waveText).GetScale().x), 0.0f, 0.0f));
 
-			TTN_Transform& lastNumTrans = Get<TTN_Transform>(waveNums[waveNums.size() - 1]);
-			//places the complete text
-			Get<TTN_Transform>(completeText).SetPos(lastNumTrans.GetGlobalPos() - glm::vec3(0.45f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
-				std::abs(Get<TTN_Transform>(completeText).GetScale().x), 0.0f, 0.0f));
+		TTN_Transform& lastNumTrans = Get<TTN_Transform>(waveNums[waveNums.size() - 1]);
+		//places the complete text
+		Get<TTN_Transform>(completeText).SetPos(lastNumTrans.GetGlobalPos() - glm::vec3(0.45f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
+			std::abs(Get<TTN_Transform>(completeText).GetScale().x), 0.0f, 0.0f));
+
+		//when the text leaves opens shop and resets all shop based power ups
+		if ((firstNumTrans.GetGlobalPos().x <= 99.9f && firstNumTrans.GetGlobalPos().x >= 0.f) && !shopOnce && (m_currentWave != lastWave)) {
+			shouldShop = true;
+			shopOnce = true;
+			cannonPower = false;
+			abilityCooldownBuff = false;
+			upgradeAbilities = false;
+			//std::cout << "WORKING" << std::endl;
 		}
+	}
 
 	if ((m_currentWave > waveTracker) && m_waveProgress == 1.0f) { //check if round ended and its a new round
 		shopOnce = false; //set shoponce to false so we know the player hasn't seen the shop yet
@@ -1113,7 +1132,7 @@ void GameUI::MakeScoreNumEntity()
 	TTN_Transform& scoreTrans = Get<TTN_Transform>(scoreText);
 
 	//setup a transform for the new entity
-	TTN_Transform numTrans = TTN_Transform(glm::vec3(scoreTrans.GetGlobalPos().x - 0.2f * std::abs(scoreTrans.GetScale().x) - 
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(scoreTrans.GetGlobalPos().x - 0.2f * std::abs(scoreTrans.GetScale().x) -
 		(float)scoreNums.size() * 0.35f * scoreTextScale * 150.0f, scoreTrans.GetGlobalPos().y, scoreTrans.GetGlobalPos().z),
 		glm::vec3(0.0f), glm::vec3(scoreTextScale * 150.0f, scoreTextScale * 150.0f, 1.0f));
 	AttachCopy(scoreNums[scoreNums.size() - 1], numTrans);
@@ -1132,7 +1151,7 @@ void GameUI::MakeHealthNumEntity()
 	TTN_Transform& healthTrans = Get<TTN_Transform>(healthBar);
 
 	//setup a transform for the new entity
-	TTN_Transform numTrans = TTN_Transform(glm::vec3(healthTrans.GetGlobalPos().x + 0.3f * std::abs(healthTrans.GetScale().x)  -
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(healthTrans.GetGlobalPos().x + 0.3f * std::abs(healthTrans.GetScale().x) -
 		(float)healthNums.size() * 0.35f * healthTextScale * 150.0f, healthTrans.GetGlobalPos().y, healthTrans.GetGlobalPos().z),
 		glm::vec3(0.0f), glm::vec3(healthTextScale * 150.0f, healthTextScale * 150.0f, 1.0f));
 	AttachCopy(healthNums[healthNums.size() - 1], numTrans);
