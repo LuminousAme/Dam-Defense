@@ -195,7 +195,7 @@ int main() {
 			paused->SetShouldRender(true);
 			options->SetShouldRender(false);
 		}
-		//if the menu has appeared but the player has unpaused with the esc key	
+		//if the menu has appeared but the player has unpaused with the esc key
 		else if (gameScene->GetShouldRender() && (paused->GetShouldRender() || options->GetShouldRender()) && !gameScene->GetPaused()) {
 			TTN_Application::TTN_Input::SetCursorLocked(true);
 			paused->SetShouldResume(false);
@@ -303,7 +303,6 @@ int main() {
 			gameScene->SetGameIsOver(false);
 			gameScene->RestartData();
 			gameSceneUI->RestartData();
-
 		}
 
 		//game over go to menu
@@ -345,8 +344,6 @@ int main() {
 			gameScene->SetGameIsOver(false);
 			gameScene->RestartData();
 			gameSceneUI->RestartData();
-
-
 		}
 
 		//if game win and they want to go back to the main menu

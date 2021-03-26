@@ -140,7 +140,7 @@ void Game::Update(float deltaTime)
 	engine.Update();
 
 	//call the update on ImGui
-	//ImGui();
+	ImGui();
 
 	//get fps
 	//std::cout << "FPS: " << std::to_string(1.0f / deltaTime) << std::endl;
@@ -1489,6 +1489,7 @@ void Game::WaveUpdate(float deltaTime) {
 		m_waveInProgress = true;
 		m_firstWave = false;
 	}
+
 	//otherwise, check if it should spawn
 	else {
 		m_timeUntilNextSpawn -= deltaTime;
@@ -2102,12 +2103,18 @@ void Game::BirdUpate(float deltaTime)
 void Game::ImGui()
 {
 	//Volume control
-	ImGui::Begin("Temp Volume Control");
+	//ImGui::Begin("Temp Volume Control");
+	ImGui::Begin("Shop Prices Control");
 
-	ImGui::SliderInt("Master", &masterVolume, 0, 100);
+	ImGui::SliderInt("Heal Cost", &healCost, 10, 1000);
+	ImGui::SliderInt("Cannon Fire Rate Cost", &cannonCost, 10, 1000);
+	ImGui::SliderInt("Ability Cooldown Cost", &abilityCost, 10, 1000);
+	ImGui::SliderInt("Ability Upgrade Cost", &upgradeCost, 10, 1000);
+
+	/*ImGui::SliderInt("Master", &masterVolume, 0, 100);
 	ImGui::SliderInt("Music", &musicVolume, 0, 100);
 	ImGui::SliderInt("Sound Effects", &sfxVolume, 0, 100);
-	ImGui::SliderFloat("Mouse", &mouseSensetivity, 0.0f, 100.0f);
+	ImGui::SliderFloat("Mouse", &mouseSensetivity, 0.0f, 100.0f);*/
 
 	ImGui::End();
 
@@ -2148,8 +2155,8 @@ void Game::ImGui()
 
 	if (ImGui::CollapsingHeader("Directional Light Controls")) {
 		TTN_DirectionalLight tempSun = illBuffer->GetSunRef();
-		/*
-		glm::vec3 direction = tempSun.m_lightDirection;
+		
+		/*glm::vec3 direction = tempSun.m_lightDirection;
 		glm::vec3 color = tempSun.m_lightColor;
 		glm::vec3 ambientColor = tempSun.m_ambientColor;
 		float ambientPower = tempSun.m_ambientPower;
@@ -2157,8 +2164,8 @@ void Game::ImGui()
 		float lightSpecularPower = tempSun.m_lightSpecularPower;
 		float minShadowBias = tempSun.m_minShadowBias;
 		float maxShadowBias = tempSun.m_maxShadowBias;
-		int pcfPasses = tempSun.m_pcfFilterSamples;
-		*/
+		int pcfPasses = tempSun.m_pcfFilterSamples;*/
+		
 
 		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 0.0f)) {
 			SetSun(tempSun);
@@ -2418,5 +2425,7 @@ void Game::ImGui()
 		}
 	}
 
-	ImGui::End();
+	ImGui::End(); 
+	
+
 }
