@@ -464,9 +464,9 @@ void OptionsMenu::InitScene()
 
 		//create a transform for the button
 		TTN_Transform buttonTrans;
-		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(650.0f, -220.0f, 0.9f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
-		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(250.0f, -220.0f, 0.9f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
-		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-250.0f, -220.0f, 0.9f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(650.0f, -240.0f, 0.9f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(250.0f, -240.0f, 0.9f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-250.0f, -240.0f, 0.9f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
 		AttachCopy(temp, buttonTrans);
 
 		//create a 2D renderer for the button

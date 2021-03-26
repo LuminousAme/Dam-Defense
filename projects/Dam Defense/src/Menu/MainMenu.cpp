@@ -352,8 +352,6 @@ void MainMenu::SetUpOtherData()
 	//and add it to this scene's list of effects
 	m_PostProcessingEffects.push_back(m_colorCorrectEffect);
 
-	
-
 	//set all 3 effects to false
 	m_applyWarmLut = false;
 	m_applyCoolLut = false;
@@ -395,7 +393,7 @@ void MainMenu::ImGui()
 			SetSceneAmbientColor(glm::vec3(sceneAmbientLight[0], sceneAmbientLight[1], sceneAmbientLight[2]));
 		}
 
-		//loop through all the lights 
+		//loop through all the lights
 		int i = 0;
 		std::vector<entt::entity>::iterator it = m_Lights.begin();
 		while (it != m_Lights.end()) {
@@ -559,7 +557,7 @@ void MainMenu::ImGui()
 			}
 		}
 
-		//Ambient, specular, and lineart outline 
+		//Ambient, specular, and lineart outline
 		if (ImGui::Checkbox("Ambient, Specular, and custom(outline) Lighting", &m_ambientSpecularAndOutline)) {
 			//set ambient, specular, and outline to true
 			m_ambientSpecularAndOutline = true;
@@ -729,7 +727,7 @@ void MainMenuUI::InitScene()
 		TTN_2DAnimation loopAnim = TTN_2DAnimation(loop, loopLenghts, true);
 
 		//create an 2d animator for the logo
-		TTN_2DAnimator logoAnimator = TTN_2DAnimator({startAnim, loopAnim}, 0);
+		TTN_2DAnimator logoAnimator = TTN_2DAnimator({ startAnim, loopAnim }, 0);
 		AttachCopy(gameLogo, logoAnimator);
 
 		//create a transform for the logo
@@ -751,10 +749,11 @@ void MainMenuUI::InitScene()
 
 		//create a transform for the text
 		TTN_Transform textTrans;
-		if (i == 0) textTrans = TTN_Transform(glm::vec3(657.75f, -180.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 1) textTrans = TTN_Transform(glm::vec3(254.75, -360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-148.25, -180.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 3) textTrans = TTN_Transform(glm::vec3(-551.25, -360.0f, 1.0f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
+		glm::vec3 textScale = glm::vec3(600.0f / 2.75f, 175.0f / 2.75f, 1.0f);
+		if (i == 0) textTrans = TTN_Transform(glm::vec3(657.75f, -180.0f, 1.0f), glm::vec3(0.0f), textScale);
+		else if (i == 1) textTrans = TTN_Transform(glm::vec3(254.75, -360.0f, 1.0f), glm::vec3(0.0f), textScale);
+		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-148.25, -180.0f, 1.0f), glm::vec3(0.0f), textScale);
+		else if (i == 3) textTrans = TTN_Transform(glm::vec3(-551.25, -360.0f, 1.0f), glm::vec3(0.0f), textScale);
 		AttachCopy(temp, textTrans);
 
 		//create a 2D renderer for the button
@@ -764,7 +763,6 @@ void MainMenuUI::InitScene()
 		else if (i == 2) textRenderer = TTN_Renderer2D(textureOptions);
 		else if (i == 3) textRenderer = TTN_Renderer2D(textureQuit);
 		AttachCopy(temp, textRenderer);
-
 	}
 
 	//buttons

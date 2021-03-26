@@ -69,7 +69,7 @@ void PauseMenu::InitScene()
 
 		if (i == 0) textTrans = TTN_Transform(glm::vec3(657.75f, -75.0f, 0.5f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
 		else if (i == 1) textTrans = TTN_Transform(glm::vec3(254.75, -75.0f, 0.5f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
-		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-148.25, -75.0f, 0.5f), glm::vec3(0.0f), glm::vec3(550.0f / 2.0f, 150.0f / 2.0f, 1.0f));
+		else if (i == 2) textTrans = TTN_Transform(glm::vec3(-148.25, -75.0f, 0.5f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
 		else if (i == 3) textTrans = TTN_Transform(glm::vec3(-551.25, -75.0f, 0.5f), glm::vec3(0.0f), glm::vec3(550.0f / 2.75f, 150.0f / 2.75f, 1.0f));
 		AttachCopy(temp, textTrans);
 
