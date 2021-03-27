@@ -37,6 +37,9 @@ void GameWinMenu::Update(float deltaTime)
 
 void GameWinMenu::PostRender()
 {
+	//render the scene for the water
+	WaterManager::RenderSceneForWater(GetScene(), camera, terrain, std::vector<entt::entity>(), Get<TTN_Transform>(water).GetPos());
+
 	//disable blending so the gBuffer can draw properlly
 	glDisable(GL_BLEND);
 
@@ -136,12 +139,17 @@ void GameWinMenu::PostRender()
 		//frag shader
 		//bind the textures
 		waterText->Bind(0);
+		WaterManager::BindVoronoiAsColor(1);
+		WaterManager::BindRefractionAsColor(2);
+		WaterManager::BindReflectionAsColor(3);
 
 		//send lighting from the scene
 		shaderProgramWater->SetUniform("u_UseDiffuse", (int)m_mats[0]->GetUseAlbedo());
 
 		//render the water (just use the same plane as the terrain)
 		terrainPlain->GetVAOPointer()->Render();
+
+		WaterManager::UnbindVoronoi(1);
 	}
 
 	//unbind the geometry buffer

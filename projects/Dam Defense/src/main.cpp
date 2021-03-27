@@ -408,7 +408,7 @@ int main() {
 			set1Loaded = true;
 
 		//update the water manage
-		WaterManager::Update(TTN_Application::GetDeltaTime());
+		if(!gameScene->GetPaused()) WaterManager::Update(TTN_Application::GetDeltaTime());
 
 		//update the scenes and render the screen
 		TTN_Application::Update();

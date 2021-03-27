@@ -8,6 +8,7 @@ layout(location = 2) in vec2 inUV;
 layout(location = 0) out vec3 outPos;
 layout(location = 1) out vec3 outNormal;
 layout(location = 2) out vec2 outUV;
+layout(location = 3) out vec4 outClipSpace;
 
 //model, view, projection matrix
 uniform mat4 MVP;
@@ -43,7 +44,7 @@ void main() {
 	}
 
 	//set the positions and the normal for this vertex
-	vec3 vertexPos = vec3(inPos.x + posSum.x, posSum.y, inPos.z + posSum.z);
+	vec3 vertexPos = vec3(inPos.x, posSum.y, inPos.z);
 	vec3 vertexNormal = vec3(-1.0 * normalSum.x, 1.0 - normalSum.y, -1.0 * normalSum.z);
 
 	//pass that data onto the fragment shader
@@ -51,7 +52,8 @@ void main() {
 	outNormal = NormalMat * vertexNormal;
 	
 	//and store it as the position
-	gl_Position = MVP * vec4(vertexPos, 1.0);
+	outClipSpace = MVP * vec4(vertexPos, 1.0);
+	gl_Position = outClipSpace;
 }
 
 //function that calculates the ammount of a wave that should be added

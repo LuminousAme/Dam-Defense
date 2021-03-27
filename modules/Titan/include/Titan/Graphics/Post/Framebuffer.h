@@ -108,6 +108,11 @@ namespace Titan {
 		unsigned int m_width = 0;
 		unsigned int m_height = 0;
 
+		//Default filter is GL_NEAREST
+		GLenum m_filter = GL_NEAREST;
+		//Default filter is GL_CLAMP_TO_EDGE
+		GLenum m_wrap = GL_CLAMP_TO_EDGE;
+
 	protected:
 		//OpenGL framebuffer handle
 		GLuint m_FBO;
@@ -115,11 +120,6 @@ namespace Titan {
 		TTN_DepthTarget m_depth;
 		//Color attachment, none, one, or more
 		TTN_ColorTarget m_color;
-
-		//Default filter is GL_NEAREST
-		GLenum m_filter = GL_NEAREST;
-		//Default filter is GL_CLAMP_TO_EDGE
-		GLenum m_wrap = GL_CLAMP_TO_EDGE;
 
 		//Clearflag is nothing by default
 		GLbitfield m_clearFlag = 0;

@@ -76,6 +76,9 @@ namespace Titan {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		//enable clipping planes
+		glEnable(GL_CLIP_DISTANCE0);
+
 		//set up the shader program for the particle system
 		TTN_ParticleSystem::InitParticleShader();
 
