@@ -140,7 +140,7 @@ void Game::Update(float deltaTime)
 	engine.Update();
 
 	//call the update on ImGui
-	ImGui();
+	//ImGui();
 
 	//get fps
 	//std::cout << "FPS: " << std::to_string(1.0f / deltaTime) << std::endl;
