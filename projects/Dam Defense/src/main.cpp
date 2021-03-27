@@ -309,7 +309,6 @@ int main() {
 			gameScene->SetGameIsOver(false);
 			gameScene->RestartData();
 			gameSceneUI->RestartData();
-
 		}
 
 		//game over go to menu
@@ -351,8 +350,6 @@ int main() {
 			gameScene->SetGameIsOver(false);
 			gameScene->RestartData();
 			gameSceneUI->RestartData();
-
-
 		}
 
 		//if game win and they want to go back to the main menu

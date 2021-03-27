@@ -1,4 +1,4 @@
-//Titan Engine, by Atlas X Games 
+//Titan Engine, by Atlas X Games
 // Partilce.cpp - source file for the class that represents a particle system
 
 //precompile header, this file uses GLM/gtx/transform.hpp
@@ -30,7 +30,6 @@ namespace Titan {
 
 		//reverse memory space for all the particle data
 		SetUpData();
-
 
 		//set up function pointers
 		readGraphVelo = &defaultReadGraph;
@@ -69,7 +68,7 @@ namespace Titan {
 		readGraphScale = &defaultReadGraph;
 
 		SetUpRenderingStuff();
-		
+
 		VertexPosVBO->LoadData(m_particle._mesh->GetVertexPositions().data(), m_particle._mesh->GetVertexPositions().size());
 		VertexNormVBO->LoadData(m_particle._mesh->GetVertexNormals().data(), m_particle._mesh->GetVertexNormals().size());
 		VertexUVVBO->LoadData(m_particle._mesh->GetVertexUvs().data(), m_particle._mesh->GetVertexUvs().size());
@@ -252,7 +251,7 @@ namespace Titan {
 				//update how long the particle has been alive
 				timeAlive[i] += deltaTime;
 
-				//get a t value for interpolation 
+				//get a t value for interpolation
 				float t = std::clamp(timeAlive[i] / lifeTimes[i], 0.0f, 1.0f);
 				//update the position of the particlce based on the interpolation of the velocities
 				Positions[i] += glm::mix(StartVelocities[i], EndVelocities[i], readGraphVelo(t)) * deltaTime;
@@ -290,7 +289,7 @@ namespace Titan {
 			if (!Active[i])
 				continue;
 
-			//get a t value for interpolation 
+			//get a t value for interpolation
 			float t = std::clamp(timeAlive[i] / lifeTimes[i], 0.0f, 1.0f);
 
 			//interpolate the color
@@ -300,12 +299,10 @@ namespace Titan {
 			//get the global position of the particle
 			glm::vec3 temp_pos = Positions[i];
 
-			
 			//save the color
 			particle_col[numOfActiveParticles] = temp_col;
 			particle_pos[numOfActiveParticles] = temp_pos;
 			particle_scale[numOfActiveParticles] = temp_scale;
-
 
 			numOfActiveParticles++;
 		}
@@ -420,7 +417,6 @@ namespace Titan {
 				Dir = glm::vec3(rotMat * glm::vec4(Dir, 1.0f));
 			}
 
-
 			StartVelocities[m_activeParticleIndex] = Dir * TTN_Random::RandomFloat(m_particle._startSpeed, m_particle._startSpeed2);
 			EndVelocities[m_activeParticleIndex] = Dir * TTN_Random::RandomFloat(m_particle._endSpeed, m_particle._endSpeed2);
 		}
@@ -453,7 +449,7 @@ namespace Titan {
 	//sets up vao and vbos
 	void TTN_ParticleSystem::SetUpRenderingStuff()
 	{
-		//create vbos 
+		//create vbos
 		VertexPosVBO = TTN_VertexBuffer::Create();
 		VertexNormVBO = TTN_VertexBuffer::Create();
 		VertexUVVBO = TTN_VertexBuffer::Create();

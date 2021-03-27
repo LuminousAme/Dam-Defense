@@ -290,9 +290,9 @@ protected:
 
 	/////////////ENEMY AND WAVE CONTROLS//////////////////
 	float muzzleFlashCD = 1.50f; // time for muzzle flash
-	float m_timeBetweenEnemyWaves = 8.0f; //rest time between waves
+	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
 	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
-	int m_enemiesPerWave = 5; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
+	int m_enemiesPerWave = 1; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
 
 	int m_currentWave = 0; //the current wave
 	float m_timeTilNextWave; //the timer until the next wave starts, used after a wave has ended
@@ -338,7 +338,7 @@ protected:
 	float timeSinceJingleStartedPlaying = 0.0f;
 
 	//volume controls
-	int masterVolume = 100;
+	int masterVolume = 50;
 	int musicVolume = 20;
 	int sfxVolume = 5;
 
@@ -437,10 +437,10 @@ inline float ZeroOneZero(float t) {
 	return (-4.0f * (t * t) + 4.0f * t);
 }
 
-inline float ZeroUntilHalfThenOne(float t){
+inline float ZeroUntilHalfThenOne(float t) {
 	if (t <= 0.5f) {
 		return 0.0f;
 	}
-	
+
 	return TTN_Interpolation::ReMap(0.5f, 1.0f, 0.0f, 1.0f, t);
 }

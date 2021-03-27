@@ -14,7 +14,7 @@ public:
 	//default constructor
 	GameUI();
 
-	//default destrcutor 
+	//default destrcutor
 	~GameUI() = default;
 
 	//sets up the scene
@@ -28,6 +28,7 @@ public:
 
 	//mouse input
 	void MouseButtonDownChecks();
+	void KeyDownChecks();
 
 	//setters
 	void SetScore(unsigned score) { m_score = score; }
@@ -78,6 +79,7 @@ public:
 	void SetUpgradeCost(int cost) { upgradeCost = cost; }
 
 private:
+#pragma region ENTITES AND STUFF
 	//entities
 	entt::entity cam;
 	entt::entity background;
@@ -90,7 +92,7 @@ private:
 	float healthScale = 0.3f;
 	//health numbers
 	std::vector<entt::entity> healthNums;
-	float healthTextScale = 0.4f;
+	float healthTextScale = 0.45f;
 
 	//crosshair
 	entt::entity crosshairCross;
@@ -129,6 +131,8 @@ private:
 	std::vector<entt::entity> birdBombNums;
 	//special ability general data
 	float specialAbilityScale = 0.2f;
+
+#pragma endregion
 
 	//shop buttons
 	entt::entity buttonHealth;
@@ -173,10 +177,14 @@ private:
 
 		//shop stuff
 	bool shouldExitShop; //exit bool
+	bool lerpAway; //lerp away bool
 	bool shopOnce = false; //variable for only spawning the shop once per end of round
 
 	float lerpTime = 10.0f;
-	float lerpTotalTime = 1.5f;
+	float lerpTotalTime = 4.0f;
+	float lerpTime2 = 10.0f;
+	float lerpTotalTime2 = 4.0f;
+
 	bool shouldShop = false;
 	bool shopPause = false;
 	bool shopping = false;
