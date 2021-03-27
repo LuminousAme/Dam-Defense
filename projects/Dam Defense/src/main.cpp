@@ -264,6 +264,7 @@ int main() {
 			options->SetShouldRender(false);
 			gameScene->SetPaused(true);
 			gameScene->SetGameIsPaused(true);
+			gameScene->SetInputDelay();
 			//gameSceneUI->SetShouldShop(false);
 			paused->SetShouldRender(false);
 			paused->SetPaused(false);
