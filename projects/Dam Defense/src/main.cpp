@@ -13,6 +13,7 @@
 #include "Menu/GameWinMenu.h"
 #include "Menu/OptionMenu.h"
 #include "Game/HUD.h"
+#include "WaterManager.h"
 
 using namespace Titan;
 
@@ -21,8 +22,13 @@ void PrepareAssetLoading();
 
 //main function, runs the program
 int main() {
-	Logger::Init(); //initliaze otter's base logging system
-	TTN_Application::Init("Dam Defense", 1920, 1080, false); //initliaze titan's application
+	//initliaze otter's base logging system
+	Logger::Init(); 
+	//initliaze titan's application
+	TTN_Application::Init("Dam Defense", 1920, 1080, false); 
+
+	//initlize the water effect manager
+	WaterManager::Init();
 
 	//data to track loading progress
 	bool set1Loaded = false;
@@ -400,6 +406,9 @@ int main() {
 		//if set 1 has finished loaded, mark it as done
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)
 			set1Loaded = true;
+
+		//update the water manage
+		WaterManager::Update(TTN_Application::GetDeltaTime());
 
 		//update the scenes and render the screen
 		TTN_Application::Update();

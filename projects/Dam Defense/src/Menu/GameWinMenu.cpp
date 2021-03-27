@@ -102,11 +102,36 @@ void GameWinMenu::PostRender()
 			glm::mat3(glm::inverse(glm::transpose(Get<TTN_Transform>(water).GetGlobal()))));
 
 		//pass in data about the water animation
+		float time = WaterManager::GetTime();
+		float steepness = WaterManager::GetSteepness();
+		int waveNums = WaterManager::GetNumberOfWaves();
+		float speed = WaterManager::GetSpeed();
+
 		shaderProgramWater->SetUniform("time", time);
-		shaderProgramWater->SetUniform("speed", waveSpeed);
-		shaderProgramWater->SetUniform("baseHeight", waveBaseHeightIncrease);
-		shaderProgramWater->SetUniform("heightMultiplier", waveHeightMultiplier);
-		shaderProgramWater->SetUniform("waveLenghtMultiplier", waveLenghtMultiplier);
+		shaderProgramWater->SetUniform("u_Q", steepness);
+		shaderProgramWater->SetUniform("u_numOfWaves", waveNums);
+		shaderProgramWater->SetUniform("u_speed", speed);
+
+		float amplitudes[16];
+		float freqs[16];
+		glm::vec3 directions[16];
+
+		for (int i = 0; i < 16; i++) {
+			if (i < WaterManager::GetNumberOfWaves()) {
+				amplitudes[i] = WaterManager::m_waveAcutalAmplitude[i];
+				freqs[i] = WaterManager::m_waveFrequency[i];
+				directions[i] = WaterManager::m_waveDirection[i];
+			}
+			else {
+				amplitudes[i] = 0.0f;
+				freqs[i] = 0.0f;
+				directions[i] = glm::vec3(0.0f);
+			}
+		}
+
+		shaderProgramWater->SetUniform("u_amplitude", amplitudes[0], 16);
+		shaderProgramWater->SetUniform("u_frequency", freqs[0], 16);
+		shaderProgramWater->SetUniform("u_direction", directions[0], 16);
 
 		//frag shader
 		//bind the textures

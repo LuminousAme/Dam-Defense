@@ -7,6 +7,7 @@
 #include "Titan/Systems/Sound.h"
 #include "EnemyComponent.h"
 #include "BirdComponent.h"
+#include "WaterManager.h"
 
 using namespace Titan;
 
