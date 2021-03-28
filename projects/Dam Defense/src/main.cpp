@@ -23,7 +23,7 @@ void PrepareAssetLoading();
 //main function, runs the program
 int main() {
 	//initliaze otter's base logging system
-	Logger::Init(); 
+	Logger::Init();
 	//initliaze titan's application
 	TTN_Application::Init("Dam Defense", 1920, 1080, false); 
 
@@ -201,7 +201,7 @@ int main() {
 			paused->SetShouldRender(true);
 			options->SetShouldRender(false);
 		}
-		//if the menu has appeared but the player has unpaused with the esc key	
+		//if the menu has appeared but the player has unpaused with the esc key
 		else if (gameScene->GetShouldRender() && (paused->GetShouldRender() || options->GetShouldRender()) && !gameScene->GetPaused()) {
 			TTN_Application::TTN_Input::SetCursorLocked(true);
 			paused->SetShouldResume(false);
@@ -377,6 +377,7 @@ int main() {
 			gameSceneUI->SetCooldownCost(gameScene->GetCooldownCost());
 			gameSceneUI->SetUpgradeCost(gameScene->GetUpgradeCost());
 
+			gameSceneUI->SetArcade(gameScene->GetArcade());
 			gameSceneUI->SetLastWave(gameScene->GetLastWave());
 			gameSceneUI->SetScore(gameScene->GetScore());
 			gameSceneUI->SetDamHP(gameScene->GetDamHealth());
@@ -406,7 +407,7 @@ int main() {
 			set1Loaded = true;
 
 		//update the water manage
-		if(!gameScene->GetPaused()) WaterManager::Update(TTN_Application::GetDeltaTime());
+		if (!gameScene->GetPaused()) WaterManager::Update(TTN_Application::GetDeltaTime());
 
 		//update the scenes and render the screen
 		TTN_Application::Update();

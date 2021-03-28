@@ -56,6 +56,7 @@ void GameUI::InitScene()
 	cooldownCost = 150;
 	upgradeCost = 50;
 	lerpAway = false;
+	m_arcade = false;
 	//main camera
 	{
 		//create an entity in the scene for the camera
@@ -72,148 +73,159 @@ void GameUI::InitScene()
 		Get<TTN_Camera>(cam).View();
 	}
 
-	//health bar
+	//health bar stuff
 	{
-		//create an entity in the scene for the health bar overlay
-		healthBar = CreateEntity();
+		//health bar
+		{
+			//create an entity in the scene for the health bar overlay
+			healthBar = CreateEntity();
 
-		//create a transform for the health bar overlay
-		TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 0.9f), glm::vec3(0.0f), glm::vec3(1228.0f * healthScale, 239.0f * healthScale, 1.0f));
-		AttachCopy(healthBar, healthTrans);
+			//create a transform for the health bar overlay
+			TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 0.9f), glm::vec3(0.0f), glm::vec3(1228.0f * healthScale, 239.0f * healthScale, 1.0f));
+			AttachCopy(healthBar, healthTrans);
 
-		//create a sprite renderer for the health bar overlay
-		TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar Border"));
-		AttachCopy(healthBar, healthRenderer);
-	}
-
-	//health of dam
-	{
-		//create an entity for the health bar
-		healthDam = CreateEntity();
-
-		//create a transform for the health bar
-		TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1228.0f * healthScale, 239.0f * healthScale, 1.0f));
-		AttachCopy(healthDam, healthTrans);
-
-		//create a sprite renderer for the health bar
-		TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar"), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		AttachCopy(healthDam, healthRenderer);
-	}
-
-	//health bar background
-	{
-		//create an entity for the health bar background
-		healthBarBg = CreateEntity();
-
-		//create a transform for the health bar background
-		TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 1.1f), glm::vec3(0.0f), glm::vec3(1228.0f * healthScale, 239.0f * healthScale, 1.0f));
-		AttachCopy(healthBarBg, healthTrans);
-
-		//create a sprite renderer for the health bar background
-		TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar BG"), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		AttachCopy(healthBarBg, healthRenderer);
-	}
-
-	//progress bar
-	{
-		//create an entity in the scene for the progress bar overlay
-		progressBar = CreateEntity();
-
-		//create a transform for the progress bar overlay
-		TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 0.9f), glm::vec3(0.0f), glm::vec3(1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
-		AttachCopy(progressBar, progressTrans);
-
-		//create a sprite renderer for the progress bar overlay
-		TTN_Renderer2D progressRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar Border"));
-		AttachCopy(progressBar, progressRenderer);
-	}
-
-	//acutal progress
-	{
-		//create an entity for the progress bar
-		progressRepresentation = CreateEntity();
-
-		//create a transform for the progress bar
-		TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
-		AttachCopy(progressRepresentation, progressTrans);
-
-		//create a sprite renderer for the progress bar
-		TTN_Renderer2D progressRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar"), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-		AttachCopy(progressRepresentation, progressRenderer);
-	}
-
-	//progess bar background
-	{
-		//create an entity for the progress bar background
-		progressBarBg = CreateEntity();
-
-		//create a transform for the progress bar background
-		TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 1.1f), glm::vec3(0.0f), glm::vec3(1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
-		AttachCopy(progressBarBg, progressTrans);
-
-		//create a sprite renderer for the progress bar background
-		TTN_Renderer2D progressRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar BG"), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-		AttachCopy(progressBarBg, progressRenderer);
-	}
-
-	//crosshair top
-	{
-		//create an entity
-		crosshairCross = CreateEntity();
-
-		//make a transform for it
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f), glm::vec3(60.0f * crosshairScale, 60.0f * crosshairScale, 1.0f));
-		AttachCopy(crosshairCross, Trans);
-
-		//make a 2D renderer for it
-		TTN_Renderer2D renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Crosshair Cross"), crosshairColor);
-		AttachCopy(crosshairCross, renderer);
-	}
-
-	//crosshair bars
-	for (int i = 0; i < 4; i++) {
-		//create an entity
-		crosshairHoriLines.push_back(std::pair(CreateEntity(), 1.0f));
-
-		//make a transform for it
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f), glm::vec3(40.0f * crosshairScale, 40.0f * crosshairScale, 1.0f));
-		if (i == 0) {
-			Trans.SetPos(glm::vec3(0.0f, -22.5f, 2.0f));
-			Trans.SetScale(Trans.GetScale() * glm::vec3(0.8f, 1.0f, 1.0f));
-		}
-		if (i == 1) {
-			Trans.SetPos(glm::vec3(0.0f, -45.0f, 2.0f));
-			Trans.SetScale(Trans.GetScale() * glm::vec3(0.6f, 1.0f, 1.0f));
-		}
-		if (i == 2) {
-			Trans.SetPos(glm::vec3(0.0f, -67.5f, 2.0f));
-			Trans.SetScale(Trans.GetScale() * glm::vec3(0.4f, 1.0f, 1.0f));
-		}
-		if (i == 3) {
-			Trans.SetPos(glm::vec3(0.0f, -90.0f, 2.0f));
-			Trans.SetScale(Trans.GetScale() * glm::vec3(0.2f, 1.0f, 1.0f));
+			//create a sprite renderer for the health bar overlay
+			TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar Border"));
+			AttachCopy(healthBar, healthRenderer);
 		}
 
-		AttachCopy(crosshairHoriLines[crosshairHoriLines.size() - 1].first, Trans);
+		//health of dam
+		{
+			//create an entity for the health bar
+			healthDam = CreateEntity();
 
-		//make a 2D renderer for it
-		TTN_Renderer2D renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Crosshair Hori Line"), crosshairColor);
-		AttachCopy(crosshairHoriLines[crosshairHoriLines.size() - 1].first, renderer);
+			//create a transform for the health bar
+			TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1228.0f * healthScale, 239.0f * healthScale, 1.0f));
+			AttachCopy(healthDam, healthTrans);
+
+			//create a sprite renderer for the health bar
+			TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar"), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+			AttachCopy(healthDam, healthRenderer);
+		}
+
+		//health bar background
+		{
+			//create an entity for the health bar background
+			healthBarBg = CreateEntity();
+
+			//create a transform for the health bar background
+			TTN_Transform healthTrans = TTN_Transform(glm::vec3(750.0f, -420.0f, 1.1f), glm::vec3(0.0f), glm::vec3(1228.0f * healthScale, 239.0f * healthScale, 1.0f));
+			AttachCopy(healthBarBg, healthTrans);
+
+			//create a sprite renderer for the health bar background
+			TTN_Renderer2D healthRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar BG"), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+			AttachCopy(healthBarBg, healthRenderer);
+		}
+
 	}
 
-	//crosshair vertical bar
+	// progress bar stuff
 	{
-		crosshairVertLine = CreateEntity();
+		//progress bar
+		{
+			//create an entity in the scene for the progress bar overlay
+			progressBar = CreateEntity();
 
-		//make a transform for it
-		TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, -56.25, 2.5f), glm::vec3(0.0f), glm::vec3(60.0f * crosshairScale, 75.0f, 1.0f));
-		AttachCopy(crosshairVertLine, Trans);
+			//create a transform for the progress bar overlay
+			TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 0.9f), glm::vec3(0.0f), glm::vec3(1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
+			AttachCopy(progressBar, progressTrans);
 
-		//make a 2D renderer for it
-		TTN_Renderer2D renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Crosshair Vert Line"), crosshairColor);
-		AttachCopy(crosshairVertLine, renderer);
+			//create a sprite renderer for the progress bar overlay
+			TTN_Renderer2D progressRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar Border"));
+			AttachCopy(progressBar, progressRenderer);
+		}
+
+		//acutal progress
+		{
+			//create an entity for the progress bar
+			progressRepresentation = CreateEntity();
+
+			//create a transform for the progress bar
+			TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
+			AttachCopy(progressRepresentation, progressTrans);
+
+			//create a sprite renderer for the progress bar
+			TTN_Renderer2D progressRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar"), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+			AttachCopy(progressRepresentation, progressRenderer);
+		}
+
+		//progess bar background
+		{
+			//create an entity for the progress bar background
+			progressBarBg = CreateEntity();
+
+			//create a transform for the progress bar background
+			TTN_Transform progressTrans = TTN_Transform(glm::vec3(0.0f, 480.0f, 1.1f), glm::vec3(0.0f), glm::vec3(1228.0f * progressScale.x, 239.0f * progressScale.y, 1.0f));
+			AttachCopy(progressBarBg, progressTrans);
+
+			//create a sprite renderer for the progress bar background
+			TTN_Renderer2D progressRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Bar BG"), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+			AttachCopy(progressBarBg, progressRenderer);
+		}
+
 	}
 
+	//crosshair stuff
+	{
+		//crosshair top
+		{
+			//create an entity
+			crosshairCross = CreateEntity();
+
+			//make a transform for it
+			TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f), glm::vec3(60.0f * crosshairScale, 60.0f * crosshairScale, 1.0f));
+			AttachCopy(crosshairCross, Trans);
+
+			//make a 2D renderer for it
+			TTN_Renderer2D renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Crosshair Cross"), crosshairColor);
+			AttachCopy(crosshairCross, renderer);
+		}
+
+		//crosshair bars
+		for (int i = 0; i < 4; i++) {
+			//create an entity
+			crosshairHoriLines.push_back(std::pair(CreateEntity(), 1.0f));
+
+			//make a transform for it
+			TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f), glm::vec3(40.0f * crosshairScale, 40.0f * crosshairScale, 1.0f));
+			if (i == 0) {
+				Trans.SetPos(glm::vec3(0.0f, -22.5f, 2.0f));
+				Trans.SetScale(Trans.GetScale() * glm::vec3(0.8f, 1.0f, 1.0f));
+			}
+			if (i == 1) {
+				Trans.SetPos(glm::vec3(0.0f, -45.0f, 2.0f));
+				Trans.SetScale(Trans.GetScale() * glm::vec3(0.6f, 1.0f, 1.0f));
+			}
+			if (i == 2) {
+				Trans.SetPos(glm::vec3(0.0f, -67.5f, 2.0f));
+				Trans.SetScale(Trans.GetScale() * glm::vec3(0.4f, 1.0f, 1.0f));
+			}
+			if (i == 3) {
+				Trans.SetPos(glm::vec3(0.0f, -90.0f, 2.0f));
+				Trans.SetScale(Trans.GetScale() * glm::vec3(0.2f, 1.0f, 1.0f));
+			}
+
+			AttachCopy(crosshairHoriLines[crosshairHoriLines.size() - 1].first, Trans);
+
+			//make a 2D renderer for it
+			TTN_Renderer2D renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Crosshair Hori Line"), crosshairColor);
+			AttachCopy(crosshairHoriLines[crosshairHoriLines.size() - 1].first, renderer);
+		}
+
+		//crosshair vertical bar
+		{
+			crosshairVertLine = CreateEntity();
+
+			//make a transform for it
+			TTN_Transform Trans = TTN_Transform(glm::vec3(0.0f, -56.25, 2.5f), glm::vec3(0.0f), glm::vec3(60.0f * crosshairScale, 75.0f, 1.0f));
+			AttachCopy(crosshairVertLine, Trans);
+
+			//make a 2D renderer for it
+			TTN_Renderer2D renderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("Crosshair Vert Line"), crosshairColor);
+			AttachCopy(crosshairVertLine, renderer);
+		}
+	}
+	
 	//score
 	{
 		//create an entity in the scene for the logo
@@ -432,19 +444,19 @@ void GameUI::InitScene()
 	}
 
 	//background of shop
-	{
-		//create an entity in the scene for the background
-		background = CreateEntity();
+	//{
+	//	//create an entity in the scene for the background
+	//	background = CreateEntity();
 
-		//create a transform for the background, placing it in the center of the screen, covering the whole thing
-		TTN_Transform bgTrans = TTN_Transform(glm::vec3(1920.0f, 0.0f, 0.20f), glm::vec3(0.0f), glm::vec3(1920.0f, 1080.0f, 1.0f));
-		AttachCopy(background, bgTrans);
+	//	//create a transform for the background, placing it in the center of the screen, covering the whole thing
+	//	TTN_Transform bgTrans = TTN_Transform(glm::vec3(1920.0f, 0.0f, 0.20f), glm::vec3(0.0f), glm::vec3(1920.0f, 1080.0f, 1.0f));
+	//	AttachCopy(background, bgTrans);
 
-		//create a sprite renderer for the background
-		TTN_Renderer2D bgRenderer2D = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("BG"));
-		bgRenderer2D.SetColor(glm::vec4(0.0f));
-		AttachCopy(background, bgRenderer2D);
-	}
+	//	//create a sprite renderer for the background
+	//	TTN_Renderer2D bgRenderer2D = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("BG"));
+	//	bgRenderer2D.SetColor(glm::vec4(0.0f));
+	//	AttachCopy(background, bgRenderer2D);
+	//}
 
 	//shop sprite
 	{
@@ -571,6 +583,7 @@ void GameUI::RestartData()
 	lerpTotalTime = 4.0f;
 	lerpTime2 = 10.0f;
 	lerpTotalTime2 = 4.0f;
+	m_arcade = false;
 }
 
 void GameUI::Update(float deltaTime)
@@ -822,7 +835,7 @@ void GameUI::Update(float deltaTime)
 			std::abs(Get<TTN_Transform>(completeText).GetScale().x), 0.0f, 0.0f));
 
 		//when the text leaves, opens shop and resets all shop based power ups
-		if ((firstNumTrans.GetGlobalPos().x >= -299.9f && firstNumTrans.GetGlobalPos().x <= -199.f) && !shopOnce && (m_currentWave != lastWave)) {
+		if ((firstNumTrans.GetGlobalPos().x >= -299.9f && firstNumTrans.GetGlobalPos().x <= -199.f) && !shopOnce && (m_currentWave != lastWave || m_arcade)) {
 			shouldShop = true;
 			shopOnce = true;
 			cannonPower = false;
@@ -850,7 +863,6 @@ void GameUI::Update(float deltaTime)
 		//	std::cout << "  wave tracking " << std::endl;
 	}
 
-	TTN_Transform& trans = Get<TTN_Transform>(background);
 
 	/*std::cout << waveTracker << "  wave " << std::endl;
 	std::cout << m_currentWave << " curretn " << std::endl;*/
@@ -859,7 +871,7 @@ void GameUI::Update(float deltaTime)
 
 	//if wave complete has lerped away and shouldshop bool is true
 	if (shouldShop) {
-		TTN_Transform& trans = Get<TTN_Transform>(background);
+		//TTN_Transform& trans = Get<TTN_Transform>(background);
 		TTN_Transform& Shoptrans = Get<TTN_Transform>(shop);
 		TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);
 		TTN_Transform& buttonTransCannon = Get<TTN_Transform>(buttonCannon);
@@ -876,12 +888,12 @@ void GameUI::Update(float deltaTime)
 		//if the shop has lerped in
 		if (shopping) {
 			lerpTime = 0.0f;
-			trans.SetPos(glm::vec3(0.0f, 0.0f, 0.20f));
+			//trans.SetPos(glm::vec3(0.0f, 0.0f, 0.20f));
 			//buttonTrans.SetPos(glm::vec3(510.0f, 200.0f, 0.10f));
 			//buttonTransAbility.SetPos(glm::vec3(-425.0f, -200.0f, 0.10f));
 		}
 
-		if ((trans.GetGlobalPos().x >= -10.f && trans.GetGlobalPos().x <= 10.f || trans.GetGlobalPos().x <= 0.f) && !shopping) { // if shop background reaches the end of the screen
+		if ((Shoptrans.GetGlobalPos().x >= -10.f && Shoptrans.GetGlobalPos().x <= 10.f || Shoptrans.GetGlobalPos().x <= 0.f) && !shopping) { // if shop background reaches the end of the screen
 			shopping = true;
 			//std::cout << glm::to_string(Shoptrans.GetPos()) << "  lsss " << std::endl;
 			//std::cout << trans.GetGlobalPos().x << " LLL LLLLLLLLLLL" << std::endl;
@@ -918,7 +930,7 @@ void GameUI::Update(float deltaTime)
 			//std::cout << glm::to_string(buttonTransAbility.GetPos()) << "  LLL " << std::endl;
 
 			//shop hud lerp
-			Shoptrans.SetPos(centerPosShop - glm::vec3(0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+			Shoptrans.SetPos(centerPosShop - glm::vec3(0.5f * 1920.f, 0.0f, 0.0f));
 
 			//continue button lerping
 			if (buttonTransContinue.GetPos() == glm::vec3(0.0f, -365.0f, 0.10f)) {
@@ -958,7 +970,7 @@ void GameUI::Update(float deltaTime)
 			else
 				buttonTransUpgrade.SetPos(centerPosUpgradeButton - glm::vec3(0.5f * std::abs(buttonTransUpgrade.GetScale().x), 0.0f, 0.0f));
 
-			trans.SetPos(centerPos - glm::vec3(0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+			//trans.SetPos(centerPos - glm::vec3(0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
 			std::cout << glm::to_string(buttonTransUpgrade.GetPos()) << std::endl;
 			//std::cout << glm::to_string(buttonTrans.GetPos()) << std::endl;
 			//std::cout << glm::to_string(buttonTransContinue.GetPos()) << std::endl;
@@ -968,7 +980,7 @@ void GameUI::Update(float deltaTime)
 
 	//put the sprites/textures back to original position and color
 	if (!shouldShop && lerpAway) {
-		TTN_Transform& trans = Get<TTN_Transform>(background);
+		//TTN_Transform& trans = Get<TTN_Transform>(background);
 		TTN_Transform& Shoptrans = Get<TTN_Transform>(shop);
 		TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);
 		TTN_Transform& buttonTransCannon = Get<TTN_Transform>(buttonCannon);
@@ -982,7 +994,7 @@ void GameUI::Update(float deltaTime)
 		}
 		float t = waveCompleteLerpParamter(lerpTime2 / lerpTotalTime2);
 
-		glm::vec3 centerPos = TTN_Interpolation::Lerp(glm::vec3(0.0f, 0.0f, 0.20f), glm::vec3(-3840.0f, 0.0f, 0.20f), t);//3840
+		//glm::vec3 centerPos = TTN_Interpolation::Lerp(glm::vec3(0.0f, 0.0f, 0.20f), glm::vec3(-3840.0f, 0.0f, 0.20f), t);//3840
 		glm::vec3 centerPosShop = TTN_Interpolation::Lerp(glm::vec3(0.0f, 0.0f, 0.15f), glm::vec3(-3840.0f, 0.0f, 0.15f), t);
 		glm::vec3 centerPosButton = TTN_Interpolation::Lerp(glm::vec3(425.0f, 160.0f, 0.1f), glm::vec3(-3415.0f, 160.0f, 0.1f), t);
 		glm::vec3 centerPosCannonButton = TTN_Interpolation::Lerp(glm::vec3(425.0f, -200.0f, 0.1f), glm::vec3(-3415.0f, -200.0f, 0.1f), t);
@@ -990,7 +1002,7 @@ void GameUI::Update(float deltaTime)
 		glm::vec3 centerPosUpgradeButton = TTN_Interpolation::Lerp(glm::vec3(-425.0f, 160.0f, 0.1f), glm::vec3(-4265.0f, 160.0f, 0.1f), t);
 		glm::vec3 centerPosContinue = TTN_Interpolation::Lerp(glm::vec3(0.0f, -365.0f, 0.1f), glm::vec3(-3840.0f, -365.0f, 0.1f), t);
 
-		std::cout << glm::to_string(trans.GetPos()) << "  LLL " << std::endl;
+		std::cout << glm::to_string(Shoptrans.GetPos()) << "  LLL " << std::endl;
 
 		//shop hud lerp
 		Shoptrans.SetPos(centerPosShop);
@@ -1011,13 +1023,12 @@ void GameUI::Update(float deltaTime)
 		buttonTransUpgrade.SetPos(centerPosUpgradeButton);
 
 		//background lerping
-		trans.SetPos(centerPos);
+		//trans.SetPos(centerPos);
 
-		if (trans.GetGlobalPos().x < -1900.f)
+		if (Shoptrans.GetGlobalPos().x < -1900.f)
 			lerpAway = false;
 
 		if (!lerpAway) {
-			trans.SetPos(glm::vec3(1920.0f, 0.0f, 0.20f));
 			Shoptrans.SetPos(glm::vec3(1920.0f, 0.0f, 0.15f));
 			buttonTrans.SetPos(glm::vec3(1270.0f, 160.0f, 0.10f));
 			buttonTransCannon.SetPos(glm::vec3(1270.0f, -200.0f, 0.10f));

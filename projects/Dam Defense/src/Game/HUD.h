@@ -43,6 +43,7 @@ public:
 	void SetBirdBombCoolDownTime(float cooldownRemaining) { birdBombCoolDownTime = cooldownRemaining; }
 	void SetBirdBombMaxCoolDown(float cooldown) { birdBombMaxCoolDownTime = cooldown; }
 	void SetBirdBombRealCoolDown(float realCoolDownTime) { birdBombRealCoolDownTime = realCoolDownTime; }
+	void SetArcade(bool arcade) { m_arcade = arcade; }
 	//getters
 	unsigned GetScore() { return m_score; }
 	float GetDamHealth() { return m_DamHealth; }
@@ -82,7 +83,6 @@ private:
 #pragma region ENTITES AND STUFF
 	//entities
 	entt::entity cam;
-	entt::entity background;
 
 	//healthbar
 	entt::entity healthBar;
@@ -141,6 +141,7 @@ private:
 	entt::entity buttonUpgrade;
 	entt::entity shop;
 	entt::entity buttonContinue;
+	//entt::entity background;
 
 	//assets
 	TTN_Texture2D::st2dptr textureScore;
@@ -156,6 +157,8 @@ private:
 	TTN_Texture2D::st2dptr textureContinue1;
 	TTN_Texture2D::st2dptr textureContinue2;
 
+	//arcade mode
+	bool m_arcade;
 	//dam health
 	float m_DamHealth;
 	//progess

@@ -229,7 +229,7 @@ void Game::PostRender()
 		shaderProgramWater->SetUniform("u_numOfWaves", waveNums);
 		shaderProgramWater->SetUniform("u_speed", speed);
 
-		float amplitudes[16]; 
+		float amplitudes[16];
 		float freqs[16];
 		glm::vec3 directions[16];
 
@@ -2191,7 +2191,7 @@ void Game::ImGui()
 
 	if (ImGui::CollapsingHeader("Directional Light Controls")) {
 		TTN_DirectionalLight tempSun = illBuffer->GetSunRef();
-		
+
 		/*glm::vec3 direction = tempSun.m_lightDirection;
 		glm::vec3 color = tempSun.m_lightColor;
 		glm::vec3 ambientColor = tempSun.m_ambientColor;
