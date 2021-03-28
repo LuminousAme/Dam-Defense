@@ -837,10 +837,6 @@ void Game::RestartData()
 	cannonBuff = false;
 	abilityCooldownBuff = false;
 	upgradeAbilities = false;
-	healCost = 50;
-	cannonCost = 100;
-	abilityCost = 150;
-	upgradeCost = 20;
 	//bools for cost reset
 	cannonScoreCost = false;
 	abilityScoreCost = false;
