@@ -5,6 +5,7 @@
 //include required features from titan
 #include "Titan/Application.h"
 #include "Titan/Utilities/Interpolation.h"
+#include "WaterManager.h"
 
 using namespace Titan;
 

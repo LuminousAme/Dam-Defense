@@ -7,6 +7,7 @@
 #include "Titan/Systems/Sound.h"
 #include "EnemyComponent.h"
 #include "BirdComponent.h"
+#include "WaterManager.h"
 
 using namespace Titan;
 
@@ -129,6 +130,8 @@ public:
 	int GetCannonCost() { return cannonCost; }
 	int GetCooldownCost() { return abilityCost; }
 	int GetUpgradeCost() { return upgradeCost; }
+
+	void SetInputDelay() { m_InputDelay = m_InputDelayTime; }
 
 	//function to restart the game reseting all the data
 	void RestartData();
@@ -291,7 +294,7 @@ protected:
 	float muzzleFlashCD = 1.50f; // time for muzzle flash
 	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
 	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
-	int m_enemiesPerWave = 1; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
+	int m_enemiesPerWave = 5; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
 
 	int m_currentWave = 0; //the current wave
 	float m_timeTilNextWave; //the timer until the next wave starts, used after a wave has ended

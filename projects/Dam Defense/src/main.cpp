@@ -13,6 +13,7 @@
 #include "Menu/GameWinMenu.h"
 #include "Menu/OptionMenu.h"
 #include "Game/HUD.h"
+#include "WaterManager.h"
 
 using namespace Titan;
 
@@ -21,8 +22,13 @@ void PrepareAssetLoading();
 
 //main function, runs the program
 int main() {
-	Logger::Init(); //initliaze otter's base logging system
-	TTN_Application::Init("Dam Defense", 1920, 1080, false); //initliaze titan's application
+	//initliaze otter's base logging system
+	Logger::Init(); 
+	//initliaze titan's application
+	TTN_Application::Init("Dam Defense", 1920, 1080, true); 
+
+	//initlize the water effect manager
+	WaterManager::Init();
 
 	//data to track loading progress
 	bool set1Loaded = false;
@@ -195,7 +201,7 @@ int main() {
 			paused->SetShouldRender(true);
 			options->SetShouldRender(false);
 		}
-		//if the menu has appeared but the player has unpaused with the esc key
+		//if the menu has appeared but the player has unpaused with the esc key	
 		else if (gameScene->GetShouldRender() && (paused->GetShouldRender() || options->GetShouldRender()) && !gameScene->GetPaused()) {
 			TTN_Application::TTN_Input::SetCursorLocked(true);
 			paused->SetShouldResume(false);
@@ -258,6 +264,7 @@ int main() {
 			options->SetShouldRender(false);
 			gameScene->SetPaused(true);
 			gameScene->SetGameIsPaused(true);
+			gameScene->SetInputDelay();
 			//gameSceneUI->SetShouldShop(false);
 			paused->SetShouldRender(false);
 			paused->SetPaused(false);
@@ -398,6 +405,9 @@ int main() {
 		//if set 1 has finished loaded, mark it as done
 		if (!set1Loaded && TTN_AssetSystem::GetSetLoaded(1) && TTN_AssetSystem::GetCurrentSet() == 1)
 			set1Loaded = true;
+
+		//update the water manage
+		if(!gameScene->GetPaused()) WaterManager::Update(TTN_Application::GetDeltaTime());
 
 		//update the scenes and render the screen
 		TTN_Application::Update();

@@ -37,6 +37,9 @@ void GameWinMenu::Update(float deltaTime)
 
 void GameWinMenu::PostRender()
 {
+	//render the scene for the water
+	WaterManager::RenderSceneForWater(GetScene(), camera, terrain, std::vector<entt::entity>(), Get<TTN_Transform>(water).GetPos());
+
 	//disable blending so the gBuffer can draw properlly
 	glDisable(GL_BLEND);
 
@@ -102,21 +105,51 @@ void GameWinMenu::PostRender()
 			glm::mat3(glm::inverse(glm::transpose(Get<TTN_Transform>(water).GetGlobal()))));
 
 		//pass in data about the water animation
+		float time = WaterManager::GetTime();
+		float steepness = WaterManager::GetSteepness();
+		int waveNums = WaterManager::GetNumberOfWaves();
+		float speed = WaterManager::GetSpeed();
+
 		shaderProgramWater->SetUniform("time", time);
-		shaderProgramWater->SetUniform("speed", waveSpeed);
-		shaderProgramWater->SetUniform("baseHeight", waveBaseHeightIncrease);
-		shaderProgramWater->SetUniform("heightMultiplier", waveHeightMultiplier);
-		shaderProgramWater->SetUniform("waveLenghtMultiplier", waveLenghtMultiplier);
+		shaderProgramWater->SetUniform("u_Q", steepness);
+		shaderProgramWater->SetUniform("u_numOfWaves", waveNums);
+		shaderProgramWater->SetUniform("u_speed", speed);
+
+		float amplitudes[16];
+		float freqs[16];
+		glm::vec3 directions[16];
+
+		for (int i = 0; i < 16; i++) {
+			if (i < WaterManager::GetNumberOfWaves()) {
+				amplitudes[i] = WaterManager::m_waveAcutalAmplitude[i];
+				freqs[i] = WaterManager::m_waveFrequency[i];
+				directions[i] = WaterManager::m_waveDirection[i];
+			}
+			else {
+				amplitudes[i] = 0.0f;
+				freqs[i] = 0.0f;
+				directions[i] = glm::vec3(0.0f);
+			}
+		}
+
+		shaderProgramWater->SetUniform("u_amplitude", amplitudes[0], 16);
+		shaderProgramWater->SetUniform("u_frequency", freqs[0], 16);
+		shaderProgramWater->SetUniform("u_direction", directions[0], 16);
 
 		//frag shader
 		//bind the textures
 		waterText->Bind(0);
+		WaterManager::BindVoronoiAsColor(1);
+		WaterManager::BindRefractionAsColor(2);
+		WaterManager::BindReflectionAsColor(3);
 
 		//send lighting from the scene
 		shaderProgramWater->SetUniform("u_UseDiffuse", (int)m_mats[0]->GetUseAlbedo());
 
 		//render the water (just use the same plane as the terrain)
 		terrainPlain->GetVAOPointer()->Render();
+
+		WaterManager::UnbindVoronoi(1);
 	}
 
 	//unbind the geometry buffer
