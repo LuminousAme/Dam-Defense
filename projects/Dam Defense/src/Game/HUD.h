@@ -83,7 +83,6 @@ private:
 #pragma region ENTITES AND STUFF
 	//entities
 	entt::entity cam;
-	entt::entity background;
 
 	//healthbar
 	entt::entity healthBar;
@@ -142,6 +141,7 @@ private:
 	entt::entity buttonUpgrade;
 	entt::entity shop;
 	entt::entity buttonContinue;
+	//entt::entity background;
 
 	//assets
 	TTN_Texture2D::st2dptr textureScore;

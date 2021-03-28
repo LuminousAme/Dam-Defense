@@ -229,7 +229,7 @@ void Game::PostRender()
 		shaderProgramWater->SetUniform("u_numOfWaves", waveNums);
 		shaderProgramWater->SetUniform("u_speed", speed);
 
-		float amplitudes[16]; 
+		float amplitudes[16];
 		float freqs[16];
 		glm::vec3 directions[16];
 
