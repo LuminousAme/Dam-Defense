@@ -25,7 +25,7 @@ int main() {
 	//initliaze otter's base logging system
 	Logger::Init(); 
 	//initliaze titan's application
-	TTN_Application::Init("Dam Defense", 1920, 1080, true); 
+	TTN_Application::Init("Dam Defense", 1920, 1080, false); 
 
 	//initlize the water effect manager
 	WaterManager::Init();

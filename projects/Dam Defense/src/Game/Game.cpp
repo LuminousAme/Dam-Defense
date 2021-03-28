@@ -140,7 +140,7 @@ void Game::Update(float deltaTime)
 	engine.Update();
 
 	//call the update on ImGui
-	//ImGui();
+	ImGui();
 
 	//get fps
 	//std::cout << "FPS: " << std::to_string(1.0f / deltaTime) << std::endl;
@@ -1950,29 +1950,32 @@ void Game::Shop(float deltaTime)
 	//faster cannon
 	if (cannonBuff) {
 		playerShootCooldown = 0.45f;
+		Get<TTN_MorphAnimator>(cannon).getAnimRefAtIndex(1).SetPlaybackSpeedFactor(1.5555555555f);
 		//std::cout << "  CD LOWWW " << std::endl;
 		if (!cannonScoreCost && m_score >= cannonCost) {
 			m_score = m_score - cannonCost;//score cost of cannon powerup
 			cannonScoreCost = true;
-			std::cout << "  CD LOWWW " << std::endl;
 		}
 	}
 
 	else {
 		playerShootCooldown = 0.7f;
+		Get<TTN_MorphAnimator>(cannon).getAnimRefAtIndex(1).SetPlaybackSpeedFactor(1.0f);
 		cannonScoreCost = false;
 	}
 
 	//if the player has lower ability cd from shop
 	if (abilityCooldownBuff) {
-		FlameTimer = FlameTimer - deltaTime;
-		BombTimer = BombTimer - deltaTime;
+		FlameThrowerCoolDown = 0.666666666f * 30.0f;
+		BirdBombCooldown = 0.666666666f * 15.0f;
 		if (!abilityScoreCost && m_score >= abilityCost) {
 			m_score = m_score - abilityCost;//score cost of ability power up
 			abilityScoreCost = true;
 		}
 	}
 	else {
+		FlameThrowerCoolDown = 30.0f;
+		BirdBombCooldown = 15.0f;
 		abilityScoreCost = false;
 	}
 
@@ -2139,10 +2142,10 @@ void Game::ImGui()
 	//ImGui::Begin("Temp Volume Control");
 	ImGui::Begin("Shop Prices Control");
 
-	ImGui::SliderInt("Heal Cost", &healCost, 10, 1000);
-	ImGui::SliderInt("Cannon Fire Rate Cost", &cannonCost, 10, 1000);
-	ImGui::SliderInt("Ability Cooldown Cost", &abilityCost, 10, 1000);
-	ImGui::SliderInt("Ability Upgrade Cost", &upgradeCost, 10, 1000);
+	ImGui::SliderInt("Heal Cost", &healCost, 50, 10000);
+	ImGui::SliderInt("Cannon Fire Rate Cost", &cannonCost, 50, 10000);
+	ImGui::SliderInt("Ability Cooldown Cost", &abilityCost, 50, 10000);
+	ImGui::SliderInt("Ability Upgrade Cost", &upgradeCost, 50, 10000);
 
 	/*ImGui::SliderInt("Master", &masterVolume, 0, 100);
 	ImGui::SliderInt("Music", &musicVolume, 0, 100);
@@ -2151,7 +2154,7 @@ void Game::ImGui()
 
 	ImGui::End();
 
-	//ImGui controller for the camera
+	/*//ImGui controller for the camera
 	ImGui::Begin("Editor");
 
 	if (ImGui::CollapsingHeader("Cannon controls")) {
@@ -2197,7 +2200,7 @@ void Game::ImGui()
 		float lightSpecularPower = tempSun.m_lightSpecularPower;
 		float minShadowBias = tempSun.m_minShadowBias;
 		float maxShadowBias = tempSun.m_maxShadowBias;
-		int pcfPasses = tempSun.m_pcfFilterSamples;*/
+		int pcfPasses = tempSun.m_pcfFilterSamples;
 		
 
 		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 0.0f)) {
@@ -2457,8 +2460,8 @@ void Game::ImGui()
 			m_bloomEffect->SetRadius(m_bloomRadius);
 		}
 	}
-
+		
 	ImGui::End(); 
-	
+	*/
 
 }
