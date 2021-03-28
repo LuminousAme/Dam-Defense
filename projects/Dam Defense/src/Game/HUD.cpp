@@ -56,6 +56,7 @@ void GameUI::InitScene()
 	cooldownCost = 150;
 	upgradeCost = 50;
 	lerpAway = false;
+	m_arcade = false;
 	//main camera
 	{
 		//create an entity in the scene for the camera
@@ -571,6 +572,7 @@ void GameUI::RestartData()
 	lerpTotalTime = 4.0f;
 	lerpTime2 = 10.0f;
 	lerpTotalTime2 = 4.0f;
+	m_arcade = false;
 }
 
 void GameUI::Update(float deltaTime)
@@ -822,7 +824,7 @@ void GameUI::Update(float deltaTime)
 			std::abs(Get<TTN_Transform>(completeText).GetScale().x), 0.0f, 0.0f));
 
 		//when the text leaves, opens shop and resets all shop based power ups
-		if ((firstNumTrans.GetGlobalPos().x >= -299.9f && firstNumTrans.GetGlobalPos().x <= -199.f) && !shopOnce && (m_currentWave != lastWave)) {
+		if ((firstNumTrans.GetGlobalPos().x >= -299.9f && firstNumTrans.GetGlobalPos().x <= -199.f) && !shopOnce && (m_currentWave != lastWave || m_arcade)) {
 			shouldShop = true;
 			shopOnce = true;
 			cannonPower = false;

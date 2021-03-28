@@ -370,6 +370,7 @@ int main() {
 			gameSceneUI->SetCooldownCost(gameScene->GetCooldownCost());
 			gameSceneUI->SetUpgradeCost(gameScene->GetUpgradeCost());
 
+			gameSceneUI->SetArcade(gameScene->GetArcade());
 			gameSceneUI->SetLastWave(gameScene->GetLastWave());
 			gameSceneUI->SetScore(gameScene->GetScore());
 			gameSceneUI->SetDamHP(gameScene->GetDamHealth());

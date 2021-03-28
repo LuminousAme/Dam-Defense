@@ -2155,7 +2155,7 @@ void Game::ImGui()
 
 	if (ImGui::CollapsingHeader("Directional Light Controls")) {
 		TTN_DirectionalLight tempSun = illBuffer->GetSunRef();
-		
+
 		/*glm::vec3 direction = tempSun.m_lightDirection;
 		glm::vec3 color = tempSun.m_lightColor;
 		glm::vec3 ambientColor = tempSun.m_ambientColor;
@@ -2165,7 +2165,6 @@ void Game::ImGui()
 		float minShadowBias = tempSun.m_minShadowBias;
 		float maxShadowBias = tempSun.m_maxShadowBias;
 		int pcfPasses = tempSun.m_pcfFilterSamples;*/
-		
 
 		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 0.0f)) {
 			SetSun(tempSun);
@@ -2425,7 +2424,5 @@ void Game::ImGui()
 		}
 	}
 
-	ImGui::End(); 
-	
-
+	ImGui::End();
 }
