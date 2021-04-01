@@ -43,7 +43,8 @@ public:
 	void SetColor1(bool lut) { color = lut; }
 
 	bool GetOff() { return acutal_Off; }
-	bool GetColor() { return acutal_color; }
+	bool GetColor() { return acutal_color; } //first color correction option
+	bool GetColor2() { return acutal_color2; }//second color correction option
 
 	void SetDiff(float d) { diff = d; }
 	float GetDiff() { return acutal_Diff; }
@@ -116,6 +117,12 @@ private:
 	// color correction button
 	entt::entity ColorBar;
 
+	//color correction border and bg
+	entt::entity ColorBarBorder2;
+	entt::entity ColorBarBg2;
+	// color correction button
+	entt::entity ColorBar2;
+
 	/// buttons /////
 	//off color correction
 	entt::entity buttonOff;
@@ -126,6 +133,7 @@ private:
 	// other colorblind/color correction
 	entt::entity buttonColor2;
 	entt::entity colorText2;
+
 
 	//color correction border and bg
 	entt::entity diffBarBorder;
@@ -191,6 +199,7 @@ private:
 	int diff;
 	bool Off;
 	bool color;
+	bool color2;
 	bool easy;
 	bool reg;
 	bool hard;
@@ -203,6 +212,8 @@ private:
 	int acutal_Diff;
 	bool acutal_Off;
 	bool acutal_color;
+	bool acutal_color2;
+
 	bool acutal_easy;
 	bool acutal_reg;
 	bool acutal_hard;

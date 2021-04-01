@@ -122,7 +122,6 @@ void EnemyComponent::Update(float deltaTime)
 		//grab a refernece to it's transform
 		auto& tBoat = m_scene->Get<TTN_Transform>(m_entityNumber);
 
-		
 		//if it was alive last frame, set the death direction
 		if (wasAliveLastFrame) {
 			deathDirection = direction;
@@ -130,7 +129,7 @@ void EnemyComponent::Update(float deltaTime)
 		}
 
 		//rotate the ship up
-		direction = glm::normalize(TTN_Interpolation::Lerp(deathDirection, glm::vec3(0.0f, 1.0f, 0.0f), 
+		direction = glm::normalize(TTN_Interpolation::Lerp(deathDirection, glm::vec3(0.0f, 1.0f, 0.0f),
 			std::clamp(TTN_Interpolation::ReMap(0.0f, timeSinking, 0.0f, 0.4f, timeSinceDeath), 0.0f, 0.2f)));
 
 		tBoat.LookAlong(direction, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -139,7 +138,6 @@ void EnemyComponent::Update(float deltaTime)
 		if (m_path < 3) tBoat.RotateRelative(glm::vec3(0.0f, 0.0f, TTN_Interpolation::Lerp(0.0f, -90.0f, TTN_Interpolation::ReMap(0.0f, timeSinking, 0.0f, 1.0f, timeSinceDeath))));
 		//right paths
 		else tBoat.RotateRelative(glm::vec3(0.0f, 0.0f, TTN_Interpolation::Lerp(0.0f, 90.0f, TTN_Interpolation::ReMap(0.0f, timeSinking, 0.0f, 1.0f, timeSinceDeath))));
-
 
 		//sink the ship
 		tBoat.SetPos(tBoat.GetPos() + glm::vec3(0.0f, (-2.0f / 10.0f) * deltaTime, 0.0f));

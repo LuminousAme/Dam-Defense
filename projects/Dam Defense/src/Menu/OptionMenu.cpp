@@ -268,18 +268,20 @@ void OptionsMenu::InitScene()
 
 	//indicator for no color correction
 	{
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 3; i++) {
 			//button border
 			{
 				//create an entity in the scene for the bar border
 				entt::entity temp = CreateEntity();
 				if (i == 0) OffBarBorder = temp;
 				else if (i == 1) ColorBarBorder = temp;
+				else if (i == 2) ColorBarBorder2 = temp;
 
 				//create a transform for the mouse sensitivity bar overlay
 				TTN_Transform buttonTrans;
 				if (i == 0) buttonTrans = TTN_Transform(glm::vec3(450.0f, 20.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
 				else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(50.0f, 20.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+				else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(-450.0f, 20.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
 				AttachCopy(temp, buttonTrans);
 
 				//create a sprite renderer for the bar overlay
@@ -293,11 +295,13 @@ void OptionsMenu::InitScene()
 				entt::entity temp = CreateEntity();
 				if (i == 0) OffBar = temp;
 				else if (i == 1) ColorBar = temp;
+				else if (i == 2) ColorBar2 = temp;
 
 				//create a transform for the off button
 				TTN_Transform buttonTrans;
 				if (i == 0) buttonTrans = TTN_Transform(glm::vec3(450.0f, 20.0f, 0.1f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
 				else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(50.0f, 20.0f, 0.1f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+				else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-450.0f, 20.0f, 0.1f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
 				AttachCopy(temp, buttonTrans);
 
 				//create a sprite renderer for the health bar
@@ -310,11 +314,13 @@ void OptionsMenu::InitScene()
 				entt::entity temp = CreateEntity();
 				if (i == 0) OffBarBg = temp;
 				else if (i == 1) ColorBarBg = temp;
+				else if (i == 2) ColorBarBg2 = temp;
 
 				//create a transform for the off button
 				TTN_Transform buttonTrans;
 				if (i == 0) buttonTrans = TTN_Transform(glm::vec3(450.0f, 20.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
 				else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(50.0f, 20.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
+				else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-450.0f, 20.0f, 0.9f), glm::vec3(0.0f), glm::vec3(249.0f * mouseScale, 239.0f * mouseScale, 1.0f));
 				AttachCopy(temp, buttonTrans);
 
 				//create a sprite renderer for the mouse bar background
@@ -326,15 +332,17 @@ void OptionsMenu::InitScene()
 	}
 
 	//actual button
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 3; i++) {
 		entt::entity temp = CreateEntity();
 		if (i == 0) buttonOff = temp;
 		else if (i == 1) buttonColor1 = temp;
+		else if (i == 2) buttonColor2 = temp;
 
 		//create a transform for the button
 		TTN_Transform buttonTrans;
 		if (i == 0) buttonTrans = TTN_Transform(glm::vec3(650.0f, 0.0f, 2.0f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
 		else if (i == 1) buttonTrans = TTN_Transform(glm::vec3(250.0, 0.0f, 2.0f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
+		else if (i == 2) buttonTrans = TTN_Transform(glm::vec3(-250.0, 0.0f, 2.0f), glm::vec3(0.0f), glm::vec3(250.0f, 150.0, 1.0f));
 		AttachCopy(temp, buttonTrans);
 
 		//create a 2D renderer for the button
@@ -620,15 +628,37 @@ void OptionsMenu::Update(float deltaTime)
 			Get<TTN_Renderer2D>(buttonColor1).SetSprite(textureButton1);
 		}
 
+		//get buttons transform
+		TTN_Transform buttonColor2Trans = Get<TTN_Transform>(buttonColor2);
+		if (mousePosWorldSpace.x < buttonColor2Trans.GetPos().x + 0.5f * abs(buttonColor2Trans.GetScale().x) &&
+			mousePosWorldSpace.x > buttonColor2Trans.GetPos().x - 0.5f * abs(buttonColor2Trans.GetScale().x) &&
+			mousePosWorldSpace.y < buttonColor2Trans.GetPos().y + 0.5f * abs(buttonColor2Trans.GetScale().y) &&
+			mousePosWorldSpace.y > buttonColor2Trans.GetPos().y - 0.5f * abs(buttonColor2Trans.GetScale().y)) {
+			Get<TTN_Renderer2D>(buttonColor2).SetSprite(textureButton2);
+		}
+		else {
+			Get<TTN_Renderer2D>(buttonColor2).SetSprite(textureButton1);
+		}
+
 		if (Off) {
 			Get<TTN_Renderer2D>(OffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 			Get<TTN_Renderer2D>(ColorBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+			Get<TTN_Renderer2D>(ColorBar2).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
 		}
 
 		if (color) {
 			Get<TTN_Renderer2D>(OffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
 			Get<TTN_Renderer2D>(ColorBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+			Get<TTN_Renderer2D>(ColorBar2).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
 		}
+
+		if (color2) {
+			Get<TTN_Renderer2D>(OffBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+			Get<TTN_Renderer2D>(ColorBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+			Get<TTN_Renderer2D>(ColorBar2).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		}
+
+
 	}
 
 	//difficulty buttons
@@ -974,10 +1004,11 @@ void OptionsMenu::MouseButtonDownChecks()
 				mousePosWorldSpace.x > buttonOffTrans.GetPos().x - 0.5f * abs(buttonOffTrans.GetScale().x) &&
 				mousePosWorldSpace.y < buttonOffTrans.GetPos().y + 0.5f * abs(buttonOffTrans.GetScale().y) &&
 				mousePosWorldSpace.y > buttonOffTrans.GetPos().y - 0.5f * abs(buttonOffTrans.GetScale().y)) {
-				\
+				
 					//if it is, turn off the colorbind modes
-					Off = true;
+				Off = true;
 				color = false;
+				color2 = false;
 			}
 
 			//get the first colorbind mode button's transform and check if it's being pressed
@@ -989,7 +1020,24 @@ void OptionsMenu::MouseButtonDownChecks()
 				//if it is, turn it on
 				color = true;
 				Off = false;
+				color2 = false;
 			}
+
+			//get the second colorbind mode button's transform and check if it's being pressed
+			TTN_Transform buttonColor2Trans = Get<TTN_Transform>(buttonColor2);
+			if (mousePosWorldSpace.x < buttonColor2Trans.GetPos().x + 0.5f * abs(buttonColor2Trans.GetScale().x) &&
+				mousePosWorldSpace.x > buttonColor2Trans.GetPos().x - 0.5f * abs(buttonColor2Trans.GetScale().x) &&
+				mousePosWorldSpace.y < buttonColor2Trans.GetPos().y + 0.5f * abs(buttonColor2Trans.GetScale().y) &&
+				mousePosWorldSpace.y > buttonColor2Trans.GetPos().y - 0.5f * abs(buttonColor2Trans.GetScale().y)) {
+				//if it is, turn it on
+				color = false;
+				Off = false;
+				color2 = true;
+			}
+
+
+
+
 		}
 
 		// difficulty buttons

@@ -140,7 +140,7 @@ void Game::Update(float deltaTime)
 	engine.Update();
 
 	//call the update on ImGui
-	//ImGui();
+	ImGui();
 
 	//get fps
 	//std::cout << "FPS: " << std::to_string(1.0f / deltaTime) << std::endl;
@@ -537,6 +537,8 @@ void Game::SetUpEntities()
 
 		//setup a mesh renderer for the cannon
 		TTN_Renderer cannonRenderer = TTN_Renderer(cannonMesh, shaderProgramAnimatedTextured, cannonMat);
+		//TTN_Material f = cannonRenderer.GetMat();
+
 		//attach that renderer to the entity
 		AttachCopy(cannon, cannonRenderer);
 
@@ -2434,7 +2436,7 @@ void Game::ImGui()
 				m_mats[i]->SetUseAlbedo(m_useTextures);
 			}
 		}
-
+		
 		//bloom controls
 		ImGui::Text("Bloom settings");
 
