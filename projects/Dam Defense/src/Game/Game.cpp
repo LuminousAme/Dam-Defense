@@ -621,27 +621,6 @@ void Game::SetUpEntities()
 		}
 	}
 
-	//entity for the smoke particle system (rather than recreating whenever we need it, we'll just make one
-	//and burst again when we need to)
-	{
-		smokePS = CreateEntity();
-
-		//setup a transfrom for the particle system
-		TTN_Transform smokePSTrans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
-		//attach that transform to the entity
-		AttachCopy(smokePS, smokePSTrans);
-
-		//setup a particle system for the particle system
-		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(5000, 0, smokeParticle, 0.0f, false);
-		ps->MakeCircleEmitter(glm::vec3(0.0f));
-		ps->VelocityReadGraphCallback(FastStart);
-		ps->ColorReadGraphCallback(SlowStart);
-		//setup a particle system component
-		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
-		//attach the particle system component to the entity
-		AttachCopy(smokePS, psComponent);
-	}
-
 	//terrain entity
 	{
 		terrain = CreateEntity();
@@ -680,9 +659,6 @@ void Game::SetUpEntities()
 //sets up any other data the game needs to store
 void Game::SetUpOtherData()
 {
-	//call the restart data function
-	RestartData();
-
 	Bombing = false;
 
 	//create the particle templates
@@ -759,6 +735,9 @@ void Game::SetUpOtherData()
 		gunParticle.SetOneStartSize(0.20f / 10.0f);
 		gunParticle.SetOneStartSpeed(10.0f / 10.0f);
 	}
+
+	//call the restart data function
+	RestartData();
 
 	glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 
@@ -853,8 +832,14 @@ void Game::RestartData()
 	m_firstWave = true;
 
 	//delete all boats in scene
-	std::vector<entt::entity>::iterator it = boats.begin();
-	while (it != boats.end()) {
+	auto enemyView = GetScene()->view<EnemyComponent>();
+	std::vector<entt::entity> enemies = std::vector<entt::entity>();
+	for (auto entity : enemyView) {
+		enemies.push_back(entity);
+	}
+
+	std::vector<entt::entity>::iterator it = enemies.begin();
+	while (it != enemies.end()) {
 		//add a countdown until it deletes
 		TTN_DeleteCountDown countdown = TTN_DeleteCountDown(0.01f);
 		TTN_DeleteCountDown cannonCountdown = TTN_DeleteCountDown(0.008f);
@@ -864,19 +849,13 @@ void Game::RestartData()
 		//mark it as dead
 		Get<EnemyComponent>(*it).SetAlive(false);
 
-		//and remove it from the list of boats as it will be deleted soon
-		std::vector<entt::entity>::iterator itt = enemyCannons.begin();
-		while (itt != enemyCannons.end()) {
-			if (*itt == Get<EnemyComponent>(*it).GetCannonEntity()) {
-				itt = enemyCannons.erase(itt);
-			}
-			else
-				itt++;
-		}
-
-		it = boats.erase(it);
+		it = enemies.erase(it);
 	}
 
+	boats.clear();
+	enemyCannons.clear();
+
+	//delete all of the birds in the scene
 	std::vector<entt::entity>::iterator itt = birds.begin();
 	while (itt != birds.end()) {
 		//delete the bird
@@ -886,6 +865,44 @@ void Game::RestartData()
 
 	for (int i = 0; i < birdNum; i++)
 		MakeABird();
+
+	//delete all of the particle systems in the scene
+	auto particleView = GetScene()->view<TTN_ParticeSystemComponent>();
+	std::vector<entt::entity> particles = std::vector<entt::entity>();
+	for (auto entity : particleView) {
+		particles.push_back(entity);
+	}
+
+	std::vector<entt::entity>::iterator ittt = particles.begin();
+	while (ittt != particles.end()) {
+		//delete the particle system
+		DeleteEntity(*ittt);
+		itt = particles.erase(ittt);
+	}
+
+	flames.clear();
+
+	//entity for the smoke particle system (rather than recreating whenever we need it, we'll just make one
+	//and burst again when we need to)
+	{
+		smokePS = CreateEntity();
+
+		//setup a transfrom for the particle system
+		TTN_Transform smokePSTrans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
+		//attach that transform to the entity
+		AttachCopy(smokePS, smokePSTrans);
+
+		//setup a particle system for the particle system
+		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(5000, 0, smokeParticle, 0.0f, false);
+		ps->MakeCircleEmitter(glm::vec3(0.0f));
+		ps->VelocityReadGraphCallback(FastStart);
+		ps->ColorReadGraphCallback(SlowStart);
+		//setup a particle system component
+		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
+		//attach the particle system component to the entity
+		AttachCopy(smokePS, psComponent);
+	}
+
 
 	//sets the buses to not be paused
 	engine.GetBus("Music").SetPaused(false);
