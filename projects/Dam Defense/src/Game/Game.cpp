@@ -623,27 +623,6 @@ void Game::SetUpEntities()
 		}
 	}
 
-	//entity for the smoke particle system (rather than recreating whenever we need it, we'll just make one
-	//and burst again when we need to)
-	{
-		smokePS = CreateEntity();
-
-		//setup a transfrom for the particle system
-		TTN_Transform smokePSTrans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
-		//attach that transform to the entity
-		AttachCopy(smokePS, smokePSTrans);
-
-		//setup a particle system for the particle system
-		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(5000, 0, smokeParticle, 0.0f, false);
-		ps->MakeCircleEmitter(glm::vec3(0.0f));
-		ps->VelocityReadGraphCallback(FastStart);
-		ps->ColorReadGraphCallback(SlowStart);
-		//setup a particle system component
-		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
-		//attach the particle system component to the entity
-		AttachCopy(smokePS, psComponent);
-	}
-
 	//terrain entity
 	{
 		terrain = CreateEntity();
@@ -682,9 +661,6 @@ void Game::SetUpEntities()
 //sets up any other data the game needs to store
 void Game::SetUpOtherData()
 {
-	//call the restart data function
-	RestartData();
-
 	Bombing = false;
 
 	//create the particle templates
@@ -761,6 +737,9 @@ void Game::SetUpOtherData()
 		gunParticle.SetOneStartSize(0.20f / 10.0f);
 		gunParticle.SetOneStartSpeed(10.0f / 10.0f);
 	}
+
+	//call the restart data function
+	RestartData();
 
 	glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 
@@ -839,10 +818,6 @@ void Game::RestartData()
 	cannonBuff = false;
 	abilityCooldownBuff = false;
 	upgradeAbilities = false;
-	healCost = 50;
-	cannonCost = 100;
-	abilityCost = 150;
-	upgradeCost = 20;
 	//bools for cost reset
 	cannonScoreCost = false;
 	abilityScoreCost = false;
@@ -859,8 +834,14 @@ void Game::RestartData()
 	m_firstWave = true;
 
 	//delete all boats in scene
-	std::vector<entt::entity>::iterator it = boats.begin();
-	while (it != boats.end()) {
+	auto enemyView = GetScene()->view<EnemyComponent>();
+	std::vector<entt::entity> enemies = std::vector<entt::entity>();
+	for (auto entity : enemyView) {
+		enemies.push_back(entity);
+	}
+
+	std::vector<entt::entity>::iterator it = enemies.begin();
+	while (it != enemies.end()) {
 		//add a countdown until it deletes
 		TTN_DeleteCountDown countdown = TTN_DeleteCountDown(0.01f);
 		TTN_DeleteCountDown cannonCountdown = TTN_DeleteCountDown(0.008f);
@@ -870,19 +851,13 @@ void Game::RestartData()
 		//mark it as dead
 		Get<EnemyComponent>(*it).SetAlive(false);
 
-		//and remove it from the list of boats as it will be deleted soon
-		std::vector<entt::entity>::iterator itt = enemyCannons.begin();
-		while (itt != enemyCannons.end()) {
-			if (*itt == Get<EnemyComponent>(*it).GetCannonEntity()) {
-				itt = enemyCannons.erase(itt);
-			}
-			else
-				itt++;
-		}
-
-		it = boats.erase(it);
+		it = enemies.erase(it);
 	}
 
+	boats.clear();
+	enemyCannons.clear();
+
+	//delete all of the birds in the scene
 	std::vector<entt::entity>::iterator itt = birds.begin();
 	while (itt != birds.end()) {
 		//delete the bird
@@ -892,6 +867,44 @@ void Game::RestartData()
 
 	for (int i = 0; i < birdNum; i++)
 		MakeABird();
+
+	//delete all of the particle systems in the scene
+	auto particleView = GetScene()->view<TTN_ParticeSystemComponent>();
+	std::vector<entt::entity> particles = std::vector<entt::entity>();
+	for (auto entity : particleView) {
+		particles.push_back(entity);
+	}
+
+	std::vector<entt::entity>::iterator ittt = particles.begin();
+	while (ittt != particles.end()) {
+		//delete the particle system
+		DeleteEntity(*ittt);
+		itt = particles.erase(ittt);
+	}
+
+	flames.clear();
+
+	//entity for the smoke particle system (rather than recreating whenever we need it, we'll just make one
+	//and burst again when we need to)
+	{
+		smokePS = CreateEntity();
+
+		//setup a transfrom for the particle system
+		TTN_Transform smokePSTrans = TTN_Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f / 10.0f));
+		//attach that transform to the entity
+		AttachCopy(smokePS, smokePSTrans);
+
+		//setup a particle system for the particle system
+		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(5000, 0, smokeParticle, 0.0f, false);
+		ps->MakeCircleEmitter(glm::vec3(0.0f));
+		ps->VelocityReadGraphCallback(FastStart);
+		ps->ColorReadGraphCallback(SlowStart);
+		//setup a particle system component
+		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
+		//attach the particle system component to the entity
+		AttachCopy(smokePS, psComponent);
+	}
+
 
 	//sets the buses to not be paused
 	engine.GetBus("Music").SetPaused(false);
@@ -1952,29 +1965,32 @@ void Game::Shop(float deltaTime)
 	//faster cannon
 	if (cannonBuff) {
 		playerShootCooldown = 0.45f;
+		Get<TTN_MorphAnimator>(cannon).getAnimRefAtIndex(1).SetPlaybackSpeedFactor(1.5555555555f);
 		//std::cout << "  CD LOWWW " << std::endl;
 		if (!cannonScoreCost && m_score >= cannonCost) {
 			m_score = m_score - cannonCost;//score cost of cannon powerup
 			cannonScoreCost = true;
-			std::cout << "  CD LOWWW " << std::endl;
 		}
 	}
 
 	else {
 		playerShootCooldown = 0.7f;
+		Get<TTN_MorphAnimator>(cannon).getAnimRefAtIndex(1).SetPlaybackSpeedFactor(1.0f);
 		cannonScoreCost = false;
 	}
 
 	//if the player has lower ability cd from shop
 	if (abilityCooldownBuff) {
-		FlameTimer = FlameTimer - deltaTime;
-		BombTimer = BombTimer - deltaTime;
+		FlameThrowerCoolDown = 0.666666666f * 30.0f;
+		BirdBombCooldown = 0.666666666f * 15.0f;
 		if (!abilityScoreCost && m_score >= abilityCost) {
 			m_score = m_score - abilityCost;//score cost of ability power up
 			abilityScoreCost = true;
 		}
 	}
 	else {
+		FlameThrowerCoolDown = 30.0f;
+		BirdBombCooldown = 15.0f;
 		abilityScoreCost = false;
 	}
 
@@ -2141,10 +2157,10 @@ void Game::ImGui()
 	//ImGui::Begin("Temp Volume Control");
 	ImGui::Begin("Shop Prices Control");
 
-	ImGui::SliderInt("Heal Cost", &healCost, 10, 1000);
-	ImGui::SliderInt("Cannon Fire Rate Cost", &cannonCost, 10, 1000);
-	ImGui::SliderInt("Ability Cooldown Cost", &abilityCost, 10, 1000);
-	ImGui::SliderInt("Ability Upgrade Cost", &upgradeCost, 10, 1000);
+	ImGui::SliderInt("Heal Cost", &healCost, 50, 10000);
+	ImGui::SliderInt("Cannon Fire Rate Cost", &cannonCost, 50, 10000);
+	ImGui::SliderInt("Ability Cooldown Cost", &abilityCost, 50, 10000);
+	ImGui::SliderInt("Ability Upgrade Cost", &upgradeCost, 50, 10000);
 
 	/*ImGui::SliderInt("Master", &masterVolume, 0, 100);
 	ImGui::SliderInt("Music", &musicVolume, 0, 100);
@@ -2153,7 +2169,7 @@ void Game::ImGui()
 
 	ImGui::End();
 
-	//ImGui controller for the camera
+	/*//ImGui controller for the camera
 	ImGui::Begin("Editor");
 
 	if (ImGui::CollapsingHeader("Cannon controls")) {
@@ -2199,7 +2215,8 @@ void Game::ImGui()
 		float lightSpecularPower = tempSun.m_lightSpecularPower;
 		float minShadowBias = tempSun.m_minShadowBias;
 		float maxShadowBias = tempSun.m_maxShadowBias;
-		int pcfPasses = tempSun.m_pcfFilterSamples;*/
+		int pcfPasses = tempSun.m_pcfFilterSamples;
+		
 
 		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 0.0f)) {
 			SetSun(tempSun);
@@ -2458,6 +2475,8 @@ void Game::ImGui()
 			m_bloomEffect->SetRadius(m_bloomRadius);
 		}
 	}
+		
+	ImGui::End(); 
+	*/
 
-	ImGui::End();
 }
