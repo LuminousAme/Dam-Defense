@@ -657,8 +657,6 @@ void OptionsMenu::Update(float deltaTime)
 			Get<TTN_Renderer2D>(ColorBar).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
 			Get<TTN_Renderer2D>(ColorBar2).SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 		}
-
-
 	}
 
 	//difficulty buttons
@@ -1004,8 +1002,7 @@ void OptionsMenu::MouseButtonDownChecks()
 				mousePosWorldSpace.x > buttonOffTrans.GetPos().x - 0.5f * abs(buttonOffTrans.GetScale().x) &&
 				mousePosWorldSpace.y < buttonOffTrans.GetPos().y + 0.5f * abs(buttonOffTrans.GetScale().y) &&
 				mousePosWorldSpace.y > buttonOffTrans.GetPos().y - 0.5f * abs(buttonOffTrans.GetScale().y)) {
-				
-					//if it is, turn off the colorbind modes
+				//if it is, turn off the colorbind modes
 				Off = true;
 				color = false;
 				color2 = false;
@@ -1034,10 +1031,6 @@ void OptionsMenu::MouseButtonDownChecks()
 				Off = false;
 				color2 = true;
 			}
-
-
-
-
 		}
 
 		// difficulty buttons

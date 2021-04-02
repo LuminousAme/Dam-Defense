@@ -11,10 +11,10 @@ namespace Titan {
 	class TTN_BloomEffect : public TTN_PostEffect
 	{
 	public:
-		//defines a special easier to use name for shared(smart) pointers to the class 
+		//defines a special easier to use name for shared(smart) pointers to the class
 		typedef std::shared_ptr<TTN_BloomEffect> sbloomptr;
 
-		//creates and returns a shared(smart) pointer to the class 
+		//creates and returns a shared(smart) pointer to the class
 		static inline sbloomptr Create() {
 			return std::make_shared<TTN_BloomEffect>();
 		}
@@ -35,13 +35,16 @@ namespace Titan {
 		int GetNumOfPasses() { return m_numOfPasses; }
 		unsigned GetBlurDownScale() { return m_blurBufferDivisor; }
 		float* GetWeights() { return m_weights; }
+		float* GetSamples() { return m_samples; }
+		float GetStrength() { return m_strength; }
 		float GetRadius() { return m_radius; }
 		//Setters
 		void SetThreshold(float threshold) { m_threshold = threshold; }
 		void SetNumOfPasses(int numOfPasses) { m_numOfPasses = numOfPasses; }
 		void SetBlurDownScale(unsigned downscale);
-		void SetWeights(float weights[5]) { for(int i = 0; i < 5; i++) m_weights[i] = weights[i]; }
+		void SetWeights(float weights[5]) { for (int i = 0; i < 5; i++) m_weights[i] = weights[i]; }
 		void SetRadius(float radius) { m_radius = radius; }
+		void SetStrength(float strength) { m_strength = strength; }
 		
 	private:
 		//the threshold for how much of the bright colours to extract
@@ -50,6 +53,11 @@ namespace Titan {
 		int m_numOfPasses = 5;
 		//the weights for the operation, the user can set these if they want to give them more fine control
 		float m_weights[5] = { 0.22f, 0.19f, 0.12, 0.05, 0.03 };
+
+		//smaples for radial blur
+		float m_samples[10] = { -0.08f,-0.05f, -0.03f, -0.02f, -0.1f, 0.1f, 0.02f, 0.03f, 0.05f, 0.08f };
+		//strength of radial blur
+		float m_strength = 2.8f;
 
 		//the scale by which the blur framebuffers should be reduced to save on memory
 		unsigned m_blurBufferDivisor = 4.0;

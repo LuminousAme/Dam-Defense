@@ -879,11 +879,11 @@ void GameUI::Update(float deltaTime)
 		TTN_Transform& buttonTransContinue = Get<TTN_Transform>(buttonContinue);
 
 		//update time
-		if (!m_paused)
-			lerpTime += deltaTime;
+	/*	if (!m_paused)*/
+		lerpTime += deltaTime;
 
-		else
-			lerpTime = lerpTime;
+		/*	else
+				lerpTime = lerpTime;*/
 
 		if (m_waveProgress == 1.0f && lerpTime > 5.0f) {
 			lerpTime = 0.0f;
@@ -983,7 +983,7 @@ void GameUI::Update(float deltaTime)
 	}
 
 	//put the sprites/textures back to original position and color
-	if (!shouldShop && lerpAway && !m_paused) {
+	if (!shouldShop && lerpAway ) {
 		//TTN_Transform& trans = Get<TTN_Transform>(background);
 		TTN_Transform& Shoptrans = Get<TTN_Transform>(shop);
 		TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);

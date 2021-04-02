@@ -11,6 +11,8 @@ layout(binding = 0) uniform sampler2D s_SourceImage;
 //and a uniform for how much to step before reaching the next fragment (may skip fragments) 
 uniform float u_Step; 
 
+//helpful : http://blog.trsquarelab.com/2015/12/a-simple-box-blur-implementation-in.html 
+// http://amritamaz.net/blog/understanding-box-blur 
 
 void main() {
 	vec4 result = vec4(0.0);
@@ -33,7 +35,7 @@ void main() {
 	result += texture(s_SourceImage, vec2(inUV.x + 4.0 * u_Step, inUV.y))  ;
 	result += texture(s_SourceImage, vec2(inUV.x - 4.0 * u_Step, inUV.y))  ;
 
-		//divide by 9 to get the average
+	//divide by 9 to get the average
 	result = result / 9.f;
 
 	//save the result and pass it on 
