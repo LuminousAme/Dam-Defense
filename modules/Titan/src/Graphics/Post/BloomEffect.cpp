@@ -59,7 +59,8 @@ namespace Titan {
 		m_shaders.push_back(TTN_Shader::Create());
 		//load in the shader
 		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_passthrough_vert.glsl", GL_VERTEX_SHADER);
-		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_gaussian_horizontal_frag.glsl", GL_FRAGMENT_SHADER);
+		//m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_box_horizontal_frag.glsl", GL_FRAGMENT_SHADER);
+		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_radial_blur_frag.glsl", GL_FRAGMENT_SHADER);
 		m_shaders[index]->Link();
 		index++;
 
@@ -67,7 +68,8 @@ namespace Titan {
 		m_shaders.push_back(TTN_Shader::Create());
 		//load in the shader
 		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_passthrough_vert.glsl", GL_VERTEX_SHADER);
-		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_gaussian_vertical_frag.glsl", GL_FRAGMENT_SHADER);
+		//m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_box_vertical_frag.glsl", GL_FRAGMENT_SHADER);
+		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_passthrough_frag.glsl", GL_FRAGMENT_SHADER);
 		m_shaders[index]->Link();
 
 		//init the original
@@ -78,7 +80,6 @@ namespace Titan {
 	void TTN_BloomEffect::ApplyEffect(TTN_PostEffect::spostptr buffer)
 	{
 		//do the extraction pass taking the brightness from the previous effect
-
 		//bind the shader
 		BindShader(0);
 		//bind the previous effect as the color
@@ -125,6 +126,7 @@ namespace Titan {
 			UnbindShader();
 		}
 
+		
 		//composition pass
 
 		//bind the shader

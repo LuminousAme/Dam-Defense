@@ -12,6 +12,7 @@ void main()
 { 
 	//just pass on the uvs
 	outUV = inUV;
+
 	//and keep the fullscreen quad as is
 	gl_Position = vec4(inPosition, 1.0);
 }

@@ -537,6 +537,8 @@ void Game::SetUpEntities()
 
 		//setup a mesh renderer for the cannon
 		TTN_Renderer cannonRenderer = TTN_Renderer(cannonMesh, shaderProgramAnimatedTextured, cannonMat);
+		//TTN_Material f = cannonRenderer.GetMat();
+
 		//attach that renderer to the entity
 		AttachCopy(cannon, cannonRenderer);
 
@@ -2167,7 +2169,7 @@ void Game::ImGui()
 
 	ImGui::End();
 
-	/*//ImGui controller for the camera
+	//ImGui controller for the camera
 	ImGui::Begin("Editor");
 
 	if (ImGui::CollapsingHeader("Cannon controls")) {
@@ -2213,7 +2215,7 @@ void Game::ImGui()
 		float lightSpecularPower = tempSun.m_lightSpecularPower;
 		float minShadowBias = tempSun.m_minShadowBias;
 		float maxShadowBias = tempSun.m_maxShadowBias;
-		int pcfPasses = tempSun.m_pcfFilterSamples;
+		int pcfPasses = tempSun.m_pcfFilterSamples;*/
 		
 
 		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 0.0f)) {
@@ -2451,7 +2453,7 @@ void Game::ImGui()
 				m_mats[i]->SetUseAlbedo(m_useTextures);
 			}
 		}
-
+		
 		//bloom controls
 		ImGui::Text("Bloom settings");
 
@@ -2475,6 +2477,6 @@ void Game::ImGui()
 	}
 		
 	ImGui::End(); 
-	*/
+	
 
 }
