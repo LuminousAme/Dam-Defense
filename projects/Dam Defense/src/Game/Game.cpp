@@ -2470,6 +2470,18 @@ void Game::ImGui()
 		if (ImGui::SliderFloat("radius", &m_bloomRadius, 0.1f, 20.0f)) {
 			m_bloomEffect->SetRadius(m_bloomRadius);
 		}
+
+		if (ImGui::Button("Make Gaussian Blur")) {
+			m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::GAUSSIAN);
+		}
+
+		if (ImGui::Button("Make Box Blur")) {
+			m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::BOX);
+		}
+
+		if (ImGui::Button("Make Radial Blur")) {
+			m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::RADIAL);
+		}
 	}
 		
 	ImGui::End(); 

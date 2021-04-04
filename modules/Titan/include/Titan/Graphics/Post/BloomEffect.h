@@ -7,6 +7,12 @@
 #include "Titan/Graphics/Post/PostEffect.h"
 
 namespace Titan {
+	enum class TTN_BloomBlurModes {
+		GAUSSIAN,
+		BOX,
+		RADIAL
+	};
+
 	//class for color correction post processing effects
 	class TTN_BloomEffect : public TTN_PostEffect
 	{
@@ -38,6 +44,7 @@ namespace Titan {
 		float* GetSamples() { return m_samples; }
 		float GetStrength() { return m_strength; }
 		float GetRadius() { return m_radius; }
+		TTN_BloomBlurModes GetBlurMode() { return m_blurMode; }
 		//Setters
 		void SetThreshold(float threshold) { m_threshold = threshold; }
 		void SetNumOfPasses(int numOfPasses) { m_numOfPasses = numOfPasses; }
@@ -45,6 +52,7 @@ namespace Titan {
 		void SetWeights(float weights[5]) { for (int i = 0; i < 5; i++) m_weights[i] = weights[i]; }
 		void SetRadius(float radius) { m_radius = radius; }
 		void SetStrength(float strength) { m_strength = strength; }
+		void SetBlurMode(TTN_BloomBlurModes blurMode) { m_blurMode = blurMode; }
 		
 	private:
 		//the threshold for how much of the bright colours to extract
@@ -63,5 +71,8 @@ namespace Titan {
 		unsigned m_blurBufferDivisor = 4.0;
 		//the radius of the effect
 		float m_radius = 1.0f;
+
+		//the blur mode
+		TTN_BloomBlurModes m_blurMode = TTN_BloomBlurModes::GAUSSIAN;
 	};
 }

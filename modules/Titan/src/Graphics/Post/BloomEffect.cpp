@@ -55,16 +55,52 @@ namespace Titan {
 		m_shaders[index]->Link();
 		index++;
 
-		//horizontal blur shader
+		//horizontal gaussian blur shader
 		m_shaders.push_back(TTN_Shader::Create());
 		//load in the shader
 		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_passthrough_vert.glsl", GL_VERTEX_SHADER);
 		//m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_box_horizontal_frag.glsl", GL_FRAGMENT_SHADER);
+		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_gaussian_horizontal_frag.glsl", GL_FRAGMENT_SHADER);
+		m_shaders[index]->Link();
+		index++;
+
+		//vertical gaussian blur shader
+		m_shaders.push_back(TTN_Shader::Create());
+		//load in the shader
+		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_passthrough_vert.glsl", GL_VERTEX_SHADER);
+		//m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_box_vertical_frag.glsl", GL_FRAGMENT_SHADER);
+		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_gaussian_vertical_frag.glsl", GL_FRAGMENT_SHADER);
+		m_shaders[index]->Link();
+		index++;
+
+		//horizontal box blur shader
+		m_shaders.push_back(TTN_Shader::Create());
+		//load in the shader
+		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_passthrough_vert.glsl", GL_VERTEX_SHADER);
+		//m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_box_horizontal_frag.glsl", GL_FRAGMENT_SHADER);
+		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_box_horizontal_frag.glsl", GL_FRAGMENT_SHADER);
+		m_shaders[index]->Link();
+		index++;
+
+		//vertical box blur shader
+		m_shaders.push_back(TTN_Shader::Create());
+		//load in the shader
+		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_passthrough_vert.glsl", GL_VERTEX_SHADER);
+		//m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_box_vertical_frag.glsl", GL_FRAGMENT_SHADER);
+		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_box_vertical_frag.glsl", GL_FRAGMENT_SHADER);
+		m_shaders[index]->Link();
+		index++;
+
+		//radial blur shader
+		m_shaders.push_back(TTN_Shader::Create());
+		//load in the shader
+		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_passthrough_vert.glsl", GL_VERTEX_SHADER);
+		//m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_box_vertical_frag.glsl", GL_FRAGMENT_SHADER);
 		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_radial_blur_frag.glsl", GL_FRAGMENT_SHADER);
 		m_shaders[index]->Link();
 		index++;
 
-		//vertical blur shader
+		//passthrough shader to suppor the radial blur
 		m_shaders.push_back(TTN_Shader::Create());
 		//load in the shader
 		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_passthrough_vert.glsl", GL_VERTEX_SHADER);
@@ -95,10 +131,25 @@ namespace Titan {
 
 		//loop through each of the blur passes
 		for (int i = 0; i < m_numOfPasses; i++) {
-			//horiztonal pass
+			//grab the shader index
+			int shaderIndex = 0;
+			switch (m_blurMode) {
+			case TTN_BloomBlurModes::GAUSSIAN:
+				shaderIndex = 2;
+				break;
 
+			case TTN_BloomBlurModes::BOX:
+				shaderIndex = 4;
+				break;
+
+			case TTN_BloomBlurModes::RADIAL:
+				shaderIndex = 6;
+				break;
+			}
+
+			//horiztonal pass
 			//bind the shader
-			BindShader(2);
+			BindShader(shaderIndex);
 			//bind the second (hori blur) framebuffer as the color
 			m_buffers[1]->BindColorAsTexture(0, 0);
 			//set the uniforms
@@ -111,9 +162,8 @@ namespace Titan {
 			UnbindShader();
 
 			//vertical pass
-
 			//bind the shader
-			BindShader(3);
+			BindShader(shaderIndex + 1);
 			//bind the third (vert blur) framebuffer as the color
 			m_buffers[2]->BindColorAsTexture(0, 0);
 			//sets the uniforms
@@ -124,6 +174,7 @@ namespace Titan {
 			//unbinds everything
 			m_buffers[2]->UnbindTexture(0);
 			UnbindShader();
+		
 		}
 
 		
