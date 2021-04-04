@@ -1103,8 +1103,8 @@ void OptionsMenu::MouseButtonDownChecks()
 			//grab the transform of the bar
 			TTN_Transform playButtonTrans = Get<TTN_Transform>(mouseSensitivity);
 			//if the player's mouse is over the bar
-			if (mousePosWorldSpace.x < playButtonTrans.GetPos().x + 0.5f * abs(playButtonTrans.GetScale().x) &&
-				mousePosWorldSpace.x > playButtonTrans.GetPos().x - 0.5f * abs(playButtonTrans.GetScale().x) &&
+			if (mousePosWorldSpace.x < playButtonTrans.GetPos().x + 0.51f * abs(playButtonTrans.GetScale().x) &&
+				mousePosWorldSpace.x > playButtonTrans.GetPos().x - 0.51f * abs(playButtonTrans.GetScale().x) &&
 				mousePosWorldSpace.y < playButtonTrans.GetPos().y + 0.5f * abs(playButtonTrans.GetScale().y) &&
 				mousePosWorldSpace.y > playButtonTrans.GetPos().y - 0.5f * abs(playButtonTrans.GetScale().y)) {
 				//make a temp float mouse sensetivity
@@ -1115,6 +1115,14 @@ void OptionsMenu::MouseButtonDownChecks()
 				//if it's on the center than the mouse senestivity is 50%
 				if (mousePosWorldSpace.x == 0.0f)
 					normalizedMouseSen = 0.5f;
+
+				else if (mousePosWorldSpace.x < playButtonTrans.GetPos().x - 0.5f * abs(playButtonTrans.GetScale().x)) {
+					normalizedMouseSen = 1.0f;
+				}
+
+				else if (mousePosWorldSpace.x > playButtonTrans.GetPos().x + 0.5f * abs(playButtonTrans.GetScale().x)) {
+					normalizedMouseSen = 0.0f;
+				}
 
 				//if it's to the left than find the percentage
 				else if (mousePosWorldSpace.x > 0.0f)
@@ -1143,8 +1151,8 @@ void OptionsMenu::MouseButtonDownChecks()
 			//grab the transform of the bar
 			TTN_Transform volumeBarTrans = Get<TTN_Transform>(volumeBar);
 			//if the player's mouse is over the bar
-			if (mousePosWorldSpace.x < volumeBarTrans.GetPos().x + 0.5f * abs(volumeBarTrans.GetScale().x) &&
-				mousePosWorldSpace.x > volumeBarTrans.GetPos().x - 0.5f * abs(volumeBarTrans.GetScale().x) &&
+			if (mousePosWorldSpace.x < volumeBarTrans.GetPos().x + 0.51f * abs(volumeBarTrans.GetScale().x) &&
+				mousePosWorldSpace.x > volumeBarTrans.GetPos().x - 0.51f * abs(volumeBarTrans.GetScale().x) &&
 				mousePosWorldSpace.y < volumeBarTrans.GetPos().y + 0.5f * abs(volumeBarTrans.GetScale().y) &&
 				mousePosWorldSpace.y > volumeBarTrans.GetPos().y - 0.5f * abs(volumeBarTrans.GetScale().y)) {
 				//get a temp float for the volume
@@ -1155,6 +1163,14 @@ void OptionsMenu::MouseButtonDownChecks()
 				//if it's at the center than the volume is 50%
 				if (mousePosWorldSpace.x == 0.0f)
 					normalizedVolume = 0.5f;
+
+				else if (mousePosWorldSpace.x < volumeBarTrans.GetPos().x - 0.5f * abs(volumeBarTrans.GetScale().x)) {
+					normalizedVolume = 1.0f;
+				}
+
+				else if (mousePosWorldSpace.x > volumeBarTrans.GetPos().x + 0.5f * abs(volumeBarTrans.GetScale().x)) {
+					normalizedVolume = 0.0f;
+				}
 
 				//if it's too the left find the percetange
 				else if (mousePosWorldSpace.x > 0.0f)
@@ -1183,8 +1199,8 @@ void OptionsMenu::MouseButtonDownChecks()
 			//get the bar's transform
 			TTN_Transform MusicVolumeBarTrans = Get<TTN_Transform>(MusicVolumeBar);
 			//if the player's mouse is over the bar
-			if (mousePosWorldSpace.x < MusicVolumeBarTrans.GetPos().x + 0.5f * abs(MusicVolumeBarTrans.GetScale().x) &&
-				mousePosWorldSpace.x > MusicVolumeBarTrans.GetPos().x - 0.5f * abs(MusicVolumeBarTrans.GetScale().x) &&
+			if (mousePosWorldSpace.x < MusicVolumeBarTrans.GetPos().x + 0.51f * abs(MusicVolumeBarTrans.GetScale().x) &&
+				mousePosWorldSpace.x > MusicVolumeBarTrans.GetPos().x - 0.51f * abs(MusicVolumeBarTrans.GetScale().x) &&
 				mousePosWorldSpace.y < MusicVolumeBarTrans.GetPos().y + 0.5f * abs(MusicVolumeBarTrans.GetScale().y) &&
 				mousePosWorldSpace.y > MusicVolumeBarTrans.GetPos().y - 0.5f * abs(MusicVolumeBarTrans.GetScale().y)) {
 				//get a temp float for the volume
@@ -1195,6 +1211,14 @@ void OptionsMenu::MouseButtonDownChecks()
 				//if it's at the center than the volume is 50%
 				if (mousePosWorldSpace.x == 0.0f)
 					normalizedMusic = 0.5f;
+
+				else if (mousePosWorldSpace.x < MusicVolumeBarTrans.GetPos().x - 0.5f * abs(MusicVolumeBarTrans.GetScale().x)) {
+					normalizedMusic = 1.0f;
+				}
+
+				else if (mousePosWorldSpace.x > MusicVolumeBarTrans.GetPos().x + 0.5f * abs(MusicVolumeBarTrans.GetScale().x)) {
+					normalizedMusic = 0.0f;
+				}
 
 				//if it's too the left, figure out what percentage the volume is
 				else if (mousePosWorldSpace.x > 0.0f)
@@ -1223,8 +1247,8 @@ void OptionsMenu::MouseButtonDownChecks()
 			//get the bar's transform
 			TTN_Transform SFXVolumeBarTrans = Get<TTN_Transform>(SFXvolumeBar);
 			//if the player's mouse is over the bar
-			if (mousePosWorldSpace.x < SFXVolumeBarTrans.GetPos().x + 0.5f * abs(SFXVolumeBarTrans.GetScale().x) &&
-				mousePosWorldSpace.x > SFXVolumeBarTrans.GetPos().x - 0.5f * abs(SFXVolumeBarTrans.GetScale().x) &&
+			if (mousePosWorldSpace.x < SFXVolumeBarTrans.GetPos().x + 0.51f * abs(SFXVolumeBarTrans.GetScale().x) &&
+				mousePosWorldSpace.x > SFXVolumeBarTrans.GetPos().x - 0.51f * abs(SFXVolumeBarTrans.GetScale().x) &&
 				mousePosWorldSpace.y < SFXVolumeBarTrans.GetPos().y + 0.5f * abs(SFXVolumeBarTrans.GetScale().y) &&
 				mousePosWorldSpace.y > SFXVolumeBarTrans.GetPos().y - 0.5f * abs(SFXVolumeBarTrans.GetScale().y)) {
 				//make a temp float for the volume
@@ -1235,6 +1259,14 @@ void OptionsMenu::MouseButtonDownChecks()
 				//if it's in the center than the volume is 50%
 				if (mousePosWorldSpace.x == 0.0f)
 					normalizedSFX = 0.5f;
+
+				else if (mousePosWorldSpace.x < SFXVolumeBarTrans.GetPos().x - 0.5f * abs(SFXVolumeBarTrans.GetScale().x)) {
+					normalizedSFX = 1.0f;
+				}
+
+				else if (mousePosWorldSpace.x > SFXVolumeBarTrans.GetPos().x + 0.5f * abs(SFXVolumeBarTrans.GetScale().x)) {
+					normalizedSFX = 0.0f;
+				}
 
 				//if it's to the left then find out what percentage it is
 				else if (mousePosWorldSpace.x > 0.0f)
@@ -1263,8 +1295,8 @@ void OptionsMenu::MouseButtonDownChecks()
 			//get the bar's transform
 			TTN_Transform VoiceVolumeBarTrans = Get<TTN_Transform>(VoiceVolumeBar);
 			//if the player's mouse is over the bar
-			if (mousePosWorldSpace.x < VoiceVolumeBarTrans.GetPos().x + 0.5f * abs(VoiceVolumeBarTrans.GetScale().x) &&
-				mousePosWorldSpace.x > VoiceVolumeBarTrans.GetPos().x - 0.5f * abs(VoiceVolumeBarTrans.GetScale().x) &&
+			if (mousePosWorldSpace.x < VoiceVolumeBarTrans.GetPos().x + 0.51f * abs(VoiceVolumeBarTrans.GetScale().x) &&
+				mousePosWorldSpace.x > VoiceVolumeBarTrans.GetPos().x - 0.51f * abs(VoiceVolumeBarTrans.GetScale().x) &&
 				mousePosWorldSpace.y < VoiceVolumeBarTrans.GetPos().y + 0.5f * abs(VoiceVolumeBarTrans.GetScale().y) &&
 				mousePosWorldSpace.y > VoiceVolumeBarTrans.GetPos().y - 0.5f * abs(VoiceVolumeBarTrans.GetScale().y)) {
 				//make a temp float for the volume
@@ -1275,6 +1307,14 @@ void OptionsMenu::MouseButtonDownChecks()
 				//if it's in the center than the volume is 50%
 				if (mousePosWorldSpace.x == 0.0f)
 					normalizedVoice = 0.5f;
+
+				else if (mousePosWorldSpace.x < VoiceVolumeBarTrans.GetPos().x - 0.5f * abs(VoiceVolumeBarTrans.GetScale().x)) {
+					normalizedVoice = 1.0f;
+				}
+
+				else if (mousePosWorldSpace.x > VoiceVolumeBarTrans.GetPos().x + 0.5f * abs(VoiceVolumeBarTrans.GetScale().x)) {
+					normalizedVoice = 0.0f;
+				}
 
 				//if it's to the left then find out what percentage it is
 				else if (mousePosWorldSpace.x > 0.0f)
@@ -1303,8 +1343,8 @@ void OptionsMenu::MouseButtonDownChecks()
 			//get the bar's transform
 			TTN_Transform diffBarTrans = Get<TTN_Transform>(diffBar);
 			//check if the player's mouse is over the bar
-			if (mousePosWorldSpace.x < diffBarTrans.GetPos().x + 0.5f * abs(diffBarTrans.GetScale().x) &&
-				mousePosWorldSpace.x > diffBarTrans.GetPos().x - 0.5f * abs(diffBarTrans.GetScale().x) &&
+			if (mousePosWorldSpace.x < diffBarTrans.GetPos().x + 0.51f * abs(diffBarTrans.GetScale().x) &&
+				mousePosWorldSpace.x > diffBarTrans.GetPos().x - 0.51f * abs(diffBarTrans.GetScale().x) &&
 				mousePosWorldSpace.y < diffBarTrans.GetPos().y + 0.5f * abs(diffBarTrans.GetScale().y) &&
 				mousePosWorldSpace.y > diffBarTrans.GetPos().y - 0.5f * abs(diffBarTrans.GetScale().y)) {
 				//get a temp float for the difficulty
@@ -1317,12 +1357,18 @@ void OptionsMenu::MouseButtonDownChecks()
 					normalizedDiff = 0.5f;
 				}
 
+				else if (mousePosWorldSpace.x < diffBarTrans.GetPos().x - 0.5f * abs(diffBarTrans.GetScale().x)) {
+					normalizedDiff = 1.0f;
+				}
+
+				else if (mousePosWorldSpace.x > diffBarTrans.GetPos().x + 0.5f * abs(diffBarTrans.GetScale().x)) {
+					normalizedDiff = 0.0f;
+				}
+
 				//if it's to the left then figure out what percentage it is
 				else if (mousePosWorldSpace.x > 0.0f) {
 					normalizedDiff = abs(TTN_Interpolation::ReMap(0.0f, 200.0f, 0.0f, 1.0f, (abs((mousePosWorldSpace.x - 10.f) / diffBarTrans.GetScale().x) * 200.f)) - 0.5f);
-					if (normalizedDiff < 0.050f) {
-						normalizedDiff = 0.05f;
-					}
+
 				}
 
 				//if it's to the right then figure out what percentage it is
@@ -1333,6 +1379,10 @@ void OptionsMenu::MouseButtonDownChecks()
 				//otherwise keep the existing value
 				else {
 					float normalizedDiff = tempDiff / 200.f;
+				}
+
+				if (normalizedDiff < 0.050f) {
+					normalizedDiff = 0.05f;
 				}
 
 				//set the mask to the normalized value
