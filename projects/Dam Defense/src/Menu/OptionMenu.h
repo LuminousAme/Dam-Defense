@@ -39,6 +39,9 @@ public:
 	float GetVolumeSFX() { return acutal_volumeSFX; }
 	void SetVolumeSFX(float vol) { volumeSFX = vol; }
 
+	float GetVolumeVoice() { return acutal_volumeVoice; }
+	void SetVolumeVoice(float vol) { volumeVoice = vol; }
+
 	void SetNoLut(bool lut) { Off = lut; }
 	void SetColor1(bool lut) { color = lut; }
 
@@ -83,7 +86,6 @@ private:
 	entt::entity volumeBarBg;
 	//master volume bar
 	entt::entity volumeBar;
-	float volumeScale = 0.3f;//scale of bar
 	//master volume numbers
 	std::vector<entt::entity> volumeNums;
 	float volumeNumScale = 0.4f;
@@ -104,7 +106,15 @@ private:
 	//music volume numbers
 	std::vector<entt::entity> MusicVolumeNums;
 
-	float buttonScale = 0.3f;//scale of button
+	//dialogue volume bar border and bg
+	entt::entity VoiceVolumeBarBorder;
+	entt::entity VoiceVolumeBarBg;
+	//dialogue volume bar
+	entt::entity  VoiceVolumeBar;
+	//dialogue volume numbers
+	std::vector<entt::entity>  VoiceVolumeNums;
+
+	float buttonScale = 0.25f;//scale of button
 	//color correction border and bg
 	entt::entity OffBarBorder;
 	entt::entity OffBarBg;
@@ -133,7 +143,6 @@ private:
 	// other colorblind/color correction
 	entt::entity buttonColor2;
 	entt::entity colorText2;
-
 
 	//color correction border and bg
 	entt::entity diffBarBorder;
@@ -182,10 +191,28 @@ private:
 	TTN_Texture2D::st2dptr textureButton1;
 	TTN_Texture2D::st2dptr textureButton2;
 
+
+	entt::entity textureApply;
+	entt::entity textureBlueYellow;
+	entt::entity textureDefault;
+	entt::entity textureVoiceVolume;
+	entt::entity textureDifficulty;
+	entt::entity textureEasy;
+	entt::entity textureHard;
+	entt::entity textureMasterVol;
+	entt::entity textureMouseSen;
+	entt::entity textureMusicVol;
+	entt::entity textureNoCBM;
+	entt::entity textureNormal;
+	entt::entity textureRedGreen;
+	entt::entity textureSFXVolume;
+	entt::entity textureUndo;
+
 	void MakeMouseNumEntity();
 	void MakeVolumeNumEntity();
 	void MakeMusicNumEntity();
 	void MakeSFXNumEntity();
+	void MakeVoiceNumEntity();
 	void MakeDiffNumEntity();
 
 	void WriteToFile();
@@ -196,6 +223,7 @@ private:
 	int volume;
 	int volumeSFX;
 	int volumeMusic;
+	int volumeVoice;
 	int diff;
 	bool Off;
 	bool color;
@@ -209,6 +237,7 @@ private:
 	int acutal_volume;
 	int acutal_volumeSFX;
 	int acutal_volumeMuisc;
+	int acutal_volumeVoice;
 	int acutal_Diff;
 	bool acutal_Off;
 	bool acutal_color;
@@ -227,5 +256,5 @@ private:
 	bool previousSceneMainMenu;
 
 	//the time remaining before it accepts player input, used when the player is moving in and out of the scene
-	float m_InputDelay; 
+	float m_InputDelay;
 };

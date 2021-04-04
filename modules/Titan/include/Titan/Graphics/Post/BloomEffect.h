@@ -45,7 +45,7 @@ namespace Titan {
 		void SetWeights(float weights[5]) { for (int i = 0; i < 5; i++) m_weights[i] = weights[i]; }
 		void SetRadius(float radius) { m_radius = radius; }
 		void SetStrength(float strength) { m_strength = strength; }
-		
+
 	private:
 		//the threshold for how much of the bright colours to extract
 		float m_threshold = 0.2f;

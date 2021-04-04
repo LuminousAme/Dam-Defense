@@ -905,7 +905,6 @@ void Game::RestartData()
 		AttachCopy(smokePS, psComponent);
 	}
 
-
 	//sets the buses to not be paused
 	engine.GetBus("Music").SetPaused(false);
 	engine.GetBus("SFX").SetPaused(false);
@@ -2216,7 +2215,6 @@ void Game::ImGui()
 		float minShadowBias = tempSun.m_minShadowBias;
 		float maxShadowBias = tempSun.m_maxShadowBias;
 		int pcfPasses = tempSun.m_pcfFilterSamples;*/
-		
 
 		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 0.0f)) {
 			SetSun(tempSun);
@@ -2453,7 +2451,7 @@ void Game::ImGui()
 				m_mats[i]->SetUseAlbedo(m_useTextures);
 			}
 		}
-		
+
 		//bloom controls
 		ImGui::Text("Bloom settings");
 
@@ -2475,8 +2473,6 @@ void Game::ImGui()
 			m_bloomEffect->SetRadius(m_bloomRadius);
 		}
 	}
-		
-	ImGui::End(); 
-	
 
+	ImGui::End();
 }

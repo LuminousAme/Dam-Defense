@@ -126,7 +126,6 @@ namespace Titan {
 			UnbindShader();
 		}
 
-		
 		//composition pass
 
 		//bind the shader
