@@ -206,8 +206,8 @@ namespace Titan {
 		TTN_DirectionalLight m_Sun;
 
 		inline static TTN_CascadedFrameBuffer::scfboptr shadowBuffer = nullptr;
-		inline static int shadowWidth = 1024;
-		inline static int shadowHeight = 1024;
+		inline static int shadowWidth = 5120;
+		inline static int shadowHeight = 5120;
 		TTN_UniformBuffer sunBuffer;
 
 		//flag for if 3D geo has been drawn

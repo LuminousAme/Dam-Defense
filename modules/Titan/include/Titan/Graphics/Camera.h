@@ -28,6 +28,7 @@ namespace Titan {
 		const glm::vec3& GetUp() { return m_up; }
 		//Gets the far plane
 		const float& GetFarPlane() { return m_zFar; }
+		const float& GetNearPlane() { return m_zNear; }
 		/// Gets the direction that the camera is looking at 
 		const glm::vec3& GetTarget() { return m_target; }
 

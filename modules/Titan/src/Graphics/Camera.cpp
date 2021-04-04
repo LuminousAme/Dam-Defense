@@ -148,7 +148,7 @@ namespace Titan {
 		//multiply each clip space corner by the inverse vp matrix to get the corners in world space
 		for (int i = 0; i < corners.size(); i++) {
 			 glm::vec4 temp = inverseVP * glm::vec4(corners[i], 1.0f);
-			 corners[i] = glm::vec3(temp / temp.w);
+			 corners[i] = temp / temp.w;
 		}
 
 		//return the corners in world space

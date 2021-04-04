@@ -370,12 +370,6 @@ namespace Titan {
 				viewMat, Get<TTN_Camera>(m_Cam).GetProj());
 		}
 
-		/*
-		if (m_hasDrawn3DGeo) {
-			TTK::Context& ctx = TTK::Context::Instance();
-			ctx.Flush();
-		}*/
-
 		//unbind the empty effect now that we've fully rendered everything and run through all the post effect
 		m_emptyEffect->UnbindBuffer();
 
@@ -512,24 +506,9 @@ namespace Titan {
 		if (is3DGeo) {
 			//shadow depth pass
 			//set up light space matrices
-			
-			TTK::Context& ctx = TTK::Context::Instance();
-			ctx.SetWindowSize(1920, 1080);
-			ctx.SetView(viewMat);
-			ctx.SetProjection(Get<TTN_Camera>(m_Cam).GetProj());
 
-			//get the light view matrix 
-			//glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3((-m_Sun.m_lightDirection)), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			glm::vec3 lightForward = glm::normalize(glm::vec3(-illBuffer->GetSunRef().m_lightDirection));
-			glm::vec3 lightRight = glm::cross(lightForward, glm::vec3(0.0f, 1.0f, 0.0f));
-			glm::vec3 lightUp = glm::cross(lightForward, lightRight);
-
-			glm::mat4 lightViewMatrix = glm::mat4(1.0f);
-			lightViewMatrix[0] = glm::vec4(lightRight, 0.0f);
-			lightViewMatrix[1] = glm::vec4(lightUp, 0.0f);
-			lightViewMatrix[2] = glm::vec4(lightForward, 0.0f);
-			lightViewMatrix[3] = glm::vec4(glm::vec3(0.0f), 1.0f);
-			lightViewMatrix = glm::transpose(lightViewMatrix);
+			//get generic light view matrix
+			glm::mat4 lightViewMatrix = glm::lookAt(glm::normalize(glm::vec3(illBuffer->GetSunRef().m_lightDirection)), Get<TTN_Transform>(m_Cam).GetGlobalPos(), glm::vec3(0.0f, 1.0f, 0.0f));
 
 			//make an array of matrices with which to make the projection matrices in
 			glm::mat4 lightSpaceMatrices[4];
@@ -540,97 +519,79 @@ namespace Titan {
 				float n = 0.0f;
 				float f = 1.0f;
 
-				if (i == 0) {
+				//get the near and far interpolation parameters
+				switch (i) {
+				case 0:
 					n = 0.0f;
 					f = 0.05f;
-				}
-				else if (i == 1) {
+					break;
+				case 1:
 					n = 0.05f;
 					f = 0.2f;
-				}
-				else if (i == 2) {
+					break;
+				case 2:
 					n = 0.2f;
 					f = 0.5f;
-				}
-				else if (i == 3) {
+					break;
+				case 3:
 					n = 0.5f;
 					f = 1.0f;
-				}					
+					break;
+				}		
 
 				//now get all of the corners in world space
 				std::vector<glm::vec3> corners;
 				//corners = Get<TTN_Camera>(m_Cam).CalcPerspectiveCorners(Get<TTN_Transform>(m_Cam).GetGlobalPos(), camForward, camRight, camUp, n, f);
 				corners = Get<TTN_Camera>(m_Cam).CalcCornersFromClipSpace(viewMat, n, f);
 
-				/*
-				ctx.AddLine(corners[0], corners[1], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-				ctx.AddLine(corners[0], corners[3], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-				ctx.AddLine(corners[2], corners[3], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-				ctx.AddLine(corners[2], corners[1], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-
-				ctx.AddLine(corners[0 + 4], corners[1 + 4], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-				ctx.AddLine(corners[0 + 4], corners[3 + 4], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-				ctx.AddLine(corners[2 + 4], corners[3 + 4], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-				ctx.AddLine(corners[2 + 4], corners[1 + 4], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-
-				ctx.AddLine(corners[0], corners[4], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-				ctx.AddLine(corners[1], corners[5], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-				ctx.AddLine(corners[2], corners[6], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-				ctx.AddLine(corners[3], corners[7], glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-
+				//get the center of the frusta
+				glm::vec3 frustaCenter = glm::vec3(0.0f);
 				for (int j = 0; j < 8; j++) {
-					std::cout << "corner " << j << ", x: " << corners[j].x << " y:" << corners[j].y << " z: " << corners[j].z << std::endl;
+					frustaCenter += corners[j];
 				}
-				std::cout << "\n";*/
+				frustaCenter /= 8.0f;
 
-				//now translate those corners into light space
-				for (auto& corner : corners) {
-					glm::vec4 temp = lightViewMatrix * glm::vec4(corner, 1.0f);
-					corner = temp;
-				}
-
-				//now find the min and max value on each axis
-				float vals[6] = { corners[0].x, corners[0].x, corners[0].y, corners[0].y, corners[0].z, corners[0].z };
+				//get the radius of the frustrum
+				float frustaRadius = -INFINITY;
 				for (int j = 0; j < 8; j++) {
-					vals[0] = std::min(vals[0], corners[j].x);
-					vals[1] = std::max(vals[1], corners[j].x);
-					vals[2] = std::min(vals[2], corners[j].y);
-					vals[3] = std::max(vals[3], corners[j].y);
-					vals[4] = std::min(vals[4], corners[j].z);
-					vals[5] = std::max(vals[5], corners[j].z);
+					float distance = glm::abs(glm::length(corners[j] - frustaCenter));
+					frustaRadius = glm::max(frustaRadius, distance);
 				}
+				frustaRadius = glm::ceil(frustaRadius);
 
-				/*
-				std::vector<glm::vec3> orthoCorners = std::vector<glm::vec3>();
-				orthoCorners.push_back(glm::vec3(vals[0], vals[2], vals[4])); //left, bottom, near
-				orthoCorners.push_back(glm::vec3(vals[0], vals[3], vals[4])); //left, top, near
-				orthoCorners.push_back(glm::vec3(vals[1], vals[2], vals[4])); //right bottom, near
-				orthoCorners.push_back(glm::vec3(vals[1], vals[3], vals[4])); //right top, near
+				//make the local frustrum light view
+				float nearClip = glm::mix(Get<TTN_Camera>(m_Cam).GetNearPlane(), Get<TTN_Camera>(m_Cam).GetFarPlane(), n);
+				float farClip = glm::mix(Get<TTN_Camera>(m_Cam).GetNearPlane(), Get<TTN_Camera>(m_Cam).GetFarPlane(), f);
 
-				orthoCorners.push_back(glm::vec3(vals[0], vals[2], vals[5])); //left, bottom, far
-				orthoCorners.push_back(glm::vec3(vals[0], vals[3], vals[5])); //left, top, far
-				orthoCorners.push_back(glm::vec3(vals[1], vals[2], vals[5])); //right bottom, far
-				orthoCorners.push_back(glm::vec3(vals[1], vals[3], vals[5])); //right top, far
+				//a make an AABB in light space from the frusta
+				glm::vec3 lightSpaceFrustaCenter = lightViewMatrix * glm::vec4(frustaCenter, 1.0f);
+				glm::vec3 maxOrtho = lightSpaceFrustaCenter - glm::vec3(frustaRadius);
+				glm::vec3 minOrtho = lightSpaceFrustaCenter + glm::vec3(frustaRadius);
+
+
+				//store the near and fars
+				float farLightSpace = maxOrtho.z;
+				float nearLightSpace = minOrtho.z;
+
+				//use those mins and maxes to construct the orthographic projection matrix
+				lightSpaceMatrices[i]  = glm::ortho(minOrtho.x, maxOrtho.x, minOrtho.y, maxOrtho.y, nearLightSpace, farLightSpace);
+
 				
-			
-				ctx.AddLine(orthoCorners[0], orthoCorners[1], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-				ctx.AddLine(orthoCorners[0], orthoCorners[2], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-				ctx.AddLine(orthoCorners[3], orthoCorners[1], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-				ctx.AddLine(orthoCorners[3], orthoCorners[2], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+				//make the rounding matrix
+				glm::vec4 shadowOrigin = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+				shadowOrigin = lightSpaceMatrices[i] * lightViewMatrix * shadowOrigin;
+				float w = shadowOrigin.w;
+				shadowOrigin = shadowOrigin * float(shadowWidth) / 2.0f;
 
-				ctx.AddLine(orthoCorners[0+4], orthoCorners[1+4], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-				ctx.AddLine(orthoCorners[0+4], orthoCorners[2+4], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-				ctx.AddLine(orthoCorners[3+4], orthoCorners[1+4], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-				ctx.AddLine(orthoCorners[3+4], orthoCorners[2+4], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+				glm::vec4 roundedOrigin = glm::round(shadowOrigin);
+				glm::vec4 roundOffset = roundedOrigin - shadowOrigin;
+				roundOffset = roundOffset * 2.0f / 4096.0f;
+				roundOffset.z = 0.0f;
+				roundOffset.w = 0.0f;
 
-				ctx.AddLine(orthoCorners[0], orthoCorners[4], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-				ctx.AddLine(orthoCorners[1], orthoCorners[5], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-				ctx.AddLine(orthoCorners[2], orthoCorners[6], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-				ctx.AddLine(orthoCorners[3], orthoCorners[7], glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));*/
-
-				//use the min and max values to construct the orthographic projections
-				lightSpaceMatrices[i] = glm::ortho(vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]);
-				//lightSpaceMatrices[i] = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -50.0f, 50.0f);
+				glm::mat4 shadowProj = lightSpaceMatrices[i];
+				shadowProj[3] += roundOffset;
+				lightSpaceMatrices[i] = shadowProj;
 
 				//finally multiply the view matrix into the projection matrix to complete the lightspace matrix
 				lightSpaceMatrices[i] *= lightViewMatrix;

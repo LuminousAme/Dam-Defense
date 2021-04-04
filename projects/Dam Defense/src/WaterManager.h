@@ -56,14 +56,6 @@ public:
 	static void BindVoronoiAsColor(int index) { m_voronoiBuffer->BindColorAsTexture(0, index); }
 	static void UnbindVoronoi(int index) { m_voronoiBuffer->UnbindTexture(index); }
 
-	static void RenderSceneForWater(entt::registry* reg, entt::entity camera, entt::entity terrain, std::vector<entt::entity> exclude, glm::vec3 waterPos);
-
-	static void BindRefractionAsColor(int index) { m_refractionBuffer->BindColorAsTexture(0, index); }
-	static void UnbindRefraction(int index) { m_refractionBuffer->UnbindTexture(index); }
-
-	static void BindReflectionAsColor(int index) { m_reflectionBuffer->BindColorAsTexture(0, index); }
-	static void UnbindReflection(int index) { m_reflectionBuffer->UnbindTexture(index); }
-
 private:
 	//general variables
 	inline static float m_speed = 0.5f;
@@ -94,17 +86,6 @@ private:
 
 	inline static float m_voronoiSpeed = 0.0000045f;
 	inline static float m_voronoiGridFidelty = 16.0f;
-
-private:
-	//variables for the reflection and refraction effect
-	inline static TTN_Framebuffer::sfboptr m_reflectionBuffer = nullptr;
-	inline static TTN_Framebuffer::sfboptr m_refractionBuffer = nullptr;
-
-	inline static TTN_Shader::sshptr m_clippingRegShader = nullptr;
-	inline static TTN_Shader::sshptr m_clippingTerrainShader = nullptr;
-
-	inline static float relfectionHeight = 0.0f;
-	inline static float refractionHeight = 0.0f;
 };
 
 inline float waterLifeInterpolationParameter(float t) {

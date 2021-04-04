@@ -9,8 +9,6 @@ layout(location = 3) in vec4 inClipSpace;
 //material data
 layout(binding=0) uniform sampler2D waterText;
 layout(binding=1) uniform sampler2D voronoiText;
-layout(binding=2) uniform sampler2D refractionText;
-layout(binding=3) uniform sampler2D reflectionText;
 
 uniform int u_UseDiffuse;
 //result, multiple render targets
@@ -31,11 +29,6 @@ void main() {
 	textureVoronoiDark = pow(textureVoronoiDark, vec4(9.5));
 	textureColor = textureColor - (0.1 * normalize(textureVoronoiDark));
 	textureColor = textureColor + textureVoronoi;
-
-	//get the reflection and refraction components
-	vec2 ndc = 0.5 * (inClipSpace.xy / inClipSpace.w) + 0.5;
-	vec4 refractionColor = texture(refractionText, ndc);
-	vec4 reflectionColor = texture(reflectionText, vec2(ndc.x, -1.0 * ndc.y));
 
 	//get the albedo from the diffuse / abledo texture map and output it
 	outColors = mix(vec4(1.0), textureColor, u_UseDiffuse);
