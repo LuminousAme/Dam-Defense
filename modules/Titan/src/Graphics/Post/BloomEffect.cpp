@@ -100,7 +100,7 @@ namespace Titan {
 		m_shaders[index]->Link();
 		index++;
 
-		//passthrough shader to suppor the radial blur
+		//passthrough shader to support the radial blur
 		m_shaders.push_back(TTN_Shader::Create());
 		//load in the shader
 		m_shaders[index]->LoadShaderStageFromFile("shaders/Post/ttn_passthrough_vert.glsl", GL_VERTEX_SHADER);
@@ -129,56 +129,94 @@ namespace Titan {
 		buffer->UnbindTexture(0);
 		UnbindShader();
 
-		//loop through each of the blur passes
-		for (int i = 0; i < m_numOfPasses; i++) {
-			//grab the shader index
-			int shaderIndex = 0;
-			switch (m_blurMode) {
-			case TTN_BloomBlurModes::GAUSSIAN:
-				shaderIndex = 2;
-				break;
+		//if (m_blurMode == TTN_BloomBlurModes::GAUSSIAN || m_blurMode == TTN_BloomBlurModes::BOX) {
+			//loop through each of the blur passes
+			for (int i = 0; i < m_numOfPasses; i++) {
+				//grab the shader index
+				int shaderIndex = 0;
+				switch (m_blurMode) {
+				case TTN_BloomBlurModes::GAUSSIAN:
+					shaderIndex = 2;
+					break;
 
-			case TTN_BloomBlurModes::BOX:
-				shaderIndex = 4;
-				break;
+				case TTN_BloomBlurModes::BOX:
+					shaderIndex = 4;
+					break;
 
-			case TTN_BloomBlurModes::RADIAL:
-				shaderIndex = 6;
-				break;
+				case TTN_BloomBlurModes::RADIAL:
+					shaderIndex = 6;
+					break;
+				}
+
+				//horiztonal pass
+				//bind the shader
+				BindShader(shaderIndex);
+				//bind the second (hori blur) framebuffer as the color
+				m_buffers[1]->BindColorAsTexture(0, 0);
+				//set the uniforms
+				m_shaders[2]->SetUniform("u_Step", m_radius / m_buffers[0]->m_width);
+				m_shaders[2]->SetUniform("u_Strength", m_strength);
+				m_shaders[2]->SetUniform("u_Weights", m_weights[0], 5);
+				//renders to the fullscreen quad in the third (vert blur) framebuffer
+				m_buffers[2]->RenderToFSQ();
+				//unbinds everything
+				m_buffers[1]->UnbindTexture(0);
+				UnbindShader();
+
+				//vertical pass
+				//bind the shader
+				BindShader(shaderIndex + 1);
+				//bind the third (vert blur) framebuffer as the color
+				m_buffers[2]->BindColorAsTexture(0, 0);
+				//sets the uniforms
+				m_shaders[3]->SetUniform("u_Step", m_radius / m_buffers[0]->m_height);
+				m_shaders[2]->SetUniform("u_Strength", m_strength);
+				m_shaders[3]->SetUniform("u_Weights", m_weights[0], 5);
+				//renders to the fullscreen quad in the second (hori blur) framebuffer
+				m_buffers[1]->RenderToFSQ();
+				//unbinds everything
+				m_buffers[2]->UnbindTexture(0);
+				UnbindShader();
 			}
 
-			//horiztonal pass
-			//bind the shader
-			BindShader(shaderIndex);
-			//bind the second (hori blur) framebuffer as the color
-			m_buffers[1]->BindColorAsTexture(0, 0);
-			//set the uniforms
-			m_shaders[2]->SetUniform("u_Step", m_radius / m_buffers[0]->m_width);
-			m_shaders[2]->SetUniform("u_Weights", m_weights[0], 5);
-			//renders to the fullscreen quad in the third (vert blur) framebuffer
-			m_buffers[2]->RenderToFSQ();
-			//unbinds everything
-			m_buffers[1]->UnbindTexture(0);
-			UnbindShader();
+		//}
 
-			//vertical pass
-			//bind the shader
-			BindShader(shaderIndex + 1);
-			//bind the third (vert blur) framebuffer as the color
-			m_buffers[2]->BindColorAsTexture(0, 0);
-			//sets the uniforms
-			m_shaders[3]->SetUniform("u_Step", m_radius / m_buffers[0]->m_height);
-			m_shaders[3]->SetUniform("u_Weights", m_weights[0], 5);
-			//renders to the fullscreen quad in the second (hori blur) framebuffer
-			m_buffers[1]->RenderToFSQ();
-			//unbinds everything
-			m_buffers[2]->UnbindTexture(0);
-			UnbindShader();
-		
-		}
+
+		//radial
+		//else {
+		//	int shaderIndex = 6;
+
+		//	//horiztonal pass
+		//	//bind the shader
+		//	BindShader(shaderIndex);
+		//	//bind the second (hori blur) framebuffer as the color
+		//	m_buffers[1]->BindColorAsTexture(0, 0);
+		//	//set the uniforms
+		//	m_shaders[2]->SetUniform("u_Strength", m_strength);
+		//	m_shaders[2]->SetUniform("u_Weights", m_weights[0], 5);
+		//	//renders to the fullscreen quad in the third (vert blur) framebuffer
+		//	m_buffers[2]->RenderToFSQ();
+		//	//unbinds everything
+		//	m_buffers[1]->UnbindTexture(0);
+		//	UnbindShader();
+
+		//	//passthrough
+		//	//bind the shader
+		//	BindShader(shaderIndex + 1);
+		//	//bind the third (vert blur) framebuffer as the color
+		//	m_buffers[2]->BindColorAsTexture(0, 0);
+		//	//sets the uniforms
+		//	//m_shaders[3]->SetUniform("u_Step", m_radius / m_buffers[0]->m_height);
+		//	//m_shaders[3]->SetUniform("u_Weights", m_weights[0], 5);
+		//	//renders to the fullscreen quad in the second (hori blur) framebuffer
+		//	m_buffers[1]->RenderToFSQ();
+		//	//unbinds everything
+		//	m_buffers[2]->UnbindTexture(0);
+		//	UnbindShader();
+		//}
+
 
 		//composition pass
-
 		//bind the shader
 		BindShader(1);
 		//bind the previous effect's color as a texture

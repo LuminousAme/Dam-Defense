@@ -410,6 +410,7 @@ protected:
 	int m_numOfBloomPasses;
 	unsigned m_bloomBufferDivisor;
 	float m_bloomRadius = 3.0f;
+	float m_bloomStrength = 2.4f;
 
 	bool m_noLighting;
 	bool m_ambientOnly;

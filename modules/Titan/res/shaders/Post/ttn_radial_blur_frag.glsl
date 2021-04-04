@@ -13,7 +13,7 @@ layout(binding = 0) uniform sampler2D s_SourceImage;
 uniform float u_Radius=1.0f; 
 
 //strength of blur
-uniform float u_Strength = 2.1f;
+uniform float u_Strength=2.6f;
 
 //the samples for the blur
 uniform float u_Samples[10];
@@ -47,7 +47,7 @@ void main() {
     vec4 sum = color;
 
    // Take a texture sample, move a little in the direction of the radial direction vector (dir) then take another, slightly more weighted,
-    // sample, add it to the total, then repeat the process until done. (
+    // sample, add it to the total, then repeat the process until done. 
     for (int i = 0; i < 10; i++){
         sum += texture2D( s_SourceImage, inUV + dir * samples[i] * u_Radius );
 

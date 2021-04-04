@@ -70,7 +70,7 @@ namespace Titan {
 		unsigned m_blurBufferDivisor = 4.0;
 		//the radius of the effect
 		float m_radius = 1.0f;
-
+		
 		//the blur mode
 		TTN_BloomBlurModes m_blurMode = TTN_BloomBlurModes::GAUSSIAN;
 	};

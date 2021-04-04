@@ -151,7 +151,6 @@ void Game::Update(float deltaTime)
 //render the terrain and water
 void Game::PostRender()
 {
-
 	//disable blending so the gBuffer can draw properlly
 	glDisable(GL_BLEND);
 
@@ -746,6 +745,7 @@ void Game::SetUpOtherData()
 	m_numOfBloomPasses = m_bloomEffect->GetNumOfPasses();
 	m_bloomBufferDivisor = m_bloomEffect->GetBlurDownScale();
 	m_bloomEffect->SetRadius(m_bloomRadius);
+	m_bloomEffect->SetStrength(m_bloomStrength);
 	m_bloomEffect->SetShouldApply(true);
 	m_PostProcessingEffects.push_back(m_bloomEffect);
 
@@ -2469,6 +2469,10 @@ void Game::ImGui()
 			m_bloomEffect->SetRadius(m_bloomRadius);
 		}
 
+		if (ImGui::SliderFloat("Strength (radial)", &m_bloomStrength, 0.1f, 20.0f)) {
+			m_bloomEffect->SetStrength(m_bloomStrength);
+		}
+
 		if (ImGui::Button("Make Gaussian Blur")) {
 			m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::GAUSSIAN);
 		}
@@ -2480,6 +2484,8 @@ void Game::ImGui()
 		if (ImGui::Button("Make Radial Blur")) {
 			m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::RADIAL);
 		}
+
+		//if (m_bloomEffect->GetBlurMode() == TTN_BloomBlurModes::RADIAL)
 	}
 
 	ImGui::End();
