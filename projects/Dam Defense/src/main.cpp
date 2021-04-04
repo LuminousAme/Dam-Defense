@@ -391,6 +391,8 @@ int main() {
 			gameSceneUI->SetBirdBombMaxCoolDown(gameScene->GetBirdBombMaxCoolDown());
 			gameSceneUI->SetBirdBombCoolDownTime(gameScene->GetBirdCoolDownTime());
 			gameSceneUI->SetBirdBombRealCoolDown(gameScene->GetRealBirdCoolDownTime());
+			// REMEBER TO SET DIALOGUE WHEN WE GET IT
+
 			gameScene->SetMouseSensitivity(options->GetMouseSen());
 			gameScene->SetMasterVolume(options->GetVolume());
 			gameScene->SetMusicVolume(options->GetVolumeMusic());
@@ -463,6 +465,13 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Bar", "textures/Health_Bar.png", 1); //health/progress bar itself
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Bar BG", "textures/Health_Bar_BG.png", 1); //background behind the health/progress bar
 
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Option Bar Border", "textures/Option_Border.png", 1); //overlay border of the option bar
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Option Bar", "textures/Option_Bar.png", 1); //option bar itself
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Option Bar BG", "textures/Option_BG.png", 1); //background behind the option bar
+
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Option BG", "textures/Wood_Menu.png", 1); //background behind the option bar
+
+
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Base", "textures/Button_1.png", 1); //button when not being hovered over
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Hovering", "textures/Button_2.png", 1); //button when being hovered over
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Play-Text", "textures/text/play.png", 1); //rendered text of word Play
@@ -474,6 +483,51 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Play Again", "textures/text/Play again.png", 1); //rendered text of words Play again
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Quit-Text", "textures/text/Quit.png", 1); //rendered text of word Quit
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Main Menu", "textures/text/Main Menu.png", 1); //rendered text of word main menu
+
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Apply", "textures/Options/Apply.png", 1); //texture for apply button option
+	//by cbm
+	TTN_AssetSystem::AddTexture2DToBeLoaded("BY CBM", "textures/Options/BY CBM.png", 1); //texture for apply button option
+
+	//default 
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Default", "textures/Options/Default.png", 1); //texture for apply button opti
+	 
+	//dialogue volume
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Voice Volume", "textures/Options/Dialogue Volume.png", 1); //texture for apply button option
+
+	//difficulty
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Difficulty", "textures/Options/Difficulty.png", 1); //texture for apply button option
+	
+	//easy
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Easy", "textures/Options/Easy.png", 1); //texture for apply button option
+
+	//hard
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Hard", "textures/Options/Hard.png", 1); //texture for apply button option
+
+	//master volume
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Master Volume", "textures/Options/Master Volume.png", 1); //texture for apply button option
+
+	//mouse sen
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Mouse Sen", "textures/Options/Mouse Sensitivity.png", 1); //texture for apply button option
+
+	//music volume
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Music Volume", "textures/Options/Music volume.png", 1); //texture for apply button option
+
+	//no cbm
+	TTN_AssetSystem::AddTexture2DToBeLoaded("No CBM", "textures/Options/No CBM.png", 1); //texture for apply button option
+
+	//normal
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Normal", "textures/Options/Normal.png", 1); //texture for apply button option
+
+	//rg cbm
+	TTN_AssetSystem::AddTexture2DToBeLoaded("RG CBM", "textures/Options/RG CBM.png", 1); //texture for apply button option
+
+	//sfx volume
+	TTN_AssetSystem::AddTexture2DToBeLoaded("SFX Volume", "textures/Options/SFX Volume.png", 1); //texture for apply button option
+
+	//undo
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Undo", "textures/Options/Undo.png", 1); //texture for apply button option
+
+
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Continue Hovered", "textures/shop/Continue Button_Hovered.png", 1); //texture for continue button
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Continue", "textures/shop/Continue Button_Normal.png", 1); //texture for continue button

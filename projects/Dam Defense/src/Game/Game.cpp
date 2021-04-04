@@ -151,7 +151,6 @@ void Game::Update(float deltaTime)
 //render the terrain and water
 void Game::PostRender()
 {
-
 	//disable blending so the gBuffer can draw properlly
 	glDisable(GL_BLEND);
 
@@ -746,6 +745,7 @@ void Game::SetUpOtherData()
 	m_numOfBloomPasses = m_bloomEffect->GetNumOfPasses();
 	m_bloomBufferDivisor = m_bloomEffect->GetBlurDownScale();
 	m_bloomEffect->SetRadius(m_bloomRadius);
+	m_bloomEffect->SetStrength(m_bloomStrength);
 	m_bloomEffect->SetShouldApply(true);
 	m_PostProcessingEffects.push_back(m_bloomEffect);
 
@@ -900,7 +900,6 @@ void Game::RestartData()
 		//attach the particle system component to the entity
 		AttachCopy(smokePS, psComponent);
 	}
-
 
 	//sets the buses to not be paused
 	engine.GetBus("Music").SetPaused(false);
@@ -2212,7 +2211,6 @@ void Game::ImGui()
 		float minShadowBias = tempSun.m_minShadowBias;
 		float maxShadowBias = tempSun.m_maxShadowBias;
 		int pcfPasses = tempSun.m_pcfFilterSamples;*/
-		
 
 		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 0.0f)) {
 			SetSun(tempSun);
@@ -2449,7 +2447,7 @@ void Game::ImGui()
 				m_mats[i]->SetUseAlbedo(m_useTextures);
 			}
 		}
-		
+
 		//bloom controls
 		ImGui::Text("Bloom settings");
 
@@ -2471,6 +2469,10 @@ void Game::ImGui()
 			m_bloomEffect->SetRadius(m_bloomRadius);
 		}
 
+		if (ImGui::SliderFloat("Strength (radial)", &m_bloomStrength, 0.1f, 20.0f)) {
+			m_bloomEffect->SetStrength(m_bloomStrength);
+		}
+
 		if (ImGui::Button("Make Gaussian Blur")) {
 			m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::GAUSSIAN);
 		}
@@ -2482,9 +2484,9 @@ void Game::ImGui()
 		if (ImGui::Button("Make Radial Blur")) {
 			m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::RADIAL);
 		}
-	}
-		
-	ImGui::End(); 
-	
 
+		//if (m_bloomEffect->GetBlurMode() == TTN_BloomBlurModes::RADIAL)
+	}
+
+	ImGui::End();
 }

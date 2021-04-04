@@ -53,7 +53,6 @@ namespace Titan {
 		void SetRadius(float radius) { m_radius = radius; }
 		void SetStrength(float strength) { m_strength = strength; }
 		void SetBlurMode(TTN_BloomBlurModes blurMode) { m_blurMode = blurMode; }
-		
 	private:
 		//the threshold for how much of the bright colours to extract
 		float m_threshold = 0.2f;
@@ -71,7 +70,7 @@ namespace Titan {
 		unsigned m_blurBufferDivisor = 4.0;
 		//the radius of the effect
 		float m_radius = 1.0f;
-
+		
 		//the blur mode
 		TTN_BloomBlurModes m_blurMode = TTN_BloomBlurModes::GAUSSIAN;
 	};
