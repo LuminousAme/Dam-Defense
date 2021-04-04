@@ -151,8 +151,6 @@ void Game::Update(float deltaTime)
 //render the terrain and water
 void Game::PostRender()
 {
-	//render the scene for the water
-	WaterManager::RenderSceneForWater(GetScene(), GetCamEntity(), terrain, std::vector<entt::entity>(), Get<TTN_Transform>(water).GetPos());
 
 	//disable blending so the gBuffer can draw properlly
 	glDisable(GL_BLEND);
@@ -254,8 +252,6 @@ void Game::PostRender()
 		//bind the textures
 		waterText->Bind(0);
 		WaterManager::BindVoronoiAsColor(1);
-		WaterManager::BindRefractionAsColor(2);
-		WaterManager::BindReflectionAsColor(3);
 
 		//send lighting from the scene
 		shaderProgramWater->SetUniform("u_UseDiffuse", (int)m_mats[0]->GetUseAlbedo());
