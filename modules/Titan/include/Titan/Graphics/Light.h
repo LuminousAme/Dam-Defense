@@ -57,7 +57,7 @@ namespace Titan {
 	struct TTN_DirectionalLight {
 		//same types should be grouped together
 		//always use vec4s with a uniform buffer
-		glm::vec4 m_lightDirection = glm::vec4(-0.671f, -1.07f, -1.07f, 0.0f);
+		glm::vec4 m_lightDirection = glm::vec4(-1.571f, -1.07f, -1.07f, 0.0f);
 		glm::vec4 m_lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
 		glm::vec4 m_ambientColor = glm::vec4(0.765f, 0.865f, 1.0f, 0.0f);
 
@@ -67,7 +67,7 @@ namespace Titan {
 		float m_lightSpecularPower = 2.0f;
 
 		float m_minShadowBias = 0.0f; 
-		float m_maxShadowBias = 0.0f;
+		float m_maxShadowBias = 0.001f;
 
 		//ints
 		int m_pcfFilterSamples = 5;

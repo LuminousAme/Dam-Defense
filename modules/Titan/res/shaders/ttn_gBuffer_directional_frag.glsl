@@ -147,12 +147,12 @@ void main() {
 
 
 	vec3 result = ((sun.m_ambientPower * sun.m_ambientColor.xyz) + // global ambient light
-		 (diffuse + specular) // light factors from our single light, including shadow 
+		 shadow * (diffuse + specular) // light factors from our single light, including shadow 
 		);
 
 
-	//if(shadow < -0.1)
-		//result = vec3(1.0, 0.0, 0.8);
+	if(shadow < -0.1)
+		result = vec3(1.0, 0.0, 0.8);
 
 	//if the alpha is less than 31% than it is our clear colour
     if (textureColor.a < 0.31)
