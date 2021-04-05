@@ -174,3 +174,31 @@ glm::vec3 EnemyComponent::Arrive(glm::vec3 target, glm::vec3 currentVelocity, gl
 	//otherwise seek the target position
 	return Seek(target, currentVelocity, currentPosition);
 }
+
+glm::vec3 EnemyComponent::Flee(glm::vec3 target, glm::vec3 currentVelocity, glm::vec3 currentPosition)
+{
+	glm::vec3 maxVelo((-10.0f / 10.0f) * (m_diff / 100.f), 0.0f, (-12.0f / 10.0f) * (m_diff / 100.f));
+
+	//gets the desired vector
+	glm::vec3 desired = (target - currentPosition);
+	desired = glm::normalize(desired) * maxVelo;
+	glm::vec3 steering = desired - currentVelocity;
+	glm::vec3 moveVelo = steering;
+
+	//return it
+	return moveVelo;
+}
+
+glm::vec3 EnemyComponent::Evade(glm::vec3 targetPos, glm::vec3 targetVelocity, glm::vec3 currentVelocity, glm::vec3 currentPosition)
+{
+	//distance
+	glm::vec3 distance = targetPos - currentPosition;
+
+	//updates ahead
+	float T = distance.x / maxVelo.x;
+
+	//future position of target
+	glm::vec3 futurePos = targetPos + targetVelocity * T;
+
+	return Flee(futurePos, currentVelocity, currentPosition);
+}

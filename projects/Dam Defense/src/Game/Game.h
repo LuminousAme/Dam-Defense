@@ -124,6 +124,10 @@ public:
 
 	void SetUpgradeBuff(bool up) { upgradeAbilities = up; }
 
+
+	void SetShopping(bool shop) { shopping = shop; }
+	void SetPauseRender(bool pause) { pauseRender = pause; }
+
 	int GetLastWave() { return lastWave; }
 
 	int GetHealCost() { return healCost; }
@@ -327,6 +331,9 @@ protected:
 	bool upgradeAbilities;
 	int upgradeCost = 50; //score cost of upgrade powerup
 	bool upgradeScoreCost; //bool to reset after every round
+
+	bool shopping; //whether the payer is in shop or not 
+	bool pauseRender;
 
 	/////////// SOUND CONTROL///////////////
 	//control melody

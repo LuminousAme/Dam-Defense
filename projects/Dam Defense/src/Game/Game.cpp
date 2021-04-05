@@ -291,7 +291,7 @@ void Game::KeyDownChecks()
 	}
 
 	//if they try to press the escape key, pause or unpause the game
-	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc)) {
+	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc) && (!shopping || (shopping && pauseRender) )) {
 		m_InputDelay = m_InputDelayTime;
 		m_paused = !m_paused;
 		TTN_Scene::SetPaused(m_paused);
@@ -1524,7 +1524,7 @@ void Game::WaveUpdate(float deltaTime) {
 	}
 
 	//if the cooldown between waves has ended, begin the next wave
-	else if (!m_waveInProgress && m_timeTilNextWave <= 0.0f && m_timeUntilNextSpawn >= 0.0f) {
+	else if (!m_waveInProgress && m_timeTilNextWave <= 0.0f && m_timeUntilNextSpawn >= 0.0f && (!shopping)) {
 		m_currentWave++;
 		m_boatsRemainingThisWave = m_enemiesPerWave * m_currentWave;
 		m_boatsStillNeedingToSpawnThisWave = m_boatsRemainingThisWave;
