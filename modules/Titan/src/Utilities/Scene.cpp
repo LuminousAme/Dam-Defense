@@ -5,8 +5,6 @@
 // Scene.cpp - source file for the class that handles ECS, render calls, etc.
 #include "Titan/Utilities/Scene.h"
 
-#include "TTK/TTKContext.h"
-
 namespace Titan {
 	//default constructor
 
