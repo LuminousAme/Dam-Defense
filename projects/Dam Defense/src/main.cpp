@@ -471,7 +471,6 @@ void PrepareAssetLoading() {
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Option BG", "textures/Wood_Menu.png", 1); //background behind the option bar
 
-
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Base", "textures/Button_1.png", 1); //button when not being hovered over
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Button Hovering", "textures/Button_2.png", 1); //button when being hovered over
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Play-Text", "textures/text/play.png", 1); //rendered text of word Play
@@ -526,8 +525,6 @@ void PrepareAssetLoading() {
 
 	//undo
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Undo", "textures/Options/Undo.png", 1); //texture for apply button option
-
-
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Continue Hovered", "textures/shop/Continue Button_Hovered.png", 1); //texture for continue button
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Continue", "textures/shop/Continue Button_Normal.png", 1); //texture for continue button

@@ -70,6 +70,6 @@ namespace Titan {
 		float m_maxShadowBias = 0.001f;
 
 		//ints
-		int m_pcfFilterSamples = 5;
+		int m_pcfFilterSamples = 4;
 	};
 }
