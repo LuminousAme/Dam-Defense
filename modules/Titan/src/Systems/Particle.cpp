@@ -36,6 +36,7 @@ namespace Titan {
 		readGraphColor = &defaultReadGraph;
 		readGraphRotation = &defaultReadGraph;
 		readGraphScale = &defaultReadGraph;
+		readGraphAccelleration = &defaultReadGraph;
 
 		SetUpRenderingStuff();
 	}
@@ -66,6 +67,7 @@ namespace Titan {
 		readGraphColor = &defaultReadGraph;
 		readGraphRotation = &defaultReadGraph;
 		readGraphScale = &defaultReadGraph;
+		readGraphAccelleration = &defaultReadGraph;
 
 		SetUpRenderingStuff();
 
@@ -83,6 +85,9 @@ namespace Titan {
 		delete[] EndVelocities;
 		delete[] StartScales;
 		delete[] EndScales;
+		delete[] StartAccelerations;
+		delete[] EndAccelerations;
+		delete[] acceleratingVelocity;
 		delete[] timeAlive;
 		delete[] lifeTimes;
 		delete[] Active;
@@ -219,13 +224,17 @@ namespace Titan {
 		readGraphScale = function;
 	}
 
+	void TTN_ParticleSystem::accelerationReadGraph(float(*function)())
+	{
+	}
+
 	//updates the particle system
 	void TTN_ParticleSystem::Update(float deltaTime)
 	{
 		//only run if the particle system is not paused
 		if (!m_paused) {
 			//only emit new particles if it still has durtation remainig or doesn't but is looping
-			if (m_durationRemaining > 0.0f || (m_durationRemaining <= 0.0f && m_loop))
+			if ((m_durationRemaining > 0.0f || (m_durationRemaining <= 0.0f && m_loop)) && (m_elapsedTime < m_stopTime || m_stopTime < 0.0f))
 			{
 				//emit new particles
 				m_emissionTimer += deltaTime;
@@ -240,6 +249,7 @@ namespace Titan {
 					Emit();
 				}
 
+				m_elapsedTime += deltaTime;
 				m_durationRemaining -= deltaTime;
 			}
 			//if it doesn't have duration left but should loop then loop it
@@ -263,8 +273,14 @@ namespace Titan {
 
 				//get a t value for interpolation
 				float t = std::clamp(timeAlive[i] / lifeTimes[i], 0.0f, 1.0f);
+
+				//update acceleterating velocity 
+				acceleratingVelocity[i] += glm::mix(StartAccelerations[i], EndAccelerations[i], t) * deltaTime;
+
+				
 				//update the position of the particlce based on the interpolation of the velocities
-				Positions[i] += glm::mix(StartVelocities[i], EndVelocities[i], readGraphVelo(t)) * deltaTime;
+				Positions[i] += glm::mix(StartVelocities[i], EndVelocities[i], readGraphVelo(t)) * deltaTime + acceleratingVelocity[i] * deltaTime + 
+					glm::mix(StartAccelerations[i], EndAccelerations[i], t) * (deltaTime * deltaTime);
 			}
 		}
 	}
@@ -511,6 +527,17 @@ namespace Titan {
 			EndScales[m_activeParticleIndex] = endScale;
 		}
 
+		//accelerations 
+		{
+			float t = TTN_Random::RandomFloat(0.0f, 1.0f);
+			glm::vec3 startAccel = glm::mix(m_particle._startAcceleration, m_particle._startAcceleration2, t);
+			t = TTN_Random::RandomFloat(0.0f, 1.0f);
+			glm::vec3 endAccel = glm::mix(m_particle._endAcceleration, m_particle._endAccelertaion2, t);
+			StartAccelerations[m_activeParticleIndex] = startAccel;
+			EndAccelerations[m_activeParticleIndex] = endAccel;
+			acceleratingVelocity[m_activeParticleIndex] = glm::vec3(0.0f);
+		}
+
 		//how long the particle has been alive and how long it should live (used to caculate t values)
 		timeAlive[m_activeParticleIndex] = 0.0f;
 		float t = TTN_Random::RandomFloat(0.0f, 1.0f);
@@ -566,6 +593,9 @@ namespace Titan {
 		EndVelocities = new glm::vec3[m_maxParticlesCount];
 		StartScales = new float[m_maxParticlesCount];
 		EndScales = new float[m_maxParticlesCount];
+		StartAccelerations = new glm::vec3[m_maxParticlesCount];
+		EndAccelerations = new glm::vec3[m_maxParticlesCount];
+		acceleratingVelocity = new glm::vec3[m_maxParticlesCount];
 		timeAlive = new float[m_maxParticlesCount];
 		lifeTimes = new float[m_maxParticlesCount];
 		Active = new bool[m_maxParticlesCount];
@@ -584,6 +614,9 @@ namespace Titan {
 			EndScales[i] = 0.0f;
 			timeAlive[i] = 0.0f;
 			lifeTimes[i] = 0.0f;
+			StartAccelerations[i] = glm::vec3(0.0f);
+			EndAccelerations[i] = glm::vec3(0.0f);
+			acceleratingVelocity[i] = glm::vec3(0.0f);
 			Active[i] = false;
 
 			particle_pos[i] = glm::vec3(0.0f);

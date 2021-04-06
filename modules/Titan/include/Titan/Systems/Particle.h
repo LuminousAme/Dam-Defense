@@ -26,6 +26,8 @@ namespace Titan {
 		float _startSpeed, _startSpeed2;
 		float _endSpeed, _endSpeed2;
 		float _lifeTime, _lifeTime2;
+		glm::vec3 _startAcceleration, _startAcceleration2;
+		glm::vec3 _endAcceleration, _endAccelertaion2;
 		TTN_Mesh::smptr _mesh;
 		TTN_Material::smatptr _mat;
 
@@ -45,6 +47,10 @@ namespace Titan {
 			_endSpeed2 = 1.0f;
 			_lifeTime = 1.0f;
 			_lifeTime2 = 1.0f;
+			_startAcceleration = glm::vec3(0.0f);
+			_startAcceleration2 = glm::vec3(0.0f);
+			_endAcceleration = glm::vec3(0.0f);
+			_endAccelertaion2 = glm::vec3(0.0f);
 			_mesh = TTN_Mesh::Create();
 			_mat = TTN_Material::Create();
 		}
@@ -110,6 +116,26 @@ namespace Titan {
 		void SetTwoLifetimes(float LifeTime, float LifeTime2) {
 			_lifeTime = LifeTime;
 			_lifeTime2 = LifeTime2;
+		}
+
+		void SetOneStartAcceleration(glm::vec3 acceleration) {
+			_startAcceleration = acceleration;
+			_startAcceleration2 = acceleration;
+		}
+
+		void SetTwoStartAccelerations(glm::vec3 acceleration, glm::vec3 acceleration2) {
+			_startAcceleration = acceleration;
+			_startAcceleration2 = acceleration2;
+		}
+
+		void SetOneEndAcelleration(glm::vec3 acceleration) {
+			_endAcceleration = acceleration;
+			_endAccelertaion2 = acceleration;
+		}
+
+		void SetTwoEndAcellerations(glm::vec3 acceleration, glm::vec3 acceleration2) {
+			_endAcceleration = acceleration;
+			_endAccelertaion2 = acceleration2;
 		}
 
 		void SetMesh(TTN_Mesh::smptr mesh) {
@@ -181,6 +207,7 @@ namespace Titan {
 		void SetEmissionRate(float emissionRate);
 		void SetEmitterRotation(glm::vec3 rotation);
 		void SetPaused(bool paused);
+		void SetStopAfter(float stopAfterTime) { m_stopTime = stopAfterTime; }
 
 		//getters
 		float GetEmitterAngle() { return m_EmitterAngle; }
@@ -197,6 +224,7 @@ namespace Titan {
 		void ColorReadGraphCallback(float (*function)(float));
 		void RotationReadGraphCallback(float (*function)(float));
 		void ScaleReadGraphCallback(float (*function)(float));
+		void accelerationReadGraph(float (*function)());
 
 		//updates the particle system as a whole, as well as the all the indivual particles 
 		void Update(float deltaTime);
@@ -220,6 +248,10 @@ namespace Titan {
 		glm::vec3* StartVelocities;
 		glm::vec3* EndVelocities;
 
+		glm::vec3* StartAccelerations;
+		glm::vec3* EndAccelerations;
+		glm::vec3* acceleratingVelocity;
+
 		float* StartScales;
 		float* EndScales;
 
@@ -240,6 +272,8 @@ namespace Titan {
 		float m_emissionRate;
 		TTN_ParticleTemplate m_particle;
 		float m_duration;
+		float m_stopTime = -1.0f;
+		float m_elapsedTime = 0.0f;
 		bool m_loop;
 		float m_emissionTimer;
 		bool m_paused;
@@ -270,6 +304,7 @@ namespace Titan {
 		float (*readGraphColor)(float);
 		float (*readGraphRotation)(float);
 		float (*readGraphScale)(float);
+		float (*readGraphAccelleration)(float);
 
 		void SetUpRenderingStuff();
 		void SetUpData();

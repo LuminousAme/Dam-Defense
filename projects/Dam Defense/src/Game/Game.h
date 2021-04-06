@@ -295,7 +295,7 @@ protected:
 	float m_InputDelay; //the time remaining before it accepts player input, used when the player is moving in and out of the scene
 
 	/////////////ENEMY AND WAVE CONTROLS//////////////////
-	float muzzleFlashCD = 1.50f; // time for muzzle flash
+	float muzzleFlashCD = 0.50f; // time for muzzle flash
 	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
 	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
 	int m_enemiesPerWave = 1; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
@@ -361,6 +361,7 @@ protected:
 	TTN_ParticleTemplate expolsionParticle;//expolsion particles
 	TTN_ParticleTemplate birdParticle;//bird expolsion particles
 	TTN_ParticleTemplate gunParticle;//enemy ship gun particles
+	TTN_ParticleTemplate splashparticle;//splash particles
 
 	//set up functions, called by InitScene()
 protected:
@@ -400,7 +401,8 @@ protected:
 
 	void CreateExpolsion(glm::vec3 location);
 	void CreateBirdExpolsion(glm::vec3 location);
-	void CreateMuzzleFlash(glm::vec3 location, entt::entity e);
+	void CreateMuzzleFlash(glm::vec3 location, entt::entity e, glm::vec3 direction, float directionMultipler, bool inverted);
+	void CreateSplash(glm::vec3 location);
 
 	//CG assingment 2 stuff
 protected:
