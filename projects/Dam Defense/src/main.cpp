@@ -199,6 +199,7 @@ int main() {
 			TTN_Application::TTN_Input::SetCursorLocked(false);
 			paused->SetShouldResume(false);
 			paused->SetShouldRender(true);
+			paused->SetRendering(true);
 			options->SetShouldRender(false);
 		}
 		//if the menu has appeared but the player has unpaused with the esc key
@@ -207,6 +208,8 @@ int main() {
 			paused->SetShouldResume(false);
 			paused->SetShouldRender(false);
 			options->SetShouldRender(false);
+			paused->SetRendering(false);
+
 		}
 		//if the menu has appeared and the player has unpaused from the menu button
 		else if (gameScene->GetShouldRender() && paused->GetShouldRender() && paused->GetShouldResume()) {
@@ -215,6 +218,8 @@ int main() {
 			gameScene->SetPaused(false);
 			paused->SetShouldResume(false);
 			paused->SetShouldRender(false);
+			paused->SetRendering(false);
+
 		}
 
 		//if the menu has appeared and the player has pressed the menu button from the menu button
@@ -224,6 +229,7 @@ int main() {
 			gameScene->SetShouldRender(false);
 			gameSceneUI->SetShouldRender(false);
 			paused->SetShouldRender(false);
+			paused->SetRendering(false);
 			options->SetShouldRender(false);
 			//paused->SetShouldResume(true);
 			paused->SetShouldMenu(false);
@@ -239,6 +245,7 @@ int main() {
 			gameScene->SetShouldRender(false);
 			gameSceneUI->SetShouldRender(false);
 			paused->SetShouldRender(false);
+			paused->SetRendering(false);
 			paused->SetShouldOptions(false);
 			audioEngine.GetBus("Music").SetPaused(true);
 			audioEngine.GetBus("SFX").SetPaused(true);
@@ -251,6 +258,7 @@ int main() {
 			gameScene->SetShouldRender(true);
 			gameSceneUI->SetShouldRender(true);
 			paused->SetShouldRender(true);
+			paused->SetRendering(true);
 			audioEngine.GetBus("Music").SetPaused(false);
 			audioEngine.GetBus("SFX").SetPaused(false);
 			options->SetShouldRender(false);
@@ -376,6 +384,8 @@ int main() {
 			gameSceneUI->SetCannonCost(gameScene->GetCannonCost());
 			gameSceneUI->SetCooldownCost(gameScene->GetCooldownCost());
 			gameSceneUI->SetUpgradeCost(gameScene->GetUpgradeCost());
+			gameScene->SetShopping(gameSceneUI->GetShouldShopping());
+			gameScene->SetPauseRender(paused->GetRendering());
 
 			gameSceneUI->SetArcade(gameScene->GetArcade());
 			gameSceneUI->SetLastWave(gameScene->GetLastWave());

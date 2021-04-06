@@ -29,10 +29,12 @@ public:
 	bool GetShouldResume() { return shouldResume; }
 	bool GetShouldMenu() { return shouldMenu; }
 	bool GetShouldOptions() { return shouldOptions; }
+	bool GetRendering() { return isRendering; }
 
 	void SetShouldResume(bool resume) { shouldResume = resume; }
 	void SetShouldMenu(bool menu) { shouldMenu = menu; }
 	void SetShouldOptions(bool option) { shouldOptions = option; }
+	void SetRendering(bool rend) { isRendering = rend; }
 
 private:
 	//entities
@@ -66,4 +68,5 @@ private:
 	bool shouldResume;
 	bool shouldMenu;
 	bool shouldOptions;
+	bool isRendering;
 };

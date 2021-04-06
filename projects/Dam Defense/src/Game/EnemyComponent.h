@@ -6,7 +6,7 @@
 #include "Titan/Application.h"
 #include "Titan/Utilities/Interpolation.h"
 
-using namespace Titan; 
+using namespace Titan;
 
 //Enemy component class
 class EnemyComponent {
@@ -43,9 +43,12 @@ public:
 	//Updates the boat's physics
 	void Update(float deltaTime);
 
-	//steering behaviours 
+	//steering behaviours
 	glm::vec3 Seek(glm::vec3 target, glm::vec3 currentVelocity, glm::vec3 currentPosition);
 	glm::vec3 Arrive(glm::vec3 target, glm::vec3 currentVelocity, glm::vec3 currentPosition, float accetpableDistance);
+
+	glm::vec3 Flee(glm::vec3 target, glm::vec3 currentVelocity, glm::vec3 currentPosition);
+	glm::vec3 Evade(glm::vec3 targetPos, glm::vec3 targetVelocity, glm::vec3 currentVelocity, glm::vec3 currentPosition);
 
 protected:
 	entt::entity m_entityNumber; //the entity number for the current boat, used to access it's transforms and physics
@@ -63,6 +66,9 @@ protected:
 	bool m_alive; //wheter or not a ship is alive
 	bool m_attacking; //whether or not a ship is attacking
 	entt::entity m_cannonEntityRef;
+
+	//max velocity of boat
+	glm::vec3 maxVelo = glm::vec3 ((-10.0f / 10.0f)* (m_diff / 100.f), 0.0f, (-12.0f / 10.0f)* (m_diff / 100.f));
 
 	glm::vec3 direction; //current direction of the boat
 	glm::vec3 deathDirection; //direction the boat was facing when it died
