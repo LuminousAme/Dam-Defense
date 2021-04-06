@@ -1957,78 +1957,81 @@ void Game::GameSounds(float deltaTime)
 
 void Game::Shop(float deltaTime)
 {
-	//heal from shop
-	if ((healCounter > 0)) {
-		//if (m_score < healCost) { //if score is less than the cost, do nothing
-		//}
-		//else {
-		if (Dam_health < 100.f && Dam_health>90.f) { // if dam health is above 90 but below 100
-			healAmount = abs(Dam_health - 100.f); //get remaining health
-		}
-		else // else normal heal amount
-			healAmount = 10.f;
+	if (shopping) {
+		//heal from shop
+		if ((healCounter > 0)) {
+			//if (m_score < healCost) { //if score is less than the cost, do nothing
+			//}
+			//else {
+			if (Dam_health < 100.f && Dam_health>90.f) { // if dam health is above 90 but below 100
+				healAmount = abs(Dam_health - 100.f); //get remaining health
+			}
+			else // else normal heal amount
+				healAmount = 10.f;
 
-		Dam_health = Dam_health + healAmount; //heal
-		//Dam_health = round(Dam_health);
-		m_score = m_score - healCost;//score cost of heal
-		//std::cout << Dam_health << std::endl;
-		//}
-	}
-
-	//faster cannon
-	if (cannonBuff) {
-		playerShootCooldown = 0.45f;
-		Get<TTN_MorphAnimator>(cannon).getAnimRefAtIndex(1).SetPlaybackSpeedFactor(1.5555555555f);
-		//std::cout << "  CD LOWWW " << std::endl;
-		if (!cannonScoreCost && m_score >= cannonCost) {
-			m_score = m_score - cannonCost;//score cost of cannon powerup
-			cannonScoreCost = true;
-		}
-	}
-
-	else {
-		playerShootCooldown = 0.7f;
-		Get<TTN_MorphAnimator>(cannon).getAnimRefAtIndex(1).SetPlaybackSpeedFactor(1.0f);
-		cannonScoreCost = false;
-	}
-
-	//if the player has lower ability cd from shop
-	if (abilityCooldownBuff) {
-		FlameThrowerCoolDown = 0.666666666f * 30.0f;
-		BirdBombCooldown = 0.666666666f * 15.0f;
-		if (!abilityScoreCost && m_score >= abilityCost) {
-			m_score = m_score - abilityCost;//score cost of ability power up
-			abilityScoreCost = true;
-		}
-	}
-	else {
-		FlameThrowerCoolDown = 30.0f;
-		BirdBombCooldown = 15.0f;
-		abilityScoreCost = false;
-	}
-
-	if (upgradeAbilities) {
-		FlameActiveTime = 5.0f; //longer active flamethrower
-		//std::cout << " UPPPPPPPPPPPPPPPGRADe" << std::endl;
-		//std::cout << FlameActiveTime << std::endl;
-		for (auto bird : birds) {
-			Get<BirdComponent>(bird).SetDiveSpeed(50.0f / 10.0f);
-			//Get<BirdComponent>(bird).SetDiveWeight
+			Dam_health = Dam_health + healAmount; //heal
+			//Dam_health = round(Dam_health);
+			m_score = m_score - healCost;//score cost of heal
+			//std::cout << Dam_health << std::endl;
+			//}
 		}
 
-		if (!upgradeScoreCost && m_score >= upgradeCost) {
-			m_score = m_score - upgradeCost;//score cost of ability power up
-			upgradeScoreCost = true;
+		//faster cannon
+		if (cannonBuff) {
+			playerShootCooldown = 0.45f;
+			Get<TTN_MorphAnimator>(cannon).getAnimRefAtIndex(1).SetPlaybackSpeedFactor(1.5555555555f);
+			//std::cout << "  CD LOWWW " << std::endl;
+			if (!cannonScoreCost && m_score >= cannonCost) {
+				m_score = m_score - cannonCost;//score cost of cannon powerup
+				cannonScoreCost = true;
+			}
 		}
-	}
 
-	else
-	{
-		FlameActiveTime = 3.0f; // regular flame timer
-		for (auto bird : birds) {
-			Get<BirdComponent>(bird).SetDiveSpeed(25.0f / 10.0f);//regular dive speed
+		else {
+			playerShootCooldown = 0.7f;
+			Get<TTN_MorphAnimator>(cannon).getAnimRefAtIndex(1).SetPlaybackSpeedFactor(1.0f);
+			cannonScoreCost = false;
 		}
-		upgradeScoreCost = false;
+
+		//if the player has lower ability cd from shop
+		if (abilityCooldownBuff) {
+			FlameThrowerCoolDown = 0.666666666f * 30.0f;
+			BirdBombCooldown = 0.666666666f * 15.0f;
+			if (!abilityScoreCost && m_score >= abilityCost) {
+				m_score = m_score - abilityCost;//score cost of ability power up
+				abilityScoreCost = true;
+			}
+		}
+		else {
+			FlameThrowerCoolDown = 30.0f;
+			BirdBombCooldown = 15.0f;
+			abilityScoreCost = false;
+		}
+
+		if (upgradeAbilities) {
+			FlameActiveTime = 5.0f; //longer active flamethrower
+			//std::cout << " UPPPPPPPPPPPPPPPGRADe" << std::endl;
+			//std::cout << FlameActiveTime << std::endl;
+			for (auto bird : birds) {
+				Get<BirdComponent>(bird).SetDiveSpeed(50.0f / 10.0f);
+				//Get<BirdComponent>(bird).SetDiveWeight
+			}
+
+			if (!upgradeScoreCost && m_score >= upgradeCost) {
+				m_score = m_score - upgradeCost;//score cost of ability power up
+				upgradeScoreCost = true;
+			}
+		}
+
+		else
+		{
+			FlameActiveTime = 3.0f; // regular flame timer
+			for (auto bird : birds) {
+				Get<BirdComponent>(bird).SetDiveSpeed(25.0f / 10.0f);//regular dive speed
+			}
+			upgradeScoreCost = false;
+		}
+
 	}
 
 	if (m_score < 0)

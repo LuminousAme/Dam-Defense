@@ -124,7 +124,6 @@ public:
 
 	void SetUpgradeBuff(bool up) { upgradeAbilities = up; }
 
-
 	void SetShopping(bool shop) { shopping = shop; }
 	void SetPauseRender(bool pause) { pauseRender = pause; }
 
@@ -302,7 +301,7 @@ protected:
 	float muzzleFlashCD = 1.50f; // time for muzzle flash
 	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
 	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
-	int m_enemiesPerWave = 4; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
+	int m_enemiesPerWave = 1; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
 
 	int m_currentWave = 0; //the current wave
 	float m_timeTilNextWave; //the timer until the next wave starts, used after a wave has ended
@@ -336,7 +335,7 @@ protected:
 	int upgradeCost = 50; //score cost of upgrade powerup
 	bool upgradeScoreCost; //bool to reset after every round
 
-	bool shopping; //whether the payer is in shop or not 
+	bool shopping; //whether the payer is in shop or not
 	bool pauseRender;
 
 	/////////// SOUND CONTROL///////////////

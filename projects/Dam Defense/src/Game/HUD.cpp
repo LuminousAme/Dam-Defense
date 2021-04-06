@@ -742,7 +742,6 @@ void GameUI::Update(float deltaTime)
 
 	//update the score number
 	{
-		int t;
 		while (GetNumOfDigits(m_score) < scoreNums.size()) {
 			DeleteEntity(scoreNums[scoreNums.size() - 1]);
 			scoreNums.pop_back();
@@ -788,269 +787,266 @@ void GameUI::Update(float deltaTime)
 	}
 
 	if (!m_paused) {}
-		//update the wave complete
-		{
-			while (GetNumOfDigits(m_currentWave) < waveNums.size()) {
-				DeleteEntity(waveNums[waveNums.size() - 1]);
-				waveNums.pop_back();
+	//update the wave complete
+	{
+		while (GetNumOfDigits(m_currentWave) < waveNums.size()) {
+			DeleteEntity(waveNums[waveNums.size() - 1]);
+			waveNums.pop_back();
+		}
+
+		if (GetNumOfDigits(m_currentWave) > waveNums.size())
+			MakeWaveNumEntity();
+
+		for (int i = 0; i < waveNums.size(); i++) {
+			Get<TTN_Renderer2D>(waveNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_currentWave, waveNums.size() - i - 1)) + "-Text"));
+		}
+
+		//update time
+		m_waveCompleteTime += deltaTime;
+		if (m_waveProgress == 1.0f && waveDone && m_waveCompleteTime > 15.0f) {
+			m_waveCompleteTime = 0.0f;
+		}
+
+		//update position
+		float t = waveCompleteLerpParamter(m_waveCompleteTime / m_waveCompleteTotalTime);
+		glm::vec3 centerPos = TTN_Interpolation::Lerp(glm::vec3(1500.0f, 0.0f, 1.0f), glm::vec3(-1500.0f, 0.0f, 1.0f), t);
+		int offset = std::ceil((float)waveNums.size() / 2.0f);
+		//position of the numbers
+		for (int i = 0; i < waveNums.size(); i++) {
+			TTN_Transform& trans = Get<TTN_Transform>(waveNums[i]);
+			if (i < offset) {
+				//places the numbers to the left of the center
+				trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
 			}
-
-			if (GetNumOfDigits(m_currentWave) > waveNums.size())
-				MakeWaveNumEntity();
-
-			for (int i = 0; i < waveNums.size(); i++) {
-				Get<TTN_Renderer2D>(waveNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(m_currentWave, waveNums.size() - i - 1)) + "-Text"));
+			else {
+				//places the numbers on and to the right of the center
+				trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
 			}
+		}
+		TTN_Transform& firstNumTrans = Get<TTN_Transform>(waveNums[0]);
+		//places the wave text
+		Get<TTN_Transform>(waveText).SetPos(firstNumTrans.GetGlobalPos() + glm::vec3(0.35f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
+			std::abs(Get<TTN_Transform>(waveText).GetScale().x), 0.0f, 0.0f));
 
-			//update time
-			m_waveCompleteTime += deltaTime;
-			if (m_waveProgress == 1.0f && waveDone && m_waveCompleteTime > 15.0f) {
-				m_waveCompleteTime = 0.0f;
-			}
+		TTN_Transform& lastNumTrans = Get<TTN_Transform>(waveNums[waveNums.size() - 1]);
+		//places the complete text
+		Get<TTN_Transform>(completeText).SetPos(lastNumTrans.GetGlobalPos() - glm::vec3(0.45f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
+			std::abs(Get<TTN_Transform>(completeText).GetScale().x), 0.0f, 0.0f));
 
+		//when the text leaves, opens shop and resets all shop based power ups
+		if ((firstNumTrans.GetGlobalPos().x >= -599.9f && firstNumTrans.GetGlobalPos().x <= -499.f) && !shopOnce && (m_currentWave != lastWave || m_arcade)) {
+			shouldShop = true;
+			shopOnce = true;
+			cannonPower = false;
+			abilityCooldownBuff = false;
+			upgradeAbilities = false;
+			lerpAway = false;
+			lerpTime2 = 10.f;
+			//std::cout << "WORKING" << std::endl;
+			Get<TTN_Renderer2D>(buttonHealth).SetColor(glm::vec4(1.0f));
+			Get<TTN_Renderer2D>(buttonCannon).SetColor(glm::vec4(1.0f));
+			Get<TTN_Renderer2D>(buttonAbilityCD).SetColor(glm::vec4(1.0f));
+			Get<TTN_Renderer2D>(buttonUpgrade).SetColor(glm::vec4(1.0f));
+		}
+	}
+
+	// unpause indicators
+
+	if ((m_currentWave > waveTracker) && m_waveProgress == 1.0f) { //check if round ended and its a new round
+		shopOnce = false; //set shoponce to false so we know the player hasn't seen the shop yet
+	}
+
+	if (waveChange) { // if the player closes out of the shop and goes on to a new wave
+		waveTracker++; // increment wave counter (1 behind current wave)
+		waveChange = false;
+		healCounter = 0;
+		healOnce = false;
+		//	std::cout << "  wave tracking " << std::endl;
+	}
+
+	/*std::cout << waveTracker << "  wave " << std::endl;
+	std::cout << m_currentWave << " curretn " << std::endl;*/
+	//std::cout << trans.GetGlobalPos().x << std::endl;
+	//std::cout << glm::to_string(trans.GetPos()) << " LLL LLLLLLLLLLL" << std::endl;
+
+	//if wave complete has lerped away and shouldshop bool is true
+	if (shouldShop) {
+		//TTN_Transform& trans = Get<TTN_Transform>(background);
+		TTN_Transform& Shoptrans = Get<TTN_Transform>(shop);
+		TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);
+		TTN_Transform& buttonTransCannon = Get<TTN_Transform>(buttonCannon);
+		TTN_Transform& buttonTransAbility = Get<TTN_Transform>(buttonAbilityCD);
+		TTN_Transform& buttonTransUpgrade = Get<TTN_Transform>(buttonUpgrade);
+		TTN_Transform& buttonTransContinue = Get<TTN_Transform>(buttonContinue);
+
+		//update time
+	/*	if (!m_paused)*/
+		lerpTime += deltaTime;
+
+		/*	else
+				lerpTime = lerpTime;*/
+
+		if (m_waveProgress == 1.0f && lerpTime > 5.0f) {
+			lerpTime = 0.0f;
+		}
+
+		//if the shop has lerped in
+		if (shopping) {
+			lerpTime = 0.0f;
+			//trans.SetPos(glm::vec3(0.0f, 0.0f, 0.20f));
+			//buttonTrans.SetPos(glm::vec3(510.0f, 200.0f, 0.10f));
+			//buttonTransAbility.SetPos(glm::vec3(-425.0f, -200.0f, 0.10f));
+		}
+
+		if ((Shoptrans.GetGlobalPos().x >= -10.f && Shoptrans.GetGlobalPos().x <= 10.f || Shoptrans.GetGlobalPos().x <= 0.f) && !shopping) { // if shop background reaches the end of the screen
+			shopping = true;
+			//std::cout << glm::to_string(Shoptrans.GetPos()) << "  lsss " << std::endl;
+			//std::cout << trans.GetGlobalPos().x << " LLL LLLLLLLLLLL" << std::endl;
+			Shoptrans.SetPos(glm::vec3(0.0f, 0.0f, 0.15f));
+		}
+
+		if (!shopping) { //if the shop hasn't lerped in yet
 			//update position
-			float t = waveCompleteLerpParamter(m_waveCompleteTime / m_waveCompleteTotalTime);
-			glm::vec3 centerPos = TTN_Interpolation::Lerp(glm::vec3(1500.0f, 0.0f, 1.0f), glm::vec3(-1500.0f, 0.0f, 1.0f), t);
-			int offset = std::ceil((float)waveNums.size() / 2.0f);
-			//position of the numbers
-			for (int i = 0; i < waveNums.size(); i++) {
-				TTN_Transform& trans = Get<TTN_Transform>(waveNums[i]);
-				if (i < offset) {
-					//places the numbers to the left of the center
-					trans.SetPos(centerPos + glm::vec3((float)(offset - i) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
-				}
-				else {
-					//places the numbers on and to the right of the center
-					trans.SetPos(centerPos - glm::vec3((float)(i - offset) * 0.35f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
-				}
-			}
-			TTN_Transform& firstNumTrans = Get<TTN_Transform>(waveNums[0]);
-			//places the wave text
-			Get<TTN_Transform>(waveText).SetPos(firstNumTrans.GetGlobalPos() + glm::vec3(0.35f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
-				std::abs(Get<TTN_Transform>(waveText).GetScale().x), 0.0f, 0.0f));
+			glm::vec3 centerPos = glm::vec3(0.f);
+			glm::vec3 centerPosShop = glm::vec3(0.f);
+			glm::vec3 centerPosButton = glm::vec3(0.f);
+			glm::vec3 centerPosCannonButton = glm::vec3(0.f);
+			glm::vec3 centerPosAbilityButton = glm::vec3(0.f);
+			glm::vec3 centerPosUpgradeButton = glm::vec3(0.f);
+			glm::vec3 centerPosContinue = glm::vec3(0.f);
 
-			TTN_Transform& lastNumTrans = Get<TTN_Transform>(waveNums[waveNums.size() - 1]);
-			//places the complete text
-			Get<TTN_Transform>(completeText).SetPos(lastNumTrans.GetGlobalPos() - glm::vec3(0.45f * std::abs(firstNumTrans.GetScale().x) + 0.4f *
-				std::abs(Get<TTN_Transform>(completeText).GetScale().x), 0.0f, 0.0f));
+			float t = waveCompleteLerpParamter(lerpTime / lerpTotalTime);
+			//std::cout << " T Intwerpolate  " << t << std::endl;
 
-			//when the text leaves, opens shop and resets all shop based power ups
-			if ((firstNumTrans.GetGlobalPos().x >= -599.9f && firstNumTrans.GetGlobalPos().x <= -499.f) && !shopOnce && (m_currentWave != lastWave || m_arcade)) {
-				shouldShop = true;
-				shopOnce = true;
-				cannonPower = false;
-				abilityCooldownBuff = false;
-				upgradeAbilities = false;
-				lerpAway = false;
-				lerpTime2 = 10.f;
-				//std::cout << "WORKING" << std::endl;
-				Get<TTN_Renderer2D>(buttonHealth).SetColor(glm::vec4(1.0f));
-				Get<TTN_Renderer2D>(buttonCannon).SetColor(glm::vec4(1.0f));
-				Get<TTN_Renderer2D>(buttonAbilityCD).SetColor(glm::vec4(1.0f));
-				Get<TTN_Renderer2D>(buttonUpgrade).SetColor(glm::vec4(1.0f));
-			}
-		}
-
-
-		// unpause indicators
-
-		if ((m_currentWave > waveTracker) && m_waveProgress == 1.0f) { //check if round ended and its a new round
-			shopOnce = false; //set shoponce to false so we know the player hasn't seen the shop yet
-		}
-
-		if (waveChange) { // if the player closes out of the shop and goes on to a new wave
-			waveTracker++; // increment wave counter (1 behind current wave)
-			waveChange = false;
-			healCounter = 0;
-			healOnce = false;
-			//	std::cout << "  wave tracking " << std::endl;
-		}
-
-		/*std::cout << waveTracker << "  wave " << std::endl;
-		std::cout << m_currentWave << " curretn " << std::endl;*/
-		//std::cout << trans.GetGlobalPos().x << std::endl;
-		//std::cout << glm::to_string(trans.GetPos()) << " LLL LLLLLLLLLLL" << std::endl;
-
-		//if wave complete has lerped away and shouldshop bool is true
-		if (shouldShop) {
-			//TTN_Transform& trans = Get<TTN_Transform>(background);
-			TTN_Transform& Shoptrans = Get<TTN_Transform>(shop);
-			TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);
-			TTN_Transform& buttonTransCannon = Get<TTN_Transform>(buttonCannon);
-			TTN_Transform& buttonTransAbility = Get<TTN_Transform>(buttonAbilityCD);
-			TTN_Transform& buttonTransUpgrade = Get<TTN_Transform>(buttonUpgrade);
-			TTN_Transform& buttonTransContinue = Get<TTN_Transform>(buttonContinue);
-
-			//update time
-		/*	if (!m_paused)*/
-			lerpTime += deltaTime;
-
-			/*	else
-					lerpTime = lerpTime;*/
-
-			if (m_waveProgress == 1.0f && lerpTime > 5.0f) {
-				lerpTime = 0.0f;
-			}
-
-			//if the shop has lerped in
-			if (shopping) {
-				lerpTime = 0.0f;
-				//trans.SetPos(glm::vec3(0.0f, 0.0f, 0.20f));
-				//buttonTrans.SetPos(glm::vec3(510.0f, 200.0f, 0.10f));
-				//buttonTransAbility.SetPos(glm::vec3(-425.0f, -200.0f, 0.10f));
-			}
-
-			if ((Shoptrans.GetGlobalPos().x >= -10.f && Shoptrans.GetGlobalPos().x <= 10.f || Shoptrans.GetGlobalPos().x <= 0.f) && !shopping) { // if shop background reaches the end of the screen
-				shopping = true;
-				//std::cout << glm::to_string(Shoptrans.GetPos()) << "  lsss " << std::endl;
-				//std::cout << trans.GetGlobalPos().x << " LLL LLLLLLLLLLL" << std::endl;
-				Shoptrans.SetPos(glm::vec3(0.0f, 0.0f, 0.15f));
-			}
-
-			if (!shopping) { //if the shop hasn't lerped in yet
-				//update position
-				glm::vec3 centerPos = glm::vec3(0.f);
-				glm::vec3 centerPosShop = glm::vec3(0.f);
-				glm::vec3 centerPosButton = glm::vec3(0.f);
-				glm::vec3 centerPosCannonButton = glm::vec3(0.f);
-				glm::vec3 centerPosAbilityButton = glm::vec3(0.f);
-				glm::vec3 centerPosUpgradeButton = glm::vec3(0.f);
-				glm::vec3 centerPosContinue = glm::vec3(0.f);
-
-				float t = waveCompleteLerpParamter(lerpTime / lerpTotalTime);
-				//std::cout << " T Intwerpolate  " << t << std::endl;
-
-				centerPos = TTN_Interpolation::Lerp(glm::vec3(2880.0f, 0.0f, 0.20f), glm::vec3(-960.0f, 0.0f, 0.20f), t);//3840
-				centerPosShop = TTN_Interpolation::Lerp(glm::vec3(2880.0f, 0.0f, 0.15f), glm::vec3(-960.0f, 0.0f, 0.15f), t);
-				centerPosButton = TTN_Interpolation::Lerp(glm::vec3(2455.0f, 160.0f, 0.1f), glm::vec3(-1370.0f, 160.0f, 0.1f), t);
-				centerPosCannonButton = TTN_Interpolation::Lerp(glm::vec3(2455.0f, -200.0f, 0.1f), glm::vec3(-1370.0f, -200.0f, 0.1f), t);
-				//	centerPosAbilityButton = TTN_Interpolation::Lerp(glm::vec3(1605.0f, -200.0f, 0.1f), glm::vec3(-1795.0f, -200.0f, 0.1f), t);
-					//centerPosAbilityButton = TTN_Interpolation::Lerp(glm::vec3(2030.0f, -200.0f, 0.1f), glm::vec3(-2645.0f, -200.0f, 0.1f), t); //cooldowns
-				centerPosAbilityButton = TTN_Interpolation::Lerp(glm::vec3(1605.0f, -200.0f, 0.1f), glm::vec3(-2220.0f, -200.0f, 0.1f), t); //cooldowns
-				centerPosUpgradeButton = TTN_Interpolation::Lerp(glm::vec3(1605.0f, 160.0f, 0.1f), glm::vec3(-2220.0f, 160.0f, 0.1f), t);
-				centerPosContinue = TTN_Interpolation::Lerp(glm::vec3(2270.0f, -365.0f, 0.1f), glm::vec3(-1570.0f, -365.0f, 0.1f), t);
-				// x= 1920 + scale/2, buttons.x = 2880 - 425
-				//lerping stops at a halved pos (200.f in lerp is 100.f in pos)
-				// pos can be determined by (lerp 1- lerp 2 /2 - scale/2 [100]
-				centerPosContinue.x = round(centerPosContinue.x);
-				//centerPos.x = round(centerPos.x);
-				//std::cout << glm::to_string(buttonTransAbility.GetPos()) << "  LLL " << std::endl;
-
-				//shop hud lerp
-				Shoptrans.SetPos(centerPosShop - glm::vec3(0.5f * 1920.f, 0.0f, 0.0f));
-
-				//continue button lerping
-				if (buttonTransContinue.GetPos() == glm::vec3(0.0f, -365.0f, 0.10f)) {
-					buttonTransContinue.SetPos(glm::vec3(0.0f, -365.0f, 0.10f));
-				}
-				else {
-					buttonTransContinue.SetPos(centerPosContinue - glm::vec3(0.5f * std::abs(buttonTransContinue.GetScale().x), 0.0f, 0.0f));
-				}
-
-				//heal button lerping
-				if (buttonTrans.GetPos() == glm::vec3(425.0f, 160.0f, 0.10f)) {
-					buttonTrans.SetPos(glm::vec3(425.0f, 160.0f, 0.10f));
-				}
-				else {
-					buttonTrans.SetPos(centerPosButton - glm::vec3(0.5f * std::abs(buttonTrans.GetScale().x), 0.0f, 0.0f));
-					//std::cout << glm::to_string(buttonTrans.GetPos()) << "  BBBBB L " << std::endl;
-				}
-
-				//cannon firing button lerping
-				if (buttonTransCannon.GetPos() == glm::vec3(425.0f, -200.0f, 0.10f)) {
-					buttonTransCannon.SetPos(glm::vec3(425.0f, -200.0f, 0.10f));
-				}
-				else
-					buttonTransCannon.SetPos(centerPosCannonButton - glm::vec3(0.5f * std::abs(buttonTransCannon.GetScale().x), 0.0f, 0.0f));
-
-				//cooldown button lerping
-				if (buttonTransAbility.GetPos() == glm::vec3(-425.0f, -200.0f, 0.10f)) {
-					buttonTransAbility.SetPos(glm::vec3(-425.0f, -200.0f, 0.10f));
-				}
-				else
-					buttonTransAbility.SetPos(centerPosAbilityButton - glm::vec3(0.5f * std::abs(buttonTransAbility.GetScale().x), 0.0f, 0.0f));
-
-				//upgrade button lerping
-				if (buttonTransUpgrade.GetPos() == glm::vec3(-425.0f, 160.0f, 0.10f)) {
-					buttonTransUpgrade.SetPos(glm::vec3(-425.0f, 160.0f, 0.10f));
-				}
-				else
-					buttonTransUpgrade.SetPos(centerPosUpgradeButton - glm::vec3(0.5f * std::abs(buttonTransUpgrade.GetScale().x), 0.0f, 0.0f));
-
-				//trans.SetPos(centerPos - glm::vec3(0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
-				//std::cout << glm::to_string(buttonTransUpgrade.GetPos()) << std::endl;
-				//std::cout << glm::to_string(buttonTrans.GetPos()) << std::endl;
-				//std::cout << glm::to_string(buttonTransContinue.GetPos()) << std::endl;
-				//std::cout << glm::to_string(Shoptrans.GetPos()) << std::endl;
-			}
-		}
-
-		//put the sprites/textures back to original position and color
-		if (!shouldShop && lerpAway) {
-			//TTN_Transform& trans = Get<TTN_Transform>(background);
-			TTN_Transform& Shoptrans = Get<TTN_Transform>(shop);
-			TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);
-			TTN_Transform& buttonTransCannon = Get<TTN_Transform>(buttonCannon);
-			TTN_Transform& buttonTransAbility = Get<TTN_Transform>(buttonAbilityCD);
-			TTN_Transform& buttonTransUpgrade = Get<TTN_Transform>(buttonUpgrade);
-			TTN_Transform& buttonTransContinue = Get<TTN_Transform>(buttonContinue);
-
-			lerpTime2 += deltaTime;
-			if (lerpTime2 > 5.0f) {
-				lerpTime2 = 0.0f;
-			}
-			float t = waveCompleteLerpParamter(lerpTime2 / lerpTotalTime2);
-
-			//glm::vec3 centerPos = TTN_Interpolation::Lerp(glm::vec3(0.0f, 0.0f, 0.20f), glm::vec3(-3840.0f, 0.0f, 0.20f), t);//3840
-			glm::vec3 centerPosShop = TTN_Interpolation::Lerp(glm::vec3(0.0f, 0.0f, 0.15f), glm::vec3(-3840.0f, 0.0f, 0.15f), t);
-			glm::vec3 centerPosButton = TTN_Interpolation::Lerp(glm::vec3(425.0f, 160.0f, 0.1f), glm::vec3(-3415.0f, 160.0f, 0.1f), t);
-			glm::vec3 centerPosCannonButton = TTN_Interpolation::Lerp(glm::vec3(425.0f, -200.0f, 0.1f), glm::vec3(-3415.0f, -200.0f, 0.1f), t);
-			glm::vec3 centerPosAbilityButton = TTN_Interpolation::Lerp(glm::vec3(-425.0f, -200.0f, 0.1f), glm::vec3(-4265.0f, -200.0f, 0.1f), t);
-			glm::vec3 centerPosUpgradeButton = TTN_Interpolation::Lerp(glm::vec3(-425.0f, 160.0f, 0.1f), glm::vec3(-4265.0f, 160.0f, 0.1f), t);
-			glm::vec3 centerPosContinue = TTN_Interpolation::Lerp(glm::vec3(0.0f, -365.0f, 0.1f), glm::vec3(-3840.0f, -365.0f, 0.1f), t);
-
-			//std::cout << glm::to_string(Shoptrans.GetPos()) << "  LLL " << std::endl;
+			centerPos = TTN_Interpolation::Lerp(glm::vec3(2880.0f, 0.0f, 0.20f), glm::vec3(-960.0f, 0.0f, 0.20f), t);//3840
+			centerPosShop = TTN_Interpolation::Lerp(glm::vec3(2880.0f, 0.0f, 0.15f), glm::vec3(-960.0f, 0.0f, 0.15f), t);
+			centerPosButton = TTN_Interpolation::Lerp(glm::vec3(2455.0f, 160.0f, 0.1f), glm::vec3(-1370.0f, 160.0f, 0.1f), t);
+			centerPosCannonButton = TTN_Interpolation::Lerp(glm::vec3(2455.0f, -200.0f, 0.1f), glm::vec3(-1370.0f, -200.0f, 0.1f), t);
+			//	centerPosAbilityButton = TTN_Interpolation::Lerp(glm::vec3(1605.0f, -200.0f, 0.1f), glm::vec3(-1795.0f, -200.0f, 0.1f), t);
+				//centerPosAbilityButton = TTN_Interpolation::Lerp(glm::vec3(2030.0f, -200.0f, 0.1f), glm::vec3(-2645.0f, -200.0f, 0.1f), t); //cooldowns
+			centerPosAbilityButton = TTN_Interpolation::Lerp(glm::vec3(1605.0f, -200.0f, 0.1f), glm::vec3(-2220.0f, -200.0f, 0.1f), t); //cooldowns
+			centerPosUpgradeButton = TTN_Interpolation::Lerp(glm::vec3(1605.0f, 160.0f, 0.1f), glm::vec3(-2220.0f, 160.0f, 0.1f), t);
+			centerPosContinue = TTN_Interpolation::Lerp(glm::vec3(2270.0f, -365.0f, 0.1f), glm::vec3(-1570.0f, -365.0f, 0.1f), t);
+			// x= 1920 + scale/2, buttons.x = 2880 - 425
+			//lerping stops at a halved pos (200.f in lerp is 100.f in pos)
+			// pos can be determined by (lerp 1- lerp 2 /2 - scale/2 [100]
+			centerPosContinue.x = round(centerPosContinue.x);
+			//centerPos.x = round(centerPos.x);
+			//std::cout << glm::to_string(buttonTransAbility.GetPos()) << "  LLL " << std::endl;
 
 			//shop hud lerp
-			Shoptrans.SetPos(centerPosShop);
+			Shoptrans.SetPos(centerPosShop - glm::vec3(0.5f * 1920.f, 0.0f, 0.0f));
 
 			//continue button lerping
-			buttonTransContinue.SetPos(centerPosContinue);
-
-			//heal button lerping
-			buttonTrans.SetPos(centerPosButton);
-
-			//cannon firing button lerping
-			buttonTransCannon.SetPos(centerPosCannonButton);
-
-			//cooldown button lerping
-			buttonTransAbility.SetPos(centerPosAbilityButton);
-
-			//upgrade button lerping
-			buttonTransUpgrade.SetPos(centerPosUpgradeButton);
-
-			//background lerping
-			//trans.SetPos(centerPos);
-
-			if (Shoptrans.GetGlobalPos().x < -1900.f)
-				lerpAway = false;
-
-			if (!lerpAway) {
-				Shoptrans.SetPos(glm::vec3(1920.0f, 0.0f, 0.15f));
-				buttonTrans.SetPos(glm::vec3(1270.0f, 160.0f, 0.10f));
-				buttonTransCannon.SetPos(glm::vec3(1270.0f, -200.0f, 0.10f));
-				buttonTransAbility.SetPos(glm::vec3(1270.0f, -200.0f, 0.10f));
-				buttonTransUpgrade.SetPos(glm::vec3(1270.0f, 160.0f, 0.10f));
-				buttonTransContinue.SetPos(glm::vec3(1920.0f, -365.0f, 0.10f));
+			if (buttonTransContinue.GetPos() == glm::vec3(0.0f, -365.0f, 0.10f)) {
+				buttonTransContinue.SetPos(glm::vec3(0.0f, -365.0f, 0.10f));
+			}
+			else {
+				buttonTransContinue.SetPos(centerPosContinue - glm::vec3(0.5f * std::abs(buttonTransContinue.GetScale().x), 0.0f, 0.0f));
 			}
 
-			/*	Get<TTN_Renderer2D>(buttonHealth).SetColor(glm::vec4(1.0f));
-				Get<TTN_Renderer2D>(buttonCannon).SetColor(glm::vec4(1.0f));
-				Get<TTN_Renderer2D>(buttonAbilityCD).SetColor(glm::vec4(1.0f));
-				Get<TTN_Renderer2D>(buttonUpgrade).SetColor(glm::vec4(1.0f));*/
+			//heal button lerping
+			if (buttonTrans.GetPos() == glm::vec3(425.0f, 160.0f, 0.10f)) {
+				buttonTrans.SetPos(glm::vec3(425.0f, 160.0f, 0.10f));
+			}
+			else {
+				buttonTrans.SetPos(centerPosButton - glm::vec3(0.5f * std::abs(buttonTrans.GetScale().x), 0.0f, 0.0f));
+				//std::cout << glm::to_string(buttonTrans.GetPos()) << "  BBBBB L " << std::endl;
+			}
+
+			//cannon firing button lerping
+			if (buttonTransCannon.GetPos() == glm::vec3(425.0f, -200.0f, 0.10f)) {
+				buttonTransCannon.SetPos(glm::vec3(425.0f, -200.0f, 0.10f));
+			}
+			else
+				buttonTransCannon.SetPos(centerPosCannonButton - glm::vec3(0.5f * std::abs(buttonTransCannon.GetScale().x), 0.0f, 0.0f));
+
+			//cooldown button lerping
+			if (buttonTransAbility.GetPos() == glm::vec3(-425.0f, -200.0f, 0.10f)) {
+				buttonTransAbility.SetPos(glm::vec3(-425.0f, -200.0f, 0.10f));
+			}
+			else
+				buttonTransAbility.SetPos(centerPosAbilityButton - glm::vec3(0.5f * std::abs(buttonTransAbility.GetScale().x), 0.0f, 0.0f));
+
+			//upgrade button lerping
+			if (buttonTransUpgrade.GetPos() == glm::vec3(-425.0f, 160.0f, 0.10f)) {
+				buttonTransUpgrade.SetPos(glm::vec3(-425.0f, 160.0f, 0.10f));
+			}
+			else
+				buttonTransUpgrade.SetPos(centerPosUpgradeButton - glm::vec3(0.5f * std::abs(buttonTransUpgrade.GetScale().x), 0.0f, 0.0f));
+
+			//trans.SetPos(centerPos - glm::vec3(0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
+			//std::cout << glm::to_string(buttonTransUpgrade.GetPos()) << std::endl;
+			//std::cout << glm::to_string(buttonTrans.GetPos()) << std::endl;
+			//std::cout << glm::to_string(buttonTransContinue.GetPos()) << std::endl;
+			//std::cout << glm::to_string(Shoptrans.GetPos()) << std::endl;
+		}
+	}
+
+	//put the sprites/textures back to original position and color
+	if (!shouldShop && lerpAway) {
+		//TTN_Transform& trans = Get<TTN_Transform>(background);
+		TTN_Transform& Shoptrans = Get<TTN_Transform>(shop);
+		TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);
+		TTN_Transform& buttonTransCannon = Get<TTN_Transform>(buttonCannon);
+		TTN_Transform& buttonTransAbility = Get<TTN_Transform>(buttonAbilityCD);
+		TTN_Transform& buttonTransUpgrade = Get<TTN_Transform>(buttonUpgrade);
+		TTN_Transform& buttonTransContinue = Get<TTN_Transform>(buttonContinue);
+
+		lerpTime2 += deltaTime;
+		if (lerpTime2 > 5.0f) {
+			lerpTime2 = 0.0f;
+		}
+		float t = waveCompleteLerpParamter(lerpTime2 / lerpTotalTime2);
+
+		//glm::vec3 centerPos = TTN_Interpolation::Lerp(glm::vec3(0.0f, 0.0f, 0.20f), glm::vec3(-3840.0f, 0.0f, 0.20f), t);//3840
+		glm::vec3 centerPosShop = TTN_Interpolation::Lerp(glm::vec3(0.0f, 0.0f, 0.15f), glm::vec3(-3840.0f, 0.0f, 0.15f), t);
+		glm::vec3 centerPosButton = TTN_Interpolation::Lerp(glm::vec3(425.0f, 160.0f, 0.1f), glm::vec3(-3415.0f, 160.0f, 0.1f), t);
+		glm::vec3 centerPosCannonButton = TTN_Interpolation::Lerp(glm::vec3(425.0f, -200.0f, 0.1f), glm::vec3(-3415.0f, -200.0f, 0.1f), t);
+		glm::vec3 centerPosAbilityButton = TTN_Interpolation::Lerp(glm::vec3(-425.0f, -200.0f, 0.1f), glm::vec3(-4265.0f, -200.0f, 0.1f), t);
+		glm::vec3 centerPosUpgradeButton = TTN_Interpolation::Lerp(glm::vec3(-425.0f, 160.0f, 0.1f), glm::vec3(-4265.0f, 160.0f, 0.1f), t);
+		glm::vec3 centerPosContinue = TTN_Interpolation::Lerp(glm::vec3(0.0f, -365.0f, 0.1f), glm::vec3(-3840.0f, -365.0f, 0.1f), t);
+
+		//std::cout << glm::to_string(Shoptrans.GetPos()) << "  LLL " << std::endl;
+
+		//shop hud lerp
+		Shoptrans.SetPos(centerPosShop);
+
+		//continue button lerping
+		buttonTransContinue.SetPos(centerPosContinue);
+
+		//heal button lerping
+		buttonTrans.SetPos(centerPosButton);
+
+		//cannon firing button lerping
+		buttonTransCannon.SetPos(centerPosCannonButton);
+
+		//cooldown button lerping
+		buttonTransAbility.SetPos(centerPosAbilityButton);
+
+		//upgrade button lerping
+		buttonTransUpgrade.SetPos(centerPosUpgradeButton);
+
+		//background lerping
+		//trans.SetPos(centerPos);
+
+		if (Shoptrans.GetGlobalPos().x < -1900.f)
+			lerpAway = false;
+
+		if (!lerpAway) {
+			Shoptrans.SetPos(glm::vec3(1920.0f, 0.0f, 0.15f));
+			buttonTrans.SetPos(glm::vec3(1270.0f, 160.0f, 0.10f));
+			buttonTransCannon.SetPos(glm::vec3(1270.0f, -200.0f, 0.10f));
+			buttonTransAbility.SetPos(glm::vec3(1270.0f, -200.0f, 0.10f));
+			buttonTransUpgrade.SetPos(glm::vec3(1270.0f, 160.0f, 0.10f));
+			buttonTransContinue.SetPos(glm::vec3(1920.0f, -365.0f, 0.10f));
 		}
 
-	
+		/*	Get<TTN_Renderer2D>(buttonHealth).SetColor(glm::vec4(1.0f));
+			Get<TTN_Renderer2D>(buttonCannon).SetColor(glm::vec4(1.0f));
+			Get<TTN_Renderer2D>(buttonAbilityCD).SetColor(glm::vec4(1.0f));
+			Get<TTN_Renderer2D>(buttonUpgrade).SetColor(glm::vec4(1.0f));*/
+	}
 
 	//button hovering
 	{
@@ -1102,7 +1098,7 @@ void GameUI::Update(float deltaTime)
 		TTN_Transform contButtonTrans = Get<TTN_Transform>(buttonContinue);
 		if (mousePosWorldSpace.x < contButtonTrans.GetPos().x + 0.5f * abs(contButtonTrans.GetScale().x) &&
 			mousePosWorldSpace.x > contButtonTrans.GetPos().x - 0.5f * abs(contButtonTrans.GetScale().x) &&
-			mousePosWorldSpace.y < contButtonTrans.GetPos().y + 0.5f * abs(contButtonTrans.GetScale().y) &&
+			mousePosWorldSpace.y < contButtonTrans.GetPos().y +  abs(contButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > contButtonTrans.GetPos().y - 0.5f * abs(contButtonTrans.GetScale().y)) {
 			Get<TTN_Renderer2D>(buttonContinue).SetSprite(textureContinue2);
 		}
