@@ -294,7 +294,7 @@ void Game::KeyDownChecks()
 	}
 
 	//if they try to press the escape key, pause or unpause the game
-	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc) && (!shopping || (shopping && pauseRender) )) {
+	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Esc) && (!shopping || (shopping && pauseRender))) {
 		m_InputDelay = m_InputDelayTime;
 		m_paused = !m_paused;
 		TTN_Scene::SetPaused(m_paused);
@@ -854,7 +854,8 @@ void Game::RestartData()
 	m_rightSideSpawn = (bool)(rand() % 2);
 	m_waveInProgress = false;
 	m_firstWave = true;
-
+	speedMod = 0.0f;
+	damageMod = 0.0f;
 	//delete all boats in scene
 	auto enemyView = GetScene()->view<EnemyComponent>();
 	std::vector<entt::entity> enemies = std::vector<entt::entity>();
@@ -1357,7 +1358,9 @@ void Game::SpawnBoatLeft()
 
 		//create and attach the enemy component to the boat
 		int randPath = rand() % 3; // generates path number between 0-2 (left side paths, right side path nums are 3-5)
+		//int randPath = 2; // generates path number between 0-2 (left side paths, right side path nums are 3-5)
 		EnemyComponent en = EnemyComponent(boats[boats.size() - 1], this, randomBoat, randPath, 0.0f);
+		en.SetSpeedMod(speedMod);
 		AttachCopy(boats[boats.size() - 1], en);
 	}
 
@@ -1493,7 +1496,9 @@ void Game::SpawnBoatRight() {
 
 		//create and attach the enemy component to the boat
 		int randPath = rand() % 3 + 3; // generates path number between 3-5 (right side paths, left side path nums are 0-2)
+		//int randPath = 5; // generates path number between 3-5 (right side paths, left side path nums are 0-2)
 		EnemyComponent en = EnemyComponent(boats[boats.size() - 1], this, randomBoat, randPath, 0.0f);
+		en.SetSpeedMod(speedMod);
 		AttachCopy(boats[boats.size() - 1], en);
 	}
 
@@ -1595,9 +1600,22 @@ void Game::WaveUpdate(float deltaTime) {
 		m_timeUntilNextSpawn = 0.0f;
 		m_waveInProgress = true;
 		m_firstWave = false;
+		if (!(m_currentWave <= 1)) {
+			damageMod++;
+			if (damageMod >= 5.0f) {
+				damageMod = 5.0f; //cap the damage growth
+			}
+			speedMod = speedMod + 3.0f;
+			if (speedMod >= 15.0f) {
+				speedMod = 15.0f; //cap the speed growth
+			}
+		}
 	}
+	/*	for (int i = 0; i < boats.size(); i++) {
+			Get<EnemyComponent>(boats[i]).SetSpeedMod(speedMod);
+		}*/
 
-	//otherwise, check if it should spawn
+		//otherwise, check if it should spawn
 	else {
 		m_timeUntilNextSpawn -= deltaTime;
 		//if it's time for the next enemy spawn
@@ -1834,7 +1852,7 @@ void Game::Damage(float deltaTime) {
 		//check if the boat is close enough to the dam to damage it
 		if (Get<TTN_Transform>(*it).GetPos().z <= EnemyComponent::GetZTarget() + 2.0f * EnemyComponent::GetZTargetDistance())
 			//if it is, damage it
-			Dam_health = Dam_health - damage * deltaTime;
+			Dam_health = Dam_health - (damage + damageMod) * deltaTime * 0.0f;
 		//and move onto the next boat
 		it++;
 	}
@@ -2333,19 +2351,19 @@ void Game::ImGui()
 		//control the x axis position
 		auto& a = Get<TTN_Transform>(camera);
 		float b = a.GetPos().x;
-		if (ImGui::SliderFloat("Camera Test X-Axis", &b, -0.5f, 0.5f)) {
+		if (ImGui::SliderFloat("Camera Test X-Axis", &b, -200.0f / 10.0f, 200.5f / 10.0f)) {
 			a.SetPos(glm::vec3(b, a.GetPos().y, a.GetPos().z));
 		}
 
 		//control the y axis position
 		float c = a.GetPos().y;
-		if (ImGui::SliderFloat("Camera Test Y-Axis", &c, -0.5f, 0.5f)) {
+		if (ImGui::SliderFloat("Camera Test Y-Axis", &c, -200.5f / 10.0f, 200.5f / 10.0f)) {
 			a.SetPos(glm::vec3(a.GetPos().x, c, a.GetPos().z));
 		}
 
 		//control the y axis position
 		float d = a.GetPos().z;
-		if (ImGui::SliderFloat("Camera Test Z-Axis", &d, -0.5f, 0.5f)) {
+		if (ImGui::SliderFloat("Camera Test Z-Axis", &d, -200.5f / 10.0f, 200.5f / 10.0f)) {
 			a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y, d));
 		}
 	}

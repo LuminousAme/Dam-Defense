@@ -209,7 +209,6 @@ int main() {
 			paused->SetShouldRender(false);
 			options->SetShouldRender(false);
 			paused->SetRendering(false);
-
 		}
 		//if the menu has appeared and the player has unpaused from the menu button
 		else if (gameScene->GetShouldRender() && paused->GetShouldRender() && paused->GetShouldResume()) {
@@ -219,7 +218,6 @@ int main() {
 			paused->SetShouldResume(false);
 			paused->SetShouldRender(false);
 			paused->SetRendering(false);
-
 		}
 
 		//if the menu has appeared and the player has pressed the menu button from the menu button
@@ -497,15 +495,15 @@ void PrepareAssetLoading() {
 	//by cbm
 	TTN_AssetSystem::AddTexture2DToBeLoaded("BY CBM", "textures/Options/BY CBM.png", 1); //texture for apply button option
 
-	//default 
+	//default
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Default", "textures/Options/Default.png", 1); //texture for apply button opti
-	 
+
 	//dialogue volume
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Voice Volume", "textures/Options/Dialogue Volume.png", 1); //texture for apply button option
 
 	//difficulty
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Difficulty", "textures/Options/Difficulty.png", 1); //texture for apply button option
-	
+
 	//easy
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Easy", "textures/Options/Easy.png", 1); //texture for apply button option
 
