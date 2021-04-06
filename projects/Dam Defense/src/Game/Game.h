@@ -251,6 +251,10 @@ protected:
 	float damage = 2.0f; //damage of boats (dam health is 100.f)
 	unsigned m_score = 0;
 
+	//increase damage per wave
+	float damageMod = 0.f;
+	float speedMod = 0.f; // increase speed per wave
+
 	/////// Terrain and water control data ////////
 	float terrainScale = 0.15f;//the terrain scale
 
@@ -298,7 +302,7 @@ protected:
 	float muzzleFlashCD = 1.50f; // time for muzzle flash
 	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
 	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
-	int m_enemiesPerWave = 1; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
+	int m_enemiesPerWave = 4; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
 
 	int m_currentWave = 0; //the current wave
 	float m_timeTilNextWave; //the timer until the next wave starts, used after a wave has ended

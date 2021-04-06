@@ -978,7 +978,7 @@ void GameUI::Update(float deltaTime)
 					buttonTransUpgrade.SetPos(centerPosUpgradeButton - glm::vec3(0.5f * std::abs(buttonTransUpgrade.GetScale().x), 0.0f, 0.0f));
 
 				//trans.SetPos(centerPos - glm::vec3(0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
-				std::cout << glm::to_string(buttonTransUpgrade.GetPos()) << std::endl;
+				//std::cout << glm::to_string(buttonTransUpgrade.GetPos()) << std::endl;
 				//std::cout << glm::to_string(buttonTrans.GetPos()) << std::endl;
 				//std::cout << glm::to_string(buttonTransContinue.GetPos()) << std::endl;
 				//std::cout << glm::to_string(Shoptrans.GetPos()) << std::endl;
@@ -1009,7 +1009,7 @@ void GameUI::Update(float deltaTime)
 			glm::vec3 centerPosUpgradeButton = TTN_Interpolation::Lerp(glm::vec3(-425.0f, 160.0f, 0.1f), glm::vec3(-4265.0f, 160.0f, 0.1f), t);
 			glm::vec3 centerPosContinue = TTN_Interpolation::Lerp(glm::vec3(0.0f, -365.0f, 0.1f), glm::vec3(-3840.0f, -365.0f, 0.1f), t);
 
-			std::cout << glm::to_string(Shoptrans.GetPos()) << "  LLL " << std::endl;
+			//std::cout << glm::to_string(Shoptrans.GetPos()) << "  LLL " << std::endl;
 
 			//shop hud lerp
 			Shoptrans.SetPos(centerPosShop);

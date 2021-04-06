@@ -27,6 +27,7 @@ public:
 	void SetCannonEntity(entt::entity entity) { m_cannonEntityRef = entity; }
 	void SetDifficulty(float d) { m_diff = d; }
 	void SetMuzzleCD(float cd) { muzzleFlashCD = cd; }
+	void SetSpeedMod(float mod) { m_speedMod = mod; }
 	//getters
 	int GetBoatType() { return m_boatType; }
 	int GetDifficulty() { return m_diff; }
@@ -39,6 +40,7 @@ public:
 	static float GetZTarget() { return m_ztarget; }
 	static float GetZTargetDistance() { return m_targetDistance; }
 	float GetMuzzleCD() { return muzzleFlashCD; }
+	float GetSpeedMod() { return m_speedMod; }
 
 	//Updates the boat's physics
 	void Update(float deltaTime);
@@ -57,7 +59,7 @@ protected:
 	int m_path; //which path the boat is taking, 0 left side middle, 1 left side far, 2 left side close, 3 right side middle, 4 right side far, 5 right side close
 	float m_damageCooldown; //cooldown between the shots from the enemy ships
 
-	float m_diff;// how fast ships go
+	float m_diff;// how fast ships go based on difficulty
 
 	float m_ypos; //the y position of the boat, determined by the boat type
 	inline static float m_ztarget = 10.0f / 10.0f; //the target z position near the dam that the enemy ship seeks
@@ -67,8 +69,9 @@ protected:
 	bool m_attacking; //whether or not a ship is attacking
 	entt::entity m_cannonEntityRef;
 
+	float m_speedMod; //increase speed
 	//max velocity of boat
-	glm::vec3 maxVelo = glm::vec3 ((-10.0f / 10.0f)* (m_diff / 100.f), 0.0f, (-12.0f / 10.0f)* (m_diff / 100.f));
+	glm::vec3 maxVelo;
 
 	glm::vec3 direction; //current direction of the boat
 	glm::vec3 deathDirection; //direction the boat was facing when it died
