@@ -1852,7 +1852,7 @@ void Game::Damage(float deltaTime) {
 		//check if the boat is close enough to the dam to damage it
 		if (Get<TTN_Transform>(*it).GetPos().z <= EnemyComponent::GetZTarget() + 2.0f * EnemyComponent::GetZTargetDistance())
 			//if it is, damage it
-			Dam_health = Dam_health - (damage + damageMod) * deltaTime * 0.0f;
+			Dam_health = Dam_health - (damage + damageMod) * deltaTime;
 		//and move onto the next boat
 		it++;
 	}
