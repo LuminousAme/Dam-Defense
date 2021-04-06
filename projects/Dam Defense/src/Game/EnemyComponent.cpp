@@ -75,7 +75,7 @@ void EnemyComponent::Update(float deltaTime)
 		//center left
 		if (m_path == 2) {
 			//first part
-			if (tBoat.GetPos().x <= 90.f / 10.0f && !(tBoat.GetPos().x <= 7.5f / 10.0f)) {
+			if (tBoat.GetPos().x <= 85.f / 10.0f && !(tBoat.GetPos().x <= 7.5f / 10.0f)) {
 				//boat movement
 				pBoat.AddForce(Seek(glm::vec3(5.0f / 10.0f, m_ypos, 55.0f / 10.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 			}
@@ -108,7 +108,7 @@ void EnemyComponent::Update(float deltaTime)
 		//right center path
 		if (m_path == 5) {
 			//part 1
-			if (tBoat.GetPos().x >= -90.f / 10.0f && !(tBoat.GetPos().x >= -7.5f / 10.0f)) {
+			if (tBoat.GetPos().x >= -85.f / 10.0f && !(tBoat.GetPos().x >= -7.5f / 10.0f)) {
 				//boat movement
 				pBoat.AddForce(Seek(glm::vec3(-5.0f / 10.0f, m_ypos, 55.0f / 10.0f), pBoat.GetLinearVelocity(), tBoat.GetPos()));
 			}
