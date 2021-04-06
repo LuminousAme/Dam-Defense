@@ -152,6 +152,20 @@ namespace Titan {
 		//setsup the shader, called by titan's application init
 		static void InitParticleShader();
 
+		//makes it a sprite based particle system
+		void MakeParticlesAsSprites(TTN_Texture2D::st2dptr spriteTexture) 
+		{ 
+			m_spriteParticleTexture = spriteTexture; 
+		m_isSprites = true; 
+		s_spriteVAO = TTN_VertexArrayObject::Create();
+
+		s_spriteVAO->AddVertexBuffer(s_spriteVertexPosVBO, { BufferAttribute(0, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Position) });
+		s_spriteVAO->AddVertexBuffer(ColorInstanceBuffer, { BufferAttribute(1, 4, GL_FLOAT, false, sizeof(float) * 4, 0, AttribUsage::Color, 1) });
+		s_spriteVAO->AddVertexBuffer(PositionInstanceBuffer, { BufferAttribute(2, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::User0, 1) });
+		s_spriteVAO->AddVertexBuffer(ScaleInstanceBuffer, { BufferAttribute(3, 1, GL_FLOAT, false, sizeof(float), 0, AttribUsage::User1, 1) });
+		}
+		void MakeParticlesAsFullMesh() { m_isSprites = false; }
+
 		//sets up emitter data
 		void MakeConeEmitter(float angle, glm::vec3 emitterRotation = glm::vec3(0.0f));
 		void MakeCircleEmitter(glm::vec3 emitterRotation = glm::vec3(0.0f));
@@ -243,6 +257,13 @@ namespace Titan {
 		TTN_VertexBuffer::svbptr ColorInstanceBuffer;
 		TTN_VertexBuffer::svbptr PositionInstanceBuffer;
 		TTN_VertexBuffer::svbptr ScaleInstanceBuffer;
+		//stuff for sprite particles
+		TTN_VertexArrayObject::svaptr s_spriteVAO;
+		inline static TTN_VertexBuffer::svbptr s_spriteVertexPosVBO;
+		inline static glm::vec3 s_particleSpriteVertexPos = glm::vec3(0.0f);
+		inline static TTN_Shader::sshptr s_spriteParticleShader;
+		TTN_Texture2D::st2dptr m_spriteParticleTexture;
+		bool m_isSprites = false;
 
 		//function pointers for lerp
 		float (*readGraphVelo)(float);

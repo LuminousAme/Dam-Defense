@@ -102,6 +102,16 @@ namespace Titan {
 
 		//init the default particle texture too
 		s_defaultWhiteTexture = TTN_Texture2D::LoadFromFile("textures/ttn_particle_default.png");
+
+		//also do set up for the 2D sprite renderer 
+		s_spriteParticleShader = TTN_Shader::Create();
+		s_spriteParticleShader->LoadShaderStageFromFile("shaders/ttn_sprite_particle_vert.glsl", GL_VERTEX_SHADER);
+		s_spriteParticleShader->LoadShaderStageFromFile("shaders/ttn_sprite_particle_geo.glsl", GL_GEOMETRY_SHADER);
+		s_spriteParticleShader->LoadShaderStageFromFile("shaders/ttn_sprite_particle_frag.glsl", GL_FRAGMENT_SHADER);
+		s_spriteParticleShader->Link();
+
+		s_spriteVertexPosVBO = TTN_VertexBuffer::Create();
+		s_spriteVertexPosVBO->LoadData(&s_particleSpriteVertexPos, 1);
 	}
 
 	//sets up the particle system as a cone
@@ -118,7 +128,7 @@ namespace Titan {
 		m_rotation = glm::radians(emitterRotation);
 		m_emitterShape = TTN_ParticleEmitterShape::CIRCLE;
 	}
-
+	
 	//sets up the particle system as a sphere
 	void TTN_ParticleSystem::MakeSphereEmitter()
 	{
@@ -262,62 +272,133 @@ namespace Titan {
 	//renders all the active particles
 	void TTN_ParticleSystem::Render(glm::vec3 ParentGlobalPos, glm::mat4 view, glm::mat4 projection)
 	{
-		//bind the shader
-		s_particleShaderProgram->Bind();
+		if (m_isSprites) {
+			glDepthMask(GL_FALSE);
 
-		//set uniforms
-		glm::mat4 temp_model = glm::translate(ParentGlobalPos) * glm::toMat4(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f))) * glm::scale(glm::vec3(1.0f));
-		glm::mat4 tempMVP = projection;
-		tempMVP *= view;
-		s_particleShaderProgram->SetUniformMatrix("u_model", temp_model);
-		s_particleShaderProgram->SetUniformMatrix("u_mvp", tempMVP * temp_model);
-		s_particleShaderProgram->SetUniformMatrix("u_normalMat", glm::mat3(glm::transpose(glm::inverse(temp_model))));
+			//bind the shader
+			s_spriteParticleShader->Bind();
 
-		//bind the albedo texture from the mat
-		if (m_particle._mat->GetAlbedo() != nullptr) {
-			m_particle._mat->GetAlbedo()->Bind(0);
+			//set uniforms
+			glm::mat4 temp_model = glm::translate(ParentGlobalPos) * glm::toMat4(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f))) * glm::scale(glm::vec3(1.0f));
+			glm::mat4 tempVP = projection;
+			tempVP *= view;
+			s_spriteParticleShader->SetUniformMatrix("u_model", temp_model);
+			s_spriteParticleShader->SetUniformMatrix("u_vp", tempVP);
+			s_spriteParticleShader->SetUniformMatrix("u_modelView", view * temp_model);
+
+			//bind the albedo texture from the mat
+			if (m_spriteParticleTexture != nullptr) {
+				m_spriteParticleTexture->Bind(0);
+			}
+			//if it doesn't have a texture in the mat set a default white texture
+			else {
+				s_defaultWhiteTexture->Bind(0);
+			}
+
+			size_t numOfActiveParticles = 0;
+			//go through all the particles and set up their data for rendering
+			for (size_t i = 0; i < m_maxParticlesCount; i++) {
+				//if the particle isn't active, just skip to the next one
+				if (!Active[i])
+					continue;
+
+				//get a t value for interpolation
+				float t = std::clamp(timeAlive[i] / lifeTimes[i], 0.0f, 1.0f);
+
+				//interpolate the color
+				glm::vec4 temp_col = glm::mix(StartColors[i], EndColors[i], readGraphColor(t));
+				//interpolate the scale
+				float temp_scale = glm::mix(StartScales[i], EndScales[i], readGraphScale(t));
+				//get the global position of the particle
+				glm::vec3 temp_pos = Positions[i];
+
+				//save the color
+				particle_col[numOfActiveParticles] = temp_col;
+				particle_pos[numOfActiveParticles] = temp_pos;
+				particle_scale[numOfActiveParticles] = temp_scale;
+
+				numOfActiveParticles++;
+			}
+			//if there are particles to acutally be rendered, render them, if not just exit the function
+			if (numOfActiveParticles > 0) {
+				//manually set up the buffers and vao since titan doesn't currently have the infastructure to render instanced stuff automatically
+
+				ColorInstanceBuffer->LoadData(particle_col, numOfActiveParticles);
+
+				PositionInstanceBuffer->LoadData(particle_pos, numOfActiveParticles);
+
+				ScaleInstanceBuffer->LoadData(particle_scale, numOfActiveParticles);
+
+				s_spriteVAO->Bind();
+
+				glDrawArraysInstanced(GL_POINTS, 0, 1, numOfActiveParticles);
+
+				s_spriteVAO->UnBind();
+			}
+
+			glDepthMask(GL_TRUE);
+			//unbind the shader
+			s_spriteParticleShader->UnBind();
 		}
-		//if it doesn't have a texture in the mat set a default white texture
 		else {
-			s_defaultWhiteTexture->Bind(0);
+			//bind the shader
+			s_particleShaderProgram->Bind();
+
+			//set uniforms
+			glm::mat4 temp_model = glm::translate(ParentGlobalPos) * glm::toMat4(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f))) * glm::scale(glm::vec3(1.0f));
+			glm::mat4 tempMVP = projection;
+			tempMVP *= view;
+			s_particleShaderProgram->SetUniformMatrix("u_model", temp_model);
+			s_particleShaderProgram->SetUniformMatrix("u_mvp", tempMVP * temp_model);
+			s_particleShaderProgram->SetUniformMatrix("u_normalMat", glm::mat3(glm::transpose(glm::inverse(temp_model))));
+
+			//bind the albedo texture from the mat
+			if (m_particle._mat->GetAlbedo() != nullptr) {
+				m_particle._mat->GetAlbedo()->Bind(0);
+			}
+			//if it doesn't have a texture in the mat set a default white texture
+			else {
+				s_defaultWhiteTexture->Bind(0);
+			}
+
+			size_t numOfActiveParticles = 0;
+			//go through all the particles and set up their data for rendering
+			for (size_t i = 0; i < m_maxParticlesCount; i++) {
+				//if the particle isn't active, just skip to the next one
+				if (!Active[i])
+					continue;
+
+				//get a t value for interpolation
+				float t = std::clamp(timeAlive[i] / lifeTimes[i], 0.0f, 1.0f);
+
+				//interpolate the color
+				glm::vec4 temp_col = glm::mix(StartColors[i], EndColors[i], readGraphColor(t));
+				//interpolate the scale
+				float temp_scale = glm::mix(StartScales[i], EndScales[i], readGraphScale(t));
+				//get the global position of the particle
+				glm::vec3 temp_pos = Positions[i];
+
+				//save the color
+				particle_col[numOfActiveParticles] = temp_col;
+				particle_pos[numOfActiveParticles] = temp_pos;
+				particle_scale[numOfActiveParticles] = temp_scale;
+
+				numOfActiveParticles++;
+			}
+			//if there are particles to acutally be rendered, render them, if not just exit the function
+			if (numOfActiveParticles > 0) {
+				//manually set up the buffers and vao since titan doesn't currently have the infastructure to render instanced stuff automatically
+
+				ColorInstanceBuffer->LoadData(particle_col, numOfActiveParticles);
+
+				PositionInstanceBuffer->LoadData(particle_pos, numOfActiveParticles);
+
+				ScaleInstanceBuffer->LoadData(particle_scale, numOfActiveParticles);
+
+				m_vao->RenderInstanced(numOfActiveParticles, m_particle._mesh->GetVertexPositions().size());
+			}
 		}
 
-		size_t numOfActiveParticles = 0;
-		//go through all the particles and set up their data for rendering
-		for (size_t i = 0; i < m_maxParticlesCount; i++) {
-			//if the particle isn't active, just skip to the next one
-			if (!Active[i])
-				continue;
-
-			//get a t value for interpolation
-			float t = std::clamp(timeAlive[i] / lifeTimes[i], 0.0f, 1.0f);
-
-			//interpolate the color
-			glm::vec4 temp_col = glm::mix(StartColors[i], EndColors[i], readGraphColor(t));
-			//interpolate the scale
-			float temp_scale = glm::mix(StartScales[i], EndScales[i], readGraphScale(t));
-			//get the global position of the particle
-			glm::vec3 temp_pos = Positions[i];
-
-			//save the color
-			particle_col[numOfActiveParticles] = temp_col;
-			particle_pos[numOfActiveParticles] = temp_pos;
-			particle_scale[numOfActiveParticles] = temp_scale;
-
-			numOfActiveParticles++;
-		}
-		//if there are particles to acutally be rendered, render them, if not just exit the function
-		if (numOfActiveParticles > 0) {
-			//manually set up the buffers and vao since titan doesn't currently have the infastructure to render instanced stuff automatically
-
-			ColorInstanceBuffer->LoadData(particle_col, numOfActiveParticles);
-
-			PositionInstanceBuffer->LoadData(particle_pos, numOfActiveParticles);
-
-			ScaleInstanceBuffer->LoadData(particle_scale, numOfActiveParticles);
-
-			m_vao->RenderInstanced(numOfActiveParticles, m_particle._mesh->GetVertexPositions().size());
-		}
 	}
 
 	//emits a single particle
@@ -343,18 +424,12 @@ namespace Titan {
 			glm::vec4 Startcolor, EndColor;
 
 			//calculate start color
-			float r = TTN_Random::RandomFloat(m_particle._StartColor.r, m_particle._StartColor2.r);
-			float g = TTN_Random::RandomFloat(m_particle._StartColor.g, m_particle._StartColor2.g);
-			float b = TTN_Random::RandomFloat(m_particle._StartColor.b, m_particle._StartColor2.b);
-			float a = TTN_Random::RandomFloat(m_particle._StartColor.a, m_particle._StartColor2.a);
-			Startcolor = glm::vec4(r, g, b, a);
+			float t = TTN_Random::RandomFloat(0.0f, 1.0f);
+			Startcolor = glm::mix(m_particle._StartColor, m_particle._StartColor2, t);
 
 			//calculate end color
-			r = TTN_Random::RandomFloat(m_particle._EndColor.r, m_particle._EndColor2.r);
-			g = TTN_Random::RandomFloat(m_particle._EndColor.g, m_particle._EndColor2.g);
-			b = TTN_Random::RandomFloat(m_particle._EndColor.b, m_particle._EndColor2.b);
-			a = TTN_Random::RandomFloat(m_particle._EndColor.a, m_particle._EndColor2.a);
-			EndColor = glm::vec4(r, g, b, a);
+			t = TTN_Random::RandomFloat(0.0f, 1.0f);
+			EndColor = glm::mix(m_particle._EndColor, m_particle._EndColor2, t);
 
 			StartColors[m_activeParticleIndex] = Startcolor;
 			EndColors[m_activeParticleIndex] = EndColor;
@@ -417,19 +492,30 @@ namespace Titan {
 				Dir = glm::vec3(rotMat * glm::vec4(Dir, 1.0f));
 			}
 
-			StartVelocities[m_activeParticleIndex] = Dir * TTN_Random::RandomFloat(m_particle._startSpeed, m_particle._startSpeed2);
-			EndVelocities[m_activeParticleIndex] = Dir * TTN_Random::RandomFloat(m_particle._endSpeed, m_particle._endSpeed2);
+			float t = TTN_Random::RandomFloat(0.0f, 1.0f);
+			float startSpeed = glm::mix(m_particle._startSpeed, m_particle._startSpeed2, t);
+			t = TTN_Random::RandomFloat(0.0f, 1.0f);
+			float endSpeed = glm::mix(m_particle._endSpeed, m_particle._endSpeed2, t);
+
+			StartVelocities[m_activeParticleIndex] = Dir * startSpeed;
+			EndVelocities[m_activeParticleIndex] = Dir * endSpeed;
 		}
 
 		//scales
 		{
-			StartScales[m_activeParticleIndex] = TTN_Random::RandomFloat(m_particle._StartSize, m_particle._StartSize2);
-			EndScales[m_activeParticleIndex] = TTN_Random::RandomFloat(m_particle._EndSize, m_particle._EndSize2);
+			float t = TTN_Random::RandomFloat(0.0f, 1.0f);
+			float startScale = glm::mix(m_particle._StartSize, m_particle._StartSize2, t);
+			t = TTN_Random::RandomFloat(0.0f, 1.0f);
+			float endScale = glm::mix(m_particle._EndSize, m_particle._EndSize2, t);
+			StartScales[m_activeParticleIndex] = startScale;
+			EndScales[m_activeParticleIndex] = endScale;
 		}
 
 		//how long the particle has been alive and how long it should live (used to caculate t values)
 		timeAlive[m_activeParticleIndex] = 0.0f;
-		lifeTimes[m_activeParticleIndex] = TTN_Random::RandomFloat(m_particle._lifeTime, m_particle._lifeTime2);
+		float t = TTN_Random::RandomFloat(0.0f, 1.0f);
+		float lifetime = glm::mix(m_particle._lifeTime, m_particle._lifeTime2, t);
+		lifeTimes[m_activeParticleIndex] = lifetime;
 
 		//set the particle to be alive
 		Active[m_activeParticleIndex] = true;

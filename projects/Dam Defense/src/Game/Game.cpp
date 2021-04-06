@@ -341,7 +341,7 @@ void Game::MouseButtonChecks()
 			Get<TTN_Transform>(smokePS).SetPos(Get<TTN_Transform>(cannon).GetGlobalPos() + (1.75f / 10.0f) * playerDir);
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
 				SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
-			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
+			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(250);
 			m_cannonFiringSounds->SetNextPostion(glm::vec3(0.0f));
 			m_cannonFiringSounds->PlayFromQueue();
 		}
@@ -666,7 +666,7 @@ void Game::SetUpOtherData()
 		smokeParticle.SetMesh(sphereMesh);
 		smokeParticle.SetTwoLifetimes((playerShootCooldown - 0.1f), playerShootCooldown);
 		smokeParticle.SetOneStartColor(glm::vec4(0.1f, 0.1f, 0.1f, 0.8f));
-		smokeParticle.SetOneEndColor(glm::vec4(0.5f, 0.5f, 0.5f, 0.1f));
+		smokeParticle.SetTwoEndColors(glm::vec4(0.25f, 0.25f, 0.25f, 0.0f), glm::vec4(0.5f, 0.5f, 0.5f, 0.25f));
 		smokeParticle.SetOneStartSize(0.05f / 10.0f);
 		smokeParticle.SetOneEndSize(0.05f / 10.0f);
 		smokeParticle.SetTwoStartSpeeds(1.5f / 10.0f, 1.0f / 10.0f);
@@ -895,6 +895,7 @@ void Game::RestartData()
 		ps->MakeCircleEmitter(glm::vec3(0.0f));
 		ps->VelocityReadGraphCallback(FastStart);
 		ps->ColorReadGraphCallback(SlowStart);
+		ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
 		//setup a particle system component
 		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
 		//attach the particle system component to the entity
@@ -1039,6 +1040,7 @@ void Game::CreateExpolsion(glm::vec3 location)
 	ps->VelocityReadGraphCallback(FastStart);
 	ps->ColorReadGraphCallback(ZeroUntilHalfThenOne);
 	ps->ScaleReadGraphCallback(ZeroOneZero);
+	ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
 	//setup a particle system component
 	TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
 	//attach the particle system component to the entity
@@ -1066,6 +1068,7 @@ void Game::CreateBirdExpolsion(glm::vec3 location)
 	ps->VelocityReadGraphCallback(FastStart);
 	ps->ColorReadGraphCallback(SlowStart);
 	ps->ScaleReadGraphCallback(ZeroOneZero);
+	ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
 	//setup a particle system component
 	TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
 	//attach the particle system component to the entity
@@ -1114,7 +1117,7 @@ void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e)
 	ps->VelocityReadGraphCallback(FastStart);
 	ps->ColorReadGraphCallback(SlowStart);
 	ps->ScaleReadGraphCallback(ZeroOneZero);
-
+	ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
 	//setup a particle system component
 	TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
 	//attach the particle system component to the entity
@@ -1148,7 +1151,7 @@ void Game::Flamethrower() {
 				//setup a particle system for the particle system
 				TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1500, 250, fireParticle, FlameActiveTime - 1.0f, true);
 				ps->MakeConeEmitter(15.0f, glm::vec3(90.0f, 0.0f, 0.0f));
-
+				ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
 				std::cout << FlameActiveTime << std::endl;
 
 				//setup a particle system component

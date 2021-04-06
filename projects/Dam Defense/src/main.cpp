@@ -577,4 +577,6 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Cross", "textures/crosshair/crosshair cross.png", 1); //the cross at the top of the crosshair
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Hori Line", "textures/crosshair/crosshair hori.png", 1); //the horiztonal lines dropping down on the crosshair
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Vert Line", "textures/crosshair/crosshair vert dotted.png", 1); //the vertical line
+
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Particle Sprite", "textures/circle_particle_sprite.png", 1); //particle sprite
 }
