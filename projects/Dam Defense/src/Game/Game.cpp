@@ -344,7 +344,7 @@ void Game::MouseButtonChecks()
 			Get<TTN_Transform>(smokePS).SetPos(Get<TTN_Transform>(cannon).GetGlobalPos() + (1.75f / 10.0f) * playerDir);
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
 				SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
-			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(250);
+			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(150);
 			m_cannonFiringSounds->SetNextPostion(glm::vec3(0.0f));
 			m_cannonFiringSounds->PlayFromQueue();
 		}
@@ -1073,7 +1073,7 @@ void Game::CreateExpolsion(glm::vec3 location)
 	AttachCopy(newExpolsion, psComponent);
 
 	//get a reference to that particle system and burst it
-	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(500);
+	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(100);
 }
 
 void Game::CreateBirdExpolsion(glm::vec3 location)
@@ -1209,7 +1209,7 @@ void Game::Flamethrower() {
 				AttachCopy(flames[i], firePSTrans);
 
 				//setup a particle system for the particle system
-				TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1500, 250, fireParticle, FlameActiveTime, true);
+				TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(300, 50, fireParticle, FlameActiveTime, true);
 				ps->MakeConeEmitter(15.0f, glm::vec3(90.0f, 0.0f, 0.0f));
 				ps->SetStopAfter(FlameActiveTime - 1.0f);
 				ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
