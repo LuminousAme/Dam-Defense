@@ -918,7 +918,7 @@ void Game::RestartData()
 		AttachCopy(smokePS, smokePSTrans);
 
 		//setup a particle system for the particle system
-		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(5000, 0, smokeParticle, 0.0f, false);
+		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(500, 0, smokeParticle, 0.0f, false);
 		ps->MakeCircleEmitter(glm::vec3(0.0f));
 		ps->VelocityReadGraphCallback(FastStart);
 		ps->ColorReadGraphCallback(SlowStart);
