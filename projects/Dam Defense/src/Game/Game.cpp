@@ -56,7 +56,7 @@ void Game::Update(float deltaTime)
 
 			//if a cannonball has passed the water plane but not yet splashed, play the splash effect
 			if (!cannonBalls[i].second && Get<TTN_Transform>(cannonBalls[i].first).GetGlobalPos().y <=
-				Get<TTN_Transform>(water).GetGlobalPos().y) {
+				Get<TTN_Transform>(water).GetGlobalPos().y - 0.1f) {
 				//sets the position where the sound should play
 				glm::vec3 temp = Get<TTN_Transform>(cannonBalls[i].first).GetGlobalPos();
 				temp.x *= -1.0f;
@@ -64,6 +64,9 @@ void Game::Update(float deltaTime)
 				m_splashSounds->SetNextPostion(temp);
 				//and plays the splash sound
 				m_splashSounds->PlayFromQueue();
+
+				//play a splash particle effect
+				CreateSplash(Get<TTN_Transform>(cannonBalls[i].first).GetGlobalPos());
 
 				//and mark the cannonball as having splashed
 				cannonBalls[i].second = true;
@@ -341,7 +344,7 @@ void Game::MouseButtonChecks()
 			Get<TTN_Transform>(smokePS).SetPos(Get<TTN_Transform>(cannon).GetGlobalPos() + (1.75f / 10.0f) * playerDir);
 			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->
 				SetEmitterRotation(glm::vec3(rotAmmount.y, -rotAmmount.x, 0.0f));
-			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(500);
+			Get<TTN_ParticeSystemComponent>(smokePS).GetParticleSystemPointer()->Burst(150);
 			m_cannonFiringSounds->SetNextPostion(glm::vec3(0.0f));
 			m_cannonFiringSounds->PlayFromQueue();
 		}
@@ -666,11 +669,13 @@ void Game::SetUpOtherData()
 		smokeParticle.SetMesh(sphereMesh);
 		smokeParticle.SetTwoLifetimes((playerShootCooldown - 0.1f), playerShootCooldown);
 		smokeParticle.SetOneStartColor(glm::vec4(0.1f, 0.1f, 0.1f, 0.8f));
-		smokeParticle.SetOneEndColor(glm::vec4(0.5f, 0.5f, 0.5f, 0.1f));
+		smokeParticle.SetTwoEndColors(glm::vec4(0.25f, 0.25f, 0.25f, 0.0f), glm::vec4(0.5f, 0.5f, 0.5f, 0.25f));
 		smokeParticle.SetOneStartSize(0.05f / 10.0f);
 		smokeParticle.SetOneEndSize(0.05f / 10.0f);
 		smokeParticle.SetTwoStartSpeeds(1.5f / 10.0f, 1.0f / 10.0f);
 		smokeParticle.SetOneEndSpeed(0.05f / 10.0f);
+		smokeParticle.SetOneStartAcceleration(glm::vec3(0.0f));
+		smokeParticle.SetTwoEndAcellerations(glm::vec3(0.0f, 0.147f, 0.0f), glm::vec3(0.0f, 0.22f, 0.0f));
 	}
 
 	//fire particle template
@@ -731,6 +736,27 @@ void Game::SetUpOtherData()
 		//gunParticle.SetTwoStartColors(glm::vec4(0.1f, 0.1f, 0.1f, 0.8f), glm::vec4(0.1f, 0.1f, 0.1f, 0.8f)); //black
 		gunParticle.SetOneStartSize(0.20f / 10.0f);
 		gunParticle.SetOneStartSpeed(10.0f / 10.0f);
+	}
+
+	//water splash particle template
+	{
+		splashparticle = TTN_ParticleTemplate();
+		splashparticle.SetMat(smokeMat);
+		splashparticle.SetMesh(sphereMesh);
+
+		splashparticle.SetOneEndColor(glm::mix(glm::vec4(0.2f, 0.537f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.8f), 0.5f));
+		splashparticle.SetOneStartColor(glm::mix(glm::vec4(0.2f, 0.537f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 0.8f), 0.5f));
+
+		splashparticle.SetOneEndSize(0.65f / 10.0f);
+		splashparticle.SetOneStartSize(0.65f / 10.0f);
+
+		splashparticle.SetTwoStartSpeeds(1.0f, 2.0f);
+		splashparticle.SetOneEndSpeed(0.0f);
+
+		splashparticle.SetOneLifetime(2.0f);
+		
+		splashparticle.SetOneStartAcceleration(glm::vec3(0.0f, -1.8675, 0.0f));
+		splashparticle.SetOneEndAcelleration(glm::vec3(0.0f, -1.8675, 0.0f));
 	}
 
 	//call the restart data function
@@ -892,10 +918,11 @@ void Game::RestartData()
 		AttachCopy(smokePS, smokePSTrans);
 
 		//setup a particle system for the particle system
-		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(5000, 0, smokeParticle, 0.0f, false);
+		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(500, 0, smokeParticle, 0.0f, false);
 		ps->MakeCircleEmitter(glm::vec3(0.0f));
 		ps->VelocityReadGraphCallback(FastStart);
 		ps->ColorReadGraphCallback(SlowStart);
+		ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
 		//setup a particle system component
 		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
 		//attach the particle system component to the entity
@@ -1040,13 +1067,14 @@ void Game::CreateExpolsion(glm::vec3 location)
 	ps->VelocityReadGraphCallback(FastStart);
 	ps->ColorReadGraphCallback(ZeroUntilHalfThenOne);
 	ps->ScaleReadGraphCallback(ZeroOneZero);
+	ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
 	//setup a particle system component
 	TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
 	//attach the particle system component to the entity
 	AttachCopy(newExpolsion, psComponent);
 
 	//get a reference to that particle system and burst it
-	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(500);
+	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(100);
 }
 
 void Game::CreateBirdExpolsion(glm::vec3 location)
@@ -1067,6 +1095,7 @@ void Game::CreateBirdExpolsion(glm::vec3 location)
 	ps->VelocityReadGraphCallback(FastStart);
 	ps->ColorReadGraphCallback(SlowStart);
 	ps->ScaleReadGraphCallback(ZeroOneZero);
+	ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
 	//setup a particle system component
 	TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
 	//attach the particle system component to the entity
@@ -1076,29 +1105,35 @@ void Game::CreateBirdExpolsion(glm::vec3 location)
 	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(25);
 }
 
-void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e)
+void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e, glm::vec3 direction, float directionMultipler, bool inverted)
 {
 	//we don't really need to save the entity number for any reason, so we just make the variable local
 	entt::entity newExpolsion = CreateEntity(2.5f);
-	// 0 green, 1 red, 2 yellow
+	
 	//setup a transfrom for the particle system
 	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f));
 
+	//make a right vector from the direction and world up
+	glm::vec3 right = glm::normalize(glm::cross(glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f)));
+
 	int pos = rand() % 3;
 	if (pos == 0) {//regular
-		PSTrans.SetPos(glm::vec3(location.x, location.y, location.z));
+		PSTrans.SetPos(glm::vec3(location.x, location.y, location.z) + directionMultipler * glm::normalize(direction));
 	}
 	if (pos == 1) {
-		PSTrans.SetPos(glm::vec3(location.x + 0.75f, location.y, location.z));
+		PSTrans.SetPos(glm::vec3(location.x, location.y, location.z) + directionMultipler * glm::normalize(direction) + right * 0.06f);
 	}
 	if (pos == 2) {
-		PSTrans.SetPos(glm::vec3(location.x - 0.75f, location.y, location.z));
+		PSTrans.SetPos(glm::vec3(location.x, location.y, location.z) + directionMultipler * glm::normalize(direction) - right * 0.06f);
 	}
 
 	//PSTrans.SetPos(Get<TTN_Transform>(e).GetGlobalPos());
 	//PSTrans.RotateFixed(Get<TTN_Transform>(e).GetRotation());
 	//PSTrans.SetRotationQuat(Get<TTN_Transform>(e).GetRotQuat());
-	glm::vec3 tempR = Get<TTN_Transform>(e).GetRotation();
+	TTN_Transform tempTrans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+	tempTrans.LookAlong(right, glm::vec3(0.0f, 1.0f, 0.0f));
+	//glm::vec3 tempR = Get<TTN_Transform>(e).GetRotation();
+	glm::vec3 tempR = tempTrans.GetRotation();
 
 	/*glm::vec3 shipDir = glm::vec3(0.0f, 0.0f, 1.0f);
 	shipDir = glm::vec3(glm::toMat4(glm::quat(glm::radians(glm::vec3(-tempR.y, -tempR.x, tempR.z)))) * glm::vec4(shipDir, 1.0f));
@@ -1111,11 +1146,12 @@ void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e)
 	//setup a particle system for the particle system
 	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(25, 0, gunParticle, 0.0f, false);
 
-	ps->MakeConeEmitter(10.0f, glm::vec3(-tempR.y, -tempR.x, tempR.z));//-75 x
+	if(!inverted)ps->MakeConeEmitter(10.0f, glm::vec3(-tempR.y, -tempR.x, tempR.z));//-75 x
+	else if (inverted)ps->MakeConeEmitter(10.0f, glm::vec3(tempR.y, -tempR.x, tempR.z));
 	ps->VelocityReadGraphCallback(FastStart);
 	ps->ColorReadGraphCallback(SlowStart);
 	ps->ScaleReadGraphCallback(ZeroOneZero);
-
+	ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
 	//setup a particle system component
 	TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
 	//attach the particle system component to the entity
@@ -1124,6 +1160,33 @@ void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e)
 	//get a reference to that particle system and burst it
 	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(30);
 	//Get<TTN_Transform>(newExpolsion).SetParent(&Get<TTN_Transform>(e),e);
+}
+
+void Game::CreateSplash(glm::vec3 location)
+{
+	{
+		//we can just make it a local variable
+		entt::entity splashPS = CreateEntity(2.0f);
+
+		//setup a transfrom for the particle system
+		TTN_Transform splashPsTrans = TTN_Transform(location, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f));
+
+		//attach that transform to the entity
+		AttachCopy(splashPS, splashPsTrans);
+
+		//setup a particle system for the particle system
+		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(100, 0, splashparticle, 10.0f, true);
+		ps->MakeConeEmitter(15.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+		ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
+		std::cout << FlameActiveTime << std::endl;
+
+		//setup a particle system component
+		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
+		//attach the particle system component to the entity
+		AttachCopy(splashPS, psComponent);
+
+		Get<TTN_ParticeSystemComponent>(splashPS).GetParticleSystemPointer()->Burst(100);
+	}
 }
 
 //creates the flames for the flamethrower
@@ -1138,7 +1201,7 @@ void Game::Flamethrower() {
 		for (int i = 0; i < 6; i++) {
 			//fire particle entities
 			{
-				flames.push_back(CreateEntity(FlameActiveTime));
+				flames.push_back(CreateEntity(FlameActiveTime + 1.0f));
 
 				//setup a transfrom for the particle system
 				TTN_Transform firePSTrans = TTN_Transform(Get<TTN_Transform>(flamethrowers[i]).GetGlobalPos() + glm::vec3(0.0f, 0.0f, 2.0f / 10.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(1.0f / 10.0f));
@@ -1147,9 +1210,10 @@ void Game::Flamethrower() {
 				AttachCopy(flames[i], firePSTrans);
 
 				//setup a particle system for the particle system
-				TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(1500, 250, fireParticle, FlameActiveTime - 1.0f, true);
+				TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(300, 50, fireParticle, FlameActiveTime, true);
 				ps->MakeConeEmitter(15.0f, glm::vec3(90.0f, 0.0f, 0.0f));
-
+				ps->SetStopAfter(FlameActiveTime - 1.0f);
+				ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
 				std::cout << FlameActiveTime << std::endl;
 
 				//setup a particle system component
@@ -1805,15 +1869,31 @@ void Game::Damage(float deltaTime) {
 
 				if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetMuzzleCD() <= 0.0f) {
 					Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).SetMuzzleCD(muzzleFlashCD);
-					if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetBoatType() == 1) { //red carrier boat
-						CreateMuzzleFlash(glm::vec3(temp.x + (tempS.x) - 1.0f, temp.y + 0.30f, temp.z - 2.0f), *can);
+					float dirMultiplier = 0.0f;
+					float heightIncrease = 0.0f;
+					switch (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetBoatType()) {
+					case 0:
+						dirMultiplier = 0.075f;
+						heightIncrease = 0.030f;
+						break;
+					case 1:
+						dirMultiplier = 0.075f;
+						heightIncrease = 2.5f * 0.030f;
+						break;
+					case 2:
+						dirMultiplier = 3.0f * 0.075f;
+						heightIncrease = 2.5f * 0.030f;
+						break;
 					}
-					else if (Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetBoatType() == 0) { //green boat
-						CreateMuzzleFlash(glm::vec3(temp.x - abs(tempS.x), temp.y + 0.30f, temp.z - 2.0f), *can);
+
+					int type = Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetBoatType();
+					int path = Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetPath();
+					bool inverted = false;
+
+					if (path == 0 || path == 1 || path == 5) {
+						inverted = true;
 					}
-					else { //yellow boat
-						CreateMuzzleFlash(glm::vec3(temp.x - abs(tempS.x) + 0.f, temp.y + 0.30f, temp.z - 2.50f), *can);
-					}
+					CreateMuzzleFlash(temp + glm::vec3(0.0f, heightIncrease, 0.0f), *can, Get<EnemyComponent>((Get<TTN_Transform>(*can).GetParentEntity())).GetDirection(), dirMultiplier, inverted);
 				}
 
 				else {

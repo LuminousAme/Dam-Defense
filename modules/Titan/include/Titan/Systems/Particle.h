@@ -26,6 +26,8 @@ namespace Titan {
 		float _startSpeed, _startSpeed2;
 		float _endSpeed, _endSpeed2;
 		float _lifeTime, _lifeTime2;
+		glm::vec3 _startAcceleration, _startAcceleration2;
+		glm::vec3 _endAcceleration, _endAccelertaion2;
 		TTN_Mesh::smptr _mesh;
 		TTN_Material::smatptr _mat;
 
@@ -45,6 +47,10 @@ namespace Titan {
 			_endSpeed2 = 1.0f;
 			_lifeTime = 1.0f;
 			_lifeTime2 = 1.0f;
+			_startAcceleration = glm::vec3(0.0f);
+			_startAcceleration2 = glm::vec3(0.0f);
+			_endAcceleration = glm::vec3(0.0f);
+			_endAccelertaion2 = glm::vec3(0.0f);
 			_mesh = TTN_Mesh::Create();
 			_mat = TTN_Material::Create();
 		}
@@ -112,6 +118,26 @@ namespace Titan {
 			_lifeTime2 = LifeTime2;
 		}
 
+		void SetOneStartAcceleration(glm::vec3 acceleration) {
+			_startAcceleration = acceleration;
+			_startAcceleration2 = acceleration;
+		}
+
+		void SetTwoStartAccelerations(glm::vec3 acceleration, glm::vec3 acceleration2) {
+			_startAcceleration = acceleration;
+			_startAcceleration2 = acceleration2;
+		}
+
+		void SetOneEndAcelleration(glm::vec3 acceleration) {
+			_endAcceleration = acceleration;
+			_endAccelertaion2 = acceleration;
+		}
+
+		void SetTwoEndAcellerations(glm::vec3 acceleration, glm::vec3 acceleration2) {
+			_endAcceleration = acceleration;
+			_endAccelertaion2 = acceleration2;
+		}
+
 		void SetMesh(TTN_Mesh::smptr mesh) {
 			_mesh = mesh;
 		}
@@ -152,6 +178,20 @@ namespace Titan {
 		//setsup the shader, called by titan's application init
 		static void InitParticleShader();
 
+		//makes it a sprite based particle system
+		void MakeParticlesAsSprites(TTN_Texture2D::st2dptr spriteTexture) 
+		{ 
+			m_spriteParticleTexture = spriteTexture; 
+		m_isSprites = true; 
+		s_spriteVAO = TTN_VertexArrayObject::Create();
+
+		s_spriteVAO->AddVertexBuffer(s_spriteVertexPosVBO, { BufferAttribute(0, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Position) });
+		s_spriteVAO->AddVertexBuffer(ColorInstanceBuffer, { BufferAttribute(1, 4, GL_FLOAT, false, sizeof(float) * 4, 0, AttribUsage::Color, 1) });
+		s_spriteVAO->AddVertexBuffer(PositionInstanceBuffer, { BufferAttribute(2, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::User0, 1) });
+		s_spriteVAO->AddVertexBuffer(ScaleInstanceBuffer, { BufferAttribute(3, 1, GL_FLOAT, false, sizeof(float), 0, AttribUsage::User1, 1) });
+		}
+		void MakeParticlesAsFullMesh() { m_isSprites = false; }
+
 		//sets up emitter data
 		void MakeConeEmitter(float angle, glm::vec3 emitterRotation = glm::vec3(0.0f));
 		void MakeCircleEmitter(glm::vec3 emitterRotation = glm::vec3(0.0f));
@@ -167,6 +207,7 @@ namespace Titan {
 		void SetEmissionRate(float emissionRate);
 		void SetEmitterRotation(glm::vec3 rotation);
 		void SetPaused(bool paused);
+		void SetStopAfter(float stopAfterTime) { m_stopTime = stopAfterTime; }
 
 		//getters
 		float GetEmitterAngle() { return m_EmitterAngle; }
@@ -183,6 +224,7 @@ namespace Titan {
 		void ColorReadGraphCallback(float (*function)(float));
 		void RotationReadGraphCallback(float (*function)(float));
 		void ScaleReadGraphCallback(float (*function)(float));
+		void accelerationReadGraph(float (*function)());
 
 		//updates the particle system as a whole, as well as the all the indivual particles 
 		void Update(float deltaTime);
@@ -206,6 +248,10 @@ namespace Titan {
 		glm::vec3* StartVelocities;
 		glm::vec3* EndVelocities;
 
+		glm::vec3* StartAccelerations;
+		glm::vec3* EndAccelerations;
+		glm::vec3* acceleratingVelocity;
+
 		float* StartScales;
 		float* EndScales;
 
@@ -226,6 +272,8 @@ namespace Titan {
 		float m_emissionRate;
 		TTN_ParticleTemplate m_particle;
 		float m_duration;
+		float m_stopTime = -1.0f;
+		float m_elapsedTime = 0.0f;
 		bool m_loop;
 		float m_emissionTimer;
 		bool m_paused;
@@ -243,12 +291,20 @@ namespace Titan {
 		TTN_VertexBuffer::svbptr ColorInstanceBuffer;
 		TTN_VertexBuffer::svbptr PositionInstanceBuffer;
 		TTN_VertexBuffer::svbptr ScaleInstanceBuffer;
+		//stuff for sprite particles
+		TTN_VertexArrayObject::svaptr s_spriteVAO;
+		inline static TTN_VertexBuffer::svbptr s_spriteVertexPosVBO;
+		inline static glm::vec3 s_particleSpriteVertexPos = glm::vec3(0.0f);
+		inline static TTN_Shader::sshptr s_spriteParticleShader;
+		TTN_Texture2D::st2dptr m_spriteParticleTexture;
+		bool m_isSprites = false;
 
 		//function pointers for lerp
 		float (*readGraphVelo)(float);
 		float (*readGraphColor)(float);
 		float (*readGraphRotation)(float);
 		float (*readGraphScale)(float);
+		float (*readGraphAccelleration)(float);
 
 		void SetUpRenderingStuff();
 		void SetUpData();
