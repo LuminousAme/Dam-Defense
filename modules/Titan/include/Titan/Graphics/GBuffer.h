@@ -12,6 +12,7 @@ namespace Titan {
 		NORMAL,
 		SPECULAR,
 		POSITION,
+		EMISSIVE
 	};
 
 	class TTN_GBuffer
@@ -53,6 +54,8 @@ namespace Titan {
 		void DrawNormalBuffer();
 		//draws out only the albedo buffer
 		void DrawAlbedoBuffer();
+		//draws out only the emissive buffer
+		void DrawEmissiveBuffer();
 
 		//Reshape the framebuffer
 		void Reshape(unsigned width, unsigned height);

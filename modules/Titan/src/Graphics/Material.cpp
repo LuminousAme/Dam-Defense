@@ -10,7 +10,8 @@ namespace Titan {
 	//default constructor
 	TTN_Material::TTN_Material() 
 		: m_Shininess(0), m_HeightInfluence(1.0f), m_hasAmbientLighting(true), m_hasSpecularLighting(true), 
-		m_hasOutline(false), m_outlineSize(0.0f), m_useDiffuseRamp(false), m_useSpecularRamp(false), m_UseAlbedo(true), m_recievesShadows(true)
+		m_hasOutline(false), m_outlineSize(0.0f), m_useDiffuseRamp(false), m_useSpecularRamp(false), m_UseAlbedo(true), m_recievesShadows(true),
+		m_emissiveStrenght(1.0f), m_useEmissive(false)
 	{
 		//set the albedo to an all white texture by default
 		m_Albedo = TTN_Texture2D::Create();
@@ -35,6 +36,10 @@ namespace Titan {
 		//set the specular ramp to an all white texture by default
 		m_specularRamp = TTN_Texture2D::Create();
 		m_specularRamp->Clear(glm::vec4(1.0f));
+
+		//set the emissive texture to an all white texture by default
+		m_EmissiveText = TTN_Texture2D::Create();
+		m_EmissiveText->Clear(glm::vec4(1.0f));
 	}
 
 	//default desctructor
