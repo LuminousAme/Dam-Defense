@@ -754,7 +754,7 @@ void Game::SetUpOtherData()
 		splashparticle.SetOneEndSpeed(0.0f);
 
 		splashparticle.SetOneLifetime(2.0f);
-		
+
 		splashparticle.SetOneStartAcceleration(glm::vec3(0.0f, -1.8675, 0.0f));
 		splashparticle.SetOneEndAcelleration(glm::vec3(0.0f, -1.8675, 0.0f));
 	}
@@ -1109,7 +1109,7 @@ void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e, glm::vec3 direc
 {
 	//we don't really need to save the entity number for any reason, so we just make the variable local
 	entt::entity newExpolsion = CreateEntity(2.5f);
-	
+
 	//setup a transfrom for the particle system
 	TTN_Transform PSTrans = TTN_Transform(location, glm::vec3(0.0f), glm::vec3(1.0f));
 
@@ -1146,7 +1146,7 @@ void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e, glm::vec3 direc
 	//setup a particle system for the particle system
 	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(25, 0, gunParticle, 0.0f, false);
 
-	if(!inverted)ps->MakeConeEmitter(10.0f, glm::vec3(-tempR.y, -tempR.x, tempR.z));//-75 x
+	if (!inverted)ps->MakeConeEmitter(10.0f, glm::vec3(-tempR.y, -tempR.x, tempR.z));//-75 x
 	else if (inverted)ps->MakeConeEmitter(10.0f, glm::vec3(tempR.y, -tempR.x, tempR.z));
 	ps->VelocityReadGraphCallback(FastStart);
 	ps->ColorReadGraphCallback(SlowStart);
@@ -1605,9 +1605,9 @@ void Game::WaveUpdate(float deltaTime) {
 			if (damageMod >= 5.0f) {
 				damageMod = 5.0f; //cap the damage growth
 			}
-			speedMod = speedMod + 3.0f;
-			if (speedMod >= 15.0f) {
-				speedMod = 15.0f; //cap the speed growth
+			speedMod = speedMod + 1.8f;
+			if (speedMod >= 12.0f) {
+				speedMod = 12.0f; //cap the speed growth
 			}
 		}
 	}
@@ -1852,7 +1852,7 @@ void Game::Damage(float deltaTime) {
 		//check if the boat is close enough to the dam to damage it
 		if (Get<TTN_Transform>(*it).GetPos().z <= EnemyComponent::GetZTarget() + 2.0f * EnemyComponent::GetZTargetDistance())
 			//if it is, damage it
-			Dam_health = Dam_health - (damage + damageMod) * deltaTime;
+			Dam_health = Dam_health - (damage + damageMod) * deltaTime * (difficulty / 100.f);
 		//and move onto the next boat
 		it++;
 	}
@@ -2111,7 +2111,6 @@ void Game::Shop(float deltaTime)
 			}
 			upgradeScoreCost = false;
 		}
-
 	}
 
 	if (m_score < 0)

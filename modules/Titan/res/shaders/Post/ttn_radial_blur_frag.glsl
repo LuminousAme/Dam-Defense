@@ -54,6 +54,7 @@ void main() {
      }
 
     sum *= 1.0f/11.0f;
+    //strengthen the blur
     float t = dist * u_Strength;
     t = clamp( t ,0.0f,1.0f);
 

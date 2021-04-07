@@ -1210,7 +1210,7 @@ void GameUI::MouseButtonDownChecks()
 		TTN_Transform contButtonTrans = Get<TTN_Transform>(buttonContinue);
 		if (mousePosWorldSpace.x < contButtonTrans.GetPos().x + 0.5f * abs(contButtonTrans.GetScale().x) &&
 			mousePosWorldSpace.x > contButtonTrans.GetPos().x - 0.5f * abs(contButtonTrans.GetScale().x) &&
-			mousePosWorldSpace.y < contButtonTrans.GetPos().y + 0.5f * abs(contButtonTrans.GetScale().y) &&
+			mousePosWorldSpace.y < contButtonTrans.GetPos().y +  abs(contButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > contButtonTrans.GetPos().y - 0.5f * abs(contButtonTrans.GetScale().y)) {
 			shouldShop = false;
 			shopping = false;
