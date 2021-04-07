@@ -1116,8 +1116,9 @@ void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e, glm::vec3 direc
 	//make a right vector from the direction and world up
 	glm::vec3 right = glm::normalize(glm::cross(glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f)));
 
+	//randomize which barrllel the shot is coming from
 	int pos = rand() % 3;
-	if (pos == 0) {//regular
+	if (pos == 0) {
 		PSTrans.SetPos(glm::vec3(location.x, location.y, location.z) + directionMultipler * glm::normalize(direction));
 	}
 	if (pos == 1) {
@@ -1127,18 +1128,8 @@ void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e, glm::vec3 direc
 		PSTrans.SetPos(glm::vec3(location.x, location.y, location.z) + directionMultipler * glm::normalize(direction) - right * 0.06f);
 	}
 
-	//PSTrans.SetPos(Get<TTN_Transform>(e).GetGlobalPos());
-	//PSTrans.RotateFixed(Get<TTN_Transform>(e).GetRotation());
-	//PSTrans.SetRotationQuat(Get<TTN_Transform>(e).GetRotQuat());
-	TTN_Transform tempTrans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-	tempTrans.LookAlong(right, glm::vec3(0.0f, 1.0f, 0.0f));
-	//glm::vec3 tempR = Get<TTN_Transform>(e).GetRotation();
-	glm::vec3 tempR = tempTrans.GetRotation();
-
-	/*glm::vec3 shipDir = glm::vec3(0.0f, 0.0f, 1.0f);
-	shipDir = glm::vec3(glm::toMat4(glm::quat(glm::radians(glm::vec3(-tempR.y, -tempR.x, tempR.z)))) * glm::vec4(shipDir, 1.0f));
-	shipDir = glm::normalize(shipDir);
-	PSTrans.SetPos(glm::vec3(0.0f, -0.0f, 0.0f) + shipDir);*/
+	//get the angle at which it should be rotated along the y-axis in order to be facing in the correct direction
+	float newAngle = glm::degrees(glm::acos(glm::dot(glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f)), glm::normalize(direction))));
 
 	//attach that transform to the entity
 	AttachCopy(newExpolsion, PSTrans);
@@ -1146,8 +1137,9 @@ void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e, glm::vec3 direc
 	//setup a particle system for the particle system
 	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(25, 0, gunParticle, 0.0f, false);
 
-	if (!inverted)ps->MakeConeEmitter(10.0f, glm::vec3(-tempR.y, -tempR.x, tempR.z));//-75 x
-	else if (inverted)ps->MakeConeEmitter(10.0f, glm::vec3(tempR.y, -tempR.x, tempR.z));
+	//if (!inverted)ps->MakeConeEmitter(10.0f, glm::vec3(-tempR.y, -tempR.x, tempR.z));//-75 x
+	//else if (inverted)ps->MakeConeEmitter(10.0f, glm::vec3(tempR.y, -tempR.x, tempR.z));
+	ps->MakeConeEmitter(10.0f, glm::vec3(-90.0f, newAngle, 0.0f));
 	ps->VelocityReadGraphCallback(FastStart);
 	ps->ColorReadGraphCallback(SlowStart);
 	ps->ScaleReadGraphCallback(ZeroOneZero);

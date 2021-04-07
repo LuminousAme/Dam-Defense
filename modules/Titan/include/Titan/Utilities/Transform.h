@@ -57,8 +57,17 @@ namespace Titan {
 
 		//function to remove parent from all children, called when a transform is destroyed
 		void RemoveAllChildren() {
+			//make a temorary vector of all the children
+			std::vector<TTN_Transform*> tempChildren;
+
+			//copy them over
 			for (int i = 0; i < m_Children.size(); i++) {
-				m_Children[i]->SetParentNull();
+				tempChildren.push_back(m_Children[i]);
+			}
+
+			//loop through that list and set all of their parents to null
+			for (int i = 0; i < tempChildren.size(); i++) {
+				tempChildren[i]->SetParent(nullptr, entt::null);
 			}
 		}
 

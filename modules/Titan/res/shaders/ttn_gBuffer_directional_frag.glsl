@@ -54,6 +54,12 @@ uniform vec3 u_CamPos;
 
 out vec4 frag_color;
 
+float ReMap(float oMin, float oMax, float nMin, float nMax, float val) {
+	float t = (val - oMin) / (oMax - oMin);
+
+	return mix(nMin, nMax, t);
+}
+
 float shadowCalc(vec3 worldPos, vec3 clipSpacePos, float bias) {
 	//calculate depth of current fragment
 	float depth = texture(s_depthMap, inUV).r;
@@ -153,7 +159,7 @@ void main() {
 		 shadow * (diffuse + specular) // light factors from our single light, including shadow 
 		);
 
-	result += mix(vec3(0.0), texture(s_emissiveTex, inUV).rgb, emissiveStrenght);
+	result += mix(vec3(0.0), texture(s_emissiveTex, inUV).rgb, ReMap(0.0, 1.0, 1.0, 0.0, emissiveStrenght));
 
 	if(shadow < -0.1)
 		result = vec3(1.0, 0.0, 0.8);

@@ -21,6 +21,12 @@ layout(location = 2) out vec3 outSpecs;
 layout(location = 3) out vec3 outPositions;
 layout(location = 4) out vec3 outEmissive;
 
+float ReMap(float oMin, float oMax, float nMin, float nMax, float val) {
+	float t = (val - oMin) / (oMax - oMin);
+
+	return mix(nMin, nMax, t);
+}
+
 void main() {
 	//get the albedo from the diffuse / abledo texture map and output it
 	outColors = mix(vec4(inColor, 1.0), texture(s_Diffuse, inUV) * vec4(inColor, 1.0), u_UseDiffuse);
@@ -29,7 +35,7 @@ void main() {
 	outNormals = (normalize(inNormal) * 0.5) + 0.5;
 
 	//find the specular from the texture and output it 
-	outSpecs = vec3(1.0, u_UseEmissive * u_EmissiveStrenght, 1.0);
+	outSpecs = vec3(1.0, ReMap(0.0, 1.0, 1.0, 0.0, u_UseEmissive * u_EmissiveStrenght), 1.0);
 
 	//output the world space positions
 	outPositions = inPos;
