@@ -48,6 +48,9 @@ namespace Titan {
 		void SetSpecularRamp(TTN_Texture2D::st2dptr ramp);
 		void SetUseSpecularRamp(bool useRamp);
 		void SetRecievesShadows(bool recievesShadows);
+		void SetEmissive(TTN_Texture2D::st2dptr emissive) { m_EmissiveText = emissive; }
+		void SetEmissiveStrenght(float emissiveStr) { m_emissiveStrenght = emissiveStr; }
+		void SetUseEmissive(bool useEmissive) { m_useEmissive = useEmissive; }
 		
 		//getters
 		TTN_Texture2D::st2dptr GetAlbedo() { return m_Albedo; }
@@ -66,6 +69,9 @@ namespace Titan {
 		TTN_Texture2D::st2dptr GetSpecularRamp() { return m_specularRamp; }
 		bool GetUseSpecularRamp() { return m_useSpecularRamp; }
 		bool GetRecievesShadows() { return m_recievesShadows; }
+		TTN_Texture2D::st2dptr GetEmissive() { return m_EmissiveText; }
+		float GetEmissiveStrenght() { return m_emissiveStrenght; }
+		bool GetUseEmissive() { return m_useEmissive; }
 
 	private:
 		//albedo 
@@ -81,6 +87,9 @@ namespace Titan {
 		//texture for displacement mapping
 		TTN_Texture2D::st2dptr m_HeightMap;
 		float m_HeightInfluence;
+		//texture for emissive lighting
+		TTN_Texture2D::st2dptr m_EmissiveText;
+		float m_emissiveStrenght;
 
 		//lighting controls
 		bool m_hasAmbientLighting;
@@ -88,6 +97,7 @@ namespace Titan {
 		bool m_hasOutline;
 		float m_outlineSize;
 		bool m_recievesShadows;
+		bool m_useEmissive;
 
 		//toon shading ramps
 		TTN_Texture2D::st2dptr m_diffuseRamp;

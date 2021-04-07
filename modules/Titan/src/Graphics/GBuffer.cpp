@@ -14,9 +14,12 @@ namespace Titan {
 		m_gBuffer.AddColorTarget(GL_RGB8); //normals buffer, does not need alpha
 		m_gBuffer.AddColorTarget(GL_RGB8); //specular buffer, technivcally only needs 1 channel
 
+
 		//obtain positional data using depth buffer.
 		//here we use position buffer
 		m_gBuffer.AddColorTarget(GL_RGB32F);
+
+		m_gBuffer.AddColorTarget(GL_RGB8); //emissive buffer
 
 		//add a depth buffer
 		m_gBuffer.AddDepthTarget();
@@ -42,6 +45,7 @@ namespace Titan {
 		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::NORMAL, 1);
 		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::SPECULAR, 2);
 		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::POSITION, 3);
+		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::EMISSIVE, 4);
 		m_gBuffer.BindDepthAsTexture(15);
 	}
 
@@ -133,6 +137,21 @@ namespace Titan {
 
 		//bind and draw the abledo buffer
 		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::ALBEDO, 0);
+		m_gBuffer.DrawFullScreenQuad();
+		//unbind the abledo buffer
+		m_gBuffer.UnbindTexture(0);
+
+		//unbind passthorugh shader
+		m_passThrough->UnBind();
+	}
+
+	void TTN_GBuffer::DrawEmissiveBuffer()
+	{
+		//bind passthroguh shader
+		m_passThrough->Bind();
+
+		//bind and draw the abledo buffer
+		m_gBuffer.BindColorAsTexture((unsigned int)TTN_Target::EMISSIVE, 0);
 		m_gBuffer.DrawFullScreenQuad();
 		//unbind the abledo buffer
 		m_gBuffer.UnbindTexture(0);

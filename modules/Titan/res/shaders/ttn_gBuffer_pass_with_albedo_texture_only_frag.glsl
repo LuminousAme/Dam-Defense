@@ -9,6 +9,9 @@ layout(location = 3) in vec3 inColor;
 //material data
 uniform sampler2D s_Diffuse;
 uniform int u_UseDiffuse;
+uniform sampler2D s_Emissive;
+uniform int u_UseEmissive;
+uniform float u_EmissiveStrenght;
 
 //result, multiple render targets
 //we can render color to all of these
@@ -16,6 +19,7 @@ layout(location = 0) out vec4 outColors;
 layout(location = 1) out vec3 outNormals;
 layout(location = 2) out vec3 outSpecs;
 layout(location = 3) out vec3 outPositions;
+layout(location = 4) out vec3 outEmissive;
 
 void main() {
 	//get the albedo from the diffuse / abledo texture map and output it
@@ -25,8 +29,11 @@ void main() {
 	outNormals = (normalize(inNormal) * 0.5) + 0.5;
 
 	//find the specular from the texture and output it 
-	outSpecs = vec3(1.0);
+	outSpecs = vec3(1.0, u_UseEmissive * u_EmissiveStrenght, 1.0);
 
 	//output the world space positions
 	outPositions = inPos;
+
+	//output the emissive colour 
+	outEmissive = texture(s_Emissive, inUV).rgb;
 }

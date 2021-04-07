@@ -1074,7 +1074,7 @@ void Game::CreateExpolsion(glm::vec3 location)
 	AttachCopy(newExpolsion, psComponent);
 
 	//get a reference to that particle system and burst it
-	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(100);
+	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(200);
 }
 
 void Game::CreateBirdExpolsion(glm::vec3 location)

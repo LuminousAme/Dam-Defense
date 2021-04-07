@@ -789,6 +789,12 @@ namespace Titan {
 							//and bind that albedo
 							currentMatieral->GetAlbedo()->Bind(textureSlot);
 							textureSlot++;
+							//set wheter or note it should use it's emissive texture
+							currentShader->SetUniform("u_UseEmissive", (int)currentMatieral->GetUseEmissive());
+							//and bind that emissive texture
+							currentShader->SetUniform("u_EmissiveStrenght", currentMatieral->GetEmissiveStrenght());
+							currentMatieral->GetEmissive()->Bind(textureSlot);
+							textureSlot++;
 						}
 
 						//if it's a shader with a specular map

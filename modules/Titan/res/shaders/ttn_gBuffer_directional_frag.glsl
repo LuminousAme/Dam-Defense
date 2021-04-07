@@ -39,6 +39,7 @@ layout (binding = 0) uniform sampler2D s_albedoTex;
 layout (binding = 1) uniform sampler2D s_normalsTex;
 layout (binding = 2) uniform sampler2D s_specularTex;
 layout (binding = 3) uniform sampler2D s_positionTex;
+layout (binding = 4) uniform sampler2D s_emissiveTex;
 
 //get the light accumulation buffer
 layout (binding = 4) uniform sampler2D s_lightAccumTex;
@@ -120,6 +121,8 @@ void main() {
     vec3 inNormal = (normalize(texture(s_normalsTex,inUV).rgb) * 2.0) - 1.0;
     //specular
     float texSpec = texture(s_specularTex,inUV).r;
+	//emissive
+	float emissiveStrenght = texture(s_specularTex,inUV).b;
     //positions
     vec3 fragPos = texture(s_positionTex,inUV).rgb;
 
@@ -150,6 +153,7 @@ void main() {
 		 shadow * (diffuse + specular) // light factors from our single light, including shadow 
 		);
 
+	result += mix(vec3(0.0), texture(s_emissiveTex, inUV).rgb, emissiveStrenght);
 
 	if(shadow < -0.1)
 		result = vec3(1.0, 0.0, 0.8);
