@@ -39,13 +39,12 @@ EnemyComponent::EnemyComponent(entt::entity boat, TTN_Scene* scene, int boatType
 //function to update the movement, position, rotation, etc. of the boat
 void EnemyComponent::Update(float deltaTime)
 {
-	std::cout << "SApped mod: " << m_speedMod << std::endl;
+	//std::cout << "SApped mod: " << m_speedMod << std::endl;
 
 	//update max velo
-	float maxVeloX = (-20.0f / 10.0f) * (m_diff / 100.f);
-	maxVeloX = maxVeloX - m_speedMod / 20.f;
-	float maxVeloZ = (-12.0f / 10.0f) * (m_diff / 100.f);
-	maxVeloZ = maxVeloZ - m_speedMod / 10.f;
+	//float maxVeloX = (-20.0f / 10.0f) * (m_diff / 100.f);
+	float maxVeloX = (-20.0f / 10.0f) - (m_speedMod / 20.f);
+	float maxVeloZ = (-12.0f / 10.0f) - (m_speedMod / 10.f);
 
 	maxVelo = glm::vec3(maxVeloX, 0.0f, maxVeloZ);
 
