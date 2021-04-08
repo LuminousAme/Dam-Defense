@@ -14,6 +14,7 @@
 #include "Menu/OptionMenu.h"
 #include "Game/HUD.h"
 #include "WaterManager.h"
+#include "ColorBlindFilter.h"
 
 using namespace Titan;
 
@@ -58,9 +59,11 @@ int main() {
 	GameWinMenu* gameWin = new GameWinMenu;
 	GameWinMenuUI* gameWinUI = new GameWinMenuUI;
 	OptionsMenu* options = new OptionsMenu;
+	ColorBlindFilter* colBlindFil = new ColorBlindFilter;
 
 	//initliaze them
 	splash->InitScene();
+	colBlindFil->InitScene();
 	loadingScreen->InitScene();
 	loadingScreen->SetShouldRender(false);
 	gameScene->SetShouldRender(false);
@@ -73,6 +76,7 @@ int main() {
 	gameWin->SetShouldRender(false);
 	gameWinUI->SetShouldRender(false);
 	options->SetShouldRender(false);
+	colBlindFil->SetShouldRender(true);
 
 	//add them to the application
 	TTN_Application::scenes.push_back(splash);
@@ -87,6 +91,7 @@ int main() {
 	TTN_Application::scenes.push_back(gameWin);
 	TTN_Application::scenes.push_back(gameWinUI);
 	TTN_Application::scenes.push_back(options);
+	TTN_Application::scenes.push_back(colBlindFil);
 
 	//create the post processing effects
 	glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
@@ -150,6 +155,17 @@ int main() {
 			titleScreenUI->SetShouldRender(true);
 			options->InitScene();
 			options->SetShouldRender(false);
+		}
+
+		//set up the colour blind mode correctly
+		if (options->GetOff()) {
+			colBlindFil->TurnOff();
+		}
+		else if (options->GetColor()) {
+			colBlindFil->MakeRedGreen();
+		}
+		else if (options->GetColor2()) {
+			colBlindFil->MakeBlueYellow();
 		}
 
 		/// PLAY ///
@@ -656,4 +672,8 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::CreateNewMaterial("damMat");
 	TTN_AssetSystem::CreateNewMaterial("LightHouseMat");
 	TTN_AssetSystem::CreateNewMaterial("TreeMat");
+
+	//color blind luts
+	TTN_AssetSystem::AddLUTTobeLoaded("Red/Green LUT", "red-green lut.cube", 0);
+	TTN_AssetSystem::AddLUTTobeLoaded("Blue/Yellow LUT", "blue-yellow lut.cube", 0);
 }

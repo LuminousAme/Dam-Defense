@@ -53,7 +53,6 @@ void OptionsMenu::InitScene()
 
 	m_InputDelay = 0.3f;
 
-	volumeVoice = 50;
 	previousSceneMainMenu = true;
 
 	//main camera
@@ -1501,9 +1500,11 @@ void OptionsMenu::MouseButtonDownChecks()
 				acutal_volume = volume;
 				acutal_volumeSFX = volumeSFX;
 				acutal_volumeMuisc = volumeMusic;
+				acutal_volumeVoice = volumeVoice;
 				acutal_Diff = diff;
 				acutal_Off = Off;
 				acutal_color = color;
+				acutal_color2 = color2;
 				acutal_easy = easy;
 				acutal_reg = reg;
 				acutal_hard = hard;
@@ -1522,9 +1523,11 @@ void OptionsMenu::MouseButtonDownChecks()
 				volume = acutal_volume;
 				volumeSFX = acutal_volumeSFX;
 				volumeMusic = acutal_volumeMuisc;
+				volumeVoice = acutal_volumeVoice;
 				diff = acutal_Diff;
 				Off = acutal_Off;
 				color = acutal_color;
+				color2 = acutal_color2;
 				easy = acutal_easy;
 				reg = acutal_reg;
 				hard = acutal_hard;
@@ -1538,6 +1541,8 @@ void OptionsMenu::MouseButtonDownChecks()
 				Get<TTN_Renderer2D>(SFXvolumeBar).SetHoriMask(normalized);
 				normalized = volumeMusic / 100.0f;
 				Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalized);
+				normalized = volumeVoice / 100.0f;
+				Get<TTN_Renderer2D>(VoiceVolumeBar).SetHoriMask(normalized);
 				normalized = diff / 200.0f;
 				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalized);
 			}
@@ -1553,9 +1558,11 @@ void OptionsMenu::MouseButtonDownChecks()
 				volume = 100;
 				volumeSFX = 5;
 				volumeMusic = 20;
+				volumeVoice = 50;
 				diff = 100;
 				Off = true;
 				color = false;
+				color2 = false;
 				easy = false;
 				reg = true;
 				hard = false;
@@ -1569,6 +1576,8 @@ void OptionsMenu::MouseButtonDownChecks()
 				Get<TTN_Renderer2D>(SFXvolumeBar).SetHoriMask(normalized);
 				normalized = volumeMusic / 100.0f;
 				Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalized);
+				normalized = volumeVoice / 100.0f;
+				Get<TTN_Renderer2D>(VoiceVolumeBar).SetHoriMask(normalized);
 				normalized = diff / 200.0f;
 				Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalized);
 			}
@@ -1604,6 +1613,8 @@ void OptionsMenu::KeyDownChecks()
 		Get<TTN_Renderer2D>(SFXvolumeBar).SetHoriMask(normalized);
 		normalized = volumeMusic / 100.0f;
 		Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalized);
+		normalized = volumeVoice / 100.0f;
+		Get<TTN_Renderer2D>(VoiceVolumeBar).SetHoriMask(normalized);
 		normalized = diff / 200.0f;
 		Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalized);
 	}
@@ -1739,9 +1750,11 @@ void OptionsMenu::WriteToFile()
 	file << acutal_volume << std::endl;
 	file << acutal_volumeMuisc << std::endl;
 	file << acutal_volumeSFX << std::endl;
+	file << acutal_volumeVoice << std::endl;
 	file << acutal_Diff << std::endl;
 	file << (int)acutal_Off << std::endl;
 	file << (int)acutal_color << std::endl;
+	file << (int)acutal_color2 << std::endl;
 	file << (int)acutal_easy << std::endl;
 	file << (int)acutal_reg << std::endl;
 	file << (int)acutal_hard << std::endl;
@@ -1754,9 +1767,11 @@ void OptionsMenu::WriteToFile()
 	volume = acutal_volume;
 	volumeSFX = acutal_volumeSFX;
 	volumeMusic = acutal_volumeMuisc;
+	volumeVoice = acutal_volumeVoice;
 	diff = acutal_Diff;
 	Off = acutal_Off;
 	color = acutal_color;
+	color2 = acutal_color2;
 	easy = acutal_easy;
 	reg = acutal_reg;
 	hard = acutal_hard;
@@ -1770,6 +1785,8 @@ void OptionsMenu::WriteToFile()
 	Get<TTN_Renderer2D>(SFXvolumeBar).SetHoriMask(normalized);
 	normalized = volumeMusic / 100.0f;
 	Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalized);
+	normalized = volumeVoice / 100.0f;
+	Get<TTN_Renderer2D>(VoiceVolumeBar).SetHoriMask(normalized);
 	normalized = diff / 200.0f;
 	Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalized);
 }
@@ -1808,29 +1825,37 @@ void OptionsMenu::ReadFromFile()
 			ss >> volumeMusic;
 		else if (counter == 3)
 			ss >> volumeSFX;
-		else if (counter == 4)
+		else if (counter == 4) {
+			ss >> volumeVoice;
+		}
+		else if (counter == 5)
 			ss >> diff;
-		else if (counter == 5) {
+		else if (counter == 6) {
 			int temp = 0;
 			ss >> temp;
 			Off = (bool)temp;
 		}
-		else if (counter == 6) {
+		else if (counter == 7) {
 			int temp = 0;
 			ss >> temp;
 			color = (bool)temp;
 		}
-		else if (counter == 7) {
+		else if (counter == 8) {
+			int temp = 0;
+			ss >> temp;
+			color2 = (bool)temp;
+		}
+		else if (counter == 9) {
 			int temp = 0;
 			ss >> temp;
 			easy = (bool)temp;
 		}
-		else if (counter == 8) {
+		else if (counter == 10) {
 			int temp = 0;
 			ss >> temp;
 			reg = (bool)temp;
 		}
-		else if (counter == 9) {
+		else if (counter == 11) {
 			int temp = 0;
 			ss >> temp;
 			hard = (bool)temp;
@@ -1848,9 +1873,11 @@ void OptionsMenu::ReadFromFile()
 	acutal_volume = volume;
 	acutal_volumeMuisc = volumeMusic;
 	acutal_volumeSFX = volumeSFX;
+	acutal_volumeVoice = volumeVoice;
 	acutal_Diff = diff;
 	acutal_Off = Off;
 	acutal_color = color;
+	acutal_color2 = color2;
 	acutal_easy = easy;
 	acutal_reg = reg;
 	acutal_hard = hard;
@@ -1864,6 +1891,8 @@ void OptionsMenu::ReadFromFile()
 	Get<TTN_Renderer2D>(SFXvolumeBar).SetHoriMask(normalized);
 	normalized = volumeMusic / 100.0f;
 	Get<TTN_Renderer2D>(MusicVolumeBar).SetHoriMask(normalized);
+	normalized = volumeVoice / 100.0f;
+	Get<TTN_Renderer2D>(VoiceVolumeBar).SetHoriMask(normalized);
 	normalized = diff / 200.0f;
 	Get<TTN_Renderer2D>(diffBar).SetHoriMask(normalized);
 }
