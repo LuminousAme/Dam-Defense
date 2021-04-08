@@ -445,18 +445,16 @@ void GameUI::InitScene()
 	//{
 	//	//create an entity in the scene for the background
 	//	background = CreateEntity();
-
 	//	//create a transform for the background, placing it in the center of the screen, covering the whole thing
 	//	TTN_Transform bgTrans = TTN_Transform(glm::vec3(1920.0f, 0.0f, 0.20f), glm::vec3(0.0f), glm::vec3(1920.0f, 1080.0f, 1.0f));
 	//	AttachCopy(background, bgTrans);
-
 	//	//create a sprite renderer for the background
 	//	TTN_Renderer2D bgRenderer2D = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("BG"));
 	//	bgRenderer2D.SetColor(glm::vec4(0.0f));
 	//	AttachCopy(background, bgRenderer2D);
 	//}
 
-	//shop sprite
+	//shop background sprite
 	{
 		//create an entity in the scene for the background
 		shop = CreateEntity();
@@ -842,6 +840,9 @@ void GameUI::Update(float deltaTime)
 			upgradeAbilities = false;
 			lerpAway = false;
 			lerpTime2 = 10.f;
+
+			UpdatePrices();
+
 			//std::cout << "WORKING" << std::endl;
 			Get<TTN_Renderer2D>(buttonHealth).SetColor(glm::vec4(1.0f));
 			Get<TTN_Renderer2D>(buttonCannon).SetColor(glm::vec4(1.0f));
@@ -851,7 +852,6 @@ void GameUI::Update(float deltaTime)
 	}
 
 	// unpause indicators
-
 	if ((m_currentWave > waveTracker) && m_waveProgress == 1.0f) { //check if round ended and its a new round
 		shopOnce = false; //set shoponce to false so we know the player hasn't seen the shop yet
 	}
@@ -869,7 +869,7 @@ void GameUI::Update(float deltaTime)
 	//std::cout << trans.GetGlobalPos().x << std::endl;
 	//std::cout << glm::to_string(trans.GetPos()) << " LLL LLLLLLLLLLL" << std::endl;
 
-	//if wave complete has lerped away and shouldshop bool is true
+	//if wave complete has lerped away and shouldshop bool is true, then the shop should lerp in
 	if (shouldShop) {
 		//TTN_Transform& trans = Get<TTN_Transform>(background);
 		TTN_Transform& Shoptrans = Get<TTN_Transform>(shop);
@@ -880,11 +880,7 @@ void GameUI::Update(float deltaTime)
 		TTN_Transform& buttonTransContinue = Get<TTN_Transform>(buttonContinue);
 
 		//update time
-	/*	if (!m_paused)*/
 		lerpTime += deltaTime;
-
-		/*	else
-				lerpTime = lerpTime;*/
 
 		if (m_waveProgress == 1.0f && lerpTime > 5.0f) {
 			lerpTime = 0.0f;
@@ -953,7 +949,6 @@ void GameUI::Update(float deltaTime)
 				buttonTrans.SetPos(centerPosButton - glm::vec3(0.5f * std::abs(buttonTrans.GetScale().x), 0.0f, 0.0f));
 				//std::cout << glm::to_string(buttonTrans.GetPos()) << "  BBBBB L " << std::endl;
 			}
-
 			//cannon firing button lerping
 			if (buttonTransCannon.GetPos() == glm::vec3(425.0f, -200.0f, 0.10f)) {
 				buttonTransCannon.SetPos(glm::vec3(425.0f, -200.0f, 0.10f));
@@ -975,6 +970,34 @@ void GameUI::Update(float deltaTime)
 			else
 				buttonTransUpgrade.SetPos(centerPosUpgradeButton - glm::vec3(0.5f * std::abs(buttonTransUpgrade.GetScale().x), 0.0f, 0.0f));
 
+			//position of the heal price numbers
+			for (int i = 0; i < healPriceNums.size(); i++) {
+				TTN_Transform& trans = Get<TTN_Transform>(healPriceNums[i]);
+				//places the numbers to the left of the center
+				trans.SetPos(glm::vec3((buttonTrans.GetPos().x + buttonTrans.GetScale().x * 0.15f) - (i) * 0.35f * std::abs(trans.GetScale().x), buttonTrans.GetPos().y - 2.98f * 25.f, 0.09f));
+			}
+
+			//position of the cannon firing price numbers
+			for (int i = 0; i < cannonPriceNums.size(); i++) {
+				TTN_Transform& trans = Get<TTN_Transform>(cannonPriceNums[i]);
+				//places the numbers to the left of the center
+				trans.SetPos(glm::vec3((buttonTransCannon.GetPos().x + buttonTransCannon.GetScale().x * 0.15f) - (i) * 0.35f * std::abs(trans.GetScale().x), buttonTransCannon.GetPos().y - 2.98f * 25.f, 0.09f));
+			}
+
+			//position of the upgrade price numbers
+			for (int i = 0; i < upgradePriceNums.size(); i++) {
+				TTN_Transform& trans = Get<TTN_Transform>(upgradePriceNums[i]);
+				//places the numbers to the left of the center
+				trans.SetPos(glm::vec3((buttonTransUpgrade.GetPos().x + buttonTransUpgrade.GetScale().x * 0.15f) - (i) * 0.35f * std::abs(trans.GetScale().x), buttonTransUpgrade.GetPos().y - 2.98f * 25.f, 0.09f));
+			}
+
+			//position of the cooldown price numbers
+			for (int i = 0; i < cooldownPriceNums.size(); i++) {
+				TTN_Transform& trans = Get<TTN_Transform>(cooldownPriceNums[i]);
+				//places the numbers to the left of the center
+				trans.SetPos(glm::vec3((buttonTransAbility.GetPos().x + buttonTransAbility.GetScale().x * 0.15f) - (i) * 0.35f * std::abs(trans.GetScale().x), buttonTransAbility.GetPos().y - 2.98f * 25.f, 0.09f));
+			}
+
 			//trans.SetPos(centerPos - glm::vec3(0.5f * std::abs(trans.GetScale().x), 0.0f, 0.0f));
 			//std::cout << glm::to_string(buttonTransUpgrade.GetPos()) << std::endl;
 			//std::cout << glm::to_string(buttonTrans.GetPos()) << std::endl;
@@ -983,7 +1006,7 @@ void GameUI::Update(float deltaTime)
 		}
 	}
 
-	//put the sprites/textures back to original position and color
+	//lerp the sprites/textures back to original position and color
 	if (!shouldShop && lerpAway) {
 		//TTN_Transform& trans = Get<TTN_Transform>(background);
 		TTN_Transform& Shoptrans = Get<TTN_Transform>(shop);
@@ -1027,8 +1050,33 @@ void GameUI::Update(float deltaTime)
 		//upgrade button lerping
 		buttonTransUpgrade.SetPos(centerPosUpgradeButton);
 
-		//background lerping
-		//trans.SetPos(centerPos);
+		//heal price lerping
+		for (int i = 0; i < healPriceNums.size(); i++) {
+			TTN_Transform& trans = Get<TTN_Transform>(healPriceNums[i]);
+			//places the numbers to the left of the center
+			trans.SetPos(glm::vec3(centerPosButton.x - (float)(i) * 0.35f * std::abs(trans.GetScale().x), centerPosButton.y - (float)(2.98f) * 25.f, 0.09f));
+		}
+
+		//cannon price lerping
+		for (int i = 0; i < cannonPriceNums.size(); i++) {
+			TTN_Transform& trans = Get<TTN_Transform>(cannonPriceNums[i]);
+			//places the numbers to the left of the center
+			trans.SetPos(glm::vec3(centerPosCannonButton.x - (float)(i) * 0.35f * std::abs(trans.GetScale().x), centerPosCannonButton.y - (float)(2.98f) * 25.f, 0.09f));
+		}
+
+		//cd price lerping
+		for (int i = 0; i < cooldownPriceNums.size(); i++) {
+			TTN_Transform& trans = Get<TTN_Transform>(cooldownPriceNums[i]);
+			//places the numbers to the left of the center
+			trans.SetPos(glm::vec3(centerPosAbilityButton.x - (float)(i) * 0.35f * std::abs(trans.GetScale().x), centerPosAbilityButton.y - (float)(2.98f) * 25.f, 0.09f));
+		}
+
+		//upgrade price lerping
+		for (int i = 0; i < upgradePriceNums.size(); i++) {
+			TTN_Transform& trans = Get<TTN_Transform>(upgradePriceNums[i]);
+			//places the numbers to the left of the center
+			trans.SetPos(glm::vec3(centerPosUpgradeButton.x - (float)(i) * 0.35f * std::abs(trans.GetScale().x), centerPosUpgradeButton.y - (float)(2.98f) * 25.f, 0.09f));
+		}
 
 		if (Shoptrans.GetGlobalPos().x < -1900.f)
 			lerpAway = false;
@@ -1098,7 +1146,7 @@ void GameUI::Update(float deltaTime)
 		TTN_Transform contButtonTrans = Get<TTN_Transform>(buttonContinue);
 		if (mousePosWorldSpace.x < contButtonTrans.GetPos().x + 0.5f * abs(contButtonTrans.GetScale().x) &&
 			mousePosWorldSpace.x > contButtonTrans.GetPos().x - 0.5f * abs(contButtonTrans.GetScale().x) &&
-			mousePosWorldSpace.y < contButtonTrans.GetPos().y +  abs(contButtonTrans.GetScale().y) &&
+			mousePosWorldSpace.y < contButtonTrans.GetPos().y + abs(contButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > contButtonTrans.GetPos().y - 0.5f * abs(contButtonTrans.GetScale().y)) {
 			Get<TTN_Renderer2D>(buttonContinue).SetSprite(textureContinue2);
 		}
@@ -1210,7 +1258,7 @@ void GameUI::MouseButtonDownChecks()
 		TTN_Transform contButtonTrans = Get<TTN_Transform>(buttonContinue);
 		if (mousePosWorldSpace.x < contButtonTrans.GetPos().x + 0.5f * abs(contButtonTrans.GetScale().x) &&
 			mousePosWorldSpace.x > contButtonTrans.GetPos().x - 0.5f * abs(contButtonTrans.GetScale().x) &&
-			mousePosWorldSpace.y < contButtonTrans.GetPos().y +  abs(contButtonTrans.GetScale().y) &&
+			mousePosWorldSpace.y < contButtonTrans.GetPos().y + abs(contButtonTrans.GetScale().y) &&
 			mousePosWorldSpace.y > contButtonTrans.GetPos().y - 0.5f * abs(contButtonTrans.GetScale().y)) {
 			shouldShop = false;
 			shopping = false;
@@ -1220,6 +1268,69 @@ void GameUI::MouseButtonDownChecks()
 		}
 
 		m_InputDelay = 0.3f;
+	}
+}
+
+void GameUI::UpdatePrices()
+{
+	//heal price
+	{
+		while (GetNumOfDigits(healCost) < healPriceNums.size()) {
+			DeleteEntity(healPriceNums[healPriceNums.size() - 1]);
+			healPriceNums.pop_back();
+		}
+
+		if (GetNumOfDigits(healCost) > healPriceNums.size())
+			MakeHealPriceNumEntity();
+
+		for (int i = 0; i < healPriceNums.size(); i++) {
+			Get<TTN_Renderer2D>(healPriceNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(healCost, healPriceNums.size() - i - 1)) + "-Text"));
+		}
+	}
+
+	//cannon firing price
+	{
+		while (GetNumOfDigits(cannonCost) < cannonPriceNums.size()) {
+			DeleteEntity(cannonPriceNums[cannonPriceNums.size() - 1]);
+			cannonPriceNums.pop_back();
+		}
+
+		if (GetNumOfDigits(cannonCost) > cannonPriceNums.size())
+			MakeCannonPriceNumEntity();
+
+		for (int i = 0; i < cannonPriceNums.size(); i++) {
+			Get<TTN_Renderer2D>(cannonPriceNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(cannonCost, cannonPriceNums.size() - i - 1)) + "-Text"));
+		}
+	}
+
+	//upgrade price
+	{
+		while (GetNumOfDigits(upgradeCost) < upgradePriceNums.size()) {
+			DeleteEntity(upgradePriceNums[upgradePriceNums.size() - 1]);
+			upgradePriceNums.pop_back();
+		}
+
+		if (GetNumOfDigits(upgradeCost) > upgradePriceNums.size())
+			MakeUpgradePriceNumEntity();
+
+		for (int i = 0; i < upgradePriceNums.size(); i++) {
+			Get<TTN_Renderer2D>(upgradePriceNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(upgradeCost, upgradePriceNums.size() - i - 1)) + "-Text"));
+		}
+	}
+
+	//cooldown price
+	{
+		while (GetNumOfDigits(cooldownCost) < cooldownPriceNums.size()) {
+			DeleteEntity(cooldownPriceNums[cooldownPriceNums.size() - 1]);
+			cooldownPriceNums.pop_back();
+		}
+
+		if (GetNumOfDigits(cooldownCost) > cooldownPriceNums.size())
+			MakeCooldownPriceNumEntity();
+
+		for (int i = 0; i < cooldownPriceNums.size(); i++) {
+			Get<TTN_Renderer2D>(cooldownPriceNums[i]).SetSprite(TTN_AssetSystem::GetTexture2D(std::to_string(GetDigit(cooldownCost, cooldownPriceNums.size() - i - 1)) + "-Text"));
+		}
 	}
 }
 
@@ -1315,4 +1426,77 @@ void GameUI::MakeBirdBombNumEntity()
 	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
 	AttachCopy(birdBombNums[birdBombNums.size() - 1], numRenderer);
 }
+
+void GameUI::MakeHealPriceNumEntity()
+{
+	healPriceNums.push_back(CreateEntity());
+
+	//reference to the heal button's transform
+	TTN_Transform& Trans = Get<TTN_Transform>(buttonHealth);
+
+	//setup a transform for the new entity
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(Trans.GetGlobalPos().x - 0.15f * std::abs(Trans.GetScale().x), Trans.GetGlobalPos().y - 1.0f * std::abs(Trans.GetScale().y), Trans.GetGlobalPos().z),
+		glm::vec3(0.0f), glm::vec3(30.0f, 30.0f, 1.0f));
+	AttachCopy(healPriceNums[healPriceNums.size() - 1], numTrans);
+
+	//setup a 2D renderer for the new entity
+			//create a sprite renderer for the logo
+	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
+	AttachCopy(healPriceNums[healPriceNums.size() - 1], numRenderer);
+}
+
+void GameUI::MakeCannonPriceNumEntity()
+{
+	cannonPriceNums.push_back(CreateEntity());
+
+	//reference to the heal button's transform
+	TTN_Transform& Trans = Get<TTN_Transform>(buttonCannon);
+
+	//setup a transform for the new entity
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(Trans.GetGlobalPos().x - 0.15f * std::abs(Trans.GetScale().x), Trans.GetGlobalPos().y - 1.0f * std::abs(Trans.GetScale().y), Trans.GetGlobalPos().z),
+		glm::vec3(0.0f), glm::vec3(30.0f, 30.0f, 1.0f));
+	AttachCopy(cannonPriceNums[cannonPriceNums.size() - 1], numTrans);
+
+	//setup a 2D renderer for the new entity
+			//create a sprite renderer for the logo
+	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
+	AttachCopy(cannonPriceNums[cannonPriceNums.size() - 1], numRenderer);
+}
+
+void GameUI::MakeCooldownPriceNumEntity()
+{
+	cooldownPriceNums.push_back(CreateEntity());
+
+	//reference to the heal button's transform
+	TTN_Transform& Trans = Get<TTN_Transform>(buttonAbilityCD);
+
+	//setup a transform for the new entity
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(Trans.GetGlobalPos().x - 0.15f * std::abs(Trans.GetScale().x), Trans.GetGlobalPos().y - 1.0f * std::abs(Trans.GetScale().y), Trans.GetGlobalPos().z),
+		glm::vec3(0.0f), glm::vec3(30.0f, 30.0f, 1.0f));
+	AttachCopy(cooldownPriceNums[cooldownPriceNums.size() - 1], numTrans);
+
+	//setup a 2D renderer for the new entity
+			//create a sprite renderer for the logo
+	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
+	AttachCopy(cooldownPriceNums[cooldownPriceNums.size() - 1], numRenderer);
+}
+
+void GameUI::MakeUpgradePriceNumEntity()
+{
+	upgradePriceNums.push_back(CreateEntity());
+
+	//reference to the heal button's transform
+	TTN_Transform& Trans = Get<TTN_Transform>(buttonUpgrade);
+
+	//setup a transform for the new entity
+	TTN_Transform numTrans = TTN_Transform(glm::vec3(Trans.GetGlobalPos().x - 0.15f * std::abs(Trans.GetScale().x), Trans.GetGlobalPos().y - 1.0f * std::abs(Trans.GetScale().y), Trans.GetGlobalPos().z),
+		glm::vec3(0.0f), glm::vec3(30.0f, 30.0f, 1.0f));
+	AttachCopy(upgradePriceNums[upgradePriceNums.size() - 1], numTrans);
+
+	//setup a 2D renderer for the new entity
+			//create a sprite renderer for the logo
+	TTN_Renderer2D numRenderer = TTN_Renderer2D(TTN_AssetSystem::GetTexture2D("0-Text"));
+	AttachCopy(upgradePriceNums[upgradePriceNums.size() - 1], numRenderer);
+}
+
 #pragma endregion

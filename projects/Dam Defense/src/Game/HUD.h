@@ -30,6 +30,8 @@ public:
 	void MouseButtonDownChecks();
 	void KeyDownChecks();
 
+	void UpdatePrices();
+
 	//setters
 	void SetScore(unsigned score) { m_score = score; }
 	void SetDamHP(float health) { m_DamHealth = health; }
@@ -156,6 +158,11 @@ private:
 	TTN_Texture2D::st2dptr textureUpgradeButton2;
 	TTN_Texture2D::st2dptr textureContinue1;
 	TTN_Texture2D::st2dptr textureContinue2;
+	//price num enitites 
+	std::vector<entt::entity> healPriceNums;
+	std::vector<entt::entity> cannonPriceNums;
+	std::vector<entt::entity> cooldownPriceNums;
+	std::vector<entt::entity> upgradePriceNums;
 
 	//arcade mode
 	bool m_arcade;
@@ -194,7 +201,7 @@ private:
 	bool waveChange;
 	int waveTracker = 0;
 	//shop costs
-	int healCost;
+	float healCost;
 	int cannonCost;
 	int cooldownCost;
 	int upgradeCost;
@@ -230,6 +237,11 @@ private:
 	void MakeWaveNumEntity();
 	void MakeFlamethrowerNumEntity();
 	void MakeBirdBombNumEntity();
+	void MakeHealPriceNumEntity();
+	void MakeCannonPriceNumEntity();
+	void MakeCooldownPriceNumEntity();
+	void MakeUpgradePriceNumEntity();
+
 };
 
 //get the number of digits in a number

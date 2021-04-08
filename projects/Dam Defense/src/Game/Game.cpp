@@ -1588,7 +1588,7 @@ void Game::WaveUpdate(float deltaTime) {
 	}
 
 	//if it is in the cooldown between waves, reduce the cooldown by deltaTime
-	if (m_timeTilNextWave >= 0.0f) {
+	if (m_timeTilNextWave >= 0.0f && (!shopping)) {
 		m_timeTilNextWave -= deltaTime;
 	}
 
@@ -1610,12 +1610,14 @@ void Game::WaveUpdate(float deltaTime) {
 				speedMod = 12.0f; //cap the speed growth
 			}
 		}
+		healCost = healCost * glm::floor(glm::pow(2.5f, 0.2f * float(m_currentWave)));
+		//std::cout << "HEAL COST   "<< healCost << std::endl;
+		abilityCost = abilityCost * glm::floor(glm::pow(2.5f, 0.2f * float(m_currentWave)));
+		cannonCost = cannonCost * glm::floor(glm::pow(2.5f, 0.2f * float(m_currentWave)));
+		upgradeCost = upgradeCost * glm::floor(glm::pow(2.5f, 0.2f * float(m_currentWave)));
 	}
-	/*	for (int i = 0; i < boats.size(); i++) {
-			Get<EnemyComponent>(boats[i]).SetSpeedMod(speedMod);
-		}*/
 
-		//otherwise, check if it should spawn
+	//otherwise, check if it should spawn
 	else {
 		m_timeUntilNextSpawn -= deltaTime;
 		//if it's time for the next enemy spawn
