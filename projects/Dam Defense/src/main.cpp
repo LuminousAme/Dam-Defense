@@ -423,6 +423,11 @@ int main() {
 			gameScene->SetShopping(gameSceneUI->GetShouldShopping());
 			gameScene->SetPauseRender(paused->GetRendering());
 
+			gameSceneUI->SetHealCost(gameScene->GetHealCost());
+			gameSceneUI->SetCannonCost(gameScene->GetCannonCost());
+			gameSceneUI->SetCooldownCost(gameScene->GetCooldownCost());
+			gameSceneUI->SetUpgradeCost(gameScene->GetUpgradeCost());
+
 			gameSceneUI->SetArcade(gameScene->GetArcade());
 			gameSceneUI->SetLastWave(gameScene->GetLastWave());
 			gameSceneUI->SetScore(gameScene->GetScore());
