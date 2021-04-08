@@ -34,6 +34,8 @@ uniform mat4 u_lightViewProj[4];
 uniform float u_SplitRanges[4];
 uniform mat4 u_vp;
 
+uniform vec3 rimColor = vec3(1.0);
+
 //get gbuffer data
 layout (binding = 0) uniform sampler2D s_albedoTex;
 layout (binding = 1) uniform sampler2D s_normalsTex;
@@ -128,7 +130,9 @@ void main() {
     //specular
     float texSpec = texture(s_specularTex,inUV).r;
 	//emissive
-	float emissiveStrenght = texture(s_specularTex,inUV).b;
+	float emissiveStrenght = texture(s_specularTex,inUV).g;
+	//rim
+	float useRim = texture(s_specularTex,inUV).b;
     //positions
     vec3 fragPos = texture(s_positionTex,inUV).rgb;
 
@@ -154,11 +158,17 @@ void main() {
 	float shadowBias = max(sun.m_maxShadowBias * (1.0 - dot(N, lightDir)), sun.m_minShadowBias);
 	float shadow = shadowCalc(fragPos, clipPos, shadowBias);
 
-
+	//do regular lighting
 	vec3 result = ((sun.m_ambientPower * sun.m_ambientColor.xyz) + // global ambient light
 		 shadow * (diffuse + specular) // light factors from our single light, including shadow 
 		);
 
+
+	float rimLightContribution = 1.0 - max(dot(viewDir, N), 0.0);
+
+	result += mix(vec3(0.0), rimColor * rimLightContribution, ReMap(0.0, 1.0, 1.0, 0.0, useRim));
+
+	//add emissive light
 	result += mix(vec3(0.0), texture(s_emissiveTex, inUV).rgb, ReMap(0.0, 1.0, 1.0, 0.0, emissiveStrenght));
 
 	if(shadow < -0.1)

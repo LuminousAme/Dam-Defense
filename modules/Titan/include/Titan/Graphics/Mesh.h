@@ -48,6 +48,8 @@ namespace Titan {
 		void AddVertices(std::vector<glm::vec3>& verts);
 		//adds a new set of normals to the class and creates a new vbo for them
 		void AddNormals(std::vector<glm::vec3>& norms);
+		//adds a new set of tangents to the class and creates a new vbo for them
+		void AddTangents(std::vector<glm::vec3>& tangs);
 
 		//GETTERS
 		//Gets the pointer to the meshes vao
@@ -74,10 +76,13 @@ namespace Titan {
 		std::vector<glm::vec3> m_Colors;
 		//a boolean for if the mesh has colors
 		bool m_HasVertColors;
+		//a vector containg all the angents of the mesh
+		std::vector<std::vector<glm::vec3>> m_tangents;
 
 		//vbo smart pointers
 		std::vector<TTN_VertexBuffer::svbptr> m_vertVbos;
 		std::vector<TTN_VertexBuffer::svbptr> m_normVbos;
+		std::vector<TTN_VertexBuffer::svbptr> m_tangVbos;
 		TTN_VertexBuffer::svbptr m_UVsVbo;
 		TTN_VertexBuffer::svbptr m_ColVbo;
 		//smart pointer with the VAO for the mesh 

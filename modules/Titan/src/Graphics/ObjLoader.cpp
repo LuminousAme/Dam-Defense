@@ -158,12 +158,34 @@ namespace Titan {
 			meshVertNorms[i] = vertexNorms[vertexNormIndices[i] - 1];
 		}
 
+		std::vector <glm::vec3> meshVertTangents;
+		meshVertTangents.resize(vertexNormIndices.size(), glm::vec3());
+		for (int i = 0; i < vertexNormIndices.size(); i += 3) {
+			glm::vec3 edge1 = meshVertPos[i + 1] - meshVertPos[i];
+			glm::vec3 edge2 = meshVertPos[i + 2] - meshVertPos[i];
+
+			glm::vec2 deltaUV1 = meshVertUvs[i + 1] - meshVertUvs[i];
+			glm::vec2 deltaUV2 = meshVertUvs[i + 2] - meshVertUvs[i];
+
+			float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+			glm::vec3 tangent = glm::vec3();
+			tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+			tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+			tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+			//save the vertex tangent
+			meshVertTangents[i] = tangent;
+			meshVertTangents[i + 1] = tangent;
+			meshVertTangents[i + 2] = tangent;
+		}
+
 		//create and return the mesh from that data
 		TTN_Mesh::smptr newMesh = TTN_Mesh::Create();
 		newMesh->AddVertices(meshVertPos);
 		newMesh->AddNormals(meshVertNorms);
+		newMesh->AddTangents(meshVertTangents);
 		newMesh->SetUVs(meshVertUvs);
-
 
 		return newMesh;
 	}
@@ -281,9 +303,35 @@ namespace Titan {
 				meshVertNorms[i] = vertexNorms[vertexNormIndices[i] - 1];
 			}
 
+			//calculate the tangent vector
+			std::vector<glm::vec2> meshVertUvs = newMesh->GetVertexUvs();
+
+			std::vector <glm::vec3> meshVertTangents;
+			meshVertTangents.resize(vertexNormIndices.size(), glm::vec3());
+			for (int i = 0; i < vertexNormIndices.size(); i += 3) {
+				glm::vec3 edge1 = meshVertPos[i + 1] - meshVertPos[i];
+				glm::vec3 edge2 = meshVertPos[i + 2] - meshVertPos[i];
+
+				glm::vec2 deltaUV1 = meshVertUvs[i + 1] - meshVertUvs[i];
+				glm::vec2 deltaUV2 = meshVertUvs[i + 2] - meshVertUvs[i];
+
+				float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+				glm::vec3 tangent = glm::vec3();
+				tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+				tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+				tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+				//save the vertex tangent
+				meshVertTangents[i] = tangent;
+				meshVertTangents[i + 1] = tangent;
+				meshVertTangents[i + 2] = tangent;
+			}
+
 			//with the data all loaded in it need only be added to the mesh object
 			newMesh->AddVertices(meshVertPos);
 			newMesh->AddNormals(meshVertNorms);
+			newMesh->AddTangents(meshVertTangents);
 		}
 
 		//at the end of the for loop all the animation files will be loaded into a single mesh object, so you can just return that mesh

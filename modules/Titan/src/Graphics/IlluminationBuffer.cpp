@@ -63,6 +63,7 @@ namespace Titan {
 			//binds directional light shader
 			m_shaders[TTN_Lights::DIRECTIONAL]->Bind();
 			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("u_CamPos", m_camPos);
+			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("rimColor", m_rimColor);
 			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("u_SplitRanges", m_splitRanges[0], 4);
 			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniformMatrix("u_lightViewProj", m_lightSpaceViewProj[0], 4);
 			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniformMatrix("u_vp", m_viewMat);

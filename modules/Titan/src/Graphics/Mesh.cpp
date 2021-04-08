@@ -39,6 +39,8 @@ namespace Titan {
 		if (m_HasVertColors) m_vao->AddVertexBuffer(m_ColVbo, { BufferAttribute(3, 3, GL_FLOAT, false, sizeof(float) * 2, 0, AttribUsage::Color) });
 		m_vao->AddVertexBuffer(m_vertVbos[nextFrame], {BufferAttribute(4, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Position) });
 		m_vao->AddVertexBuffer(m_normVbos[nextFrame], { BufferAttribute(5, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Normal) });
+		m_vao->AddVertexBuffer(m_tangVbos[currentFrame], { BufferAttribute(6, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Tagent) });
+		m_vao->AddVertexBuffer(m_tangVbos[nextFrame], { BufferAttribute(7, 3, GL_FLOAT, false, sizeof(float) * 3, 0, AttribUsage::Tagent) });
 	}
 
 	void TTN_Mesh::SetUVs(std::vector<glm::vec2>& uvs)
@@ -113,6 +115,23 @@ namespace Titan {
 
 		//and add that vbo to the list of vert vbos
 		m_normVbos.push_back(newNormVbo);
+	}
+
+	void TTN_Mesh::AddTangents(std::vector<glm::vec3>& tangs)
+	{
+		//create a new vbo pointer for it
+		TTN_VertexBuffer::svbptr newTangVBO = TTN_VertexBuffer::Create();
+
+		//copy the list of normals
+		m_tangents.push_back(tangs);
+
+		//add those normals to the new vbo
+		if (tangs.size() != 0) {	
+			newTangVBO->LoadData(tangs.data(), tangs.size());
+		}
+
+		//and add that vbo to the list of vert vbos
+		m_tangVbos.push_back(newTangVBO);
 	}
 
 	//gets the pointer to the meshes vao 

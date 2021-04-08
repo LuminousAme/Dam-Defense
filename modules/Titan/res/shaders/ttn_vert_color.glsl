@@ -5,6 +5,7 @@ layout(location = 0) in vec3 inPos;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inUV;
 layout(location = 3) in vec3 inColor;
+layout(location = 6) in vec3 inTangent;
 
 //mesh data to pass to the frag shader
 layout(location = 0) out vec3 outPos;
@@ -12,6 +13,8 @@ layout(location = 1) out vec3 outNormal;
 layout(location = 2) out vec2 outUV;
 layout(location = 3) out vec3 outColor;
 layout(location = 4) out vec4 outFragPosLightSpace;
+layout(location = 5) out vec3 outTangent;
+layout(location = 6) out vec3 outBiTangent;
 
 //model, view, projection matrix
 uniform mat4 MVP;
@@ -29,6 +32,9 @@ void main() {
 	//pass data onto the frag shader
 	outPos = (Model * vec4(inPos, 1.0)).xyz;
 	outNormal = NormalMat * inNormal;
+	outTangent =  NormalMat * inTangent;
+	outTangent = normalize(outTangent - dot(outTangent, outNormal) * outNormal);
+	outBiTangent = cross(outNormal, outTangent);
 	outUV = inUV;
 	outColor = inColor;
 
