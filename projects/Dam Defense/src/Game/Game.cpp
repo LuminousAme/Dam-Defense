@@ -300,13 +300,9 @@ void Game::KeyDownChecks()
 		TTN_Scene::SetPaused(m_paused);
 	}
 
-	//just some temp controls to let us access the mouse for ImGUI, remeber to remove these in the final game
-	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::P)) {
-		TTN_Application::TTN_Input::SetCursorLocked(true);
-	}
-
-	if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::O)) {
-		TTN_Application::TTN_Input::SetCursorLocked(false);
+	//control to make the CG controls appear or disappear
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::C)&& TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::G)) {
+		showCGControls = !showCGControls;
 	}
 }
 
@@ -435,14 +431,14 @@ void Game::SetUpAssets()
 	enemyCannonText = TTN_AssetSystem::GetTexture2D("Enemy Cannon texture");
 
 	////MATERIALS////
-	cannonMat = TTN_Material::Create();
+	cannonMat = TTN_AssetSystem::GetMaterial("cannonMat");
 	cannonMat->SetAlbedo(cannonText);
 	cannonMat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Cannon Normal Map"));
 	cannonMat->SetUseNormalMap(true);
 	cannonMat->SetShininess(128.0f);
 	m_mats.push_back(cannonMat);
 
-	enemyCannonMat = TTN_Material::Create();
+	enemyCannonMat = TTN_AssetSystem::GetMaterial("enemyCannonMat");
 	enemyCannonMat->SetAlbedo(enemyCannonText);
 	enemyCannonMat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Enemy Cannon Normal Map"));
 	enemyCannonMat->SetUseNormalMap(true);
@@ -450,21 +446,21 @@ void Game::SetUpAssets()
 	enemyCannonMat->SetShininess(128.0f);
 	m_mats.push_back(enemyCannonMat);
 
-	boat1Mat = TTN_Material::Create();
+	boat1Mat = TTN_AssetSystem::GetMaterial("boat1Mat");
 	boat1Mat->SetAlbedo(boat1Text);
 	boat1Mat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Boat Normal Map 1"));
 	boat1Mat->SetUseNormalMap(true);
 	boat1Mat->SetHasRimLighting(true);
 	boat1Mat->SetShininess(128.0f);
 	m_mats.push_back(boat1Mat);
-	boat2Mat = TTN_Material::Create();
+	boat2Mat = TTN_AssetSystem::GetMaterial("boat2Mat");
 	boat2Mat->SetAlbedo(boat2Text);
 	boat2Mat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Boat Normal Map 2"));
 	boat2Mat->SetUseNormalMap(true);
 	boat2Mat->SetHasRimLighting(true);
 	boat2Mat->SetShininess(128.0f);
 	m_mats.push_back(boat2Mat);
-	boat3Mat = TTN_Material::Create();
+	boat3Mat = TTN_AssetSystem::GetMaterial("boat3Mat");
 	boat3Mat->SetAlbedo(boat3Text);
 	boat3Mat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Boat Normal Map 3"));
 	boat3Mat->SetUseNormalMap(true);
@@ -472,26 +468,37 @@ void Game::SetUpAssets()
 	boat3Mat->SetShininess(128.0f);
 	m_mats.push_back(boat3Mat);
 
-	flamethrowerMat = TTN_Material::Create();
+	flamethrowerMat = TTN_AssetSystem::GetMaterial("flamethrowerMat");
 	flamethrowerMat->SetAlbedo(flamethrowerText);
 	flamethrowerMat->SetShininess(128.0f);
 	m_mats.push_back(flamethrowerMat);
 
-	skyboxMat = TTN_Material::Create();
+	skyboxMat = TTN_AssetSystem::GetMaterial("skyboxMat");
 	skyboxMat->SetSkybox(skyboxText);
 	smokeMat = TTN_Material::Create();
 	smokeMat->SetAlbedo(nullptr); //do this to be sure titan uses it's default white texture for the particle
 
-	fireMat = TTN_Material::Create();
+	fireMat = TTN_AssetSystem::GetMaterial("fireMat");
 	fireMat->SetAlbedo(nullptr); //do this to be sure titan uses it's default white texture for the particle
 
-	birdMat = TTN_Material::Create();
+	birdMat = TTN_AssetSystem::GetMaterial("birdMat");
 	birdMat->SetAlbedo(birdText);
 	m_mats.push_back(birdMat);
 
-	damMat = TTN_Material::Create();
+	damMat = TTN_AssetSystem::GetMaterial("damMat");
 	damMat->SetAlbedo(damText);
 	m_mats.push_back(damMat);
+
+	lightHouseMat = TTN_AssetSystem::GetMaterial("LightHouseMat");
+	lightHouseMat->SetAlbedo(TTN_AssetSystem::GetTexture2D("LightHouseText"));
+	lightHouseMat->SetEmissive(TTN_AssetSystem::GetTexture2D("LightHouseEmissive"));
+	lightHouseMat->SetUseEmissive(true);
+	illBuffer->SetEmissiveStrenght(1.0f);
+	m_mats.push_back(lightHouseMat);
+
+	treeMat = TTN_AssetSystem::GetMaterial("TreeMat");
+	treeMat->SetAlbedo(TTN_AssetSystem::GetTexture2D("Tree texture"));
+	m_mats.push_back(treeMat);
 
 	for (int i = 0; i < m_mats.size(); i++) {
 		m_mats[i]->SetDiffuseRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
@@ -499,11 +506,6 @@ void Game::SetUpAssets()
 		m_mats[i]->SetUseDiffuseRamp(m_useDiffuseRamp);
 		m_mats[i]->SetUseSpecularRamp(m_useSpecularRamp);
 	}
-
-	illBuffer->SetDiffuseRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
-	illBuffer->SetSpecularRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
-	illBuffer->SetUseDiffuseRamp(true);
-	illBuffer->SetUseSpecularRamp(true);
 }
 
 //create the scene's initial entities
@@ -633,6 +635,91 @@ void Game::SetUpEntities()
 			//attach that transform to the entity
 			AttachCopy<TTN_Transform>(flamethrowers[i], ftTrans);
 		}
+	}
+
+	//entity for the lighthouse
+	{
+		entt::entity lightHouse = CreateEntity();
+
+		//setup a mesh renderer for the light house
+		TTN_Renderer lightHouseRenderer = TTN_Renderer(TTN_AssetSystem::GetMesh("lightHouseMesh"), shaderProgramTextured, lightHouseMat);
+		//attach that renderer to the entity
+		AttachCopy(lightHouse, lightHouseRenderer);
+
+		//setup a transform for the light house
+		TTN_Transform lightHouseTrans = TTN_Transform(glm::vec3(10.0, -0.1f, 9.0f), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.4f));
+		//attach that transform to the entity
+		AttachCopy(lightHouse, lightHouseTrans);
+	}
+
+	//entity for the lighthouse
+	for(int i = 0; i < 48; i++) {
+		entt::entity tree = CreateEntity();
+
+		//setup a mesh renderer for a tree
+		TTN_Renderer treeRenderer = TTN_Renderer(TTN_AssetSystem::GetMesh("Tree Mesh"), shaderProgramTextured, treeMat);
+		//attach that renderer to the entity
+		AttachCopy(tree, treeRenderer);
+
+		//setup a transform for a tree
+		TTN_Transform treeTrans;
+		if(i == 0) treeTrans = TTN_Transform(glm::vec3(9.0f + 2.0f, -0.1f, 8.0f), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 1) treeTrans = TTN_Transform(glm::vec3(-10.0f, -0.1f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 2) treeTrans = TTN_Transform(glm::vec3(-9.5f, -0.1f, 3.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 3) treeTrans = TTN_Transform(glm::vec3(10.1 + 2.0f, -0.1f, 4.5f), glm::vec3(0.0f, -180.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 4) treeTrans = TTN_Transform(glm::vec3(8.9 + 2.0f, -0.2f, 1.2f), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 5) treeTrans = TTN_Transform(glm::vec3(-9.1f, -0.1f, 7.6f), glm::vec3(0.0f, 72.0f, 0.0f), glm::vec3(0.075f));
+
+		else if (i == 6) treeTrans = TTN_Transform(glm::vec3(8.5f + 1.8f, -0.1f, 8.0f), glm::vec3(0.0f, 170.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 7) treeTrans = TTN_Transform(glm::vec3(-10.2f, -0.1f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 8) treeTrans = TTN_Transform(glm::vec3(-9.3f, -0.1f, 3.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 9) treeTrans = TTN_Transform(glm::vec3(10.4 + 1.8f, -0.1f, 4.5f), glm::vec3(0.0f, -181.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 10) treeTrans = TTN_Transform(glm::vec3(8.2 + 1.8f, -0.2f, 1.2f), glm::vec3(0.0f, 179.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 11) treeTrans = TTN_Transform(glm::vec3(-9.4f, -0.1f, 7.6f), glm::vec3(0.0f, 72.0f, 0.0f), glm::vec3(0.075f));
+
+		else if (i == 12) treeTrans = TTN_Transform(glm::vec3(9.0f + 2.1f, -0.1f, 8.3f), glm::vec3(0.0f, 190.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 13) treeTrans = TTN_Transform(glm::vec3(-10.0f, -0.1f, 4.7f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 14) treeTrans = TTN_Transform(glm::vec3(-9.5f, -0.1f, 3.2f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 15) treeTrans = TTN_Transform(glm::vec3(10.1 + 2.1f, -0.1f, 4.1f), glm::vec3(0.0f, -180.2f, 0.0f), glm::vec3(0.075f));
+		else if (i == 16) treeTrans = TTN_Transform(glm::vec3(8.9 + 2.1f, -0.2f, 1.5f), glm::vec3(0.0f, 181.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 17) treeTrans = TTN_Transform(glm::vec3(-9.1f, -0.1f, 7.2f), glm::vec3(0.0f, 72.0f, 0.0f), glm::vec3(0.075f));
+
+		else if (i == 18) treeTrans = TTN_Transform(glm::vec3(9.3f + 2.0f, -0.1f, 8.2f), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 19) treeTrans = TTN_Transform(glm::vec3(-10.4f, -0.1f, 4.7f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 20) treeTrans = TTN_Transform(glm::vec3(-9.2f, -0.1f, 2.7f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 21) treeTrans = TTN_Transform(glm::vec3(10.4 + 2.0f, -0.1f, 4.8f), glm::vec3(0.0f, -173.9f, 0.0f), glm::vec3(0.075f));
+		else if (i == 22) treeTrans = TTN_Transform(glm::vec3(9.3 + 2.0f, -0.2f, 1.4f), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 23) treeTrans = TTN_Transform(glm::vec3(-9.5f, -0.1f, 7.1f), glm::vec3(0.0f, 72.0f, 0.0f), glm::vec3(0.075f));
+
+		else if (i == 24) treeTrans = TTN_Transform(glm::vec3(9.0f + 1.75f, -0.1f, 8.0f - 2.0f), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 25) treeTrans = TTN_Transform(glm::vec3(-10.0f, -0.1f, 5.0f + 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 26) treeTrans = TTN_Transform(glm::vec3(-9.5f, -0.1f, 3.0f - 1.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 27) treeTrans = TTN_Transform(glm::vec3(10.1 + 1.75f, -0.1f, 4.5f - 0.5f), glm::vec3(0.0f, -180.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 28) treeTrans = TTN_Transform(glm::vec3(8.9 + 1.75f, -0.2f, 1.2f + 1.2f), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 29) treeTrans = TTN_Transform(glm::vec3(-9.1f, -0.1f, 7.6f - 1.0f), glm::vec3(0.0f, 72.0f, 0.0f), glm::vec3(0.075f));
+
+		else if (i == 30) treeTrans = TTN_Transform(glm::vec3(8.5f + 1.92f, -0.1f, 8.0f - 2.0f), glm::vec3(0.0f, 170.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 31) treeTrans = TTN_Transform(glm::vec3(-10.2f, -0.1f, 5.0f + 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 32) treeTrans = TTN_Transform(glm::vec3(-9.3f, -0.1f, 3.0f - 1.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 33) treeTrans = TTN_Transform(glm::vec3(10.4 + 1.92f, -0.1f, 4.5f - 0.5f), glm::vec3(0.0f, -181.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 34) treeTrans = TTN_Transform(glm::vec3(8.2 + 1.92f, -0.2f, 1.2f + 1.2f), glm::vec3(0.0f, 179.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 35) treeTrans = TTN_Transform(glm::vec3(-9.4f, -0.1f, 7.6f - 1.0f), glm::vec3(0.0f, 72.0f, 0.0f), glm::vec3(0.075f));
+
+		else if (i == 36) treeTrans = TTN_Transform(glm::vec3(9.0f + 1.92f, -0.1f, 8.3f - 2.0f), glm::vec3(0.0f, 190.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 37) treeTrans = TTN_Transform(glm::vec3(-10.0f, -0.1f, 4.7f + 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 38) treeTrans = TTN_Transform(glm::vec3(-9.5f, -0.1f, 3.2f - 1.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 39) treeTrans = TTN_Transform(glm::vec3(10.1 + 1.92f, -0.1f, 4.1f - 0.5f), glm::vec3(0.0f, -180.2f, 0.0f), glm::vec3(0.075f));
+		else if (i == 40) treeTrans = TTN_Transform(glm::vec3(8.9 + 1.92f, -0.2f, 1.5f + 1.2f), glm::vec3(0.0f, 181.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 41) treeTrans = TTN_Transform(glm::vec3(-9.1f, -0.1f, 7.2f - 1.0f), glm::vec3(0.0f, 72.0f, 0.0f), glm::vec3(0.075f));
+
+		else if (i == 42) treeTrans = TTN_Transform(glm::vec3(9.3f + 1.5f, -0.1f, 8.2f - 2.0f), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 43) treeTrans = TTN_Transform(glm::vec3(-10.4f, -0.1f, 4.7f - 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 44) treeTrans = TTN_Transform(glm::vec3(-9.2f, -0.1f, 2.7f - 1.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 45) treeTrans = TTN_Transform(glm::vec3(10.4 + 1.5f, -0.1f, 4.8f - 0.5f), glm::vec3(0.0f, -173.9f, 0.0f), glm::vec3(0.075f));
+		else if (i == 46) treeTrans = TTN_Transform(glm::vec3(9.3 + 1.5f, -0.2f, 1.4f + 1.2f), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.075f));
+		else if (i == 47) treeTrans = TTN_Transform(glm::vec3(-9.5f, -0.1f, 7.1f - 1.0f), glm::vec3(0.0f, 72.0f, 0.0f), glm::vec3(0.075f));
+		//attach that transform to the entity
+		AttachCopy(tree, treeTrans);
 	}
 
 	//terrain entity
@@ -779,24 +866,14 @@ void Game::SetUpOtherData()
 	glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 
 	//setup the bloom effect
-	m_bloomEffect = TTN_BloomEffect::Create();
-	m_bloomEffect->Init(windowSize.x, windowSize.y);
-	m_bloomEffect->SetThreshold(m_bloomThreshold);
+	m_bloomThreshold = m_bloomEffect->GetThreshold();
 	m_numOfBloomPasses = m_bloomEffect->GetNumOfPasses();
 	m_bloomBufferDivisor = m_bloomEffect->GetBlurDownScale();
-	m_bloomEffect->SetRadius(m_bloomRadius);
-	m_bloomEffect->SetStrength(m_bloomStrength);
-	m_bloomEffect->SetShouldApply(true);
+	m_bloomRadius = m_bloomEffect->GetRadius();
+	m_bloomStrength = m_bloomEffect->GetStrength();
 	m_PostProcessingEffects.push_back(m_bloomEffect);
 
-	//setup up the color correction effect
-	m_colorCorrectEffect = TTN_ColorCorrect::Create();
-	m_colorCorrectEffect->Init(windowSize.x, windowSize.y);
-	//set it so it doesn't render
-	m_colorCorrectEffect->SetShouldApply(true);
-	m_colorCorrectEffect->SetIntensity(1.0f);
-	m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Main LUT"));
-	//and add it to this scene's list of effects
+	//add color correction to the scene's list of effects to render
 	m_PostProcessingEffects.push_back(m_colorCorrectEffect);
 
 	//set all 3 effects to false
@@ -810,6 +887,8 @@ void Game::SetUpOtherData()
 	m_specularOnly = false;
 	m_ambientAndSpecular = true;
 	m_ambientSpecularAndOutline = false;
+
+	m_useTextures = true;
 
 	for (int i = 0; i < m_mats.size(); i++)
 		m_mats[i]->SetOutlineSize(m_outlineSize);
@@ -964,7 +1043,6 @@ void Game::RestartData()
 	m_music->PlayFromQueue();
 
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
-	firstFrame = true;
 	firstFrame = true;
 	m_score = 0;
 }
@@ -2254,345 +2332,153 @@ void Game::BirdUpate(float deltaTime)
 
 void Game::ImGui()
 {
-	//Volume control
-	//ImGui::Begin("Temp Volume Control");
-	ImGui::Begin("Shop Prices Control");
+	if (showCGControls) {
+		//ImGui controls for the CG requirements
+		ImGui::Begin("CG Controls");
 
-	ImGui::SliderInt("Heal Cost", &healCost, 50, 10000);
-	ImGui::SliderInt("Cannon Fire Rate Cost", &cannonCost, 50, 10000);
-	ImGui::SliderInt("Ability Cooldown Cost", &abilityCost, 50, 10000);
-	ImGui::SliderInt("Ability Upgrade Cost", &upgradeCost, 50, 10000);
+		if (ImGui::CollapsingHeader("Lighting and Shadow Mapping Controls")) {
+			TTN_DirectionalLight tempSun = illBuffer->GetSunRef();
 
-	/*ImGui::SliderInt("Master", &masterVolume, 0, 100);
-	ImGui::SliderInt("Music", &musicVolume, 0, 100);
-	ImGui::SliderInt("Sound Effects", &sfxVolume, 0, 100);
-	ImGui::SliderFloat("Mouse", &mouseSensetivity, 0.0f, 100.0f);*/
+			if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 0.0f)) {
+				SetSun(tempSun);
+			}
 
-	ImGui::End();
+			if (ImGui::ColorPicker3("Directional Light Color", glm::value_ptr(tempSun.m_lightColor))) {
+				SetSun(tempSun);
+			}
 
-	//ImGui controller for the camera
-	ImGui::Begin("Editor");
+			if (ImGui::ColorPicker3("Directional Light Ambient Color", glm::value_ptr(tempSun.m_ambientColor))) {
+				SetSun(tempSun);
+			}
 
-	if (ImGui::CollapsingHeader("Cannon controls")) {
-		TTN_Transform& cannonTrans = Get<TTN_Transform>(cannon);
-		ImGui::Text("Position\n");
+			if (ImGui::SliderFloat("Directional Light Ambient Power", &tempSun.m_ambientPower, 0.0f, 5.0f)) {
+				SetSun(tempSun);
+			}
 
-		//position
-		glm::vec3 globalPos = cannonTrans.GetGlobalPos();
-		float pos[3];
-		pos[0] = cannonTrans.GetPos().x;
-		pos[1] = cannonTrans.GetPos().y;
-		pos[2] = cannonTrans.GetPos().z;
+			if (ImGui::SliderFloat("Directional Light - Light Ambient Power", &tempSun.m_lightAmbientPower, 0.0f, 5.0f)) {
+				SetSun(tempSun);
+			}
 
-		if (ImGui::SliderFloat3("Position", pos, -5.0f, 5.0f)) {
-			cannonTrans.SetPos(glm::vec3(pos[0], pos[1], pos[2]));
-			globalPos = cannonTrans.GetGlobalPos();
+			if (ImGui::SliderFloat("Directional Light - Light Specular Power", &tempSun.m_lightSpecularPower, 0.0f, 5.0f)) {
+				SetSun(tempSun);
+			}
+
+			if (ImGui::SliderFloat("Directional Light Min Shadow Bias", &tempSun.m_minShadowBias, 0.0f, 0.005f)) {
+				SetSun(tempSun);
+			}
+
+			if (ImGui::SliderFloat("Directional Light Max Shadow Bias", &tempSun.m_maxShadowBias, 0.0f, 0.005f)) {
+				SetSun(tempSun);
+			}
+
+			if (ImGui::SliderInt("Directional Light PCF Filter Passes", &tempSun.m_pcfFilterSamples, 1, 20)) {
+				SetSun(tempSun);
+			}
+
+			float emissiveStr = illBuffer->GetEmissiveStrenght();
+			if (ImGui::SliderFloat("Emissive Strenght", &emissiveStr, 0.0f, 10.0f)) {
+				illBuffer->SetEmissiveStrenght(emissiveStr);
+			}
+
+			bool AmbientOn = illBuffer->GetUseAmbient();
+			if (ImGui::Checkbox("Ambient Lighting On", &AmbientOn)) {
+				illBuffer->SetUseAmbient(AmbientOn);
+			}
+
+			bool SpecularOn = illBuffer->GetUseSpecular();
+			if (ImGui::Checkbox("Specular Lighting On", &SpecularOn)) {
+				illBuffer->SetUseSpecular(SpecularOn);
+			}
+
+			bool ShadowingOn = illBuffer->GetuseShadowMapping();
+			if (ImGui::Checkbox("Shadow Mapping On", &ShadowingOn)) {
+				illBuffer->SetUseShadowMapping(ShadowingOn);
+			}
+
+			bool EmissiveOn = lightHouseMat->GetUseEmissive();
+			if (ImGui::Checkbox("Emissive Lighting On", &EmissiveOn)) {
+				lightHouseMat->SetUseEmissive(EmissiveOn);
+			}
+
+			bool RimOn = boat1Mat->GetHasRimLighting();
+			if (ImGui::Checkbox("Rim Lighting On", &RimOn)) {
+				boat1Mat->SetHasRimLighting(RimOn);
+				boat2Mat->SetHasRimLighting(RimOn);
+				boat3Mat->SetHasRimLighting(RimOn);
+			}
 		}
 
-		std::string newText = "Global Pos. X: " + std::to_string(globalPos.x) + " Y: " + std::to_string(globalPos.y) + " Z: " + std::to_string(globalPos.z);
-		ImGui::Text(newText.c_str());
-
-		ImGui::Text("\n\nScale\n");
-
-		//scale
-		float scale[3];
-		scale[0] = cannonTrans.GetScale().x;
-		scale[1] = cannonTrans.GetScale().y;
-		scale[2] = cannonTrans.GetScale().z;
-
-		if (ImGui::SliderFloat3("Scale", scale, -1.0f, 1.0f)) {
-			cannonTrans.SetScale(glm::vec3(scale[0], scale[1], scale[2]));
+		if (ImGui::CollapsingHeader("Texture Controls")) {
+			bool  texturesOn = m_mats[0]->GetUseAlbedo();
+			if (ImGui::Checkbox("Use Textures", &texturesOn)) {
+				for (int i = 0; i < m_mats.size(); i++) {
+					m_mats[i]->SetUseAlbedo(texturesOn);
+				}
+			}
 		}
+
+		if (ImGui::CollapsingHeader("Color Correction Controls")) {
+			bool mainlutIsActive = m_colorCorrectEffect->GetShouldApply();
+			if (ImGui::Checkbox("Main Colour Correction On", &mainlutIsActive)) {
+				m_colorCorrectEffect->SetShouldApply(mainlutIsActive);
+			}
+
+			ImGui::Text("Others Color correction effects can be toggled from the scenes they affect, and the options menu");
+		}
+
+		if (ImGui::CollapsingHeader("Bloom Controls")) {
+			bool bloomShouldApply = m_bloomEffect->GetShouldApply();
+			if (ImGui::Checkbox("Bloom On", &bloomShouldApply)) {
+				m_bloomEffect->SetShouldApply(bloomShouldApply);
+			}
+
+			if (ImGui::SliderFloat("Threshold", &m_bloomThreshold, 0.0f, 1.0f)) {
+				m_bloomEffect->SetThreshold(m_bloomThreshold);
+			}
+
+			if (ImGui::SliderInt("Number of blur passes", &m_numOfBloomPasses, 1, 20)) {
+				m_bloomEffect->SetNumOfPasses(m_numOfBloomPasses);
+			}
+
+			int tempInt = m_bloomBufferDivisor;
+			if (ImGui::SliderInt("Downscale divisor", &tempInt, 1, 20)) {
+				m_bloomBufferDivisor = tempInt;
+				m_bloomEffect->SetBlurDownScale(m_bloomBufferDivisor);
+			}
+
+			if (ImGui::SliderFloat("radius", &m_bloomRadius, 0.1f, 20.0f)) {
+				m_bloomEffect->SetRadius(m_bloomRadius);
+			}
+
+			if (ImGui::SliderFloat("Strength (radial)", &m_bloomStrength, 0.1f, 20.0f)) {
+				m_bloomEffect->SetStrength(m_bloomStrength);
+			}
+
+			if (ImGui::Button("Make Gaussian Blur")) {
+				m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::GAUSSIAN);
+			}
+
+			if (ImGui::Button("Make Box Blur")) {
+				m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::BOX);
+			}
+
+			if (ImGui::Button("Make Radial Blur")) {
+				m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::RADIAL);
+			}
+		}
+
+		if (ImGui::CollapsingHeader("Toon Shading Controls")) {
+			bool diffuseRampIsOn = illBuffer->GetUseDiffuseRamp();
+			if (ImGui::Checkbox("Diffuse Ramp On", &diffuseRampIsOn)) {
+				illBuffer->SetUseDiffuseRamp(diffuseRampIsOn);
+			}
+
+			bool specularRampIsOn = illBuffer->GetUseSpecularRamp();
+			if (ImGui::Checkbox("Specular Ramp On", &specularRampIsOn)) {
+				illBuffer->SetUseSpecularRamp(specularRampIsOn);
+			}
+		}
+
+		ImGui::End();
 	}
-
-	if (ImGui::CollapsingHeader("Directional Light Controls")) {
-		TTN_DirectionalLight tempSun = illBuffer->GetSunRef();
-
-		/*glm::vec3 direction = tempSun.m_lightDirection;
-		glm::vec3 color = tempSun.m_lightColor;
-		glm::vec3 ambientColor = tempSun.m_ambientColor;
-		float ambientPower = tempSun.m_ambientPower;
-		float lightAmbientPower = tempSun.m_lightAmbientPower;
-		float lightSpecularPower = tempSun.m_lightSpecularPower;
-		float minShadowBias = tempSun.m_minShadowBias;
-		float maxShadowBias = tempSun.m_maxShadowBias;
-		int pcfPasses = tempSun.m_pcfFilterSamples;*/
-
-		if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 0.0f)) {
-			SetSun(tempSun);
-		}
-
-		if (ImGui::ColorPicker3("Directional Light Color", glm::value_ptr(tempSun.m_lightColor))) {
-			SetSun(tempSun);
-		}
-
-		if (ImGui::ColorPicker3("Directional Light Ambient Color", glm::value_ptr(tempSun.m_ambientColor))) {
-			SetSun(tempSun);
-		}
-
-		if (ImGui::SliderFloat("Directional Light Ambient Power", &tempSun.m_ambientPower, 0.0f, 5.0f)) {
-			SetSun(tempSun);
-		}
-
-		if (ImGui::SliderFloat("Directional Light - Light Ambient Power", &tempSun.m_lightAmbientPower, 0.0f, 5.0f)) {
-			SetSun(tempSun);
-		}
-
-		if (ImGui::SliderFloat("Directional Light - Light Specular Power", &tempSun.m_lightSpecularPower, 0.0f, 5.0f)) {
-			SetSun(tempSun);
-		}
-
-		if (ImGui::SliderFloat("Directional Light Min Shadow Bias", &tempSun.m_minShadowBias, 0.0f, 0.005f)) {
-			SetSun(tempSun);
-		}
-
-		if (ImGui::SliderFloat("Directional Light Max Shadow Bias", &tempSun.m_maxShadowBias, 0.0f, 0.005f)) {
-			SetSun(tempSun);
-		}
-
-		if (ImGui::SliderInt("Directional Light PCF Filter Passes", &tempSun.m_pcfFilterSamples, 1, 20)) {
-			SetSun(tempSun);
-		}
-	}
-
-	if (ImGui::CollapsingHeader("Camera Controls")) {
-		//control the x axis position
-		auto& a = Get<TTN_Transform>(camera);
-		float b = a.GetPos().x;
-		if (ImGui::SliderFloat("Camera Test X-Axis", &b, -200.0f / 10.0f, 200.5f / 10.0f)) {
-			a.SetPos(glm::vec3(b, a.GetPos().y, a.GetPos().z));
-		}
-
-		//control the y axis position
-		float c = a.GetPos().y;
-		if (ImGui::SliderFloat("Camera Test Y-Axis", &c, -200.5f / 10.0f, 200.5f / 10.0f)) {
-			a.SetPos(glm::vec3(a.GetPos().x, c, a.GetPos().z));
-		}
-
-		//control the y axis position
-		float d = a.GetPos().z;
-		if (ImGui::SliderFloat("Camera Test Z-Axis", &d, -200.5f / 10.0f, 200.5f / 10.0f)) {
-			a.SetPos(glm::vec3(a.GetPos().x, a.GetPos().y, d));
-		}
-	}
-
-	if (ImGui::CollapsingHeader("Effect Controls")) {
-		//Lighting controls
-		//size of the outline
-		if (ImGui::SliderFloat("Outline Size", &m_outlineSize, 0.0f, 1.0f)) {
-			//set the size of the outline in the materials
-			for (int i = 0; i < m_mats.size(); i++)
-				m_mats[i]->SetOutlineSize(m_outlineSize);
-		}
-
-		//No ligthing
-		if (ImGui::Checkbox("No Lighting", &m_noLighting)) {
-			//set no lighting to true
-			m_noLighting = true;
-			//change all the other lighting settings to false
-			m_ambientOnly = false;
-			m_specularOnly = false;
-			m_ambientAndSpecular = false;
-			m_ambientSpecularAndOutline = false;
-
-			//set that data in the materials
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetHasAmbient(false);
-				m_mats[i]->SetHasSpecular(false);
-				m_mats[i]->SetHasOutline(false);
-			}
-		}
-
-		//Ambient only
-		if (ImGui::Checkbox("Ambient Lighting Only", &m_ambientOnly)) {
-			//set ambient only to true
-			m_ambientOnly = true;
-			//change all the other lighting settings to false
-			m_noLighting = false;
-			m_specularOnly = false;
-			m_ambientAndSpecular = false;
-			m_ambientSpecularAndOutline = false;
-
-			//set that data in the materials
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetHasAmbient(true);
-				m_mats[i]->SetHasSpecular(false);
-				m_mats[i]->SetHasOutline(false);
-			}
-		}
-
-		//Specular only
-		if (ImGui::Checkbox("Specular Lighting Only", &m_specularOnly)) {
-			//set Specular only to true
-			m_specularOnly = true;
-			//change all the other lighting settings to false
-			m_noLighting = false;
-			m_ambientOnly = false;
-			m_ambientAndSpecular = false;
-			m_ambientSpecularAndOutline = false;
-
-			//set that data in the materials
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetHasAmbient(false);
-				m_mats[i]->SetHasSpecular(true);
-				m_mats[i]->SetHasOutline(false);
-			}
-		}
-
-		//Ambient and specular
-		if (ImGui::Checkbox("Ambient and Specular Lighting", &m_ambientAndSpecular)) {
-			//set ambient and specular to true
-			m_ambientAndSpecular = true;
-			//change all the other lighting settings to false
-			m_noLighting = false;
-			m_ambientOnly = false;
-			m_specularOnly = false;
-			m_ambientSpecularAndOutline = false;
-
-			//set that data in the materials
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetHasAmbient(true);
-				m_mats[i]->SetHasSpecular(true);
-				m_mats[i]->SetHasOutline(false);
-			}
-		}
-
-		//Ambient, specular, and lineart outline
-		if (ImGui::Checkbox("Ambient, Specular, and custom(outline) Lighting", &m_ambientSpecularAndOutline)) {
-			//set ambient, specular, and outline to true
-			m_ambientSpecularAndOutline = true;
-			//change all the other lighting settings to false
-			m_noLighting = false;
-			m_ambientOnly = false;
-			m_specularOnly = false;
-			m_ambientAndSpecular = false;
-
-			//set that data in the materials
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetHasAmbient(true);
-				m_mats[i]->SetHasSpecular(true);
-				m_mats[i]->SetHasOutline(true);
-			}
-		}
-
-		//Ramp controls
-		//diffuse ramp
-		if (ImGui::Checkbox("Use Diffuse Ramp", &m_useDiffuseRamp)) {
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetUseDiffuseRamp(m_useDiffuseRamp);
-			}
-		}
-
-		//specular ramp
-		if (ImGui::Checkbox("Use Specular Ramp", &m_useSpecularRamp)) {
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetUseSpecularRamp(m_useSpecularRamp);
-			}
-		}
-
-		//Lut controls
-
-		//toogles the warm color correction effect on or off
-		if (ImGui::Checkbox("Warm Color Correction", &m_applyWarmLut)) {
-			switch (m_applyWarmLut)
-			{
-			case true:
-				//if it's been turned on set the effect to render
-				m_colorCorrectEffect->SetShouldApply(true);
-				m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
-				//and make sure the cool and customs luts are set not to render
-				m_applyCoolLut = false;
-				m_applyCustomLut = false;
-				break;
-			case false:
-				//if it's been turned of set the effect not to render
-				m_colorCorrectEffect->SetShouldApply(false);
-				break;
-			}
-		}
-
-		//toogles the cool color correction effect on or off
-		if (ImGui::Checkbox("Cool Color Correction", &m_applyCoolLut)) {
-			switch (m_applyCoolLut)
-			{
-			case true:
-				//if it's been turned on set the effect to render
-				m_colorCorrectEffect->SetShouldApply(true);
-				m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Cool LUT"));
-				//and make sure the warm and customs luts are set not to render
-				m_applyWarmLut = false;
-				m_applyCustomLut = false;
-				break;
-			case false:
-				m_colorCorrectEffect->SetShouldApply(false);
-				break;
-			}
-		}
-
-		//toogles the custom color correction effect on or off
-		if (ImGui::Checkbox("Custom Color Correction", &m_applyCustomLut)) {
-			switch (m_applyCustomLut)
-			{
-			case true:
-				//if it's been turned on set the effect to render
-				m_colorCorrectEffect->SetShouldApply(true);
-				m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Custom LUT"));
-				//and make sure the warm and cool luts are set not to render
-				m_applyWarmLut = false;
-				m_applyCoolLut = false;
-				break;
-			case false:
-				m_colorCorrectEffect->SetShouldApply(false);
-				break;
-			}
-		}
-
-		//texture controls
-		if (ImGui::Checkbox("Use Textures", &m_useTextures)) {
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetUseAlbedo(m_useTextures);
-			}
-		}
-
-		//bloom controls
-		ImGui::Text("Bloom settings");
-
-		if (ImGui::SliderFloat("Threshold", &m_bloomThreshold, 0.0f, 1.0f)) {
-			m_bloomEffect->SetThreshold(m_bloomThreshold);
-		}
-
-		if (ImGui::SliderInt("Number of blur passes", &m_numOfBloomPasses, 1, 20)) {
-			m_bloomEffect->SetNumOfPasses(m_numOfBloomPasses);
-		}
-
-		int tempInt = m_bloomBufferDivisor;
-		if (ImGui::SliderInt("Downscale divisor", &tempInt, 1, 20)) {
-			m_bloomBufferDivisor = tempInt;
-			m_bloomEffect->SetBlurDownScale(m_bloomBufferDivisor);
-		}
-
-		if (ImGui::SliderFloat("radius", &m_bloomRadius, 0.1f, 20.0f)) {
-			m_bloomEffect->SetRadius(m_bloomRadius);
-		}
-
-		if (ImGui::SliderFloat("Strength (radial)", &m_bloomStrength, 0.1f, 20.0f)) {
-			m_bloomEffect->SetStrength(m_bloomStrength);
-		}
-
-		if (ImGui::Button("Make Gaussian Blur")) {
-			m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::GAUSSIAN);
-		}
-
-		if (ImGui::Button("Make Box Blur")) {
-			m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::BOX);
-		}
-
-		if (ImGui::Button("Make Radial Blur")) {
-			m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::RADIAL);
-		}
-
-		//if (m_bloomEffect->GetBlurMode() == TTN_BloomBlurModes::RADIAL)
-	}
-
-	ImGui::End();
 }

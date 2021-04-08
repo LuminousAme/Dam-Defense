@@ -29,7 +29,12 @@ void GameWinMenu::Update(float deltaTime)
 	time += deltaTime / 2.5f;
 
 	//call imgui's update for this scene
-	//ImGui();
+	ImGui();
+
+	//control to make the CG controls appear or disappear
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::C) && TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::G)) {
+		showCGControls = !showCGControls;
+	}
 
 	//don't forget to call the base class' update
 	TTN_Scene::Update(deltaTime);
@@ -203,6 +208,16 @@ void GameWinMenu::SetUpAssets()
 	damMat = TTN_Material::Create();
 	damMat->SetAlbedo(damText);
 	m_mats.push_back(damMat);
+
+	m_mats.push_back(TTN_AssetSystem::GetMaterial("boat1Mat"));
+	m_mats.push_back(TTN_AssetSystem::GetMaterial("boat2Mat"));
+	m_mats.push_back(TTN_AssetSystem::GetMaterial("boat3Mat"));
+	m_mats.push_back(TTN_AssetSystem::GetMaterial("enemyCannonMat"));
+	m_mats.push_back(TTN_AssetSystem::GetMaterial("smokeMat"));
+	m_mats.push_back(TTN_AssetSystem::GetMaterial("fireMat"));
+	m_mats.push_back(TTN_AssetSystem::GetMaterial("birdMat"));
+	m_mats.push_back(TTN_AssetSystem::GetMaterial("LightHouseMat"));
+	m_mats.push_back(TTN_AssetSystem::GetMaterial("TreeMat"));
 
 	for (int i = 0; i < m_mats.size(); i++) {
 		m_mats[i]->SetDiffuseRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
@@ -398,292 +413,155 @@ void GameWinMenu::SetUpOtherData()
 
 void GameWinMenu::ImGui()
 {
-	ImGui::Begin("Editor");
+	if (showCGControls) {
+		//ImGui controls for the CG requirements
+		ImGui::Begin("CG Controls");
 
-	if (ImGui::CollapsingHeader("Light Controls")) {
-		ImGui::Text("Maximum number of lights: 16");
+		if (ImGui::CollapsingHeader("Lighting and Shadow Mapping Controls")) {
+			TTN_DirectionalLight tempSun = illBuffer->GetSunRef();
 
-		//scene level lighting
-		float sceneAmbientLight[3], sceneAmbientStr;
-		sceneAmbientLight[0] = GetSceneAmbientColor().r;
-		sceneAmbientLight[1] = GetSceneAmbientColor().g;
-		sceneAmbientLight[2] = GetSceneAmbientColor().b;
-		sceneAmbientStr = GetSceneAmbientLightStrength();
-
-		//scene level ambient strenght
-		if (ImGui::SliderFloat("Scene level ambient strenght", &sceneAmbientStr, 0.0f, 1.0f)) {
-			SetSceneAmbientLightStrength(sceneAmbientStr);
-		}
-
-		//scene level ambient color
-		if (ImGui::ColorPicker3("Scene level ambient color", sceneAmbientLight)) {
-			SetSceneAmbientColor(glm::vec3(sceneAmbientLight[0], sceneAmbientLight[1], sceneAmbientLight[2]));
-		}
-
-		//loop through all the lights
-		int i = 0;
-		std::vector<entt::entity>::iterator it = m_Lights.begin();
-		while (it != m_Lights.end()) {
-			//make temp floats for their data
-			float color[3], pos[3], ambientStr, specularStr, attenConst, attenLine, attenQuad;
-			TTN_Light& tempLightRef = Get<TTN_Light>(*it);
-			TTN_Transform& tempLightTransRef = Get<TTN_Transform>(*it);
-			color[0] = tempLightRef.GetColor().r;
-			color[1] = tempLightRef.GetColor().g;
-			color[2] = tempLightRef.GetColor().b;
-			pos[0] = tempLightTransRef.GetPos().x;
-			pos[1] = tempLightTransRef.GetPos().y;
-			pos[2] = tempLightTransRef.GetPos().z;
-			ambientStr = tempLightRef.GetAmbientStrength();
-			specularStr = tempLightRef.GetSpecularStrength();
-			attenConst = tempLightRef.GetConstantAttenuation();
-			attenLine = tempLightRef.GetLinearAttenuation();
-			attenQuad = tempLightRef.GetQuadraticAttenuation();
-
-			//position
-			std::string tempPosString = "Light " + std::to_string(i) + " Position";
-			if (ImGui::SliderFloat3(tempPosString.c_str(), pos, -100.0f, 100.0f)) {
-				tempLightTransRef.SetPos(glm::vec3(pos[0], pos[1], pos[2]));
+			if (ImGui::SliderFloat3("Directional Light Direction", glm::value_ptr(tempSun.m_lightDirection), -50.0f, 0.0f)) {
+				SetSun(tempSun);
 			}
 
-			//color
-			std::string tempColorString = "Light " + std::to_string(i) + " Color";
-			if (ImGui::ColorPicker3(tempColorString.c_str(), color)) {
-				tempLightRef.SetColor(glm::vec3(color[0], color[1], color[2]));
+			if (ImGui::ColorPicker3("Directional Light Color", glm::value_ptr(tempSun.m_lightColor))) {
+				SetSun(tempSun);
 			}
 
-			//strenghts
-			std::string tempAmbientStrString = "Light " + std::to_string(i) + " Ambient strenght";
-			if (ImGui::SliderFloat(tempAmbientStrString.c_str(), &ambientStr, 0.0f, 10.0f)) {
-				tempLightRef.SetAmbientStrength(ambientStr);
+			if (ImGui::ColorPicker3("Directional Light Ambient Color", glm::value_ptr(tempSun.m_ambientColor))) {
+				SetSun(tempSun);
 			}
 
-			std::string tempSpecularStrString = "Light " + std::to_string(i) + " Specular strenght";
-			if (ImGui::SliderFloat(tempSpecularStrString.c_str(), &specularStr, 0.0f, 10.0f)) {
-				tempLightRef.SetSpecularStrength(specularStr);
+			if (ImGui::SliderFloat("Directional Light Ambient Power", &tempSun.m_ambientPower, 0.0f, 5.0f)) {
+				SetSun(tempSun);
 			}
 
-			//attenutaition
-			std::string tempAttenConst = "Light " + std::to_string(i) + " Constant Attenuation";
-			if (ImGui::SliderFloat(tempAttenConst.c_str(), &attenConst, 0.0f, 100.0f)) {
-				tempLightRef.SetConstantAttenuation(attenConst);
+			if (ImGui::SliderFloat("Directional Light - Light Ambient Power", &tempSun.m_lightAmbientPower, 0.0f, 5.0f)) {
+				SetSun(tempSun);
 			}
 
-			std::string tempAttenLine = "Light " + std::to_string(i) + " Linear Attenuation";
-			if (ImGui::SliderFloat(tempAttenLine.c_str(), &attenLine, 0.0f, 100.0f)) {
-				tempLightRef.SetLinearAttenuation(attenLine);
+			if (ImGui::SliderFloat("Directional Light - Light Specular Power", &tempSun.m_lightSpecularPower, 0.0f, 5.0f)) {
+				SetSun(tempSun);
 			}
 
-			std::string tempAttenQuad = "Light " + std::to_string(i) + " Quadratic Attenuation";
-			if (ImGui::SliderFloat(tempAttenQuad.c_str(), &attenQuad, 0.0f, 100.0f)) {
-				tempLightRef.SetQuadraticAttenuation(attenQuad);
+			if (ImGui::SliderFloat("Directional Light Min Shadow Bias", &tempSun.m_minShadowBias, 0.0f, 0.005f)) {
+				SetSun(tempSun);
 			}
 
-			std::string tempButton = "Remove Light " + std::to_string(i);
-			if (ImGui::Button(tempButton.c_str())) {
-				DeleteEntity(*it);
-				it = m_Lights.erase(it);
+			if (ImGui::SliderFloat("Directional Light Max Shadow Bias", &tempSun.m_maxShadowBias, 0.0f, 0.005f)) {
+				SetSun(tempSun);
 			}
 
-			i++;
-			it++;
-		}
+			if (ImGui::SliderInt("Directional Light PCF Filter Passes", &tempSun.m_pcfFilterSamples, 1, 20)) {
+				SetSun(tempSun);
+			}
 
-		//if there are less than 16 lights, give a button that allows the user to add a new light
-		if (i < 15) {
-			if (ImGui::Button("Add New Light")) {
-				m_Lights.push_back(CreateEntity());
+			float emissiveStr = illBuffer->GetEmissiveStrenght();
+			if (ImGui::SliderFloat("Emissive Strenght", &emissiveStr, 0.0f, 10.0f)) {
+				illBuffer->SetEmissiveStrenght(emissiveStr);
+			}
 
-				TTN_Transform newTrans = TTN_Transform();
-				TTN_Light newLight = TTN_Light();
+			bool AmbientOn = illBuffer->GetUseAmbient();
+			if (ImGui::Checkbox("Ambient Lighting On", &AmbientOn)) {
+				illBuffer->SetUseAmbient(AmbientOn);
+			}
 
-				AttachCopy(m_Lights[m_Lights.size() - 1], newTrans);
-				AttachCopy(m_Lights[m_Lights.size() - 1], newLight);
+			bool SpecularOn = illBuffer->GetUseSpecular();
+			if (ImGui::Checkbox("Specular Lighting On", &SpecularOn)) {
+				illBuffer->SetUseSpecular(SpecularOn);
+			}
+
+			bool ShadowingOn = illBuffer->GetuseShadowMapping();
+			if (ImGui::Checkbox("Shadow Mapping On", &ShadowingOn)) {
+				illBuffer->SetUseShadowMapping(ShadowingOn);
+			}
+
+			bool EmissiveOn = TTN_AssetSystem::GetMaterial("LightHouseMat")->GetUseEmissive();
+			if (ImGui::Checkbox("Emissive Lighting On", &EmissiveOn)) {
+				TTN_AssetSystem::GetMaterial("LightHouseMat")->SetUseEmissive(EmissiveOn);
+			}
+
+			bool RimOn = TTN_AssetSystem::GetMaterial("boat1Mat")->GetHasRimLighting();
+			if (ImGui::Checkbox("Rim Lighting On", &RimOn)) {
+				TTN_AssetSystem::GetMaterial("boat1Mat")->SetHasRimLighting(RimOn);
+				TTN_AssetSystem::GetMaterial("boat1Mat")->SetHasRimLighting(RimOn);
+				TTN_AssetSystem::GetMaterial("boat1Mat")->SetHasRimLighting(RimOn);
 			}
 		}
+
+		if (ImGui::CollapsingHeader("Texture Controls")) {
+			bool  texturesOn = m_mats[0]->GetUseAlbedo();
+			if (ImGui::Checkbox("Use Textures", &texturesOn)) {
+				for (int i = 0; i < m_mats.size(); i++) {
+					m_mats[i]->SetUseAlbedo(texturesOn);
+				}
+			}
+		}
+
+		if (ImGui::CollapsingHeader("Color Correction Controls")) {
+			bool mainlutIsActive = m_colorCorrectEffect->GetShouldApply();
+			if (ImGui::Checkbox("Game Win Correction On", &mainlutIsActive)) {
+				m_colorCorrectEffect->SetShouldApply(mainlutIsActive);
+			}
+
+			ImGui::Text("Others Color correction effects can be toggled from the scenes they affect, and the options menu");
+		}
+
+		if (ImGui::CollapsingHeader("Bloom Controls")) {
+			bool bloomShouldApply = m_bloomEffect->GetShouldApply();
+			if (ImGui::Checkbox("Bloom On", &bloomShouldApply)) {
+				m_bloomEffect->SetShouldApply(bloomShouldApply);
+			}
+
+			if (ImGui::SliderFloat("Threshold", &m_bloomThreshold, 0.0f, 1.0f)) {
+				m_bloomEffect->SetThreshold(m_bloomThreshold);
+			}
+
+			if (ImGui::SliderInt("Number of blur passes", &m_numOfBloomPasses, 1, 20)) {
+				m_bloomEffect->SetNumOfPasses(m_numOfBloomPasses);
+			}
+
+			int tempInt = m_bloomBufferDivisor;
+			if (ImGui::SliderInt("Downscale divisor", &tempInt, 1, 20)) {
+				m_bloomBufferDivisor = tempInt;
+				m_bloomEffect->SetBlurDownScale(m_bloomBufferDivisor);
+			}
+
+			if (ImGui::SliderFloat("radius", &m_bloomRadius, 0.1f, 20.0f)) {
+				m_bloomEffect->SetRadius(m_bloomRadius);
+			}
+
+			if (ImGui::SliderFloat("Strength (radial)", &m_bloomStrength, 0.1f, 20.0f)) {
+				m_bloomEffect->SetStrength(m_bloomStrength);
+			}
+
+			if (ImGui::Button("Make Gaussian Blur")) {
+				m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::GAUSSIAN);
+			}
+
+			if (ImGui::Button("Make Box Blur")) {
+				m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::BOX);
+			}
+
+			if (ImGui::Button("Make Radial Blur")) {
+				m_bloomEffect->SetBlurMode(TTN_BloomBlurModes::RADIAL);
+			}
+		}
+
+		if (ImGui::CollapsingHeader("Toon Shading Controls")) {
+			bool diffuseRampIsOn = illBuffer->GetUseDiffuseRamp();
+			if (ImGui::Checkbox("Diffuse Ramp On", &diffuseRampIsOn)) {
+				illBuffer->SetUseDiffuseRamp(diffuseRampIsOn);
+			}
+
+			bool specularRampIsOn = illBuffer->GetUseSpecularRamp();
+			if (ImGui::Checkbox("Specular Ramp On", &specularRampIsOn)) {
+				illBuffer->SetUseSpecularRamp(specularRampIsOn);
+			}
+		}
+
+		ImGui::End();
 	}
-
-	if (ImGui::CollapsingHeader("Effect Controls")) {
-		//Lighting controls
-		//size of the outline
-		if (ImGui::SliderFloat("Outline Size", &m_outlineSize, 0.0f, 1.0f)) {
-			//set the size of the outline in the materials
-			for (int i = 0; i < m_mats.size(); i++)
-				m_mats[i]->SetOutlineSize(m_outlineSize);
-		}
-
-		//No ligthing
-		if (ImGui::Checkbox("No Lighting", &m_noLighting)) {
-			//set no lighting to true
-			m_noLighting = true;
-			//change all the other lighting settings to false
-			m_ambientOnly = false;
-			m_specularOnly = false;
-			m_ambientAndSpecular = false;
-			m_ambientSpecularAndOutline = false;
-
-			//set that data in the materials
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetHasAmbient(false);
-				m_mats[i]->SetHasSpecular(false);
-				m_mats[i]->SetHasOutline(false);
-			}
-		}
-
-		//Ambient only
-		if (ImGui::Checkbox("Ambient Lighting Only", &m_ambientOnly)) {
-			//set ambient only to true
-			m_ambientOnly = true;
-			//change all the other lighting settings to false
-			m_noLighting = false;
-			m_specularOnly = false;
-			m_ambientAndSpecular = false;
-			m_ambientSpecularAndOutline = false;
-
-			//set that data in the materials
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetHasAmbient(true);
-				m_mats[i]->SetHasSpecular(false);
-				m_mats[i]->SetHasOutline(false);
-			}
-		}
-
-		//Specular only
-		if (ImGui::Checkbox("Specular Lighting Only", &m_specularOnly)) {
-			//set Specular only to true
-			m_specularOnly = true;
-			//change all the other lighting settings to false
-			m_noLighting = false;
-			m_ambientOnly = false;
-			m_ambientAndSpecular = false;
-			m_ambientSpecularAndOutline = false;
-
-			//set that data in the materials
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetHasAmbient(false);
-				m_mats[i]->SetHasSpecular(true);
-				m_mats[i]->SetHasOutline(false);
-			}
-		}
-
-		//Ambient and specular
-		if (ImGui::Checkbox("Ambient and Specular Lighting", &m_ambientAndSpecular)) {
-			//set ambient and specular to true
-			m_ambientAndSpecular = true;
-			//change all the other lighting settings to false
-			m_noLighting = false;
-			m_ambientOnly = false;
-			m_specularOnly = false;
-			m_ambientSpecularAndOutline = false;
-
-			//set that data in the materials
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetHasAmbient(true);
-				m_mats[i]->SetHasSpecular(true);
-				m_mats[i]->SetHasOutline(false);
-			}
-		}
-
-		//Ambient, specular, and lineart outline
-		if (ImGui::Checkbox("Ambient, Specular, and custom(outline) Lighting", &m_ambientSpecularAndOutline)) {
-			//set ambient, specular, and outline to true
-			m_ambientSpecularAndOutline = true;
-			//change all the other lighting settings to false
-			m_noLighting = false;
-			m_ambientOnly = false;
-			m_specularOnly = false;
-			m_ambientAndSpecular = false;
-
-			//set that data in the materials
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetHasAmbient(true);
-				m_mats[i]->SetHasSpecular(true);
-				m_mats[i]->SetHasOutline(true);
-			}
-		}
-
-		//Ramp controls
-
-		//diffuse ramp
-		if (ImGui::Checkbox("Use Diffuse Ramp", &m_useDiffuseRamp)) {
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetUseDiffuseRamp(m_useDiffuseRamp);
-			}
-		}
-
-		//specular ramp
-		if (ImGui::Checkbox("Use Specular Ramp", &m_useSpecularRamp)) {
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetUseSpecularRamp(m_useSpecularRamp);
-			}
-		}
-
-		//Lut controls
-
-		//toogles the warm color correction effect on or off
-		if (ImGui::Checkbox("Warm Color Correction", &m_applyWarmLut)) {
-			switch (m_applyWarmLut)
-			{
-			case true:
-				//if it's been turned on set the effect to render
-				m_colorCorrectEffect->SetShouldApply(true);
-				m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Warm LUT"));
-				//and make sure the cool and customs luts are set not to render
-				m_applyCoolLut = false;
-				m_applyCustomLut = false;
-				break;
-			case false:
-				//if it's been turned of set the effect not to render
-				m_colorCorrectEffect->SetShouldApply(false);
-				break;
-			}
-		}
-
-		//toogles the cool color correction effect on or off
-		if (ImGui::Checkbox("Cool Color Correction", &m_applyCoolLut)) {
-			switch (m_applyCoolLut)
-			{
-			case true:
-				//if it's been turned on set the effect to render
-				m_colorCorrectEffect->SetShouldApply(true);
-				m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Cool LUT"));
-				//and make sure the warm and customs luts are set not to render
-				m_applyWarmLut = false;
-				m_applyCustomLut = false;
-				break;
-			case false:
-				m_colorCorrectEffect->SetShouldApply(false);
-				break;
-			}
-		}
-
-		//toogles the custom color correction effect on or off
-		if (ImGui::Checkbox("Custom Color Correction", &m_applyCustomLut)) {
-			switch (m_applyCustomLut)
-			{
-			case true:
-				//if it's been turned on set the effect to render
-				m_colorCorrectEffect->SetShouldApply(true);
-				m_colorCorrectEffect->SetCube(TTN_AssetSystem::GetLUT("Custom LUT"));
-				//and make sure the warm and cool luts are set not to render
-				m_applyWarmLut = false;
-				m_applyCoolLut = false;
-				break;
-			case false:
-				m_colorCorrectEffect->SetShouldApply(false);
-				break;
-			}
-		}
-
-		//texture controls
-		if (ImGui::Checkbox("Use Textures", &m_useTextures)) {
-			for (int i = 0; i < m_mats.size(); i++) {
-				m_mats[i]->SetUseAlbedo(m_useTextures);
-			}
-		}
-	}
-
-	ImGui::End();
 }
 
 GameWinMenuUI::GameWinMenuUI()

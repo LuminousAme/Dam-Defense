@@ -198,7 +198,7 @@ namespace Titan {
 			m_renderCompositedScene = true;
 		}
 
-	protected:
+	public:
 		//vector to store the entities of the lights
 		std::vector<entt::entity> m_Lights;
 

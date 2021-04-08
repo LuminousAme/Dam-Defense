@@ -28,6 +28,8 @@ layout (std140, binding = 0) uniform u_Lights
     DirectionalLight ambience;
 };
 
+uniform int u_useAmbientLight;
+
 layout (binding = 0) uniform sampler2D s_albedoTex;
 layout (binding = 4) uniform sampler2D s_lightAccumTex;
 
@@ -42,6 +44,7 @@ void main() {
 
     //ambient calculation
     vec3 ambient = ambience.m_lightAmbientPower * ambience.m_ambientColor.rgb;
+	ambient = mix(vec3(0.0), ambient, u_useAmbientLight);
 
     //the result of all lighting
     vec3 result = (ambient + lightAccum.rgb) * textureColor.rgb;

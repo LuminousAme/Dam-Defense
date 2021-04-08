@@ -88,6 +88,19 @@ int main() {
 	TTN_Application::scenes.push_back(gameWinUI);
 	TTN_Application::scenes.push_back(options);
 
+	//create the post processing effects
+	glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
+
+	//bloom
+	TTN_BloomEffect::sbloomptr bloomEffect = TTN_BloomEffect::Create(); 
+	bloomEffect->Init(windowSize.x, windowSize.y);
+
+	//color correction
+	TTN_ColorCorrect::scolcorptr colorCorrectionEffect = TTN_ColorCorrect::Create();
+	colorCorrectionEffect->Init(windowSize.x, windowSize.y);
+
+
+
 	// init's the configs and contexts for imgui
 	TTN_Application::InitImgui();
 	bool firstTime = false;
@@ -104,6 +117,31 @@ int main() {
 
 		//check if the loading is done
 		if (loadingScreen->GetShouldRender() && set1Loaded) {
+			//set up bloom
+			bloomEffect->SetThreshold(0.6f);
+			bloomEffect->SetRadius(3.0f);
+			bloomEffect->SetStrength(2.4f);
+			bloomEffect->SetShouldApply(true);
+
+			//set up color correction
+			colorCorrectionEffect->SetIntensity(1.0f);
+			colorCorrectionEffect->SetShouldApply(true);
+			colorCorrectionEffect->SetCube(TTN_AssetSystem::GetLUT("Main LUT"));
+
+			//set up toon shading
+			TTN_Scene::illBuffer->SetDiffuseRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
+			TTN_Scene::illBuffer->SetSpecularRamp(TTN_AssetSystem::GetTexture2D("blue ramp"));
+			TTN_Scene::illBuffer->SetUseDiffuseRamp(true);
+			TTN_Scene::illBuffer->SetUseSpecularRamp(true);
+
+			//send the post effects to the scenes
+			gameScene->SetBloomEffect(bloomEffect);
+			titleScreen->SetBloomEffect(bloomEffect);
+			gameOver->SetBloomEffect(bloomEffect);
+			gameWin->SetBloomEffect(bloomEffect);
+			gameScene->SetColorCorrectionEffect(colorCorrectionEffect);
+			titleScreen->SetColorCorrectionEffect(colorCorrectionEffect);
+
 			//if it is, go to the main menu
 			loadingScreen->SetShouldRender(false);
 			titleScreen->InitScene();
@@ -591,4 +629,26 @@ void PrepareAssetLoading() {
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Particle Sprite", "textures/circle_particle_sprite.png", 1); //particle sprite
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Feather Sprite", "textures/Feather.png", 1); //feather sprite for the bird's death particles
+
+	TTN_AssetSystem::AddMeshToBeLoaded("lightHouseMesh", "models/LightHouse.obj", 1);
+	TTN_AssetSystem::AddTexture2DToBeLoaded("LightHouseText", "textures/LightHouseTexture.png", 1);
+	TTN_AssetSystem::AddTexture2DToBeLoaded("LightHouseEmissive", "textures/LightHouseLight.png", 1);
+
+	TTN_AssetSystem::AddMeshToBeLoaded("Tree Mesh", "models/Tree3.obj", 1);
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Tree texture", "textures/Trees Texture.png");
+
+	//materials
+	TTN_AssetSystem::CreateNewMaterial("boat1Mat");
+	TTN_AssetSystem::CreateNewMaterial("boat2Mat");
+	TTN_AssetSystem::CreateNewMaterial("boat3Mat");
+	TTN_AssetSystem::CreateNewMaterial("cannonMat");
+	TTN_AssetSystem::CreateNewMaterial("enemyCannonMat");
+	TTN_AssetSystem::CreateNewMaterial("flamethrowerMat");
+	TTN_AssetSystem::CreateNewMaterial("skyboxMat");
+	TTN_AssetSystem::CreateNewMaterial("smokeMat");
+	TTN_AssetSystem::CreateNewMaterial("fireMat");
+	TTN_AssetSystem::CreateNewMaterial("birdMat");
+	TTN_AssetSystem::CreateNewMaterial("damMat");
+	TTN_AssetSystem::CreateNewMaterial("LightHouseMat");
+	TTN_AssetSystem::CreateNewMaterial("TreeMat");
 }

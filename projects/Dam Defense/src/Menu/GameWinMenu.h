@@ -25,6 +25,8 @@ public:
 	//late render (terrain, water, etc.)
 	void PostRender();
 
+	void SetBloomEffect(TTN_BloomEffect::sbloomptr bloom) { m_bloomEffect = bloom; }
+
 	//Assets
 public:
 
@@ -122,6 +124,16 @@ protected:
 	bool m_useTextures = true;
 
 	void ImGui();
+
+	//bloom effect
+	TTN_BloomEffect::sbloomptr m_bloomEffect;
+	float m_bloomThreshold;
+	int m_numOfBloomPasses;
+	unsigned m_bloomBufferDivisor;
+	float m_bloomRadius;
+	float m_bloomStrength;
+
+	bool showCGControls = false;
 };
 
 

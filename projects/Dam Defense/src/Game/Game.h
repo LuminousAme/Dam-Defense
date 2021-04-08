@@ -136,6 +136,8 @@ public:
 
 	void SetInputDelay() { m_InputDelay = m_InputDelayTime; }
 
+	void SetBloomEffect(TTN_BloomEffect::sbloomptr bloom) { m_bloomEffect = bloom; }
+	void SetColorCorrectionEffect(TTN_ColorCorrect::scolcorptr colorCoorect) { m_colorCorrectEffect = colorCoorect; }
 	//function to restart the game reseting all the data
 	void RestartData();
 	//Assets
@@ -193,6 +195,7 @@ public:
 	TTN_Material::smatptr rockMat;
 	TTN_Material::smatptr damMat;
 	TTN_Material::smatptr enemyCannonMat;
+	TTN_Material::smatptr lightHouseMat;
 	std::vector<TTN_Material::smatptr> m_mats;
 
 	TTN_Material::smatptr cannonMat;
@@ -418,11 +421,11 @@ protected:
 
 	//bloom effect
 	TTN_BloomEffect::sbloomptr m_bloomEffect;
-	float m_bloomThreshold = 0.6f;
+	float m_bloomThreshold;
 	int m_numOfBloomPasses;
 	unsigned m_bloomBufferDivisor;
-	float m_bloomRadius = 3.0f;
-	float m_bloomStrength = 2.4f;
+	float m_bloomRadius;
+	float m_bloomStrength;
 
 	bool m_noLighting;
 	bool m_ambientOnly;
@@ -433,9 +436,11 @@ protected:
 	float m_outlineSize = 0.2f;
 
 	//variables for if the specular and diffuse ramps should be used
-	bool m_useDiffuseRamp = false;
-	bool m_useSpecularRamp = false;
+	bool m_useDiffuseRamp;
+	bool m_useSpecularRamp;
 	bool m_useTextures = true;
+
+	bool showCGControls = false;
 };
 
 inline float SmoothStep(float t) {

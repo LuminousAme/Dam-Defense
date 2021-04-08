@@ -36,6 +36,7 @@ uniform mat4 u_vp;
 
 uniform vec3 rimColor = vec3(1.0);
 uniform float rimSize = 0.2;
+uniform float emissivePower = 1.0;
 
 //get gbuffer data
 layout (binding = 0) uniform sampler2D s_albedoTex;
@@ -54,6 +55,10 @@ layout (binding = 10) uniform sampler2D s_SpecularRamp;
 uniform int u_useSpecularRamp = 0;
 
 uniform vec3 u_CamPos;
+
+uniform int u_useAmbientLight;
+uniform int u_useSpecularLight;
+uniform int u_useShadows;
 
 out vec4 frag_color;
 
@@ -143,6 +148,7 @@ void main() {
 	float dif = max(dot(N, lightDir), 0.0);
 	vec3 diffuse = dif * sun.m_lightColor.rgb;// add diffuse intensity
 	diffuse = mix(diffuse, texture(s_DiffuseRamp, vec2(dif, dif)).xyz, u_UseDiffuseRamp);
+	diffuse = mix(vec3(0.0), diffuse, u_useAmbientLight * u_useSpecularLight);
 
 	// Specular
 	vec3 viewDir  = normalize(u_CamPos - fragPos);
@@ -151,6 +157,7 @@ void main() {
 	float spec = pow(max(dot(N, h), 0.0), 4.0); // Shininess coefficient (can be a uniform)
 	vec3 specular = sun.m_lightSpecularPower * texSpec * spec * sun.m_lightColor.xyz; // Can also use a specular color
 	specular = mix(specular, (texture(s_SpecularRamp, vec2(spec, spec)).xyz), u_useSpecularRamp);
+	specular = mix(vec3(0.0), specular, u_useSpecularLight);
 
 	 //get the view position
 	vec4 temp = (u_vp * vec4(fragPos, 1.0));
@@ -158,9 +165,13 @@ void main() {
 	//do the shadow calculation
 	float shadowBias = max(sun.m_maxShadowBias * (1.0 - dot(N, lightDir)), sun.m_minShadowBias);
 	float shadow = shadowCalc(fragPos, clipPos, shadowBias);
+	shadow = mix(1.0, shadow, float(u_useShadows));
 
 	//do regular lighting
-	vec3 result = ((sun.m_ambientPower * sun.m_ambientColor.xyz) + // global ambient light
+	vec3 ambient = (sun.m_ambientPower * sun.m_ambientColor.xyz);
+	ambient = mix(vec3(0.0), ambient, u_useAmbientLight);
+
+	vec3 result = ( ambient + // global ambient light
 		 shadow * (diffuse + specular) // light factors from our single light, including shadow 
 		);
 
@@ -169,7 +180,7 @@ void main() {
 	//result += rimColor * vec3(ReMap(1.0, 0.0, 0.0, 1.0, rimStrenght));
 
 	//add emissive light
-	result += mix(vec3(0.0), texture(s_emissiveTex, inUV).rgb, ReMap(0.0, 1.0, 1.0, 0.0, emissiveStrenght));
+	result += mix(vec3(0.0), texture(s_emissiveTex, inUV).rgb, ReMap(0.0, 1.0, 1.0, 0.0, emissiveStrenght)) * emissivePower;
 
 	if(shadow < -0.1)
 		result = vec3(1.0, 0.0, 0.8);
