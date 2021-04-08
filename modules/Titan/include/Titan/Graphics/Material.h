@@ -31,6 +31,8 @@ namespace Titan {
 		//default destructor
 		~TTN_Material();
 
+		static void Init();
+
 		//setters
 		void SetAlbedo(TTN_Texture2D::st2dptr albedo);
 		void SetUseAlbedo(bool useAlbedo);
@@ -114,5 +116,9 @@ namespace Titan {
 		bool m_useDiffuseRamp;
 		TTN_Texture2D::st2dptr m_specularRamp;
 		bool m_useSpecularRamp;
+
+		//static base texture
+		inline static TTN_Texture2D::st2dptr basicWhiteTexture = nullptr;
+		inline static TTN_TextureCubeMap::stcmptr basicWhiteSkybox = nullptr;
 	};
 }

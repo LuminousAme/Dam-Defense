@@ -91,6 +91,9 @@ namespace Titan {
 		//set up the scene buffers
 		TTN_Scene::InitBuffers();
 
+		//setup the materials
+		TTN_Material::Init();
+
 		//set up the audio engine
 		m_soundEngine.Init();
 		

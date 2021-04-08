@@ -13,42 +13,44 @@ namespace Titan {
 		m_hasOutline(false), m_outlineSize(0.0f), m_useDiffuseRamp(false), m_useSpecularRamp(false), m_UseAlbedo(true), m_recievesShadows(true),
 		m_emissiveStrenght(1.0f), m_useEmissive(false), m_useNormalMap(false)
 	{
+
 		//set the albedo to an all white texture by default
-		m_Albedo = TTN_Texture2D::Create();
-		m_Albedo->Clear(glm::vec4(1.0f));
+		m_Albedo = basicWhiteTexture;
 
 		//set the specular to an all white texture by default
-		m_SpecularMap = TTN_Texture2D::Create();
-		m_SpecularMap->Clear(glm::vec4(1.0f));
+		m_SpecularMap = basicWhiteTexture;
 
 		//set the cube map to an all white texture by default
-		m_SkyboxTexture = TTN_TextureCubeMap::Create();
-		m_SkyboxTexture->Clear(glm::vec4(1.0f));
+		m_SkyboxTexture = basicWhiteSkybox;
 
 		//set the height map to an all black texture by default 
-		m_HeightMap = TTN_Texture2D::Create();
-		m_HeightMap->Clear(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+		m_HeightMap = basicWhiteTexture;
 
 		//set the diffuse ramp to an all white texture by default
-		m_diffuseRamp = TTN_Texture2D::Create();
-		m_diffuseRamp->Clear(glm::vec4(1.0f));
+		m_diffuseRamp = basicWhiteTexture;
 
 		//set the specular ramp to an all white texture by default
-		m_specularRamp = TTN_Texture2D::Create();
-		m_specularRamp->Clear(glm::vec4(1.0f));
+		m_specularRamp = basicWhiteTexture;
 
 		//set the emissive texture to an all white texture by default
-		m_EmissiveText = TTN_Texture2D::Create();
-		m_EmissiveText->Clear(glm::vec4(1.0f));
+		m_EmissiveText = basicWhiteTexture;
 
 		//set the normal map to an all white texture by default
-		m_NormalMap = TTN_Texture2D::Create();
-		m_NormalMap->Clear(glm::vec4(1.0f));
+		m_NormalMap = basicWhiteTexture;
 	}
 
 	//default desctructor
 	TTN_Material::~TTN_Material()
 	{ }
+
+	void TTN_Material::Init()
+	{
+		basicWhiteTexture = TTN_Texture2D::Create();
+		basicWhiteTexture->Clear(glm::vec4(1.0f));
+
+		basicWhiteSkybox = TTN_TextureCubeMap::Create();
+		basicWhiteSkybox->Clear(glm::vec4(1.0f));
+	}
 
 	//sets the albedo texture
 	void TTN_Material::SetAlbedo(TTN_Texture2D::st2dptr albedo)
