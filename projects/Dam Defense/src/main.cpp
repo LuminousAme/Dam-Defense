@@ -587,4 +587,5 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Crosshair Vert Line", "textures/crosshair/crosshair vert dotted.png", 1); //the vertical line
 
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Particle Sprite", "textures/circle_particle_sprite.png", 1); //particle sprite
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Feather Sprite", "textures/Feather.png", 1); //feather sprite for the bird's death particles
 }

@@ -712,11 +712,11 @@ void Game::SetUpOtherData()
 		birdParticle.SetMat(smokeMat);
 		birdParticle.SetMesh(sphereMesh);
 		birdParticle.SetTwoEndColors(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), glm::vec4(1.0f, 1.0f, 1.0f, 0.2f));
-		birdParticle.SetOneEndSize(0.65f / 10.0f);
+		birdParticle.SetOneEndSize(1.5f * 0.65f / 10.0f);
 		birdParticle.SetOneEndSpeed(0.13f / 10.0f);
 		birdParticle.SetTwoLifetimes(0.85f, 1.10f);
 		birdParticle.SetTwoStartColors(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		birdParticle.SetOneStartSize(0.01f / 10.0f);
+		birdParticle.SetOneStartSize(1.5f * 0.01f / 10.0f);
 		birdParticle.SetOneStartSpeed(10.9f / 10.0f);
 	}
 
@@ -1095,14 +1095,14 @@ void Game::CreateBirdExpolsion(glm::vec3 location)
 	ps->VelocityReadGraphCallback(FastStart);
 	ps->ColorReadGraphCallback(SlowStart);
 	ps->ScaleReadGraphCallback(ZeroOneZero);
-	ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
+	ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Feather Sprite"));
 	//setup a particle system component
 	TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
 	//attach the particle system component to the entity
 	AttachCopy(newExpolsion, psComponent);
 
 	//get a reference to that particle system and burst it
-	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(25);
+	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(5);
 }
 
 void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e, glm::vec3 direction, float directionMultipler, bool inverted)
