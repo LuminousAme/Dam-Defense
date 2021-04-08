@@ -31,6 +31,8 @@ namespace Titan {
 		//default destructor
 		~TTN_Material();
 
+		static void Init();
+
 		//setters
 		void SetAlbedo(TTN_Texture2D::st2dptr albedo);
 		void SetUseAlbedo(bool useAlbedo);
@@ -51,6 +53,9 @@ namespace Titan {
 		void SetEmissive(TTN_Texture2D::st2dptr emissive) { m_EmissiveText = emissive; }
 		void SetEmissiveStrenght(float emissiveStr) { m_emissiveStrenght = emissiveStr; }
 		void SetUseEmissive(bool useEmissive) { m_useEmissive = useEmissive; }
+		void SetNormalMap(TTN_Texture2D::st2dptr normalMap) { m_NormalMap = normalMap; }
+		void SetUseNormalMap(bool useNormalMap) { m_useNormalMap = useNormalMap; }
+		void SetHasRimLighting(bool hasRimLight) { m_hasRimLighting = hasRimLight; }
 		
 		//getters
 		TTN_Texture2D::st2dptr GetAlbedo() { return m_Albedo; }
@@ -72,6 +77,9 @@ namespace Titan {
 		TTN_Texture2D::st2dptr GetEmissive() { return m_EmissiveText; }
 		float GetEmissiveStrenght() { return m_emissiveStrenght; }
 		bool GetUseEmissive() { return m_useEmissive; }
+		TTN_Texture2D::st2dptr GetNormalMap() { return m_NormalMap; }
+		bool GetUseNormalMap() { return m_useNormalMap; }
+		bool GetHasRimLighting() { return m_hasRimLighting; }
 
 	private:
 		//albedo 
@@ -90,6 +98,8 @@ namespace Titan {
 		//texture for emissive lighting
 		TTN_Texture2D::st2dptr m_EmissiveText;
 		float m_emissiveStrenght;
+		//texture for normal mapping
+		TTN_Texture2D::st2dptr m_NormalMap;
 
 		//lighting controls
 		bool m_hasAmbientLighting;
@@ -98,11 +108,17 @@ namespace Titan {
 		float m_outlineSize;
 		bool m_recievesShadows;
 		bool m_useEmissive;
+		bool m_useNormalMap;
+		bool m_hasRimLighting;
 
 		//toon shading ramps
 		TTN_Texture2D::st2dptr m_diffuseRamp;
 		bool m_useDiffuseRamp;
 		TTN_Texture2D::st2dptr m_specularRamp;
 		bool m_useSpecularRamp;
+
+		//static base texture
+		inline static TTN_Texture2D::st2dptr basicWhiteTexture = nullptr;
+		inline static TTN_TextureCubeMap::stcmptr basicWhiteSkybox = nullptr;
 	};
 }

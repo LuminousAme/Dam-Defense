@@ -388,21 +388,21 @@ void Game::SetUpAssets()
 	shaderDepth = TTN_AssetSystem::GetShader("Depth shader");
 
 	////MESHES////
-	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
-	skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
-	sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
-	flamethrowerMesh = TTN_ObjLoader::LoadFromFile("models/Flamethrower.obj");
-	flamethrowerMesh->SetUpVao();
-	boat1Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 1.obj");
-	boat2Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 2.obj");
-	boat3Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 3.obj");
-	terrainPlain = TTN_ObjLoader::LoadFromFile("models/terrainPlain.obj");
-	terrainPlain->SetUpVao();
-	birdMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/bird/bird", 2);
-	treeMesh[0] = TTN_ObjLoader::LoadFromFile("models/Tree1.obj");
-	treeMesh[1] = TTN_ObjLoader::LoadFromFile("models/Tree2.obj");
-	treeMesh[2] = TTN_ObjLoader::LoadFromFile("models/Tree3.obj");
-	damMesh = TTN_ObjLoader::LoadFromFile("models/Dam.obj");
+	//cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
+	//skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
+	//sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
+	//flamethrowerMesh = TTN_ObjLoader::LoadFromFile("models/Flamethrower.obj");
+	//flamethrowerMesh->SetUpVao();
+	//boat1Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 1.obj");
+	//boat2Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 2.obj");
+	//boat3Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 3.obj");
+	//terrainPlain = TTN_ObjLoader::LoadFromFile("models/terrainPlain.obj");
+	//terrainPlain->SetUpVao();
+	//birdMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/bird/bird", 2);
+	//treeMesh[0] = TTN_ObjLoader::LoadFromFile("models/Tree1.obj");
+	//treeMesh[1] = TTN_ObjLoader::LoadFromFile("models/Tree2.obj");
+	//treeMesh[2] = TTN_ObjLoader::LoadFromFile("models/Tree3.obj");
+	//damMesh = TTN_ObjLoader::LoadFromFile("models/Dam.obj");
 
 	//grab the meshes
 	cannonMesh = TTN_AssetSystem::GetMesh("Cannon mesh");
@@ -437,24 +437,38 @@ void Game::SetUpAssets()
 	////MATERIALS////
 	cannonMat = TTN_Material::Create();
 	cannonMat->SetAlbedo(cannonText);
+	cannonMat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Cannon Normal Map"));
+	cannonMat->SetUseNormalMap(true);
 	cannonMat->SetShininess(128.0f);
 	m_mats.push_back(cannonMat);
 
 	enemyCannonMat = TTN_Material::Create();
 	enemyCannonMat->SetAlbedo(enemyCannonText);
+	enemyCannonMat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Enemy Cannon Normal Map"));
+	enemyCannonMat->SetUseNormalMap(true);
+	enemyCannonMat->SetHasRimLighting(true);
 	enemyCannonMat->SetShininess(128.0f);
 	m_mats.push_back(enemyCannonMat);
 
 	boat1Mat = TTN_Material::Create();
 	boat1Mat->SetAlbedo(boat1Text);
+	boat1Mat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Boat Normal Map 1"));
+	boat1Mat->SetUseNormalMap(true);
+	boat1Mat->SetHasRimLighting(true);
 	boat1Mat->SetShininess(128.0f);
 	m_mats.push_back(boat1Mat);
 	boat2Mat = TTN_Material::Create();
 	boat2Mat->SetAlbedo(boat2Text);
+	boat2Mat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Boat Normal Map 2"));
+	boat2Mat->SetUseNormalMap(true);
+	boat2Mat->SetHasRimLighting(true);
 	boat2Mat->SetShininess(128.0f);
 	m_mats.push_back(boat2Mat);
 	boat3Mat = TTN_Material::Create();
 	boat3Mat->SetAlbedo(boat3Text);
+	boat3Mat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Boat Normal Map 3"));
+	boat3Mat->SetUseNormalMap(true);
+	boat3Mat->SetHasRimLighting(true);
 	boat3Mat->SetShininess(128.0f);
 	m_mats.push_back(boat3Mat);
 
@@ -712,11 +726,11 @@ void Game::SetUpOtherData()
 		birdParticle.SetMat(smokeMat);
 		birdParticle.SetMesh(sphereMesh);
 		birdParticle.SetTwoEndColors(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f), glm::vec4(1.0f, 1.0f, 1.0f, 0.2f));
-		birdParticle.SetOneEndSize(0.65f / 10.0f);
+		birdParticle.SetOneEndSize(1.5f * 0.65f / 10.0f);
 		birdParticle.SetOneEndSpeed(0.13f / 10.0f);
 		birdParticle.SetTwoLifetimes(0.85f, 1.10f);
 		birdParticle.SetTwoStartColors(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		birdParticle.SetOneStartSize(0.01f / 10.0f);
+		birdParticle.SetOneStartSize(1.5f * 0.01f / 10.0f);
 		birdParticle.SetOneStartSpeed(10.9f / 10.0f);
 	}
 
@@ -1095,14 +1109,14 @@ void Game::CreateBirdExpolsion(glm::vec3 location)
 	ps->VelocityReadGraphCallback(FastStart);
 	ps->ColorReadGraphCallback(SlowStart);
 	ps->ScaleReadGraphCallback(ZeroOneZero);
-	ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
+	ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Feather Sprite"));
 	//setup a particle system component
 	TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
 	//attach the particle system component to the entity
 	AttachCopy(newExpolsion, psComponent);
 
 	//get a reference to that particle system and burst it
-	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(25);
+	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(5);
 }
 
 void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e, glm::vec3 direction, float directionMultipler, bool inverted)
@@ -1116,8 +1130,9 @@ void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e, glm::vec3 direc
 	//make a right vector from the direction and world up
 	glm::vec3 right = glm::normalize(glm::cross(glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f)));
 
+	//randomize which barrllel the shot is coming from
 	int pos = rand() % 3;
-	if (pos == 0) {//regular
+	if (pos == 0) {
 		PSTrans.SetPos(glm::vec3(location.x, location.y, location.z) + directionMultipler * glm::normalize(direction));
 	}
 	if (pos == 1) {
@@ -1127,18 +1142,8 @@ void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e, glm::vec3 direc
 		PSTrans.SetPos(glm::vec3(location.x, location.y, location.z) + directionMultipler * glm::normalize(direction) - right * 0.06f);
 	}
 
-	//PSTrans.SetPos(Get<TTN_Transform>(e).GetGlobalPos());
-	//PSTrans.RotateFixed(Get<TTN_Transform>(e).GetRotation());
-	//PSTrans.SetRotationQuat(Get<TTN_Transform>(e).GetRotQuat());
-	TTN_Transform tempTrans = TTN_Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-	tempTrans.LookAlong(right, glm::vec3(0.0f, 1.0f, 0.0f));
-	//glm::vec3 tempR = Get<TTN_Transform>(e).GetRotation();
-	glm::vec3 tempR = tempTrans.GetRotation();
-
-	/*glm::vec3 shipDir = glm::vec3(0.0f, 0.0f, 1.0f);
-	shipDir = glm::vec3(glm::toMat4(glm::quat(glm::radians(glm::vec3(-tempR.y, -tempR.x, tempR.z)))) * glm::vec4(shipDir, 1.0f));
-	shipDir = glm::normalize(shipDir);
-	PSTrans.SetPos(glm::vec3(0.0f, -0.0f, 0.0f) + shipDir);*/
+	//get the angle at which it should be rotated along the y-axis in order to be facing in the correct direction
+	float newAngle = glm::degrees(glm::acos(glm::dot(glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f)), glm::normalize(direction))));
 
 	//attach that transform to the entity
 	AttachCopy(newExpolsion, PSTrans);
@@ -1146,8 +1151,9 @@ void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e, glm::vec3 direc
 	//setup a particle system for the particle system
 	TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(25, 0, gunParticle, 0.0f, false);
 
-	if (!inverted)ps->MakeConeEmitter(10.0f, glm::vec3(-tempR.y, -tempR.x, tempR.z));//-75 x
-	else if (inverted)ps->MakeConeEmitter(10.0f, glm::vec3(tempR.y, -tempR.x, tempR.z));
+	//if (!inverted)ps->MakeConeEmitter(10.0f, glm::vec3(-tempR.y, -tempR.x, tempR.z));//-75 x
+	//else if (inverted)ps->MakeConeEmitter(10.0f, glm::vec3(tempR.y, -tempR.x, tempR.z));
+	ps->MakeConeEmitter(10.0f, glm::vec3(-90.0f, newAngle, 0.0f));
 	ps->VelocityReadGraphCallback(FastStart);
 	ps->ColorReadGraphCallback(SlowStart);
 	ps->ScaleReadGraphCallback(ZeroOneZero);
