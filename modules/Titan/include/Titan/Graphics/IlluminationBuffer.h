@@ -48,6 +48,7 @@ namespace Titan {
 		void SetCamPos(glm::vec3 camPos);
 		void SetShadowBuffer(TTN_Framebuffer::sfboptr shadowBuffer);
 		void SetRimColor(glm::vec3 rimColor) { m_rimColor = rimColor; }
+		void SetRimSize(float rimSize) { m_rimSize = rimSize; }
 
 		TTN_DirectionalLight& GetSunRef();
 
@@ -65,6 +66,7 @@ namespace Titan {
 		void EnableSun(bool enabled);
 
 		glm::vec3 GetRimColor() { return m_rimColor; }
+		float GetRimSize() { return m_rimSize; }
 
 	private:
 		glm::mat4 m_viewMat;
@@ -72,7 +74,8 @@ namespace Titan {
 		float m_splitRanges[4];
 		float m_farClip;
 		glm::vec3 m_camPos;
-		glm::vec3 m_rimColor;
+		glm::vec3 m_rimColor = glm::vec3(1.0f);
+		float m_rimSize = 0.2f;
 
 		TTN_Framebuffer::sfboptr m_shadowBuffer;
 

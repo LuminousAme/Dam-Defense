@@ -35,6 +35,7 @@ uniform float u_SplitRanges[4];
 uniform mat4 u_vp;
 
 uniform vec3 rimColor = vec3(1.0);
+uniform float rimSize = 0.2;
 
 //get gbuffer data
 layout (binding = 0) uniform sampler2D s_albedoTex;
@@ -164,9 +165,10 @@ void main() {
 		);
 
 
+	//add the rim lighting 
 	float rimLightContribution = 1.0 - max(dot(viewDir, N), 0.0);
-
-	result += mix(vec3(0.0), rimColor * rimLightContribution, ReMap(0.0, 1.0, 1.0, 0.0, useRim));
+	vec3 rimLighting = vec3(rimColor * smoothstep(1.0 - clamp(rimSize, 0.0, 1.0), 1.0, rimLightContribution));
+	result += mix(vec3(0.0), rimColor * rimLighting, ReMap(0.0, 1.0, 1.0, 0.0, useRim));
 
 	//add emissive light
 	result += mix(vec3(0.0), texture(s_emissiveTex, inUV).rgb, ReMap(0.0, 1.0, 1.0, 0.0, emissiveStrenght));
