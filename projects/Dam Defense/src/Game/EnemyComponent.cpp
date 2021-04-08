@@ -55,9 +55,9 @@ void EnemyComponent::Update(float deltaTime)
 
 		//left side middle path
 		if (m_path == 0) {
-			if (tBoat.GetPos().x <= 65.f / 10.0f) {
+			if (tBoat.GetPos().x <= 100.f / 10.0f) {
 				//boat movememnt
-				glm::vec3 tar = Arrive(glm::vec3(8.0f / 10.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
+				glm::vec3 tar = Arrive(glm::vec3(10.0f / 10.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
 				(tar == glm::vec3(0.0f)) ? pBoat.SetLinearVelocity(glm::vec3(0.0f)) : pBoat.AddForce(tar);
 			}
 		}
@@ -80,17 +80,17 @@ void EnemyComponent::Update(float deltaTime)
 			}
 
 			//second part
-			if (tBoat.GetPos().x <= 7.0f / 10.0f) {
-				glm::vec3 tar = Arrive(glm::vec3(4.0f / 10.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
+			if (tBoat.GetPos().x <= 7.5f / 10.0f) {
+				glm::vec3 tar = Arrive(glm::vec3(4.5f / 10.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
 				(tar == glm::vec3(0.0f)) ? pBoat.SetLinearVelocity(glm::vec3(0.0f)) : pBoat.AddForce(tar);
 			}
 		}
 
 		//right middle path
 		if (m_path == 3) {
-			if (tBoat.GetPos().x >= -65.f / 10.0f) {
+			if (tBoat.GetPos().x >= -100.f / 10.0f) {
 				//boat movement
-				glm::vec3 tar = Arrive(glm::vec3(-8.0f / 10.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
+				glm::vec3 tar = Arrive(glm::vec3(-10.0f / 10.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
 				(tar == glm::vec3(0.0f)) ? pBoat.SetLinearVelocity(glm::vec3(0.0f)) : pBoat.AddForce(tar);
 			}
 		}
@@ -113,9 +113,9 @@ void EnemyComponent::Update(float deltaTime)
 			}
 
 			//part 2
-			if (tBoat.GetPos().x >= -7.0f / 10.0f) {
+			if (tBoat.GetPos().x >= -7.5f / 10.0f) {
 				//boat movement
-				glm::vec3 tar = Arrive(glm::vec3(-4.0f / 10.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
+				glm::vec3 tar = Arrive(glm::vec3(-4.5f / 10.0f, m_ypos, m_ztarget), pBoat.GetLinearVelocity(), tBoat.GetPos(), m_targetDistance);
 				(tar == glm::vec3(0.0f)) ? pBoat.SetLinearVelocity(glm::vec3(0.0f)) : pBoat.AddForce(tar);
 			}
 		}

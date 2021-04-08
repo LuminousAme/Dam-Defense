@@ -901,7 +901,7 @@ void GameUI::Update(float deltaTime)
 			Shoptrans.SetPos(glm::vec3(0.0f, 0.0f, 0.15f));
 		}
 
-		if (!shopping) { //if the shop hasn't lerped in yet
+		if (!shopping && !lerpAway) { //if the shop hasn't lerped in yet
 			//update position
 			glm::vec3 centerPos = glm::vec3(0.f);
 			glm::vec3 centerPosShop = glm::vec3(0.f);
