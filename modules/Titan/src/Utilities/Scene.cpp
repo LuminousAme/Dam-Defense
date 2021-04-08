@@ -799,6 +799,8 @@ namespace Titan {
 							currentShader->SetUniform("u_useNormalMapping", (int)currentMatieral->GetUseNormalMap());
 							//and bind that normal map
 							currentShader->SetUniform("u_useRimLighting", (int)currentMatieral->GetHasRimLighting());
+							currentShader->SetUniform("u_rimSize", illBuffer->GetRimSize());
+							currentShader->SetUniform("u_CamPos", Get<TTN_Transform>(m_Cam).GetGlobalPos());
 							currentMatieral->GetNormalMap()->Bind(textureSlot);
 							textureSlot++;
 						}

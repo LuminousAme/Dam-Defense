@@ -31,7 +31,7 @@ void main() {
 
 	//pass data onto the frag shader
 	outPos = (Model * vec4(inPos, 1.0)).xyz;
-	outNormal = NormalMat * inNormal;
+	outNormal = normalize(NormalMat * inNormal);
 	outTangent =  NormalMat * inTangent;
 	outTangent = normalize(outTangent - dot(outTangent, outNormal) * outNormal);
 	outBiTangent = cross(outNormal, outTangent);

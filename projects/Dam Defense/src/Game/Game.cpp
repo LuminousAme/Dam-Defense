@@ -388,21 +388,21 @@ void Game::SetUpAssets()
 	shaderDepth = TTN_AssetSystem::GetShader("Depth shader");
 
 	////MESHES////
-	cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
-	skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
-	sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
-	flamethrowerMesh = TTN_ObjLoader::LoadFromFile("models/Flamethrower.obj");
-	flamethrowerMesh->SetUpVao();
-	boat1Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 1.obj");
-	boat2Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 2.obj");
-	boat3Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 3.obj");
-	terrainPlain = TTN_ObjLoader::LoadFromFile("models/terrainPlain.obj");
-	terrainPlain->SetUpVao();
-	birdMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/bird/bird", 2);
-	treeMesh[0] = TTN_ObjLoader::LoadFromFile("models/Tree1.obj");
-	treeMesh[1] = TTN_ObjLoader::LoadFromFile("models/Tree2.obj");
-	treeMesh[2] = TTN_ObjLoader::LoadFromFile("models/Tree3.obj");
-	damMesh = TTN_ObjLoader::LoadFromFile("models/Dam.obj");
+	//cannonMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/cannon/cannon", 7);
+	//skyboxMesh = TTN_ObjLoader::LoadFromFile("models/SkyboxMesh.obj");
+	//sphereMesh = TTN_ObjLoader::LoadFromFile("models/IcoSphereMesh.obj");
+	//flamethrowerMesh = TTN_ObjLoader::LoadFromFile("models/Flamethrower.obj");
+	//flamethrowerMesh->SetUpVao();
+	//boat1Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 1.obj");
+	//boat2Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 2.obj");
+	//boat3Mesh = TTN_ObjLoader::LoadFromFile("models/Boat 3.obj");
+	//terrainPlain = TTN_ObjLoader::LoadFromFile("models/terrainPlain.obj");
+	//terrainPlain->SetUpVao();
+	//birdMesh = TTN_ObjLoader::LoadAnimatedMeshFromFiles("models/bird/bird", 2);
+	//treeMesh[0] = TTN_ObjLoader::LoadFromFile("models/Tree1.obj");
+	//treeMesh[1] = TTN_ObjLoader::LoadFromFile("models/Tree2.obj");
+	//treeMesh[2] = TTN_ObjLoader::LoadFromFile("models/Tree3.obj");
+	//damMesh = TTN_ObjLoader::LoadFromFile("models/Dam.obj");
 
 	//grab the meshes
 	cannonMesh = TTN_AssetSystem::GetMesh("Cannon mesh");
@@ -437,24 +437,38 @@ void Game::SetUpAssets()
 	////MATERIALS////
 	cannonMat = TTN_Material::Create();
 	cannonMat->SetAlbedo(cannonText);
+	cannonMat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Cannon Normal Map"));
+	cannonMat->SetUseNormalMap(true);
 	cannonMat->SetShininess(128.0f);
 	m_mats.push_back(cannonMat);
 
 	enemyCannonMat = TTN_Material::Create();
 	enemyCannonMat->SetAlbedo(enemyCannonText);
+	enemyCannonMat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Enemy Cannon Normal Map"));
+	enemyCannonMat->SetUseNormalMap(true);
+	enemyCannonMat->SetHasRimLighting(true);
 	enemyCannonMat->SetShininess(128.0f);
 	m_mats.push_back(enemyCannonMat);
 
 	boat1Mat = TTN_Material::Create();
 	boat1Mat->SetAlbedo(boat1Text);
+	boat1Mat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Boat Normal Map 1"));
+	boat1Mat->SetUseNormalMap(true);
+	boat1Mat->SetHasRimLighting(true);
 	boat1Mat->SetShininess(128.0f);
 	m_mats.push_back(boat1Mat);
 	boat2Mat = TTN_Material::Create();
 	boat2Mat->SetAlbedo(boat2Text);
+	boat2Mat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Boat Normal Map 2"));
+	boat2Mat->SetUseNormalMap(true);
+	boat2Mat->SetHasRimLighting(true);
 	boat2Mat->SetShininess(128.0f);
 	m_mats.push_back(boat2Mat);
 	boat3Mat = TTN_Material::Create();
 	boat3Mat->SetAlbedo(boat3Text);
+	boat3Mat->SetNormalMap(TTN_AssetSystem::GetTexture2D("Boat Normal Map 3"));
+	boat3Mat->SetUseNormalMap(true);
+	boat3Mat->SetHasRimLighting(true);
 	boat3Mat->SetShininess(128.0f);
 	m_mats.push_back(boat3Mat);
 

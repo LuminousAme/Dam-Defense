@@ -42,7 +42,7 @@ void main() {
 
 	//pass data onto the frag shader
 	outPos = (Model * vec4(pos, 1.0)).xyz;
-	outNormal = NormalMat * normal;
+	outNormal = normalize(NormalMat * normal);
 	tangent = NormalMat * tangent;
 	outTangent = normalize(tangent - dot(tangent, outNormal) * outNormal);
 	outBiTangent = cross(outNormal, outTangent);

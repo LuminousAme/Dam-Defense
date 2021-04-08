@@ -447,6 +447,7 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Dam texture", "textures/Dam.png", 1); //texture for the dam
 	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Cannon mesh", "models/cannon/cannon", 7, 1); //mesh for the cannon
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Cannon texture", "textures/metal.png", 1); //texture for the cannon
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Cannon Normal Map", "textures/Cannon_Normal.png"); //normal map for the cannon
 	TTN_AssetSystem::AddMeshToBeLoaded("Flamethrower mesh", "models/Flamethrower.obj", 1); //mesh for the flamethrowers
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Flamethrower texture", "textures/FlamethrowerTexture.png", 1); //texture for the flamethrower
 	TTN_AssetSystem::AddMeshToBeLoaded("Terrain plane", "models/terrainPlain.obj", 1); //large plane with lots of subdivisions for the terrain and water
@@ -566,10 +567,12 @@ void PrepareAssetLoading() {
 	for (int i = 1; i < 4; i++) {
 		TTN_AssetSystem::AddMeshToBeLoaded("Boat " + std::to_string(i), "models/Boat " + std::to_string(i) + ".obj", 1); //enemy boat meshes
 		TTN_AssetSystem::AddTexture2DToBeLoaded("Boat texture " + std::to_string(i), "textures/Boat " + std::to_string(i) + " Texture.png", 1); //enemy boat textures
+		TTN_AssetSystem::AddTexture2DToBeLoaded("Boat Normal Map " + std::to_string(i), "textures/Boat " + std::to_string(i) + "_Normal.png", 1); //enemy boat normal maps
 	}
 	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Bird mesh", "models/bird/bird", 2, 1); //bird mesh
 	TTN_AssetSystem::AddMorphAnimationMeshesToBeLoaded("Enemy Cannon mesh", "models/Enemy Cannon/e_cannon", 17, 1); //mesh for the enemy cannons
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Enemy Cannon texture", "textures/Enemy_Cannon_Texture.png", 1); //enemy cannon texture
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Enemy Cannon Normal Map", "textures/EnemyCannon_Normal.png", 1); //enemy cannon normal map
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Bird texture", "textures/BirdTexture.png", 1); //bird texture
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Paused-Text", "textures/text/Paused.png", 1); //rendered text of the word paused
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Resume-Text", "textures/text/Resume.png", 1); //rendered text of the word resume

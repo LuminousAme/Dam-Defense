@@ -133,7 +133,7 @@ void main() {
 	//emissive
 	float emissiveStrenght = texture(s_specularTex,inUV).g;
 	//rim
-	float useRim = texture(s_specularTex,inUV).b;
+	float rimStrenght = texture(s_specularTex,inUV).b;
     //positions
     vec3 fragPos = texture(s_positionTex,inUV).rgb;
 
@@ -166,9 +166,7 @@ void main() {
 
 
 	//add the rim lighting 
-	float rimLightContribution = 1.0 - max(dot(viewDir, N), 0.0);
-	vec3 rimLighting = vec3(rimColor * smoothstep(1.0 - clamp(rimSize, 0.0, 1.0), 1.0, rimLightContribution));
-	result += mix(vec3(0.0), rimColor * rimLighting, ReMap(0.0, 1.0, 1.0, 0.0, useRim));
+	//result += rimColor * vec3(ReMap(1.0, 0.0, 0.0, 1.0, rimStrenght));
 
 	//add emissive light
 	result += mix(vec3(0.0), texture(s_emissiveTex, inUV).rgb, ReMap(0.0, 1.0, 1.0, 0.0, emissiveStrenght));

@@ -9,14 +9,17 @@ layout(location = 5) in vec3 inTangent;
 layout(location = 6) in vec3 inBiTangent;
 
 //material data
-uniform sampler2D s_Diffuse;
+layout(binding = 0) uniform sampler2D s_Diffuse;
 uniform int u_UseDiffuse;
-uniform sampler2D s_Emissive;
-uniform sampler2D s_normalMap;
+layout(binding = 1) uniform sampler2D s_Emissive;
+layout(binding = 2) uniform sampler2D s_normalMap;
 uniform int u_UseEmissive;
 uniform float u_EmissiveStrenght;
 uniform int u_useNormalMapping = 0;
 uniform int u_useRimLighting = 0;
+uniform float u_rimSize = 0.2;
+uniform vec3 u_rimColor = vec3(1.0);
+uniform vec3 u_CamPos;
 
 //result, multiple render targets
 //we can render color to all of these
@@ -43,8 +46,16 @@ void main() {
 	normalMapNormal = normalize(TBN * normalMapNormal);
 	outNormals = (mix(normalize(inNormal), normalMapNormal, u_useNormalMapping) * 0.5) + 0.5;
 
+	//add the rim lighting 
+	vec3 viewDir  = normalize(u_CamPos - inPos);
+	float rimLightContribution = 1.0 - max(dot(viewDir, ((outNormals * 2.0) - 1.0)), 0.0);
+	float rimLighting = smoothstep(1.0 - clamp(u_rimSize, 0.0, 1.0), 1.0, rimLightContribution);
+	outColors = mix(outColors, outColors + vec4(u_rimColor * vec3(rimLighting), 1.0), float(u_useRimLighting));
+	//rimLighting = mix(0.0, rimLighting, float(u_useRimLighting));
+	//rimLighting = ReMap(0.0, 1.0, 1.0, 0.0, rimLighting);
+
 	//find the specular from the texture and output it 
-	outSpecs = vec3(1.0, ReMap(0.0, 1.0, 1.0, 0.0, u_UseEmissive * u_EmissiveStrenght), ReMap(0.0, 1.0, 1.0, 0.0, float(u_useRimLighting)));
+	outSpecs = vec3(1.0, ReMap(0.0, 1.0, 1.0, 0.0, u_UseEmissive * u_EmissiveStrenght), 1.0);
 
 	//output the world space positions
 	outPositions = inPos;

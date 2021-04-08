@@ -74,8 +74,8 @@ namespace Titan {
 		float m_splitRanges[4];
 		float m_farClip;
 		glm::vec3 m_camPos;
-		glm::vec3 m_rimColor = glm::vec3(1.0f);
-		float m_rimSize = 0.2f;
+		glm::vec3 m_rimColor = glm::vec3(1.0f, 1.0f, 1.0f);
+		float m_rimSize = 0.4f;
 
 		TTN_Framebuffer::sfboptr m_shadowBuffer;
 
