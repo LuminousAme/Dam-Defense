@@ -62,7 +62,7 @@ namespace Titan {
 		glm::vec4 m_ambientColor = glm::vec4(0.765f, 0.865f, 1.0f, 0.0f);
 
 		//floats
-		float m_ambientPower = 0.89f;
+		float m_ambientPower = 0.6f;
 		float m_lightAmbientPower = 0.063f;
 		float m_lightSpecularPower = 2.0f;
 

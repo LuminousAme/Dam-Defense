@@ -49,6 +49,7 @@ namespace Titan {
 		void SetShadowBuffer(TTN_Framebuffer::sfboptr shadowBuffer);
 		void SetRimColor(glm::vec3 rimColor) { m_rimColor = rimColor; }
 		void SetRimSize(float rimSize) { m_rimSize = rimSize; }
+		void SetEmissiveStrenght(float emissiveStrenght) { m_emissiveStrenght = emissiveStrenght; }
 
 		TTN_DirectionalLight& GetSunRef();
 
@@ -61,13 +62,23 @@ namespace Titan {
 		void SetUseDiffuseRamp(bool useDiffuseRamp) { m_useDiffuseRamp = useDiffuseRamp; }
 		void SetSpecularRamp(TTN_Texture2D::st2dptr specularRamp) { m_specularRamp = specularRamp; }
 		void SetUseSpecularRamp(bool useSpecularRamp) { m_useSpecularRamp = useSpecularRamp; }
+		bool GetUseDiffuseRamp() { return m_useDiffuseRamp; }
+		bool GetUseSpecularRamp() { return m_useSpecularRamp; }
 
+		//variables for toogling lighting terms on and off 
+		void SetUseAmbient(bool ambient) { m_useAmbient = ambient; }
+		void SetUseSpecular(bool specular) { m_useSpecular = specular; }
+		bool GetUseAmbient() { return m_useAmbient; }
+		bool GetUseSpecular() { return m_useSpecular; }
+		void SetUseShadowMapping(bool shadowMapping) { m_useShadowMapping = shadowMapping; }
+		bool GetuseShadowMapping() { return m_useShadowMapping; }
 
 		void EnableSun(bool enabled);
 
 		glm::vec3 GetRimColor() { return m_rimColor; }
 		float GetRimSize() { return m_rimSize; }
-
+		float GetEmissiveStrenght() { return m_emissiveStrenght; }
+		
 	private:
 		glm::mat4 m_viewMat;
 		glm::mat4 m_lightSpaceViewProj[4];
@@ -76,12 +87,17 @@ namespace Titan {
 		glm::vec3 m_camPos;
 		glm::vec3 m_rimColor = glm::vec3(1.0f, 1.0f, 1.0f);
 		float m_rimSize = 0.4f;
+		float m_emissiveStrenght = 1.0f;
 
 		TTN_Framebuffer::sfboptr m_shadowBuffer;
 
 		TTN_UniformBuffer m_sunBuffer;
 
 		bool m_sunEnabled = true;
+
+		bool m_useAmbient = true;
+		bool m_useSpecular = true;
+		bool m_useShadowMapping = true;
 
 		TTN_DirectionalLight m_sun;
 

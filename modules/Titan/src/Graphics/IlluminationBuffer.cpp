@@ -64,9 +64,13 @@ namespace Titan {
 			m_shaders[TTN_Lights::DIRECTIONAL]->Bind();
 			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("u_CamPos", m_camPos);
 			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("rimColor", m_rimColor);
+			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("emissivePower", m_emissiveStrenght);
 			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("u_SplitRanges", m_splitRanges[0], 4);
 			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniformMatrix("u_lightViewProj", m_lightSpaceViewProj[0], 4);
 			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniformMatrix("u_vp", m_viewMat);
+			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("u_useAmbientLight", (int)m_useAmbient);
+			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("u_useSpecularLight", (int)m_useSpecular);
+			m_shaders[TTN_Lights::DIRECTIONAL]->SetUniform("u_useShadows", (int)m_useShadowMapping);
 
 			//bind sun uniform
 			m_sunBuffer.Bind(0);
@@ -105,6 +109,8 @@ namespace Titan {
 		gBuffer->BindLighting();
 		m_buffers[1]->BindColorAsTexture(0, 4);
 		m_buffers[0]->BindColorAsTexture(0, 5);
+
+		m_shaders[TTN_Lights::AMBIENT]->SetUniform("u_useAmbientLight", (int)m_useAmbient);
 
 		m_buffers[0]->RenderToFSQ();
 
