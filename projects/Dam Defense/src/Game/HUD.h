@@ -142,12 +142,14 @@ private:
 	entt::entity buttonAbilityCD;
 	entt::entity buttonUpgrade;
 	entt::entity shop;
+	entt::entity Johnson;
 	entt::entity buttonContinue;
 	//entt::entity background;
 
 	//assets
 	TTN_Texture2D::st2dptr textureScore;
 	TTN_Texture2D::st2dptr textureShop;//shop text/title
+	TTN_Texture2D::st2dptr textureJohnson;//shop bird
 	TTN_Texture2D::st2dptr textureHealButton1;
 	TTN_Texture2D::st2dptr textureHealButton2;
 	TTN_Texture2D::st2dptr textureFiringButton1;

@@ -301,7 +301,7 @@ void Game::KeyDownChecks()
 	}
 
 	//control to make the CG controls appear or disappear
-	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::C)&& TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::G)) {
+	if (TTN_Application::TTN_Input::GetKey(TTN_KeyCode::C) && TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::G)) {
 		showCGControls = !showCGControls;
 	}
 }
@@ -653,7 +653,7 @@ void Game::SetUpEntities()
 	}
 
 	//entity for the lighthouse
-	for(int i = 0; i < 48; i++) {
+	for (int i = 0; i < 48; i++) {
 		entt::entity tree = CreateEntity();
 
 		//setup a mesh renderer for a tree
@@ -663,7 +663,7 @@ void Game::SetUpEntities()
 
 		//setup a transform for a tree
 		TTN_Transform treeTrans;
-		if(i == 0) treeTrans = TTN_Transform(glm::vec3(9.0f + 2.0f, -0.1f, 8.0f), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.075f));
+		if (i == 0) treeTrans = TTN_Transform(glm::vec3(9.0f + 2.0f, -0.1f, 8.0f), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.075f));
 		else if (i == 1) treeTrans = TTN_Transform(glm::vec3(-10.0f, -0.1f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.075f));
 		else if (i == 2) treeTrans = TTN_Transform(glm::vec3(-9.5f, -0.1f, 3.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(0.075f));
 		else if (i == 3) treeTrans = TTN_Transform(glm::vec3(10.1 + 2.0f, -0.1f, 4.5f), glm::vec3(0.0f, -180.0f, 0.0f), glm::vec3(0.075f));
@@ -1267,7 +1267,7 @@ void Game::CreateSplash(glm::vec3 location)
 		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(100, 0, splashparticle, 10.0f, true);
 		ps->MakeConeEmitter(15.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 		ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
-		std::cout << FlameActiveTime << std::endl;
+		//std::cout << FlameActiveTime << std::endl;
 
 		//setup a particle system component
 		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
@@ -1303,7 +1303,7 @@ void Game::Flamethrower() {
 				ps->MakeConeEmitter(15.0f, glm::vec3(90.0f, 0.0f, 0.0f));
 				ps->SetStopAfter(FlameActiveTime - 1.0f);
 				ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
-				std::cout << FlameActiveTime << std::endl;
+				//std::cout << FlameActiveTime << std::endl;
 
 				//setup a particle system component
 				TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);

@@ -28,6 +28,8 @@ void GameUI::InitScene()
 	textureContinue1 = TTN_AssetSystem::GetTexture2D("Continue");
 	textureContinue2 = TTN_AssetSystem::GetTexture2D("Continue Hovered");
 
+	textureJohnson = TTN_AssetSystem::GetTexture2D("Johnson");
+
 	m_DamHealth = 100.0f;
 	m_displayedWaveProgress = 0.0f;
 	m_waveProgress = 0.0f;
@@ -470,6 +472,22 @@ void GameUI::InitScene()
 		AttachCopy(shop, bgRenderer2D);
 	}
 
+	//johnson sprite
+	{
+		//create an entity in the scene for the background
+		Johnson = CreateEntity();
+
+		//create a transform for the background, placing it in the center of the screen, covering the whole thing
+		TTN_Transform bgTrans = TTN_Transform(glm::vec3(1920.0f, 0.0f, 0.1f), glm::vec3(0.0f), glm::vec3(520.f, 305.0f, 1.0f));
+		//TTN_Transform bgTrans = TTN_Transform(glm::vec3(1920.0f, 0.0f, 0.10f), glm::vec3(0.0f), glm::vec3(1440.f, 810.0f, 1.0f));
+
+		AttachCopy(Johnson, bgTrans);
+
+		//create a sprite renderer for the background
+		TTN_Renderer2D bgRenderer2D = TTN_Renderer2D(textureJohnson);
+		AttachCopy(Johnson, bgRenderer2D);
+	}
+
 	glm::vec3 ButtonScale = glm::vec3(250.0f, 200.0, 1.0f);
 
 	//button to buy health
@@ -899,6 +917,7 @@ void GameUI::Update(float deltaTime)
 	if (shouldShop) {
 		//TTN_Transform& trans = Get<TTN_Transform>(background);
 		TTN_Transform& Shoptrans = Get<TTN_Transform>(shop);
+		TTN_Transform& Johntrans = Get<TTN_Transform>(Johnson);
 		TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);
 		TTN_Transform& buttonTransCannon = Get<TTN_Transform>(buttonCannon);
 		TTN_Transform& buttonTransAbility = Get<TTN_Transform>(buttonAbilityCD);
@@ -958,7 +977,7 @@ void GameUI::Update(float deltaTime)
 
 			//shop hud lerp
 			Shoptrans.SetPos(centerPosShop - glm::vec3(0.5f * 1920.f, 0.0f, 0.0f));
-
+			Johntrans.SetPos(centerPosShop - glm::vec3(0.5f * 1920.f, 0.0f, 0.0f));
 			//continue button lerping
 			if (buttonTransContinue.GetPos() == glm::vec3(0.0f, -365.0f, 0.10f)) {
 				buttonTransContinue.SetPos(glm::vec3(0.0f, -365.0f, 0.10f));
@@ -1036,6 +1055,7 @@ void GameUI::Update(float deltaTime)
 	if (!shouldShop && lerpAway) {
 		//TTN_Transform& trans = Get<TTN_Transform>(background);
 		TTN_Transform& Shoptrans = Get<TTN_Transform>(shop);
+		TTN_Transform& Johntrans = Get<TTN_Transform>(Johnson);
 		TTN_Transform& buttonTrans = Get<TTN_Transform>(buttonHealth);
 		TTN_Transform& buttonTransCannon = Get<TTN_Transform>(buttonCannon);
 		TTN_Transform& buttonTransAbility = Get<TTN_Transform>(buttonAbilityCD);
@@ -1060,6 +1080,7 @@ void GameUI::Update(float deltaTime)
 
 		//shop hud lerp
 		Shoptrans.SetPos(centerPosShop);
+		Johntrans.SetPos(centerPosShop);
 
 		//continue button lerping
 		buttonTransContinue.SetPos(centerPosContinue);
