@@ -761,7 +761,8 @@ void Game::SetUpEntities()
 void Game::SetUpOtherData()
 {
 	Bombing = false;
-
+	julianAlive = true;
+	jerryAlive = true;
 	//create the particle templates
 	//smoke particle
 	{
@@ -1825,9 +1826,9 @@ void Game::Collisions() {
 					cont = false;
 				}
 
-				//if one is a bird and the other is a boat
-				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Boat" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird") ||
-					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Boat"))) {
+				//if one is a bird  and they are not jerry or julian  and the other is a boat
+				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Boat" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && (Get<BirdComponent>(entity2Ptr).GetIsJerry() == false) && (!Get<BirdComponent>(entity2Ptr).GetIsJulian() == false))) ||
+					((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && (!Get<BirdComponent>(entity1Ptr).GetIsJerry()) && (!Get<BirdComponent>(entity1Ptr).GetIsJulian())) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Boat"))) {
 					//iterate through all of the boats through all of them until you find matching entity numbers
 					std::vector<entt::entity>::iterator itt = boats.begin();
 					while (itt != boats.end()) {
@@ -1887,9 +1888,9 @@ void Game::Collisions() {
 					cont = false;
 				}
 
-				//if one is a bird and the other is a cannonball
-				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball") ||
-					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird"))) {
+				//if one is jerry and other is a ball
+				if (cont && (((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity1Ptr).GetIsJerry()) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball")) ||
+					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity2Ptr).GetIsJerry()))) {
 					//then iterate through the list of cannonballs until you find the one that's collided
 					std::vector<std::pair<entt::entity, bool>>::iterator it = cannonBalls.begin();
 					while (it != cannonBalls.end()) {
@@ -1930,6 +1931,107 @@ void Game::Collisions() {
 
 					cont = false;
 				}
+
+				//if one is julian and jerry is alive and other is a ball
+				if (cont && (((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity1Ptr).GetIsJulian() && jerryAlive) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball")) ||
+					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity2Ptr).GetIsJulian() && jerryAlive))) {
+					//then iterate through the list of cannonballs until you find the one that's collided
+					std::vector<std::pair<entt::entity, bool>>::iterator it = cannonBalls.begin();
+					while (it != cannonBalls.end()) {
+						if (entity1Ptr == (*it).first || entity2Ptr == (*it).first) {
+							//and delete it
+							DeleteEntity((*it).first);
+							it = cannonBalls.erase(it);
+						}
+						else {
+							it++;
+						}
+					}
+
+					std::vector<entt::entity>::iterator btt = birds.begin();
+					while (btt != birds.end()) {
+						//if you find the bird
+						if (entity1Ptr == *btt || entity2Ptr == *btt) {
+							//play the particle effect and then have the bird delete soon
+							CreateBirdExpolsion(Get<TTN_Transform>(*btt).GetPos());
+							DeleteEntity(*btt);
+							TTN_DeleteCountDown countdown = TTN_DeleteCountDown(0.001f);
+							btt = birds.erase(btt);
+
+							//make a new bird
+							MakeABird();
+							//and set it's target
+							Get<BirdComponent>(birds[birds.size() - 1]).SetTarget(Get<BirdComponent>(birds[0]).GetTarget());
+
+							//subtract score
+							if (m_score > 50) {
+								m_score = m_score - 50;
+							}
+						}
+						else {
+							btt++;
+						}
+					}
+
+					cont = false;
+				}
+
+
+				//if one is julian and jerry is dead and other is a ball
+				if (cont && (((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity1Ptr).GetIsJulian() && !jerryAlive) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball")) ||
+					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity2Ptr).GetIsJulian() && !jerryAlive))) {
+					//then iterate through the list of cannonballs until you find the one that's collided
+					std::vector<std::pair<entt::entity, bool>>::iterator it = cannonBalls.begin();
+					while (it != cannonBalls.end()) {
+						if (entity1Ptr == (*it).first || entity2Ptr == (*it).first) {
+							//and delete it
+							DeleteEntity((*it).first);
+							it = cannonBalls.erase(it);
+						}
+						else {
+							it++;
+						}
+					}
+
+					std::vector<entt::entity>::iterator btt = birds.begin();
+					while (btt != birds.end()) {
+						//if you find the bird
+						if (entity1Ptr == *btt || entity2Ptr == *btt) {
+							//play the particle effect and then have the bird delete soon
+							CreateBirdExpolsion(Get<TTN_Transform>(*btt).GetPos());
+							DeleteEntity(*btt);
+							TTN_DeleteCountDown countdown = TTN_DeleteCountDown(0.001f);
+							btt = birds.erase(btt);
+
+							//make a new bird
+							MakeABird();
+							//and set it's target
+							Get<BirdComponent>(birds[birds.size() - 1]).SetTarget(Get<BirdComponent>(birds[0]).GetTarget());
+
+							//subtract score
+							if (m_score > 50) {
+								m_score = m_score - 50;
+							}
+						}
+						else {
+							btt++;
+						}
+					}
+
+					cont = false;
+				}
+
+
+
+
+
+
+
+
+
+
+
+
 			}
 		}
 	}

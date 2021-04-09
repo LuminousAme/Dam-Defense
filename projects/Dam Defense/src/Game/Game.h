@@ -237,6 +237,10 @@ protected:
 	/////// OTHER DATA ///////////
 #pragma region Data
 protected:
+
+	bool jerryAlive;
+	bool julianAlive;
+
 	/////// Player control data/////////
 	float cannonBallForce = 3600.0f / 10.0f;//a multiplier for the ammount of force should be applied to a cannonball when it is fired
 	float playerShootCooldown = 0.7f;//the ammount of time in seconds that the player has to wait between shots
