@@ -1827,8 +1827,8 @@ void Game::Collisions() {
 				}
 
 				//if one is a bird  and they are not jerry or julian  and the other is a boat
-				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Boat" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && (Get<BirdComponent>(entity2Ptr).GetIsJerry() == false) && (!Get<BirdComponent>(entity2Ptr).GetIsJulian() == false))) ||
-					((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && (!Get<BirdComponent>(entity1Ptr).GetIsJerry()) && (!Get<BirdComponent>(entity1Ptr).GetIsJulian())) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Boat"))) {
+				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Boat" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && (Get<BirdComponent>(entity2Ptr).GetIsJerry() == false) && (Get<BirdComponent>(entity2Ptr).GetIsJulian() == false))) ||
+					((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && (Get<BirdComponent>(entity2Ptr).GetIsJerry() == false) && (Get<BirdComponent>(entity2Ptr).GetIsJulian() == false)) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Boat"))) {
 					//iterate through all of the boats through all of them until you find matching entity numbers
 					std::vector<entt::entity>::iterator itt = boats.begin();
 					while (itt != boats.end()) {
@@ -2020,17 +2020,6 @@ void Game::Collisions() {
 
 					cont = false;
 				}
-
-
-
-
-
-
-
-
-
-
-
 
 			}
 		}
