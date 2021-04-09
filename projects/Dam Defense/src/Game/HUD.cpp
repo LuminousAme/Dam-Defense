@@ -461,6 +461,8 @@ void GameUI::InitScene()
 
 		//create a transform for the background, placing it in the center of the screen, covering the whole thing
 		TTN_Transform bgTrans = TTN_Transform(glm::vec3(1920.0f, 0.0f, 0.15f), glm::vec3(0.0f), glm::vec3(1440.f, 810.0f, 1.0f));
+		//	TTN_Transform bgTrans = TTN_Transform(glm::vec3(1920.0f, 0.0f, 0.15f), glm::vec3(0.0f), glm::vec3(1980.f, 1080.0f, 1.0f));
+
 		AttachCopy(shop, bgTrans);
 
 		//create a sprite renderer for the background
@@ -848,6 +850,30 @@ void GameUI::Update(float deltaTime)
 			Get<TTN_Renderer2D>(buttonCannon).SetColor(glm::vec4(1.0f));
 			Get<TTN_Renderer2D>(buttonAbilityCD).SetColor(glm::vec4(1.0f));
 			Get<TTN_Renderer2D>(buttonUpgrade).SetColor(glm::vec4(1.0f));
+
+			for (int i = 0; i < healPriceNums.size(); i++) {
+				TTN_Renderer2D& trans = Get<TTN_Renderer2D>(healPriceNums[i]);
+				//places the numbers to the left of the center
+				trans.SetColor(glm::vec4(1.0f));
+			}
+
+			for (int i = 0; i < cannonPriceNums.size(); i++) {
+				TTN_Renderer2D& trans = Get<TTN_Renderer2D>(cannonPriceNums[i]);
+				//places the numbers to the left of the center
+				trans.SetColor(glm::vec4(1.0f));
+			}
+
+			for (int i = 0; i < cooldownPriceNums.size(); i++) {
+				TTN_Renderer2D& trans = Get<TTN_Renderer2D>(cooldownPriceNums[i]);
+				//places the numbers to the left of the center
+				trans.SetColor(glm::vec4(1.0f));
+			}
+
+			for (int i = 0; i < upgradePriceNums.size(); i++) {
+				TTN_Renderer2D& trans = Get<TTN_Renderer2D>(upgradePriceNums[i]);
+				//places the numbers to the left of the center
+				trans.SetColor(glm::vec4(1.0f));
+			}
 		}
 	}
 
@@ -1206,6 +1232,11 @@ void GameUI::MouseButtonDownChecks()
 				healOnce = true;
 				//std::cout << healCounter << std::endl;
 				Get<TTN_Renderer2D>(buttonHealth).SetColor(glm::vec4(0.5f));
+				for (int i = 0; i < healPriceNums.size(); i++) {
+					TTN_Renderer2D& trans = Get<TTN_Renderer2D>(healPriceNums[i]);
+					//places the numbers to the left of the center
+					trans.SetColor(glm::vec4(0.5f));
+				}
 			}
 		}
 
@@ -1219,6 +1250,11 @@ void GameUI::MouseButtonDownChecks()
 				cannonPower = true;
 				//std::cout << " SHOPING C" << std::endl;
 				Get<TTN_Renderer2D>(buttonCannon).SetColor(glm::vec4(0.5f));
+				for (int i = 0; i < cannonPriceNums.size(); i++) {
+					TTN_Renderer2D& trans = Get<TTN_Renderer2D>(cannonPriceNums[i]);
+					//places the numbers to the left of the center
+					trans.SetColor(glm::vec4(0.5f));
+				}
 			}
 			else {// if power up is active
 			}
@@ -1234,6 +1270,11 @@ void GameUI::MouseButtonDownChecks()
 				abilityCooldownBuff = true;
 				//std::cout << " SHOPING AAAAAAAAAAAA" << std::endl;
 				Get<TTN_Renderer2D>(buttonAbilityCD).SetColor(glm::vec4(0.5f));
+				for (int i = 0; i < cooldownPriceNums.size(); i++) {
+					TTN_Renderer2D& trans = Get<TTN_Renderer2D>(cooldownPriceNums[i]);
+					//places the numbers to the left of the center
+					trans.SetColor(glm::vec4(0.5f));
+				}
 			}
 			else {// if power up is active
 			}
@@ -1249,6 +1290,11 @@ void GameUI::MouseButtonDownChecks()
 				upgradeAbilities = true;
 				std::cout << " SHOPING AAAAAAAAAAAA" << std::endl;
 				Get<TTN_Renderer2D>(buttonUpgrade).SetColor(glm::vec4(0.5f));
+				for (int i = 0; i < upgradePriceNums.size(); i++) {
+					TTN_Renderer2D& trans = Get<TTN_Renderer2D>(upgradePriceNums[i]);
+					//places the numbers to the left of the center
+					trans.SetColor(glm::vec4(0.5f));
+				}
 			}
 			else {// if power up is active
 			}

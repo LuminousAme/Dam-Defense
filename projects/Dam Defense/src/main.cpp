@@ -279,13 +279,13 @@ int main() {
 
 		else if (gameScene->GetShouldRender() && !gameSceneUI->GetShouldShop() && !gameSceneUI->GetShouldShopping() && gameSceneUI->GetShouldExit() && !options->GetShouldRender()) {
 			TTN_Application::TTN_Input::SetCursorLocked(true);
+			gameSceneUI->SetShouldExit(false);
 			options->SetShouldRender(false);
 			gameScene->SetPaused(false);
 			gameScene->SetGameIsPaused(false);
 			paused->SetShouldRender(false);
 			paused->SetPaused(false);
 			paused->SetShouldResume(true);
-			gameSceneUI->SetShouldExit(false);
 		}
 
 		//if the game is over
@@ -555,7 +555,8 @@ void PrepareAssetLoading() {
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Upgrade", "textures/shop/Icon_Skills.png", 1);  //texture for upgrade button
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Upgrade Hovered", "textures/shop/Icon_Skills_Hovered.png", 1); //texture for upgrade button
 
-	TTN_AssetSystem::AddTexture2DToBeLoaded("Shop", "textures/shop/Shop Main_OP100.png", 1); //texture for shop menu/ui
+	//TTN_AssetSystem::AddTexture2DToBeLoaded("Shop", "textures/shop/Shop Main_OP100.png", 1); //texture for shop menu/ui
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Shop", "textures/shop/Shop_Sign_Tex.png", 1); //texture for shop menu/ui
 
 	for (int i = 0; i < 23; i++) {
 		TTN_AssetSystem::AddTexture2DToBeLoaded("Game logo " + std::to_string(i), "textures/logo/Game Logo " + std::to_string(i + 1) + ".png", 1); //logo for the game
