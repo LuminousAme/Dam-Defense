@@ -1038,6 +1038,11 @@ void Game::RestartData()
 	mousePos = TTN_Application::TTN_Input::GetMousePosition();
 	firstFrame = true;
 	m_score = 0;
+	//reset prices
+	healCost = 250; //score cost of heal
+	cannonCost = 1000; //score cost of cannon powerup
+	abilityCost = 750; //score cost of ability cd powerup
+	upgradeCost = 750; //score cost of upgrade powerup
 }
 
 #pragma endregion
