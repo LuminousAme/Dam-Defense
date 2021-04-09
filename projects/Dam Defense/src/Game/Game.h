@@ -240,6 +240,9 @@ public:
 	TTN_AudioEventHolder::saehptr m_DialougeKillingJulianWhileJerryIsAlive;
 	TTN_AudioEventHolder::saehptr m_DialougeKillingJuilian;
 
+	bool m_hasGivenLowHealthWarning;
+	bool m_hasHitABirdThisRound;
+	int birdKillCount;
 #pragma endregion
 
 	//Entities
@@ -331,7 +334,7 @@ protected:
 	float muzzleFlashCD = 0.50f; // time for muzzle flash
 	float m_timeBetweenEnemyWaves = 5.0f; //rest time between waves
 	float m_timeBetweenEnemySpawns = 2.0f; //cooldown between when boats spawn
-	int m_enemiesPerWave = 1; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
+	int m_enemiesPerWave = 5; //how many enemy enemies should it add to each wave, so wave number * this is the number of enemies in any given wave
 
 	int m_currentWave = 0; //the current wave
 	float m_timeTilNextWave; //the timer until the next wave starts, used after a wave has ended

@@ -36,6 +36,12 @@ void Game::Update(float deltaTime)
 	//call the sound update
 	GameSounds(deltaTime);
 
+	if (!m_hasGivenLowHealthWarning) {
+		m_hasGivenLowHealthWarning = true;
+		m_DialogueLowHealth->SetNextPostion(glm::vec3(0.0f));
+		m_DialogueLowHealth->PlayFromQueue();
+	}
+
 	if (!m_paused) {
 		//subtract from the input delay
 		if (m_InputDelay >= 0.0f) m_InputDelay -= deltaTime;
@@ -364,6 +370,25 @@ void Game::SetUpAssets()
 	m_cannonUpgradeSound = TTN_AudioEventHolder::Create("Cannon Upgrade Sound", "{6abc8c3f-9bfd-40e2-8698-f838927cf0c0}", 1);
 
 	m_birdBombSound = TTN_AudioEventHolder::Create("Bird Bomb", "{7b09167d-47be-4d90-908f-543d8347eba3}", 1);
+
+	m_DialogueOpening = TTN_AudioEventHolder::Create("Opening Dialouge", "{c79fd2c3-4b97-470f-a2b2-03262612ce0d}", 1);
+	m_DialougeWave2 = TTN_AudioEventHolder::Create("Wave 2 Dialouge", "{6ee1b2f1-4205-4a22-964c-58fc15c545ff}", 1);
+	m_DialogueWave3 = TTN_AudioEventHolder::Create("Wave 3 Dialouge", "{9803a883-3ba6-406e-b828-a221514b472a}", 1);
+	m_DialogueWave4 = TTN_AudioEventHolder::Create("Wave 4 Dialouge", "{ee746cdd-0ee8-4375-8208-f293436ea878}", 1);
+	m_DialougeEnding = TTN_AudioEventHolder::Create("Ending Dialouge", "{ee746cdd-0ee8-4375-8208-f293436ea878}", 1);
+
+	m_DialogueLowHealth = TTN_AudioEventHolder::Create("Low Health Warning", "{1a396596-b228-4a1a-a8b5-1a580dd7d9ae}", 1);
+	m_DialougeFlamethrower = TTN_AudioEventHolder::Create("Dialogue Flame Thrower", "{08bfaf49-8b2a-4226-808f-b7d711b60a87}", 1);
+	m_DialougeBirdBomb = TTN_AudioEventHolder::Create("Dialouge Bird Bomb", "{201b5f50-767c-4327-944c-49b17ce424d2}", 1);
+
+	m_DialougeHittingABird = TTN_AudioEventHolder::Create("Dialogue Hitting a bird", "{ee38d21f-d09b-4c78-aa68-027f8cd7a991}", 1);
+	m_DialougeKilling5Birds = TTN_AudioEventHolder::Create("Dialouge Killing 5 birds", "{cf5fc3c7-5391-42e9-b862-0795f4e29590}", 1);
+	m_DialougeKilling10Birds = TTN_AudioEventHolder::Create("Dialogue Killing 10 Birds", "{4bfaf6a0-cfca-466b-af2c-eb8b3137171f}", 1);
+	m_DialougeKilling25Birds = TTN_AudioEventHolder::Create("Dialouge Killing 25 BIrds", "{86fedd33-1384-4242-8df4-66e193126f38}", 1);
+	
+	m_DialougeKillingJerry = TTN_AudioEventHolder::Create("Killing Jerry", "{8ed61f3c-f5a5-4f4b-b616-736672a84e34}", 1);
+	m_DialougeKillingJuilian = TTN_AudioEventHolder::Create("Killing Julian", "{3602d91a-014c-4346-808b-5feaffa769eb}", 1);
+	m_DialougeKillingJulianWhileJerryIsAlive = TTN_AudioEventHolder::Create("Killing Julian While Jerry Is Alive", "{7a299c08-45d4-44d6-a512-71cc6b8f0699}", 1);
 
 	//// SHADERS ////
 	//grab the shaders
@@ -1043,6 +1068,13 @@ void Game::RestartData()
 	cannonCost = 1000; //score cost of cannon powerup
 	abilityCost = 750; //score cost of ability cd powerup
 	upgradeCost = 750; //score cost of upgrade powerup
+
+	m_DialogueOpening->SetNextPostion(glm::vec3(0.0f));
+	m_DialogueOpening->PlayFromQueue();
+
+	m_hasGivenLowHealthWarning = false;
+	m_hasHitABirdThisRound = false;
+	birdKillCount = 0;
 }
 
 #pragma endregion
@@ -1312,6 +1344,11 @@ void Game::Flamethrower() {
 		//play the sound effect
 		m_flamethrowerSound->SetNextPostion(glm::vec3(0.0f));
 		m_flamethrowerSound->PlayFromQueue();
+
+		if (TTN_Random::RandomFloat(0.0f, 1.0f) <= 0.1f) {
+			m_DialougeFlamethrower->SetNextPostion(glm::vec3(0.0f));
+			m_DialougeFlamethrower->PlayFromQueue();
+		}
 	}
 	//otherwise nothing happens
 	else {
@@ -1664,6 +1701,7 @@ void Game::WaveUpdate(float deltaTime) {
 	if (m_waveInProgress && m_boatsRemainingThisWave == 0 && m_timeTilNextWave <= 0.0f) {
 		m_timeTilNextWave = m_timeBetweenEnemyWaves;
 		m_timeUntilNextSpawn = m_timeBetweenEnemyWaves;
+		m_hasHitABirdThisRound = false;
 		playJingle = true;
 		m_waveInProgress = false;
 		Dam_health = round(Dam_health); // round the health at the end of the round
@@ -1671,6 +1709,24 @@ void Game::WaveUpdate(float deltaTime) {
 		abilityScoreCost = false;
 		cannonScoreCost = false;
 		upgradeScoreCost = false;
+
+		//play the dialouge
+		if (m_currentWave == 1) {
+			m_DialougeWave2->SetNextPostion(glm::vec3(0.0f));
+			m_DialougeWave2->PlayFromQueue();
+		}
+		else if (m_currentWave == 2) {
+			m_DialogueWave3->SetNextPostion(glm::vec3(0.0f));
+			m_DialogueWave3->PlayFromQueue();
+		}
+		else if (m_currentWave == 3 && !m_arcade) {
+			m_DialougeEnding->SetNextPostion(glm::vec3(0.0f));
+			m_DialougeEnding->PlayFromQueue();
+		}
+		else if (m_currentWave == 3 && m_arcade) {
+			m_DialogueWave4->SetNextPostion(glm::vec3(0.0f));
+			m_DialogueWave4->PlayFromQueue();
+		}
 	}
 
 	//if it is in the cooldown between waves, reduce the cooldown by deltaTime
@@ -2146,6 +2202,10 @@ void Game::Shop(float deltaTime)
 			//sound effect
 			m_healSound->SetNextPostion(glm::vec3(0.0f));
 			m_healSound->PlayFromQueue();
+
+			if (Dam_health > 25.0f) {
+				m_hasGivenLowHealthWarning = false;
+			}
 		}
 
 		//faster cannon
@@ -2275,6 +2335,11 @@ void Game::BirdBomb()
 			//sound effect
 			m_birdBombSound->SetNextPostion(glm::vec3(0.0f));
 			m_birdBombSound->PlayFromQueue();
+
+			if (TTN_Random::RandomFloat(0.0f, 1.0f) <= 0.1f) {
+				m_DialougeBirdBomb->SetNextPostion(glm::vec3(0.0f));
+				m_DialougeBirdBomb->PlayFromQueue();
+			}
 		}
 
 		//loop through and set the target for all of the birds

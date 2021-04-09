@@ -165,6 +165,8 @@ void GameOverMenu::PostRender()
 
 void GameOverMenu::SetUpAssets()
 {
+	m_DialougeGameOver = TTN_AudioEventHolder::Create("Game over dialogue", "{6aad0ce5-e274-4e93-afe2-ae6fcf1c28e4}", 1);
+
 	//grab the shaders
 	shaderProgramTextured = TTN_AssetSystem::GetShader("Basic textured shader");
 	shaderProgramSkybox = TTN_AssetSystem::GetShader("Skybox shader");

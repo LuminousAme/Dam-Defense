@@ -384,6 +384,7 @@ int main() {
 			paused->SetShouldRender(false);
 			gameScene->SetGameIsPaused(true);
 			gameOver->SetShouldRender(true);
+			gameOver->PlayGameOverDialogue();
 			gameOverUI->SetShouldRender(true);
 			gameOverUI->SetShouldMenu(false);
 			audioEngine.GetBus("Music").SetPaused(true);

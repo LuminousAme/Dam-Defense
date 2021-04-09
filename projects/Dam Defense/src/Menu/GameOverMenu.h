@@ -27,6 +27,11 @@ public:
 
 	void SetBloomEffect(TTN_BloomEffect::sbloomptr bloom) { m_bloomEffect = bloom; }
 
+	void PlayGameOverDialogue() {
+		m_DialougeGameOver->SetNextPostion(glm::vec3(0.0f));
+		m_DialougeGameOver->PlayFromQueue();
+	}
+
 	//Assets
 public:
 
@@ -61,6 +66,8 @@ public:
 	TTN_Material::smatptr damMat;
 	TTN_Material::smatptr cannonMat;
 	TTN_Material::smatptr skyboxMat;
+
+	TTN_AudioEventHolder::saehptr m_DialougeGameOver;
 
 	//Entities
 protected:
