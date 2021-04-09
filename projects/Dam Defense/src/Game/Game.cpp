@@ -36,7 +36,7 @@ void Game::Update(float deltaTime)
 	//call the sound update
 	GameSounds(deltaTime);
 
-	if (!m_hasGivenLowHealthWarning) {
+	if (!m_hasGivenLowHealthWarning && Dam_health < 25.0f) {
 		m_hasGivenLowHealthWarning = true;
 		m_DialogueLowHealth->SetNextPostion(glm::vec3(0.0f));
 		m_DialogueLowHealth->PlayFromQueue();
@@ -1883,6 +1883,25 @@ void Game::Collisions() {
 				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Boat" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && (Get<BirdComponent>(entity2Ptr).GetIsJerry() == false) && (Get<BirdComponent>(entity2Ptr).GetIsJulian() == false))) ||
 					((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && (Get<BirdComponent>(entity2Ptr).GetIsJerry() == false) && (Get<BirdComponent>(entity2Ptr).GetIsJulian() == false)) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Boat"))) {
 					//iterate through all of the boats through all of them until you find matching entity numbers
+					birdKillCount++;
+					if (birdKillCount == 5) {
+						m_DialougeKilling5Birds->SetNextPostion(glm::vec3(0.0f));
+						m_DialougeKilling5Birds->PlayFromQueue();
+					}
+					else if (birdKillCount == 10) {
+						m_DialougeKilling10Birds->SetNextPostion(glm::vec3(0.0f));
+						m_DialougeKilling10Birds->PlayFromQueue();
+					}
+					else if (birdKillCount == 25) {
+						m_DialougeKilling25Birds->SetNextPostion(glm::vec3(0.0f));
+						m_DialougeKilling25Birds->PlayFromQueue();
+					}
+					else if (!m_hasHitABirdThisRound) {
+						m_hasHitABirdThisRound = true;
+						m_DialougeHittingABird->SetNextPostion(glm::vec3(0.0f));
+						m_DialougeHittingABird->PlayFromQueue();
+					}
+
 					std::vector<entt::entity>::iterator itt = boats.begin();
 					while (itt != boats.end()) {
 						if (entity1Ptr == *itt || entity2Ptr == *itt) {
@@ -1944,6 +1963,9 @@ void Game::Collisions() {
 				//if one is jerry and other is a ball
 				if (cont && (((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity1Ptr).GetIsJerry()) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball")) ||
 					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity2Ptr).GetIsJerry()))) {
+					m_DialougeKillingJerry->SetNextPostion(glm::vec3(0.0f));
+					m_DialougeHittingABird->PlayFromQueue();
+
 					//then iterate through the list of cannonballs until you find the one that's collided
 					std::vector<std::pair<entt::entity, bool>>::iterator it = cannonBalls.begin();
 					while (it != cannonBalls.end()) {
@@ -1988,6 +2010,9 @@ void Game::Collisions() {
 				//if one is julian and jerry is alive and other is a ball
 				if (cont && (((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity1Ptr).GetIsJulian() && jerryAlive) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball")) ||
 					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity2Ptr).GetIsJulian() && jerryAlive))) {
+					m_DialougeKillingJulianWhileJerryIsAlive->SetNextPostion(glm::vec3(0.0f));
+					m_DialougeKillingJulianWhileJerryIsAlive->PlayFromQueue();
+					
 					//then iterate through the list of cannonballs until you find the one that's collided
 					std::vector<std::pair<entt::entity, bool>>::iterator it = cannonBalls.begin();
 					while (it != cannonBalls.end()) {
@@ -2032,6 +2057,9 @@ void Game::Collisions() {
 				//if one is julian and jerry is dead and other is a ball
 				if (cont && (((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity1Ptr).GetIsJulian() && !jerryAlive) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball")) ||
 					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity2Ptr).GetIsJulian() && !jerryAlive))) {
+					m_DialougeKillingJuilian->SetNextPostion(glm::vec3(0.0f));
+					m_DialougeKillingJuilian->PlayFromQueue();
+					
 					//then iterate through the list of cannonballs until you find the one that's collided
 					std::vector<std::pair<entt::entity, bool>>::iterator it = cannonBalls.begin();
 					while (it != cannonBalls.end()) {
