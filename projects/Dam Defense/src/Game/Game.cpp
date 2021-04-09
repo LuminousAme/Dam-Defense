@@ -32,13 +32,6 @@ void Game::InitScene()
 void Game::Update(float deltaTime)
 {
 	engine.GetListener();
-	float normalizedMasterVolume = (float)masterVolume / 100.0f;
-	float normalizedMusicVolume = (float)musicVolume / 100.0f;
-	float musicvol = TTN_Interpolation::ReMap(0.0, 1.0, 0.0, 50.0, normalizedMusicVolume * normalizedMasterVolume);
-	float normalizedSFXVolume = (float)sfxVolume / 100.0f;
-	float sfxvol = TTN_Interpolation::ReMap(0.0, 1.0, 0.0, 50.0, normalizedSFXVolume * normalizedMasterVolume);
-	engine.GetBus("Music").SetVolume(musicvol);
-	engine.GetBus("SFX").SetVolume(sfxvol);
 
 	//call the sound update
 	GameSounds(deltaTime);
@@ -288,7 +281,6 @@ void Game::KeyDownChecks()
 
 		//and they press the 2 key, try to activate the bird bomb
 		if (TTN_Application::TTN_Input::GetKeyDown(TTN_KeyCode::Two)) {
-			std::cout << "bombing\n";
 			BirdBomb();
 		}
 	}
@@ -357,22 +349,21 @@ void Game::MouseButtonUpChecks()
 //sets up all the assets in the scene
 void Game::SetUpAssets()
 {
-	//// SOUNDS ////
-	//load the banks
-	engine.LoadBank("Sound/Master");
-	engine.LoadBank("Sound/Music");
-	engine.LoadBank("Sound/SFX");
-
-	//load the buses
-	engine.LoadBus("SFX", "{b9fcc2bc-7614-4852-a78d-6cad54329f8b}");
-	engine.LoadBus("Music", "{0b8d00f4-2fe5-4264-9626-a7a1988daf35}");
-
 	//make the events
 	m_cannonFiringSounds = TTN_AudioEventHolder::Create("Cannon Shot", "{01c9d609-b06a-4bb8-927d-01ee25b2b815}", 2);
 	m_splashSounds = TTN_AudioEventHolder::Create("Splash", "{ca17eafa-bffe-4121-80a3-441a94ee2fe7}", 8);
 	m_flamethrowerSound = TTN_AudioEventHolder::Create("Flamethrower", "{b52a7dfc-88df-47a9-9263-859e6564e161}", 1);
 	m_jingle = TTN_AudioEventHolder::Create("Wave Complete", "{d28d68df-bb3e-4153-95b6-89fd2715a5a3}", 1);
 	m_music = TTN_AudioEventHolder::Create("Music", "{239bd7d6-7e7e-47a7-a0f6-7afc6f1b35bc}", 1);
+
+	m_enemyCannonSound = TTN_AudioEventHolder::Create("Enemy Cannon", "{20e8878c-a8a3-41e6-a5cc-200394f71009}", 8);
+	m_enemyDeathSound = TTN_AudioEventHolder::Create("Enemy Death", "{06a2e720-3387-40c6-a8bf-34459a4a58d0}", 8);
+
+	m_healSound = TTN_AudioEventHolder::Create("Heal Sound", "{7d588012-40ab-48a9-91d2-a8f4e2595ad7}", 1);
+	m_cooldownReducedSound = TTN_AudioEventHolder::Create("Cooldown Reduced Sound", "{0295e5e9-3ffd-4f14-bad8-e48fb90f8f54}", 1);
+	m_cannonUpgradeSound = TTN_AudioEventHolder::Create("Cannon Upgrade Sound", "{6abc8c3f-9bfd-40e2-8698-f838927cf0c0}", 1);
+
+	m_birdBombSound = TTN_AudioEventHolder::Create("Bird Bomb", "{7b09167d-47be-4d90-908f-543d8347eba3}", 1);
 
 	//// SHADERS ////
 	//grab the shaders
@@ -991,11 +982,13 @@ void Game::RestartData()
 		particles.push_back(entity);
 	}
 
-	std::vector<entt::entity>::iterator ittt = particles.begin();
-	while (ittt != particles.end()) {
-		//delete the particle system
-		DeleteEntity(*ittt);
-		itt = particles.erase(ittt);
+	if (particles.size() > 0.0f) {
+		std::vector<entt::entity>::iterator ittt = particles.begin();
+		while (ittt != particles.end()) {
+			//delete the particle system
+			DeleteEntity(*ittt);
+			itt = particles.erase(ittt);
+		}
 	}
 
 	flames.clear();
@@ -1165,6 +1158,9 @@ void Game::CreateExpolsion(glm::vec3 location)
 	//attach the particle system component to the entity
 	AttachCopy(newExpolsion, psComponent);
 
+	m_enemyDeathSound->SetNextPostion(glm::vec3(-1.0f, 1.0f, 1.0f) * location);
+	m_enemyDeathSound->PlayFromQueue();
+
 	//get a reference to that particle system and burst it
 	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(200);
 }
@@ -1244,6 +1240,9 @@ void Game::CreateMuzzleFlash(glm::vec3 location, entt::entity e, glm::vec3 direc
 	//get a reference to that particle system and burst it
 	Get<TTN_ParticeSystemComponent>(newExpolsion).GetParticleSystemPointer()->Burst(30);
 	//Get<TTN_Transform>(newExpolsion).SetParent(&Get<TTN_Transform>(e),e);
+
+	m_enemyCannonSound->SetNextPostion(glm::vec3(-1.0f, 1.0f, 1.0f) * location);
+	m_enemyCannonSound->PlayFromQueue();
 }
 
 void Game::CreateSplash(glm::vec3 location)
@@ -1262,7 +1261,6 @@ void Game::CreateSplash(glm::vec3 location)
 		TTN_ParticleSystem::spsptr ps = std::make_shared<TTN_ParticleSystem>(100, 0, splashparticle, 10.0f, true);
 		ps->MakeConeEmitter(15.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 		ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
-		std::cout << FlameActiveTime << std::endl;
 
 		//setup a particle system component
 		TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
@@ -1298,7 +1296,6 @@ void Game::Flamethrower() {
 				ps->MakeConeEmitter(15.0f, glm::vec3(90.0f, 0.0f, 0.0f));
 				ps->SetStopAfter(FlameActiveTime - 1.0f);
 				ps->MakeParticlesAsSprites(TTN_AssetSystem::GetTexture2D("Particle Sprite"));
-				std::cout << FlameActiveTime << std::endl;
 
 				//setup a particle system component
 				TTN_ParticeSystemComponent psComponent = TTN_ParticeSystemComponent(ps);
@@ -2140,6 +2137,10 @@ void Game::Shop(float deltaTime)
 			m_score = m_score - healCost;//score cost of heal
 			//std::cout << Dam_health << std::endl;
 			//}
+
+			//sound effect
+			m_healSound->SetNextPostion(glm::vec3(0.0f));
+			m_healSound->PlayFromQueue();
 		}
 
 		//faster cannon
@@ -2150,6 +2151,10 @@ void Game::Shop(float deltaTime)
 			if (!cannonScoreCost && m_score >= cannonCost) {
 				m_score = m_score - cannonCost;//score cost of cannon powerup
 				cannonScoreCost = true;
+
+				//sound effect
+				m_cannonUpgradeSound->SetNextPostion(glm::vec3(0.0f));
+				m_cannonUpgradeSound->PlayFromQueue();
 			}
 		}
 
@@ -2166,6 +2171,10 @@ void Game::Shop(float deltaTime)
 			if (!abilityScoreCost && m_score >= abilityCost) {
 				m_score = m_score - abilityCost;//score cost of ability power up
 				abilityScoreCost = true;
+
+				//sound effect
+				m_cooldownReducedSound->SetNextPostion(glm::vec3(0.0f));
+				m_cooldownReducedSound->PlayFromQueue();
 			}
 		}
 		else {
@@ -2186,6 +2195,9 @@ void Game::Shop(float deltaTime)
 			if (!upgradeScoreCost && m_score >= upgradeCost) {
 				m_score = m_score - upgradeCost;//score cost of ability power up
 				upgradeScoreCost = true;
+				//sound effect
+				m_cooldownReducedSound->SetNextPostion(glm::vec3(0.0f));
+				m_cooldownReducedSound->PlayFromQueue();
 			}
 		}
 
@@ -2254,8 +2266,11 @@ void Game::BirdBomb()
 			Bombing = false;
 			//std::cout << "No target found\n";
 		}
-		else
-			//std::cout << "Target found\n";
+		else {
+			//sound effect
+			m_birdBombSound->SetNextPostion(glm::vec3(0.0f));
+			m_birdBombSound->PlayFromQueue();
+		}
 
 		//loop through and set the target for all of the birds
 			for (auto bird : birds)

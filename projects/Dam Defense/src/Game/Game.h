@@ -208,10 +208,37 @@ public:
 	TTN_AudioEngine& engine = TTN_AudioEngine::Instance();
 
 	TTN_AudioEventHolder::saehptr m_cannonFiringSounds;
-	TTN_AudioEventHolder::saehptr m_splashSounds;
-	TTN_AudioEventHolder::saehptr m_music;
-	TTN_AudioEventHolder::saehptr m_jingle;
 	TTN_AudioEventHolder::saehptr m_flamethrowerSound;
+	TTN_AudioEventHolder::saehptr m_music;
+	TTN_AudioEventHolder::saehptr m_splashSounds;
+	TTN_AudioEventHolder::saehptr m_jingle;
+
+	TTN_AudioEventHolder::saehptr m_enemyCannonSound;
+	TTN_AudioEventHolder::saehptr m_enemyDeathSound;
+
+	TTN_AudioEventHolder::saehptr m_healSound;
+	TTN_AudioEventHolder::saehptr m_cooldownReducedSound;
+	TTN_AudioEventHolder::saehptr m_cannonUpgradeSound;
+
+	TTN_AudioEventHolder::saehptr m_birdBombSound;
+
+	TTN_AudioEventHolder::saehptr m_DialogueOpening;
+	TTN_AudioEventHolder::saehptr m_DialougeWave2;
+	TTN_AudioEventHolder::saehptr m_DialogueWave3;
+	TTN_AudioEventHolder::saehptr m_DialogueWave4;
+	TTN_AudioEventHolder::saehptr m_DialougeEnding;
+	//TTN_AudioEventHolder::saehptr m_DialougeGameOver; //this can go in the game over scene
+	TTN_AudioEventHolder::saehptr m_DialogueLowHealth;
+	TTN_AudioEventHolder::saehptr m_DialougeFlamethrower;
+	TTN_AudioEventHolder::saehptr m_DialougeBirdBomb;
+	TTN_AudioEventHolder::saehptr m_DialougeHittingABird;
+	TTN_AudioEventHolder::saehptr m_DialougeKilling5Birds;
+	TTN_AudioEventHolder::saehptr m_DialougeKilling10Birds;
+	TTN_AudioEventHolder::saehptr m_DialougeKilling25Birds;
+
+	TTN_AudioEventHolder::saehptr m_DialougeKillingJerry;
+	TTN_AudioEventHolder::saehptr m_DialougeKillingJulianWhileJerryIsAlive;
+	TTN_AudioEventHolder::saehptr m_DialougeKillingJuilian;
 
 #pragma endregion
 

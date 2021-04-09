@@ -37,6 +37,23 @@ int main() {
 	//reference to the audio engine (used to pause game audio while the game isn't running)
 	TTN_AudioEngine& audioEngine = TTN_AudioEngine::Instance();
 
+	//load up the stuff from fmod
+	//// SOUNDS ////
+	//load the banks
+	audioEngine.LoadBank("Sound/Master");
+	audioEngine.LoadBank("Sound/Music");
+	audioEngine.LoadBank("Sound/SFX");
+	audioEngine.LoadBank("Sound/Dialogue");
+
+	//load the buses
+	audioEngine.LoadBus("SFX", "{b9fcc2bc-7614-4852-a78d-6cad54329f8b}");
+	audioEngine.LoadBus("Music", "{0b8d00f4-2fe5-4264-9626-a7a1988daf35}");
+	audioEngine.LoadBus("Dialogue", "{3a28ee67-f467-4886-b0a0-022829250bd5}");
+
+	
+	TTN_AudioEventHolder::saehptr ambience = TTN_AudioEventHolder::Create("Ambience", "{9bcbdc2b-af53-4de3-b171-8af04b8fb116}", 1);
+	audioEngine.GetListener();
+
 	//lock the cursor while focused in the application window
 	TTN_Application::TTN_Input::SetCursorLocked(false);
 
@@ -111,6 +128,18 @@ int main() {
 	bool firstTime = false;
 	//while the application is running
 	while (!TTN_Application::GetIsClosing()) {
+		//keep volume updated
+		float normalizedMasterVolume = (float)options->GetVolume() / 100.0f;
+		float normalizedMusicVolume = (float)options->GetVolumeMusic() / 100.0f;
+		float musicvol = TTN_Interpolation::ReMap(0.0, 1.0, 0.0, 50.0, normalizedMusicVolume * normalizedMasterVolume);
+		float normalizedSFXVolume = (float)options->GetVolumeSFX() / 100.0f;
+		float sfxvol = TTN_Interpolation::ReMap(0.0, 1.0, 0.0, 50.0, normalizedSFXVolume * normalizedMasterVolume);
+		float normalizedDialogueVolume = (float)options->GetVolumeVoice() / 100.0f;
+		float voicevol = TTN_Interpolation::ReMap(0.0, 1.0, 0.0, 50.0, normalizedDialogueVolume * normalizedMasterVolume);
+		audioEngine.GetBus("Music").SetVolume(musicvol);
+		audioEngine.GetBus("SFX").SetVolume(sfxvol);
+		audioEngine.GetBus("Dialogue").SetVolume(voicevol);
+
 		//check if the splash card is done playing
 		if (splash->GetShouldRender() && splash->GetTotalSceneTime() > 4.0f) {
 			//if it is move to the loading screen
@@ -155,6 +184,10 @@ int main() {
 			titleScreenUI->SetShouldRender(true);
 			options->InitScene();
 			options->SetShouldRender(false);
+
+			//and begin playing ambience
+			ambience->SetNextPostion(glm::vec3(0.0f));
+			ambience->PlayFromQueue();
 		}
 
 		//set up the colour blind mode correctly
