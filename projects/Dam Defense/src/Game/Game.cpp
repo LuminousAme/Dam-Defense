@@ -1800,6 +1800,7 @@ void Game::Collisions() {
 			//if they do, then check they both have tags
 			if (TTN_Scene::Has<TTN_Tag>(entity1Ptr) && TTN_Scene::Has<TTN_Tag>(entity2Ptr)) {
 				//if they do, then do tag comparisons
+	
 
 				//if one is a boat and the other is a cannonball
 				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Boat" && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball") ||
@@ -1880,27 +1881,10 @@ void Game::Collisions() {
 				}
 
 				//if one is a bird  and they are not jerry or julian  and the other is a boat
-				if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Boat" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && (Get<BirdComponent>(entity2Ptr).GetIsJerry() == false) && (Get<BirdComponent>(entity2Ptr).GetIsJulian() == false))) ||
-					((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && (Get<BirdComponent>(entity2Ptr).GetIsJerry() == false) && (Get<BirdComponent>(entity2Ptr).GetIsJulian() == false)) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Boat"))) {
+				else if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Boat" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" )) ||
+					((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird") && Get<TTN_Tag>(entity2Ptr).getLabel() == "Boat"))) {
 					//iterate through all of the boats through all of them until you find matching entity numbers
-					birdKillCount++;
-					if (birdKillCount == 5) {
-						m_DialougeKilling5Birds->SetNextPostion(glm::vec3(0.0f));
-						m_DialougeKilling5Birds->PlayFromQueue();
-					}
-					else if (birdKillCount == 10) {
-						m_DialougeKilling10Birds->SetNextPostion(glm::vec3(0.0f));
-						m_DialougeKilling10Birds->PlayFromQueue();
-					}
-					else if (birdKillCount == 25) {
-						m_DialougeKilling25Birds->SetNextPostion(glm::vec3(0.0f));
-						m_DialougeKilling25Birds->PlayFromQueue();
-					}
-					else if (!m_hasHitABirdThisRound) {
-						m_hasHitABirdThisRound = true;
-						m_DialougeHittingABird->SetNextPostion(glm::vec3(0.0f));
-						m_DialougeHittingABird->PlayFromQueue();
-					}
+					
 
 					std::vector<entt::entity>::iterator itt = boats.begin();
 					while (itt != boats.end()) {
@@ -1960,8 +1944,59 @@ void Game::Collisions() {
 					cont = false;
 				}
 
+				else if (cont && ((Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && (Get<BirdComponent>(entity2Ptr).GetIsJerry() == false) && (Get<BirdComponent>(entity2Ptr).GetIsJulian() == false))) ||
+					((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && (Get<BirdComponent>(entity1Ptr).GetIsJerry() == false) && (Get<BirdComponent>(entity1Ptr).GetIsJulian() == false)) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball"))) {
+					//iterate through all of the boats through all of them until you find matching entity numbers
+					birdKillCount++;
+					if (birdKillCount == 5) {
+						m_DialougeKilling5Birds->SetNextPostion(glm::vec3(0.0f));
+						m_DialougeKilling5Birds->PlayFromQueue();
+					}
+					else if (birdKillCount == 10) {
+						m_DialougeKilling10Birds->SetNextPostion(glm::vec3(0.0f));
+						m_DialougeKilling10Birds->PlayFromQueue();
+					}
+					else if (birdKillCount == 25) {
+						m_DialougeKilling25Birds->SetNextPostion(glm::vec3(0.0f));
+						m_DialougeKilling25Birds->PlayFromQueue();
+					}
+					else if (!m_hasHitABirdThisRound) {
+						m_hasHitABirdThisRound = true;
+						m_DialougeHittingABird->SetNextPostion(glm::vec3(0.0f));
+						m_DialougeHittingABird->PlayFromQueue();
+					}
+
+					std::vector<entt::entity>::iterator btt = birds.begin();
+					while (btt != birds.end()) {
+						//if you find the bird
+						if (entity1Ptr == *btt || entity2Ptr == *btt) {
+							//play the particle effect and then have the bird delete soon
+							CreateBirdExpolsion(Get<TTN_Transform>(*btt).GetPos());
+							DeleteEntity(*btt);
+							TTN_DeleteCountDown countdown = TTN_DeleteCountDown(0.001f);
+							btt = birds.erase(btt);
+
+							//make a new bird
+							MakeABird();
+							//and set it's target
+							Get<BirdComponent>(birds[birds.size() - 1]).SetTarget(Get<BirdComponent>(birds[0]).GetTarget());
+
+							//subtract score
+							if (m_score > 50) {
+								m_score = m_score - 50;
+							}
+						}
+						else {
+							btt++;
+						}
+					}
+
+					cont = false;
+
+				}
+				
 				//if one is jerry and other is a ball
-				if (cont && (((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity1Ptr).GetIsJerry()) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball")) ||
+				else if (cont && (((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity1Ptr).GetIsJerry()) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball")) ||
 					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity2Ptr).GetIsJerry()))) {
 					m_DialougeKillingJerry->SetNextPostion(glm::vec3(0.0f));
 					m_DialougeHittingABird->PlayFromQueue();
@@ -2008,7 +2043,7 @@ void Game::Collisions() {
 				}
 
 				//if one is julian and jerry is alive and other is a ball
-				if (cont && (((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity1Ptr).GetIsJulian() && jerryAlive) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball")) ||
+				else if (cont && (((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity1Ptr).GetIsJulian() && jerryAlive) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball")) ||
 					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity2Ptr).GetIsJulian() && jerryAlive))) {
 					m_DialougeKillingJulianWhileJerryIsAlive->SetNextPostion(glm::vec3(0.0f));
 					m_DialougeKillingJulianWhileJerryIsAlive->PlayFromQueue();
@@ -2055,7 +2090,7 @@ void Game::Collisions() {
 				}
 
 				//if one is julian and jerry is dead and other is a ball
-				if (cont && (((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity1Ptr).GetIsJulian() && !jerryAlive) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball")) ||
+				else if (cont && (((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity1Ptr).GetIsJulian() && !jerryAlive) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball")) ||
 					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity2Ptr).GetIsJulian() && !jerryAlive))) {
 					m_DialougeKillingJuilian->SetNextPostion(glm::vec3(0.0f));
 					m_DialougeKillingJuilian->PlayFromQueue();
