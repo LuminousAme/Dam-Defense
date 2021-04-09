@@ -1903,7 +1903,7 @@ void Game::Collisions() {
 							it++;
 						}
 					}
-
+					jerryAlive = false;
 					std::vector<entt::entity>::iterator btt = birds.begin();
 					while (btt != birds.end()) {
 						//if you find the bird
@@ -1976,7 +1976,6 @@ void Game::Collisions() {
 					cont = false;
 				}
 
-
 				//if one is julian and jerry is dead and other is a ball
 				if (cont && (((Get<TTN_Tag>(entity1Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity1Ptr).GetIsJulian() && !jerryAlive) && Get<TTN_Tag>(entity2Ptr).getLabel() == "Ball")) ||
 					(Get<TTN_Tag>(entity1Ptr).getLabel() == "Ball" && (Get<TTN_Tag>(entity2Ptr).getLabel() == "Bird" && Get<BirdComponent>(entity2Ptr).GetIsJulian() && !jerryAlive))) {
@@ -2020,7 +2019,6 @@ void Game::Collisions() {
 
 					cont = false;
 				}
-
 			}
 		}
 	}
