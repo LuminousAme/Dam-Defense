@@ -114,14 +114,12 @@ int main() {
 	glm::ivec2 windowSize = TTN_Backend::GetWindowSize();
 
 	//bloom
-	TTN_BloomEffect::sbloomptr bloomEffect = TTN_BloomEffect::Create(); 
+	TTN_BloomEffect::sbloomptr bloomEffect = TTN_BloomEffect::Create();
 	bloomEffect->Init(windowSize.x, windowSize.y);
 
 	//color correction
 	TTN_ColorCorrect::scolcorptr colorCorrectionEffect = TTN_ColorCorrect::Create();
 	colorCorrectionEffect->Init(windowSize.x, windowSize.y);
-
-
 
 	// init's the configs and contexts for imgui
 	TTN_Application::InitImgui();
@@ -356,23 +354,24 @@ int main() {
 			TTN_Application::TTN_Input::SetCursorLocked(false);
 			options->SetShouldRender(false);
 			gameScene->SetPaused(true);
+			paused->SetShouldRender(false);
 			gameScene->SetGameIsPaused(true);
-			gameScene->SetInputDelay();
-			//gameSceneUI->SetShouldShop(false);
 			paused->SetShouldRender(false);
 			paused->SetPaused(false);
+			gameScene->SetInputDelay();
+			//gameSceneUI->SetShouldShop(false);
 			paused->SetShouldResume(true);
 		}
 
 		else if (gameScene->GetShouldRender() && !gameSceneUI->GetShouldShop() && !gameSceneUI->GetShouldShopping() && gameSceneUI->GetShouldExit() && !options->GetShouldRender()) {
 			TTN_Application::TTN_Input::SetCursorLocked(true);
 			gameSceneUI->SetShouldExit(false);
-			options->SetShouldRender(false);
 			gameScene->SetPaused(false);
 			gameScene->SetGameIsPaused(false);
 			paused->SetShouldRender(false);
 			paused->SetPaused(false);
 			paused->SetShouldResume(true);
+			options->SetShouldRender(false);
 		}
 
 		//if the game is over
@@ -645,6 +644,7 @@ void PrepareAssetLoading() {
 
 	//TTN_AssetSystem::AddTexture2DToBeLoaded("Shop", "textures/shop/Shop Main_OP100.png", 1); //texture for shop menu/ui
 	TTN_AssetSystem::AddTexture2DToBeLoaded("Shop", "textures/shop/Shop_Sign_Tex.png", 1); //texture for shop menu/ui
+	TTN_AssetSystem::AddTexture2DToBeLoaded("Johnson", "textures/shop/Shopgull.png", 1); //texture for shop menu/ui
 
 	for (int i = 0; i < 23; i++) {
 		TTN_AssetSystem::AddTexture2DToBeLoaded("Game logo " + std::to_string(i), "textures/logo/Game Logo " + std::to_string(i + 1) + ".png", 1); //logo for the game

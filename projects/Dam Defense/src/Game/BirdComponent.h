@@ -29,6 +29,8 @@ public:
 	void SetSeparationWeight(float sepWeight) { m_SeperationWeight = sepWeight; }
 	void SetCorrectionWeight(float corWeight) { m_CorrectionWeight = corWeight; }
 	void SetDiveWeight(float diveWeight) { m_DiveWeight = diveWeight; }
+	void SetIsJerry(float jerry) { m_isJerry = jerry; }
+	void SetIsJulian(float julian) { m_isJulian = julian; }
 
 	//getters
 	std::vector<entt::entity> GetBirdsVector() { return m_allBirds; }
@@ -42,6 +44,9 @@ public:
 	float GetCorrectionWeight() { return m_CorrectionWeight; }
 	float GetDiveWeight() { return m_DiveWeight; }
 
+	float GetIsJerry() { return m_isJerry; }
+	float GetIsJulian() { return m_isJulian; }
+
 	//update the bird's physics once a frame
 	void Update(float deltaTime);
 
@@ -49,6 +54,10 @@ public:
 	glm::vec3 NormalizedSeek(glm::vec3 target, glm::vec3 currentVelocity, glm::vec3 currentPosition, float speed);
 
 private:
+	//JERRY AND JULIAN
+	bool m_isJerry;
+	bool m_isJulian;
+
 	entt::entity m_entityNumber; //the entity number for the current bird
 	TTN_Scene* m_scene; //the scene this bird is in, used to access transforms and physics components
 	std::vector<entt::entity> m_allBirds; //vector of all the birds in the scene

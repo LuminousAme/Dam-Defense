@@ -20,11 +20,13 @@ BirdComponent::BirdComponent()
 	m_AcutalSpeed = m_speed;
 	m_currentlyBombing = false;
 	m_timeSinceStateChange = 10.0f;
+	m_isJerry = false;
+	m_isJulian = false;
 }
 
 //constructor with data
 BirdComponent::BirdComponent(entt::entity bird, TTN_Scene* scene, float neighborhood, float speed, float diveSpeed, float aliWeight, float cohWeight, float sepWeight, float corWeight, float DiveWeight)
-	: m_entityNumber(bird), m_scene(scene), m_neighborhoodDistance(neighborhood), m_speed(speed), m_diveSpeed(diveSpeed), 
+	: m_entityNumber(bird), m_scene(scene), m_neighborhoodDistance(neighborhood), m_speed(speed), m_diveSpeed(diveSpeed),
 	m_AlignmentWeight(aliWeight), m_CohesionWeight(cohWeight), m_SeperationWeight(sepWeight), m_CorrectionWeight(corWeight), m_DiveWeight(DiveWeight)
 {
 	m_target = entt::null;
@@ -32,6 +34,8 @@ BirdComponent::BirdComponent(entt::entity bird, TTN_Scene* scene, float neighbor
 	m_AcutalSpeed = m_speed;
 	m_currentlyBombing = false;
 	m_timeSinceStateChange = 10.0f;
+	m_isJerry = false;
+	m_isJulian = false;
 }
 
 //update the bird every frame
@@ -69,7 +73,7 @@ void BirdComponent::Update(float deltaTime)
 			if (glm::distance(thisTrans.GetGlobalPos(), birdTrans.GetGlobalPos()) <= neighbourhood) {
 				//increase the neighbour count
 				neighbourCount++;
-				
+
 				//grab a reference to their phyiscs component
 				TTN_Physics& birdPhys = m_scene->Get<TTN_Physics>(bird);
 
@@ -91,7 +95,7 @@ void BirdComponent::Update(float deltaTime)
 		alignmentComponent = glm::normalize(alignmentComponent / (float)neighbourCount);
 		//make sure the cohension center of mass is acutally average, then turn it into the velocity towards that point, and normalize it
 		cohensionComponent = glm::normalize((cohensionCenterOfMass / (float)neighbourCount) - thisTrans.GetGlobalPos());
-		//make sure the separation component is averaged, negated, and then normalized 
+		//make sure the separation component is averaged, negated, and then normalized
 		separationComponent = glm::normalize(-1.0f * (separationComponent / (float)neighbourCount));
 	}
 
@@ -116,10 +120,10 @@ void BirdComponent::Update(float deltaTime)
 		if (m_currentlyBombing) {
 			m_timeSinceStateChange = 0.0f;
 		}
-			
+
 		//reset flag
 		m_currentlyBombing = false;
-		
+
 		//correct for position
 
 		//if it's too far in the positive x direction, start moving it towards the negative x direction
@@ -130,7 +134,7 @@ void BirdComponent::Update(float deltaTime)
 		else if (thisTrans.GetGlobalPos().x <= -80.0f / 10.0f) {
 			seekingComponent.x += 1.0f;
 		}
-		
+
 		//if it's too far in the positive y direction, start moving it towards the negative y direction
 		if (thisTrans.GetGlobalPos().y >= 35.0f / 10.0f && currentVelo.y > -0.6f / 10.0f) {
 			seekingComponent.y += -1.0f;
@@ -153,7 +157,7 @@ void BirdComponent::Update(float deltaTime)
 		}
 
 		//and normalize the seeking component
-		if(seekingComponent != glm::vec3(0.0f)) seekingComponent = glm::normalize(seekingComponent);
+		if (seekingComponent != glm::vec3(0.0f)) seekingComponent = glm::normalize(seekingComponent);
 	}
 
 	//if it is too low force it to come back up
@@ -161,7 +165,7 @@ void BirdComponent::Update(float deltaTime)
 		if (m_currentlyBombing && thisTrans.GetGlobalPos().y < -8.0f / 10.0f)
 			currentVelo.y = 0.0f;
 
-		thisTrans.SetPos(glm::vec3(thisTrans.GetGlobalPos().x, std::clamp(thisTrans.GetGlobalPos().y, -8.0f / 10.0f, 35.0f / 10.0f) , thisTrans.GetGlobalPos().z));
+		thisTrans.SetPos(glm::vec3(thisTrans.GetGlobalPos().x, std::clamp(thisTrans.GetGlobalPos().y, -8.0f / 10.0f, 35.0f / 10.0f), thisTrans.GetGlobalPos().z));
 	}
 
 	//if it's not bombing and has only been a few seconds since last bombing, turn off the allignment and cohension components and clamp the y value of the velocity
@@ -194,7 +198,7 @@ void BirdComponent::Update(float deltaTime)
 	//handle if it's looking straight up
 	if (glm::normalize(currentVelo) == glm::vec3(0.0f, 1.0f, 0.0f)) currentVelo += glm::vec3(0.1f / 10.0f, 0.0f, 0.1f / 10.0f);
 
-	//rotate the bird to be facing along the angle it is travelling 
+	//rotate the bird to be facing along the angle it is travelling
 	thisTrans.LookAlong(glm::normalize(currentVelo), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	//and set the velocity inside of the physics body
