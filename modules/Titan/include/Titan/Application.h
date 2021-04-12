@@ -7,17 +7,20 @@
 #define GLFW_INCLUDE_NONE
 #endif
 
+//import the precompiled headers 
+//glad/glad.h, GLM/glm.hpp, string, vector, and unordered map are used here
+#include "Titan/ttn_pch.h"
+
 //include the titan scene class 
-#include "Titan/Scene.h"
-//include the required features and libraries 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include "GLM/glm.hpp"
-#include <string>
-#include <vector>
-#include <unordered_map>
-
-
+#include "Titan/Utilities/Scene.h"
+//include the asset manager class
+#include "Titan/Systems/AssetSystem.h"
+//include the backend 
+#include "Titan/Utilities/Backend.h"
+//include the sound engine
+#include "Titan/Systems/Sound.h"
+ 
+ 
 namespace Titan {
 	//input enum class, converts titan keyboard input type to glfw keyboard input types
 	enum class TTN_KeyCode {
@@ -161,7 +164,7 @@ namespace Titan {
 		//function to initilize the window
 		static void Init(const std::string name, int width, int height, bool fullScreen = false);
 
-		//gets wheter or not the application is closing 
+		//gets whether or not the application is closing 
 		static bool GetIsClosing();
 
 		//function for shutting down things when the application is closing 
@@ -179,6 +182,18 @@ namespace Titan {
 		//function to run through each frame, calling scene renders, etc.
 		static void Update();
 
+		//function to close the applicate
+		static void Quit();
+
+		//imgui functions
+		static void InitImgui();
+		static void CleanImgui();
+		static void StartImgui();
+		static void EndImgui();
+
+		//gets a refernece to the sound engine
+		static TTN_AudioEngine& GetSoundEngine() { return m_soundEngine; }
+
 	public:
 		//vector for all the scenes in the application
 		static std::vector<Titan::TTN_Scene*> scenes;
@@ -188,8 +203,15 @@ namespace Titan {
 		//default constructor, just creates an empty aplication project
 		TTN_Application() = default;
 
+		//variables that hold time data
 		static float m_dt;
 		static float m_previousFrameTime;
+
+		//sound engine
+		inline static TTN_AudioEngine& m_soundEngine = TTN_AudioEngine::Instance();
+
+		//variable for if the game has quit
+		inline static bool m_hasQuit = false;
 
 	public:
 		//input helper class

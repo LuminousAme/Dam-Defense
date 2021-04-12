@@ -10,6 +10,7 @@ layout(location = 0) out vec3 outPos;
 layout(location = 1) out vec3 outNormal;
 layout(location = 2) out vec2 outUV;
 layout(location = 3) out vec3 outColor;
+layout(location = 4) out vec4 outFragPosLightSpace;
 
 //texture
 uniform sampler2D Texture;
@@ -23,6 +24,8 @@ uniform mat4 MVP;
 uniform mat4 Model; 
 //normal matrix
 uniform mat3 NormalMat;
+//lightspace matrix
+uniform mat4 u_LightSpaceMatrix;
 
 void main() {
 
@@ -35,9 +38,10 @@ void main() {
 
 	vec3 vert = inPos;
 	vert = vert + texture(Texture, inUV).r * u_influence * outNormal;
-	//vert.y = texture (Texture, inUV).r; 
+
+	//pass out the light space fragment pos
+	outFragPosLightSpace = u_LightSpaceMatrix * vec4(outPos, 1.0);
 		
 	vec4 newPos = MVP * vec4(vert, 1.0);
 	gl_Position = newPos;
-}
-	
+}	

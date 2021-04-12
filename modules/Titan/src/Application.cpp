@@ -1,11 +1,16 @@
 //Titan Engine, by Atlas X Games 
 // Application.cpp - source file for the class that runs the program, creating the window, etc.
 
+//include the precompile header, this file uses stdio.h
+#include "Titan/ttn_pch.h"
 //include the header 
 #include "Titan/Application.h"
-//import other required features
-#include <stdio.h>
-
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_glfw.cpp"
+#include "imgui_impl_opengl3.cpp"
 
 namespace Titan {
 	//set the base values for the member variables
@@ -21,6 +26,7 @@ namespace Titan {
 	std::unordered_map<TTN_MouseButton, bool> TTN_Application::TTN_Input::MouseHandled;
 	glm::vec2 TTN_Application::TTN_Input::mousePos = glm::vec2(0.0f);
 	bool TTN_Application::TTN_Input::inFrame = false;
+	std::vector<std::function<void()>> imGuiCallbacks; 
 
 	//function to initialize a new window 
 	void TTN_Application::Init(const std::string name, int width, int height, bool fullScreen)
@@ -42,6 +48,9 @@ namespace Titan {
 
 		//set the window we want to draw on to the window that was just created
 		glfwMakeContextCurrent(m_window);
+
+		//send the window to backend so other parts of titan can access the screensize
+		TTN_Backend::setWindow(m_window);
 
 		//initliaze glad and check it initliazed properly 
 		if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) == 0) {
@@ -67,27 +76,60 @@ namespace Titan {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		//enable clipping planes
+		glEnable(GL_CLIP_DISTANCE0);
+
 		//set up the shader program for the particle system
 		TTN_ParticleSystem::InitParticleShader();
 
+		//set up the shader program for shadow mapping
+		TTN_Renderer::InitShadowRendering();
+
+		//set up the shader and vaos for the sprite rendering system
+		TTN_Renderer2D::InitRenderer2D();
+
+		//set up the scene buffers
+		TTN_Scene::InitBuffers();
+
+		//setup the materials
+		TTN_Material::Init();
+
+		//set up the audio engine
+		m_soundEngine.Init();
+		
 		//Set the background colour for our scene to the base black
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 	}
 
 	//function to check if the window is being closed
 	bool TTN_Application::GetIsClosing()
 	{
-		//have glfw check if the user has tried to close the window, return what it says
+		//check if quit() has been called, if it has, return that the application is closing
+		if (m_hasQuit)
+			return m_hasQuit;
+
+		//otherwise have glfw check if the user has tried to close the window, return what it says
 		return glfwWindowShouldClose(m_window);
 	}
 
 	//function that cleans things up when the window closes so there are no memory leaks and everything goes cleanly 
 	void TTN_Application::Closing()
 	{
+		//clean up imgui
+		CleanImgui();
+
+		//shutdown the audio engine
+		m_soundEngine.Shutdown();
+
 		//have glfw destroy the window 
 		glfwDestroyWindow(m_window);
+
 		//close glfw
 		glfwTerminate();
+
+		//delete scene pointers
+		for (auto x : scenes)
+			delete x;
 	}
 
 	void TTN_Application::NewFrameStart()
@@ -101,6 +143,7 @@ namespace Titan {
 		m_previousFrameTime = Currenttime;
 
 		//Clear our window 
+		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
@@ -119,42 +162,150 @@ namespace Titan {
 	//function to run each frame 
 	void TTN_Application::Update()
 	{
-		//start a new frame 
-		TTN_Application::NewFrameStart();
+		if (!m_hasQuit) {
+			//start a new frame 
+			TTN_Application::NewFrameStart();
 
-		//check for events from glfw 
-		glfwPollEvents();
+			//start ImGui
+			StartImgui();
 
-		//go through each scene 
-		for (int i = 0; i < TTN_Application::scenes.size(); i++) {
-			//and check if they should be rendered
-			if (TTN_Application::scenes[i]->GetShouldRender()) {
-				//if they should, then check input, update, and render them 
-				TTN_Application::scenes[i]->KeyDownChecks();
-				TTN_Application::scenes[i]->KeyChecks();
-				TTN_Application::scenes[i]->KeyUpChecks();
+			//check for events from glfw 
+			glfwPollEvents();
 
-				TTN_Application::scenes[i]->MouseButtonDownChecks();
-				TTN_Application::scenes[i]->MouseButtonChecks();
-				TTN_Application::scenes[i]->MouseButtonUpChecks();
+			//update the asset system
+			TTN_AssetSystem::Update();
 
-				TTN_Application::scenes[i]->Update(m_dt);
-				TTN_Application::scenes[i]->Render();
-				TTN_Application::scenes[i]->PostRender();
+			//go through each scene 
+			for (int i = 0; i < TTN_Application::scenes.size(); i++) {
+				//and check if they should be rendered
+				if (TTN_Application::scenes[i]->GetShouldRender()) {
+					//if they should, then check input, update, and render them 
+					TTN_Application::scenes[i]->KeyDownChecks();
+					TTN_Application::scenes[i]->KeyChecks();
+					TTN_Application::scenes[i]->KeyUpChecks();
+
+					TTN_Application::scenes[i]->MouseButtonDownChecks();
+					TTN_Application::scenes[i]->MouseButtonChecks();
+					TTN_Application::scenes[i]->MouseButtonUpChecks();
+
+					TTN_Application::scenes[i]->Update(m_dt);
+					TTN_Application::scenes[i]->Render();
+					TTN_Application::scenes[i]->PostRender();
+				}
 			}
+
+			//reset the keys so they work properly on the next frame
+			TTN_Application::TTN_Input::ResetKeys();
+			//reset the mouse buttons so they work properly on the next frame
+			TTN_Application::TTN_Input::ResetMouseButtons();
+
+			//update the sound engine
+			m_soundEngine.Update();
+
+			//now all the scenes that should be rendered (current gameplay scene, ui, etc.) will be rendered
+			//while anything that doesn't need to be rendered (such as a prefabs scene) will not 
+
+			//end Imgui, rendering it
+			EndImgui();
+
+			//set the last effect to nullpointer so it's set up correctly for the next frame
+			TTN_Backend::SetLastEffect(nullptr);
+
+			//swap the buffers so all the drawings that the scenes just did are acutally visible 
+			glfwSwapBuffers(m_window);
 		}
-
-		//reset the keys so they work properly on the next frame
-		TTN_Application::TTN_Input::ResetKeys();
-		//reset the mouse buttons so they work properly on the next frame
-		TTN_Application::TTN_Input::ResetMouseButtons();
-
-		//now all the scenes that should be rendered (current gameplay scene, ui, etc.) will be rendered
-		//while anything that doesn't need to be rendered (such as a prefabs scene) will not 
-		
-		//swap the buffers so all the drawings that the scenes just did are acutally visible 
-		glfwSwapBuffers(m_window);
 	}
+
+	//quits the application
+	void TTN_Application::Quit()
+	{
+		//check if quit hasn't already been called
+		if (!m_hasQuit) {
+			//if hasn't set the quit flag to true and call the closing function
+			m_hasQuit = true;
+		}
+	}
+
+#pragma region IMGUI STUFF
+
+	//init's imgui stuff
+	void TTN_Application::InitImgui()
+	{
+		LOG_INFO(glGetString(GL_VERSION));
+		//printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
+		// Creates a new ImGUI context
+		ImGui::CreateContext();
+		// Gets our ImGUI input/output
+		ImGuiIO& io = ImGui::GetIO();
+		// Enable keyboard navigation
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		// Allow docking to our window
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		// Allow multiple viewports (so we can drag ImGui off our window)
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		// Allow our viewports to use transparent backbuffers
+		io.ConfigFlags |= ImGuiConfigFlags_TransparentBackbuffers;
+
+		// Set up the ImGui implementation for OpenGL
+		ImGui_ImplGlfw_InitForOpenGL(m_window, true);
+		ImGui_ImplOpenGL3_Init("#version 420");
+
+		// Dark mode 
+		ImGui::StyleColorsDark();
+
+		// Get our imgui style
+		ImGuiStyle& style = ImGui::GetStyle();
+		//style.Alpha = 1.0f;
+		style.WindowRounding = 0.0f;
+		style.Colors[ImGuiCol_WindowBg].w = 0.8f;
+
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+			style.WindowRounding = 0.0f;
+			style.Colors[ImGuiCol_WindowBg].w = 0.8f;
+		}
+		//	std::cout << "Hello" << std::endl;
+	}
+
+	//start
+	void TTN_Application::StartImgui() {
+		// Implementation new frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		// ImGui context new frame
+		ImGui::NewFrame();
+	}
+
+	void TTN_Application::EndImgui() {
+		// Make sure ImGui knows how big our window is
+		ImGuiIO& io = ImGui::GetIO();
+		int width, height;
+		glfwGetWindowSize(m_window, &width, &height);
+		io.DisplaySize = ImVec2(static_cast<float>(width), static_cast<float>(height));
+
+		// Render all of our ImGui elements
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// If we have multiple viewports enabled (can drag into a new window)
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+			// Update the windows that ImGui is using
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			// Restore our gl context
+			glfwMakeContextCurrent(m_window);
+		}
+	}
+
+	//called after program loop to delete some context window stuff
+	void TTN_Application::CleanImgui() {
+		// Cleanup the ImGui implementation
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		// Destroy our ImGui context
+		ImGui::DestroyContext();
+	}
+
+#pragma endregion
 
 	//checks if a key is being pressed
 	bool TTN_Application::TTN_Input::GetKey(TTN_KeyCode key)
@@ -379,4 +530,5 @@ namespace Titan {
 		glfwGetWindowSize(m_window, &width, &height);
 		return glm::ivec2(width, height);
 	}
+ 
 }

@@ -1,0 +1,340 @@
+//Titan Engine, by Atlas X Games
+//ObjLoader.cpp - source file for the class that parses OBJ files into TTN_Models 
+
+//precompile header, this file uses string, sstream, fstream, iostream, algorithm, and Logging.h
+#include "Titan/ttn_pch.h"
+//include the header
+#include "Titan/Graphics/ObjLoader.h"
+
+namespace Titan {
+
+	// Taken from https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+#pragma region String Trimming
+
+// trim from start (in place)
+	static inline void ltrim(std::string& s) {
+		s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
+			return !std::isspace(ch);
+		}));
+	}
+
+	// trim from end (in place)
+	static inline void rtrim(std::string& s) {
+		s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+			return !std::isspace(ch);
+		}).base(), s.end());
+	}
+
+	// trim from both ends (in place)
+	static inline void trim(std::string& s) {
+		ltrim(s);
+		rtrim(s);
+	}
+
+#pragma endregion 
+
+	TTN_Mesh::smptr TTN_ObjLoader::LoadFromFile(const std::string& fileName)
+	{
+		//Vectors for storing data parsed in 
+		std::vector<glm::vec3> vertexPos;
+		std::vector<glm::vec2> vertexUV; 
+		std::vector<glm::vec3> vertexNorms; 
+
+		std::vector<GLint> vertexPosIndices; 
+		std::vector<GLint> vertexUvsIndices;
+		std::vector<GLint> vertexNormIndices;
+
+		//Open the file
+		std::ifstream file;
+		file.open(fileName, std::ios::binary);
+
+		//if it fails to open, throw an error
+		if (!file) {
+			LOG_ERROR("Obj Loader failed to open file.");
+			throw std::runtime_error("Obj Loader failed to open file.");
+		}
+
+		//get a string to represent each line of the file
+		std::string line;
+
+		//parse each line of the file
+		while (std::getline(file, line)) {
+			//trim the line so there isn't any white space
+			trim(line);
+
+			//check if the line is a comment
+			if (line.substr(0, 1) == "#") {
+				//if it is, there is no need to do anything with it
+			}
+			//if it's not a a comment, check if it is an object
+			else if (line.substr(0, 1) == "o") {
+
+			}
+			//if not, then check if it's a vertex
+			else if (line.substr(0, 2) == "v ") {
+				//grab the line passed the v
+				std::istringstream ss = std::istringstream(line.substr(2));
+				//add a new vertex position to the vector
+				vertexPos.push_back(glm::vec3(1.0f));
+				//copy the line into it 
+				ss >> vertexPos[vertexPos.size() - 1].x >> vertexPos[vertexPos.size() - 1].y >> vertexPos[vertexPos.size() - 1].z;
+			}
+			//if not then check if it's a uv
+			else if (line.substr(0, 2) == "vt") {
+				//grab the line past the vt
+				std::istringstream ss = std::istringstream(line.substr(2));
+				//add a new vertex uv to the vector 
+				vertexUV.push_back(glm::vec3(1.0f));
+				//copy the line into it
+				ss >> vertexUV[vertexUV.size() - 1].x >> vertexUV[vertexUV.size() - 1].y;
+			}
+			//if not then check if it's a normal
+			else if (line.substr(0, 2) == "vn") {
+				//grab the line passed the vn
+				std::istringstream ss = std::istringstream(line.substr(2));
+				//add a new vertex normal to the vector
+				vertexNorms.push_back(glm::vec3(1.0f));
+				//copy the line into it 
+				ss >> vertexNorms[vertexNorms.size() - 1].x >> vertexNorms[vertexNorms.size() - 1].y >> vertexNorms[vertexNorms.size() - 1].z;
+			}
+			//if not then check if it's a face index detail
+			else if (line.substr(0, 1) == "f") {
+				int counter = 0; //used to check which detail we're on (0=vertex index, 1=uv index, 2=normal index)
+				GLint temp; //used to temporarily store the index before pushing it into one of the vectors
+				std::istringstream ss = std::istringstream(line.substr(1));
+				//go through the line
+				while (ss >> temp) {
+					if (counter == 0) vertexPosIndices.push_back(temp);
+					else if (counter == 1) vertexUvsIndices.push_back(temp);
+					else if (counter == 2) vertexNormIndices.push_back(temp);
+
+					//check if the next character is a forward slash
+					if (ss.peek() == '/') {
+						//if it is, move to the next character, skipping over the slash
+						counter++;
+						ss.ignore(1, '/');
+					}
+					//if it's not, check if it's a space
+					else if (ss.peek() == ' ') {
+						//if it is, move to the next character, skipping over the space
+						counter++;
+						ss.ignore(1, ' ');
+					}
+
+					//if the counter goes above 2, reset it to zero so it takes another vertex position
+					if (counter > 2)
+						counter = 0;
+				}
+					
+			}
+			//if it's anything else we can just ignore it for now
+		}
+
+		//close the file
+		file.close();
+
+		//now we have loaded in all the data, we can use it to construct a mesh 
+		//create a new vectors with all the positions, uvs, and normals (this is the lenght of the indices, as these are all the vertices needed to construct the faces, some of which
+		//may have the same values twice) 
+		std::vector <glm::vec3> meshVertPos; 
+		std::vector <glm::vec2> meshVertUvs;
+		std::vector <glm::vec3> meshVertNorms;
+		//make that those vector the lenght of the their indices vector equilavents
+		meshVertPos.resize(vertexPosIndices.size(), glm::vec3());
+		meshVertUvs.resize(vertexUvsIndices.size(), glm::vec2());
+		meshVertNorms.resize(vertexNormIndices.size(), glm::vec3());
+		
+		//copy the data from the first set of vectors into the new vectors based on the indices so that they can used by the mesh
+		for (int i = 0; i < meshVertPos.size(); i++) {
+			//copy the positions
+			meshVertPos[i] = vertexPos[vertexPosIndices[i] - 1]; 
+		}
+		for (int i = 0; i < meshVertUvs.size(); i++) {
+			//copy the uvs
+			meshVertUvs[i] = vertexUV[vertexUvsIndices[i] - 1];
+		}
+		for (int i = 0; i < meshVertNorms.size(); i++) {
+			//copy the normals
+			meshVertNorms[i] = vertexNorms[vertexNormIndices[i] - 1];
+		}
+
+		std::vector <glm::vec3> meshVertTangents;
+		meshVertTangents.resize(vertexNormIndices.size(), glm::vec3());
+		for (int i = 0; i < vertexNormIndices.size(); i += 3) {
+			glm::vec3 edge1 = meshVertPos[i + 1] - meshVertPos[i];
+			glm::vec3 edge2 = meshVertPos[i + 2] - meshVertPos[i];
+
+			glm::vec2 deltaUV1 = meshVertUvs[i + 1] - meshVertUvs[i];
+			glm::vec2 deltaUV2 = meshVertUvs[i + 2] - meshVertUvs[i];
+
+			float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+			glm::vec3 tangent = glm::vec3();
+			tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+			tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+			tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+			//save the vertex tangent
+			meshVertTangents[i] = tangent;
+			meshVertTangents[i + 1] = tangent;
+			meshVertTangents[i + 2] = tangent;
+		}
+
+		//create and return the mesh from that data
+		TTN_Mesh::smptr newMesh = TTN_Mesh::Create();
+		newMesh->AddVertices(meshVertPos);
+		newMesh->AddNormals(meshVertNorms);
+		newMesh->AddTangents(meshVertTangents);
+		newMesh->SetUVs(meshVertUvs);
+
+		return newMesh;
+	}
+
+	//loads a series of meshes for morph target animations, assumes the files are named with the convention: fileName_1, fileName_2, etc.
+	TTN_Mesh::smptr TTN_ObjLoader::LoadAnimatedMeshFromFiles(const std::string& fileName, int numOfFiles)
+	{
+		//start by loading the first mesh, this will handle the first set of vertices and normals along with the uvs
+		TTN_Mesh::smptr newMesh = LoadFromFile(fileName + "_1.obj");
+
+		//from there loop through the next couple of files, loading in vertices and normals and adding them to newMesh
+		for (int i = 2; i <= numOfFiles; i++) {
+			//Vectors for storing data parsed in 
+			std::vector<glm::vec3> vertexPos;
+			std::vector<glm::vec3> vertexNorms;
+			std::vector<GLint> vertexPosIndices;
+			std::vector<GLint> vertexNormIndices;
+
+			//Open the file
+			std::ifstream file;
+			file.open(fileName + "_" + std::to_string(i) + ".obj", std::ios::binary);
+
+			//if it fails to open, throw an error
+			if (!file) {
+				LOG_ERROR("Obj Loader failed to open file.");
+				throw std::runtime_error("Obj Loader failed to open file.");
+			}
+
+			//get a string to represent each line of the file
+			std::string line;
+
+			//parse each line of the file
+			while (std::getline(file, line)) {
+				//trim the line so there isn't any white space
+				trim(line);
+
+				//check if the line is a comment
+				if (line.substr(0, 1) == "#") {
+					//if it is, there is no need to do anything with it
+				}
+				//if it's not a a comment, check if it is an object
+				else if (line.substr(0, 1) == "o") {
+
+				}
+				//if not, then check if it's a vertex
+				else if (line.substr(0, 2) == "v ") {
+					//grab the line passed the v
+					std::istringstream ss = std::istringstream(line.substr(2));
+					//add a new vertex position to the vector
+					vertexPos.push_back(glm::vec3(1.0f));
+					//copy the line into it 
+					ss >> vertexPos[vertexPos.size() - 1].x >> vertexPos[vertexPos.size() - 1].y >> vertexPos[vertexPos.size() - 1].z;
+				}
+				//if not then check if it's a normal
+				else if (line.substr(0, 2) == "vn") {
+					//grab the line passed the vn
+					std::istringstream ss = std::istringstream(line.substr(2));
+					//add a new vertex normal to the vector
+					vertexNorms.push_back(glm::vec3(1.0f));
+					//copy the line into it 
+					ss >> vertexNorms[vertexNorms.size() - 1].x >> vertexNorms[vertexNorms.size() - 1].y >> vertexNorms[vertexNorms.size() - 1].z;
+				}
+				//if not then check if it's a face index detail
+				else if (line.substr(0, 1) == "f") {
+					int counter = 0; //used to check which detail we're on (0=vertex index, 1=uv index, 2=normal index)
+					GLint temp; //used to temporarily store the index before pushing it into one of the vectors
+					std::istringstream ss = std::istringstream(line.substr(1));
+					//go through the line
+					while (ss >> temp) {
+						if (counter == 0) vertexPosIndices.push_back(temp);
+						else if (counter == 2) vertexNormIndices.push_back(temp);
+
+						//check if the next character is a forward slash
+						if (ss.peek() == '/') {
+							//if it is, move to the next character, skipping over the slash
+							counter++;
+							ss.ignore(1, '/');
+						}
+						//if it's not, check if it's a space
+						else if (ss.peek() == ' ') {
+							//if it is, move to the next character, skipping over the space
+							counter++;
+							ss.ignore(1, ' ');
+						}
+
+						//if the counter goes above 2, reset it to zero so it takes another vertex position
+						if (counter > 2)
+							counter = 0;
+					}
+
+				}
+				//if it's anything else we can just ignore it for now
+
+			}
+
+			//close the file
+			file.close();
+
+			//now we have loaded in all the data, we can use it to construct a mesh 
+			//create a new vectors with all the positions, uvs, and normals (this is the lenght of the indices, as these are all the vertices needed to construct the faces, some of which
+			//may have the same values twice) 
+			std::vector <glm::vec3> meshVertPos;
+			std::vector <glm::vec3> meshVertNorms;
+			//make that those vector the lenght of the their indices vector equilavents
+			meshVertPos.resize(vertexPosIndices.size(), glm::vec3());
+			meshVertNorms.resize(vertexNormIndices.size(), glm::vec3());
+
+			//copy the data from the first set of vectors into the new vectors based on the indices so that they can used by the mesh
+			for (int i = 0; i < meshVertPos.size(); i++) {
+				//copy the positions
+				meshVertPos[i] = vertexPos[vertexPosIndices[i] - 1];
+			}
+			for (int i = 0; i < meshVertNorms.size(); i++) {
+				//copy the normals
+				meshVertNorms[i] = vertexNorms[vertexNormIndices[i] - 1];
+			}
+
+			//calculate the tangent vector
+			std::vector<glm::vec2> meshVertUvs = newMesh->GetVertexUvs();
+
+			std::vector <glm::vec3> meshVertTangents;
+			meshVertTangents.resize(vertexNormIndices.size(), glm::vec3());
+			for (int i = 0; i < vertexNormIndices.size(); i += 3) {
+				glm::vec3 edge1 = meshVertPos[i + 1] - meshVertPos[i];
+				glm::vec3 edge2 = meshVertPos[i + 2] - meshVertPos[i];
+
+				glm::vec2 deltaUV1 = meshVertUvs[i + 1] - meshVertUvs[i];
+				glm::vec2 deltaUV2 = meshVertUvs[i + 2] - meshVertUvs[i];
+
+				float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+				glm::vec3 tangent = glm::vec3();
+				tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+				tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+				tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+				//save the vertex tangent
+				meshVertTangents[i] = tangent;
+				meshVertTangents[i + 1] = tangent;
+				meshVertTangents[i + 2] = tangent;
+			}
+
+			//with the data all loaded in it need only be added to the mesh object
+			newMesh->AddVertices(meshVertPos);
+			newMesh->AddNormals(meshVertNorms);
+			newMesh->AddTangents(meshVertTangents);
+		}
+
+		//at the end of the for loop all the animation files will be loaded into a single mesh object, so you can just return that mesh
+		return newMesh;
+	}
+}

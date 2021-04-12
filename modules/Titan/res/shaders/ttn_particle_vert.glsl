@@ -3,7 +3,6 @@
 //data from c++
 //regular vbos
 layout(location = 0) in vec3 inVertPos;
-layout(location = 1) in vec3 inVertNorm;
 layout(location = 2) in vec2 inVertUV;
 //instanced vbos
 layout(location = 3) in vec4 inParticleColor;
@@ -12,7 +11,6 @@ layout(location = 5) in float inScale;
 
 //mesh data to pass to the frag shader
 layout(location = 0) out vec3 outPos;
-layout(location = 1) out vec3 outNormal;
 layout(location = 2) out vec2 outUV;
 layout(location = 3) out vec4 outColor;
 
@@ -26,10 +24,9 @@ void main() {
 
 	//pass data onto the frag shader
 	outPos = (u_model * vec4(ParticlePos, 1.0)).xyz;
-	outNormal = u_normalMat * inVertNorm;
 	outUV = inVertUV;
 	outColor = inParticleColor;
 
 	//set the position of the vertex
-	gl_Position = u_mvp * vec4(ParticlePos, 1.0);
+	gl_Position = (u_mvp * vec4(ParticlePos, 1.0));
 }
